@@ -169,3 +169,15 @@ test("fingerprint sugere, não funde duas compras iguais", () => {
     duplicateCandidates(t, "account", [t, { ...t, id: "second" }]),
   ).toHaveLength(2);
 });
+test("descrições diferentes entre origens continuam candidatas, sem juntar compras", () => {
+  const t = tx("expense", "-10000");
+  const other = {
+    ...t,
+    id: "provider",
+    description: "Descrição enviada pelo provedor",
+  };
+  expect(
+    duplicateCandidates(t, "account", [other, t]).map((row) => row.id),
+  ).toEqual([t.id, other.id]);
+  expect(duplicateCandidates(t, "outra-conta", [other])).toHaveLength(0);
+});

@@ -1,5 +1,13 @@
 import { expect, test } from "vitest";
 import { parseCsv, parseOfx, parsePdfLines } from "../src/importers";
+test("preserva campos originais para conciliação privada", () => {
+  const csv = parseCsv(
+    "data;descrição;valor;observação\n09/01/2026;Loja fictícia;-10,50;campo original",
+  );
+  expect(csv.rows[0].original_row?.observacao).toBe("campo original");
+  const pdf = parsePdfLines(["09/01/2026 Loja fictícia 10,50 D"]);
+  expect(pdf.rows[0].original_text).toBe("09/01/2026 Loja fictícia 10,50 D");
+});
 test("CSV preserva duas compras iguais e centavos com delimitador brasileiro", () => {
   const p = parseCsv(
     "data;descrição;valor\n09/01/2026;Loja sintética;-10,50\n09/01/2026;Loja sintética;-10,50",

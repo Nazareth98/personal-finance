@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { DetailSnapshot } from "./details";
 export const natureLabels = {
   expense: "Consumo",
   income: "Receita elegível",
@@ -50,6 +51,8 @@ export const proposalSchema = z.object({
   subcategory_id: z.string().optional(),
   installment_index: z.number().int().positive().optional(),
   installment_count: z.number().int().positive().optional(),
+  original_row: z.record(z.string(), z.string()).optional(),
+  original_text: z.string().max(10000).optional(),
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 export interface Entity {
@@ -139,7 +142,7 @@ export interface Connection extends Entity {
   cursor: number;
   scopes: string[];
 }
-export interface Snapshot {
+export interface Snapshot extends DetailSnapshot {
   version: 1;
   workspace_id: string;
   financial_accounts: Account[];
@@ -289,14 +292,19 @@ export function duplicateCandidates(
   account: string,
   transactions: Transaction[],
 ): Transaction[] {
-  return transactions.filter(
-    (t) =>
-      t.account_id === account &&
-      t.status === "approved" &&
-      t.amount_cents === p.amount_cents &&
-      t.event_date === p.event_date &&
-      normalize(t.description) === normalize(p.description),
-  );
+  return transactions
+    .filter(
+      (t) =>
+        t.account_id === account &&
+        t.status === "approved" &&
+        BigInt(t.amount_cents) === BigInt(p.amount_cents) &&
+        t.event_date === p.event_date,
+    )
+    .sort(
+      (a, b) =>
+        Number(normalize(b.description) === normalize(p.description)) -
+        Number(normalize(a.description) === normalize(p.description)),
+    );
 }
 export function reconcilePayslip(p: {
   earnings_cents: string;

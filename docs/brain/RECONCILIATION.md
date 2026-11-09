@@ -6,4 +6,4 @@ Transferência, aporte, resgate e pagamento de fatura usam duas pernas atômicas
 
 Duplicidade potencial aparece na fila: aprovar como evento distinto, ignorar ou vincular origem a transação existente. Vínculo exige mesmo workspace/conta/valor e decisão humana. Sem prova, não reconciliar automaticamente. Anulações preservam registros e auditoria.
 
-Total oficial de fatura, saldo informado pelo banco, rubricas detalhadas e correspondência de intermediadores ainda exigem conferência humana; ver KNOWN_ISSUES.
+Total declarado de fatura, pagamentos e rubricas/bases agora persistem em tabelas próprias; diferenças são calculadas e exibidas. Não há interpretação automática de intermediadores nem homologação de layout bancário: conferência humana continua necessária; ver KNOWN_ISSUES.

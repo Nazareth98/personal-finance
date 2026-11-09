@@ -45,6 +45,10 @@ try {
     grant usage on schema public to authenticated,anon;`);
   for (const f of (await readdir("supabase/migrations")).sort())
     await db.query(await readFile(`supabase/migrations/${f}`, "utf8"));
+  if (process.env.GENERATE_TYPES === "1") {
+    const { generateTypes } = await import("./generate-types.mjs");
+    await generateTypes(db);
+  }
   const a = randomUUID(),
     b = randomUUID();
   await db.query("insert into auth.users values($1),($2)", [a, b]);
@@ -85,6 +89,10 @@ try {
   } catch (e) {
     if (e.code !== "ERR_MODULE_NOT_FOUND") throw e;
   }
+  const { restoreSecurity } = await import("./restore-security.mjs");
+  checks += await restoreSecurity(db, { a, b, wa, wb });
+  const { concurrencySecurity } = await import("./concurrency-security.mjs");
+  checks += await concurrencySecurity(db, url.toString(), { a, wa });
   console.log(`PostgreSQL: ${checks} verificações de segurança aprovadas.`);
 } finally {
   await db.end();

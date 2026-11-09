@@ -54,15 +54,16 @@ export function parseCsv(text: string): ParseResult {
       const desc = r.descricao ?? r.description ?? r.title ?? r.historico;
       const amount = r.valor ?? r.amount;
       if (!date || !desc || !amount) throw new Error();
-      rows.push(
-        proposal(
+      rows.push({
+        ...proposal(
           desc,
           amount,
           date,
           r.competencia || undefined,
           r.id ? `bank:${r.id}` : undefined,
         ),
-      );
+        original_row: { ...r },
+      });
     } catch {
       warnings.push(
         `Linha ${i + 2}: data, descrição ou valor inválido. Não foi importada.`,
@@ -82,15 +83,16 @@ export function parseOfx(text: string): ParseResult {
       const raw = field("DTPOSTED") ?? "";
       if (!/^\d{8}/.test(raw)) throw new Error();
       const d = `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
-      rows.push(
-        proposal(
+      rows.push({
+        ...proposal(
           field("MEMO") ?? field("NAME") ?? "Movimento OFX",
           field("TRNAMT") ?? "",
           d,
           undefined,
           field("FITID") ? `bank:${field("FITID")}` : undefined,
         ),
-      );
+        original_text: m[0],
+      });
     } catch {
       warnings.push(`Movimento OFX ${i + 1}: campos inválidos.`);
     }
@@ -123,7 +125,7 @@ export function parsePdfLines(lines: string[]): ParseResult {
         p.installment_index = Number(installment[1]);
         p.installment_count = Number(installment[2]);
       }
-      rows.push(p);
+      rows.push(proposalSchema.parse({ ...p, original_text: line }));
     } catch {
       warnings.push(`Linha ${i + 1}: valor ou data inválidos.`);
     }

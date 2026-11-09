@@ -44,3 +44,23 @@ Normalização adotada: income_entries, benefit_movements, savings_movements e i
 | private.connection_intents | connection_id PK, state UUID, user_id, expires_at; nenhum grant ao cliente, uso único |
 
 Provedores/instituições são enums restringidos ao mock, sem tabela global editável. account_mappings está normalizado no vínculo conexão-conta nesta fase. Webhook_events não existe enquanto webhook de provedor real não for implementado.
+
+## Detalhes financeiros — migrations 004–006
+
+Mesmo padrão id/workspace, RLS e FK composta em todas as tabelas abaixo. Tipos completos gerados do PostgreSQL em `src/lib/database.types.ts` (incluindo nullability).
+
+| Entidade | Campos e invariantes |
+|---|---|
+| billing_statements | account_id de cartão, competence, due_date, declared_cents >=0; único por conta/competência; total reconhecido derivado do ledger |
+| billing_payments | statement_id, transaction_id único; valida saída de pagamento e contraparte no cartão correto |
+| installment_purchases | account_id de cartão, category_id, description, event_date, first_competence, total_cents, installments 2..600; planejamento sem consumo |
+| installment_occurrences | purchase_id, occurrence, competence, amount_cents positivo, transaction_id único opcional; soma das parcelas exata; vínculo validado por conta/valor/competência |
+| payslip_items | payslip_id, code, description, kind earning/deduction/advance, amount_cents; não produz movimento |
+| payslip_bases | payslip_id, name, amount_cents; bases informativas |
+| transaction_classifications | transaction_id, previous/new_category_id, previous/new_subcategory_id, actor_user_id, created_at; histórico de classificação |
+
+Migration 004 restringe grants por coluna e acrescenta restauração. Migration 005 inclui faturas, parcelamentos e rubricas. Migration 006 exige pares consistentes com constraint diferida, passivos de empréstimo e idempotência com validação de conteúdo. `source_links` também exige coerência da conta do lançamento. Nenhum total monetário é float.
+
+Após migration 007, a PK efetiva de cada entidade financeira é `(workspace_id,id)`, preservando UUID como identificador local do registro. `private.connection_intents` inclui workspace_id derivado pelo backend, com PK composta workspace/connection. Essa regra substitui referências anteriores a ID globalmente único no domínio financeiro.
+
+Migration 008 valida `import_raw_rows.proposal` no servidor; JSON pode conter original_row/original_text privados e imutáveis. Constraint relaciona status de revisão e transaction_id. Migration 009 inclui profile/workspace próprios no snapshot/exportação; restauração rejeita perfil/proprietário incompatíveis e preserva o perfil existente, conforme política aditiva.

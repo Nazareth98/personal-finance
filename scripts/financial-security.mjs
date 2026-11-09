@@ -48,7 +48,15 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
   );
   await db.query(
     "insert into public.credit_cards(workspace_id,account_id,closing_day,due_day,limit_cents) values($1,$2,5,12,100000)",
-    [wa, account],
+    [
+      wa,
+      (
+        await db.query(
+          "insert into public.financial_accounts(workspace_id,name,kind) values($1,'Cartão sintético','credit') returning id",
+          [wa],
+        )
+      ).rows[0].id,
+    ],
   );
   await db.query(
     "insert into public.budget_allocations(workspace_id,category_id,period,cadence,fixed_cents) values($1,$2,'2026-01-01','monthly',10000)",
@@ -75,6 +83,31 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
   };
   const tx = (await db.query("select public.record_transaction($1) id", [p]))
     .rows[0].id;
+  const invalidProposals = [
+    { ...p, amount_cents: "1.23" },
+    { ...p, event_date: "2026-02-30" },
+    { ...p, competence: "2026-02-02" },
+    { ...p, nature: "unsupported" },
+    { ...p, installment_index: 4, installment_count: 3 },
+    { ...p, description: null },
+  ];
+  for (const proposal of invalidProposals) {
+    await assert.rejects(() =>
+      db.query("select public.stage_import($1,$2,$3,$4)", [
+        account,
+        randomUUID(),
+        "invalid-test",
+        JSON.stringify([p, proposal]),
+      ]),
+    );
+    checks++;
+  }
+  assert.equal(
+    (await db.query("select count(*)::int n from public.import_batches"))
+      .rows[0].n,
+    0,
+  );
+  checks++;
   assert.equal(
     (await db.query("select public.record_transaction($1) id", [p])).rows[0].id,
     tx,
@@ -242,6 +275,8 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
     beforeHybrid,
   );
   checks++;
+  const { detailsSecurity } = await import("./details-security.mjs");
+  checks += await detailsSecurity(db, { wa, account, category, tx });
   const snap = (await db.query("select public.workspace_snapshot() data"))
     .rows[0].data;
   assert.equal(typeof snap.transactions[0].amount_cents, "string");
@@ -265,6 +300,15 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
     );
     checks++;
     await denied(`delete from public.${table} where workspace_id=$1`, [wa]);
+    if (snap[table][0]) {
+      const columns = Object.keys(snap[table][0]).filter(
+        (k) => !["id", "created_at"].includes(k),
+      );
+      await denied(
+        `insert into public.${table}(${columns.join(",")}) select ${columns.join(",")} from jsonb_populate_record(null::public.${table},$1)`,
+        [snap[table][0]],
+      );
+    }
     const writable = [
       "financial_accounts",
       "categories",
@@ -277,8 +321,11 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
     ];
     if (writable.includes(table)) {
       // Existing rows are invisible to UPDATE. No exception is expected.
+      const col = Object.keys(snap[table][0]).find(
+        (k) => !["id", "workspace_id", "created_at"].includes(k),
+      );
       const update = await db.query(
-        `update public.${table} set workspace_id=workspace_id where workspace_id=$1`,
+        `update public.${table} set ${col}=${col} where workspace_id=$1`,
         [wa],
       );
       assert.equal(update.rowCount, 0);

@@ -13,3 +13,7 @@ Processamento local, sem envio de arquivos a IA/OCR externo. Limites: 10 MiB, 20
 Linhas inválidas geram diagnósticos. Prévia lista totais e exige confirmação; nenhum parser aprova. Para cartões, usuário corrige competência e direção na revisão. A soma reconhecida não é prova de reconciliação com total da fatura.
 
 Chave forte: conta/workspace/ID de banco. Repetição exata do arquivo usa SHA-256 e índice original. Igualdade data/valor/descrição apenas sugere candidato; confirmar vínculo mantém uma transação e múltiplas origens. Compras repetidas permanecem independentes por padrão.
+
+Complemento (migration 008): validação de descrição, centavos textuais, calendário, competência, natureza, ID externo e índice/total de parcela também ocorre no PostgreSQL. Um lote com qualquer proposta inválida é revertido integralmente, inclusive suas linhas e auditoria. Aprovações/vínculos precisam referenciar uma transação; pendências/ignoradas não podem aparentar contabilização.
+
+CSV/XLSX preservam campos originais da linha; OFX e PDF preservam o bloco/linha original junto da proposta. A revisão exibe o original em contexto privado. Não são enviados a IA ou OCR externo. Data e valor iguais agora bastam para sugerir duplicidade mesmo com descrições diferentes; descrição idêntica tem prioridade na apresentação, sem fusão automática.

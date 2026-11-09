@@ -6,9 +6,11 @@ Ordem: identidade/RLS → livro financeiro e revisão → importadores → Open 
 
 - [Entidades](ENTITY_CATALOG.md), [schema](SCHEMA.md), [identidade](TENANCY_AUTH.md).
 - [Regras](BUSINESS_RULES.md), [cálculos](CALCULATION_POLICIES.md), [testes](TEST_PLAN.md).
-- [Operação](OPERATIONS.md), [pendências](KNOWN_ISSUES.md), [decisões](../adr/ADR-0001-stack.md).
+- [Operação](OPERATIONS.md), [pendências](KNOWN_ISSUES.md), [decisões de arquitetura](adr/ADR-0001-stack.md).
+- [Restauração e detalhes financeiros](adr/ADR-0004-restore-details.md).
 
 O estado verificável de cada fluxo fica no TEST_PLAN e KNOWN_ISSUES. Requisitos pendentes não são funcionalidades entregues.
 
 - [Importadores](IMPORTERS.md), [categorização](CATEGORIZATION.md), [conciliação](RECONCILIATION.md), [fluxos](UX_FLOWS.md).
 - [Open Finance](OPEN_FINANCE.md), [provedores e cobertura](OPEN_FINANCE_PROVIDER_COMPARISON.md), [migração histórica](MIGRATION_REPORT.md).
+- [Homologação no ambiente real](DEPLOY_VALIDATION.md): Supabase local não deve ser executado por decisão do proprietário.

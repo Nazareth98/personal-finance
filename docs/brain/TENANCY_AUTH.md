@@ -9,3 +9,7 @@ Storage: bucket privado, prefixo UUID do workspace, nome em um único nível, se
 Logout desmonta estado financeiro. Nenhum cache financeiro persistente no navegador. Nenhum endpoint de webhook/realtime habilitado nesta fase.
 
 Exclusão: usuário solicita; operador confirma identidade, oferece exportação e executa procedimento documentado. Não implementar exclusão silenciosa. MFA e exclusão autônoma permanecem pendentes.
+
+Restauração rejeita workspace/atores diferentes e conflitos. Cliente não pode inserir ID escolhido ou alterar id/workspace de cadastros. Schema privado não possui grants para authenticated/anon. Build recusa chave service_role/secret e só aceita formato publishable ou JWT anon. Isto valida configuração; a autorização efetiva continua no Supabase/PostgreSQL.
+
+Configuração local usa a CLI 3.1.0 fixada: auth.enable_signup=true e auth.email.enabled=true. O template efetivamente gerado pela versão instalada prevaleceu sobre páginas de referência que ainda citavam a opção antiga auth.email.enable_signup.
