@@ -13,6 +13,7 @@ private-data/
 coverage/
 test-results/
 playwright-report/
+*.tsbuildinfo
 # Kit original privado: contém referências e valores históricos do titular.
 PROMPT_CODEX.md
 docs/brain/SOURCE_SHEET_MAP.md
