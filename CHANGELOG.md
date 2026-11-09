@@ -11,3 +11,4 @@
 - CI e 8 testes de navegador com respostas sintéticas; 195 verificações PostgreSQL. Supabase CLI 3.1.0 fixada e configuração atualizada.
 - Validação de propostas no servidor, preservação da linha original, candidatos de duplicidade entre descrições diferentes e relatório CSV com proteção contra fórmulas.
 - Exportação de metadados próprios do perfil; roteiro de homologação no ambiente real, sem execução de Supabase local.
+- Seletores dependentes de categoria/subcategoria em regras; edição preserva a subcategoria válida, troca de categoria a limpa e revisão aplica o par sugerido pela mesma regra.

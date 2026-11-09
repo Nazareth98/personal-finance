@@ -5,7 +5,6 @@ Data: 09/11/2026.
 ## Revisão do prompt inicial — categorias e regras
 
 - Alta: não existe importador de inicialização para os JSONs privados de categorias/regras. A tela de importação recebe movimentos financeiros; restauração recebe backups exportados pelo aplicativo. Nenhuma delas aceita diretamente o kit `{metadata, items}`.
-- Alta: formulário de criação de regra não oferece subcategoria; edição de regra define `subcategory_id=null`, inclusive ao alterar somente palavra-chave/prioridade. Não usar esse fluxo para reproduzir integralmente regras históricas com subcategorias.
 - Média: ordem das categorias e metadados históricos de natureza/revisão não possuem mapeamento completo no schema atual. Não descartar esses campos silenciosamente numa futura carga.
 - Média: faltam contextos por banco/cartão/direção nas regras, histórico de versões das regras e fluxo de salvar classificação como regra com prévia de impacto. Sugestões atuais são recalculadas ao abrir a revisão, sem comando de reaplicação em lote.
 - Média: requisitos de projeções, alertas configuráveis de orçamento, base por média histórica e filtros/gráficos avançados ainda não estão integralmente implementados.

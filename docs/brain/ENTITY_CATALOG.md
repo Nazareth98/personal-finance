@@ -19,8 +19,8 @@ Todas as linhas têm `id UUID`, `workspace_id UUID NOT NULL`, UNIQUE(workspace_i
 |---|---|---|
 | financial_accounts | name, institution, kind checking/cash/credit/benefit/savings/loan, opening_cents, BRL, archived | 1:N movimentos; saldo derivado |
 | categories | name único no workspace, archived | 1:N subcategorias/regras/metas/movimentos |
-| subcategories | name, category_id | FK composta inclui categoria |
-| categorization_rules | keyword literal, priority int, active, category_id, subcategory_id opcional | categoria/subcategoria coerentes |
+| subcategories | name, category_id | FK composta `(workspace_id, category_id)` à categoria; nome único dentro da categoria |
+| categorization_rules | keyword literal, priority int, active, category_id obrigatório, subcategory_id opcional | FKs compostas garantem que subcategoria pertence à mesma categoria e workspace |
 | credit_cards | account_id único, closing_day/due_day 1..31, limit_cents, last_four | configuração de conta de cartão |
 | budget_allocations | period no primeiro dia, cadence monthly/annual, fixed_cents XOR percentage_bps, forecast_income_cents | categoria; UNIQUE categoria/período/cadência |
 | savings_goals | account_id único, name, target_cents positivo, deadline | saldo derivado da conta de investimento |

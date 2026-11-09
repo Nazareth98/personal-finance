@@ -169,6 +169,13 @@ export function Imports({
               r.proposal.description,
               data.categorization_rules,
             );
+            const suggestedCategory =
+              r.proposal.category_id ?? rule?.category_id;
+            const suggestedSubcategory =
+              r.proposal.subcategory_id ??
+              (suggestedCategory === rule?.category_id
+                ? (rule?.subcategory_id ?? undefined)
+                : undefined);
             const matches = duplicateCandidates(
               r.proposal,
               batch.account_id,
@@ -187,7 +194,8 @@ export function Imports({
                   accountId={batch.account_id}
                   initial={{
                     ...r.proposal,
-                    category_id: r.proposal.category_id ?? rule?.category_id,
+                    category_id: suggestedCategory,
+                    subcategory_id: suggestedSubcategory,
                   }}
                   label="Aprovar movimento"
                   submit={(p) => decide(r.id, "approve", p)}

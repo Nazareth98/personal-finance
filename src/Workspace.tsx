@@ -20,6 +20,7 @@ import { CardDetails, PayslipDetails } from "./components/FinancialDetails";
 import { Classification } from "./components/Classification";
 import { CategoryEditors, GoalEditor } from "./components/Editors";
 import { Connections } from "./components/Connections";
+import { CategorySubcategoryFields } from "./components/CategorySubcategoryFields";
 
 const pages = [
   "Visão geral",
@@ -750,7 +751,6 @@ export function Workspace({ userId }: { userId: string }) {
               <Form
                 fields={[
                   { name: "keyword", label: "Texto que a descrição contém" },
-                  categoryField,
                   {
                     name: "priority",
                     label: "Prioridade",
@@ -758,10 +758,12 @@ export function Workspace({ userId }: { userId: string }) {
                     value: "100",
                   },
                 ]}
+                children={<CategorySubcategoryFields data={data} />}
                 submit={(v) =>
                   mutate("categorization_rules", {
                     ...v,
                     priority: Number(v.priority),
+                    subcategory_id: v.subcategory_id || null,
                   })
                 }
               />

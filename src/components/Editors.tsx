@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { brl, cents, type Snapshot } from "../domain/finance";
 import { Form } from "./Form";
+import { CategorySubcategoryFields } from "./CategorySubcategoryFields";
 import { save } from "../lib/api";
 export function CategoryEditors({
   data,
@@ -105,19 +106,20 @@ export function CategoryEditors({
               type: "number",
               value: String(rule.priority),
             },
-            {
-              name: "category_id",
-              label: "Categoria da regra",
-              value: rule.category_id,
-              options: data.categories.map((c) => [c.id, c.name]),
-            },
           ]}
+          children={
+            <CategorySubcategoryFields
+              data={data}
+              categoryId={rule.category_id}
+              subcategoryId={rule.subcategory_id ?? ""}
+            />
+          }
           submit={(v) =>
             edit("categorization_rules", ruleId, {
               keyword: v.keyword,
               priority: Number(v.priority),
               category_id: v.category_id,
-              subcategory_id: null,
+              subcategory_id: v.subcategory_id || null,
             })
           }
         />

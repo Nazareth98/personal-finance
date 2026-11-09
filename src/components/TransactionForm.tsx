@@ -23,6 +23,15 @@ export function TransactionForm({
   children?: React.ReactNode;
 }) {
   const [category, setCategory] = useState(initial?.category_id ?? ""),
+    [subcategory, setSubcategory] = useState(() =>
+      data.subcategories.some(
+        (item) =>
+          item.id === initial?.subcategory_id &&
+          item.category_id === initial?.category_id,
+      )
+        ? (initial?.subcategory_id ?? "")
+        : "",
+    ),
     [nature, setNature] = useState<Nature>(initial?.nature ?? "expense"),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -190,7 +199,10 @@ export function TransactionForm({
           Categoria
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setSubcategory("");
+            }}
           >
             <option value="">Sem categoria</option>
             {data.categories.map((c) => (
@@ -204,8 +216,12 @@ export function TransactionForm({
           Subcategoria
           <select
             name="subcategory_id"
-            key={category}
-            defaultValue={initial?.subcategory_id ?? ""}
+            value={subcategory}
+            onChange={(e) => setSubcategory(e.target.value)}
+            disabled={
+              !category ||
+              !data.subcategories.some((s) => s.category_id === category)
+            }
           >
             <option value="">Sem subcategoria</option>
             {data.subcategories
