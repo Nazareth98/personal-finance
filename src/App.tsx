@@ -1,7 +1,9 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
-import { Workspace } from "./Workspace";
+const Workspace = lazy(() =>
+  import("./Workspace").then((module) => ({ default: module.Workspace })),
+);
 
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -46,7 +48,17 @@ export function App() {
     );
   if (!session || recovery)
     return <Auth recovery={recovery} onRecovered={() => setRecovery(false)} />;
-  return <Workspace key={session.user.id} userId={session.user.id} />;
+  return (
+    <Suspense
+      fallback={
+        <main className="auth" aria-busy="true">
+          Carregando seu espaço…
+        </main>
+      }
+    >
+      <Workspace key={session.user.id} userId={session.user.id} />
+    </Suspense>
+  );
 }
 
 function Auth({
@@ -132,6 +144,7 @@ function Auth({
             Senha
             <input
               name="password"
+              aria-label="Senha"
               type="password"
               minLength={mode === "signup" || recovery ? 12 : 1}
               autoComplete={

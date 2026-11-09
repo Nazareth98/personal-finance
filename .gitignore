@@ -14,6 +14,8 @@ coverage/
 test-results/
 playwright-report/
 *.tsbuildinfo
+supabase/.temp/
+supabase/.branches/
 # Kit original privado: contém referências e valores históricos do titular.
 PROMPT_CODEX.md
 docs/brain/SOURCE_SHEET_MAP.md

@@ -140,9 +140,11 @@ export function TransactionForm({
             </select>
           </label>
         )}
-        {paired && (
+        {(paired || nature === "loan") && (
           <label>
-            Conta de destino
+            {nature === "loan"
+              ? "Conta de passivo do empréstimo"
+              : "Conta de destino"}
             <select name="counterpart_account_id" required>
               <option value="">Selecione</option>
               {data.financial_accounts

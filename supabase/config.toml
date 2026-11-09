@@ -12,8 +12,9 @@ enabled = true
 site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173", "http://127.0.0.1:5173"]
 minimum_password_length = 12
-[auth.email]
 enable_signup = true
+[auth.email]
+enabled = true
 enable_confirmations = true
 secure_password_change = true
 [auth.rate_limit]

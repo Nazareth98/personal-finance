@@ -51,6 +51,7 @@ export function Form({
             {f.options ? (
               <select
                 name={f.name}
+                aria-label={f.label}
                 defaultValue={f.value ?? ""}
                 required={f.required !== false}
               >
@@ -64,6 +65,7 @@ export function Form({
             ) : (
               <input
                 name={f.name}
+                aria-label={f.label}
                 type={f.type ?? "text"}
                 defaultValue={f.value}
                 required={f.required !== false}

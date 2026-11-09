@@ -9,11 +9,16 @@ import {
   totals,
   type Snapshot,
 } from "./domain/finance";
-import { downloadJson, rpc, save, snapshot } from "./lib/api";
+import { downloadJson, downloadText, rpc, save, snapshot } from "./lib/api";
+import { ledgerCsv } from "./domain/reports";
 import { supabase } from "./lib/supabase";
 import { Form, type Field } from "./components/Form";
 import { TransactionForm } from "./components/TransactionForm";
 import { Imports } from "./components/Imports";
+import { Restore } from "./components/Restore";
+import { CardDetails, PayslipDetails } from "./components/FinancialDetails";
+import { Classification } from "./components/Classification";
+import { CategoryEditors, GoalEditor } from "./components/Editors";
 import { Connections } from "./components/Connections";
 
 const pages = [
@@ -28,6 +33,7 @@ const pages = [
   "Categorias e regras",
   "Perfil e backup",
 ] as const;
+
 type Page = (typeof pages)[number];
 export function Workspace({ userId }: { userId: string }) {
   const [data, setData] = useState<Snapshot | null>(null),
@@ -54,7 +60,7 @@ export function Workspace({ userId }: { userId: string }) {
     v: Record<string, unknown>,
     id?: string,
   ) {
-    await save(table, { ...v, workspace_id: data!.workspace_id }, id);
+    await save(table, id ? v : { ...v, workspace_id: data!.workspace_id }, id);
     await refresh();
   }
   async function command(name: string, args: Record<string, unknown>) {
@@ -391,6 +397,9 @@ export function Workspace({ userId }: { userId: string }) {
             </section>
           </>
         )}
+        {page === "Contas e cartões" && (
+          <CardDetails data={data} refresh={refresh} />
+        )}
         {page === "Lançamentos" && (
           <>
             <section>
@@ -402,6 +411,21 @@ export function Workspace({ userId }: { userId: string }) {
             </section>
             <section>
               <h2>Livro financeiro</h2>
+              <button
+                className="secondary"
+                onClick={() =>
+                  downloadText(
+                    ledgerCsv(
+                      data.transactions.filter((t) =>
+                        t.competence.startsWith(periodKey),
+                      ),
+                    ),
+                    `lancamentos-${periodKey}.csv`,
+                  )
+                }
+              >
+                Exportar período em CSV
+              </button>
               <label>
                 Buscar descrição
                 <input
@@ -445,7 +469,16 @@ export function Workspace({ userId }: { userId: string }) {
                           </td>
                           <td>{name(t.account_id)}</td>
                           <td>{natureLabels[t.nature]}</td>
-                          <td>{category(t.category_id)}</td>
+                          <td>
+                            {category(t.category_id)}
+                            {t.status === "approved" && (
+                              <Classification
+                                data={data}
+                                transaction={t}
+                                refresh={refresh}
+                              />
+                            )}
+                          </td>
                           <td className="money">{brl(t.amount_cents)}</td>
                           <td>
                             {t.status === "approved" && (
@@ -511,16 +544,27 @@ export function Workspace({ userId }: { userId: string }) {
                   },
                 ]}
                 submit={(v) =>
-                  mutate("budget_allocations", {
-                    category_id: v.category_id,
-                    period: v.period,
-                    cadence: v.cadence,
-                    fixed_cents: v.fixed ? cents(v.fixed).toString() : null,
-                    percentage_bps: v.percent ? Number(cents(v.percent)) : null,
-                    forecast_income_cents: v.forecast
-                      ? cents(v.forecast).toString()
-                      : null,
-                  })
+                  mutate(
+                    "budget_allocations",
+                    {
+                      category_id: v.category_id,
+                      period: v.period,
+                      cadence: v.cadence,
+                      fixed_cents: v.fixed ? cents(v.fixed).toString() : null,
+                      percentage_bps: v.percent
+                        ? Number(cents(v.percent))
+                        : null,
+                      forecast_income_cents: v.forecast
+                        ? cents(v.forecast).toString()
+                        : null,
+                    },
+                    data.budget_allocations.find(
+                      (b) =>
+                        b.category_id === v.category_id &&
+                        b.period === v.period &&
+                        b.cadence === v.cadence,
+                    )?.id,
+                  )
                 }
               />
             </section>
@@ -598,6 +642,7 @@ export function Workspace({ userId }: { userId: string }) {
             </div>
           </>
         )}
+        {page === "Caixinhas" && <GoalEditor data={data} refresh={refresh} />}
         {page === "Receitas e holerites" && (
           <>
             <section>
@@ -661,6 +706,9 @@ export function Workspace({ userId }: { userId: string }) {
               })}
             </section>
           </>
+        )}
+        {page === "Receitas e holerites" && (
+          <PayslipDetails data={data} refresh={refresh} />
         )}
         {page === "Importar e revisar" && (
           <Imports data={data} refresh={refresh} />
@@ -742,13 +790,26 @@ export function Workspace({ userId }: { userId: string }) {
             </section>
           </>
         )}
+        {page === "Categorias e regras" && (
+          <CategoryEditors data={data} refresh={refresh} />
+        )}
         {page === "Perfil e backup" && (
           <>
             <section>
               <h2>Meu perfil</h2>
               <Form
-                fields={[{ name: "display_name", label: "Nome de exibição" }]}
-                submit={(v) => save("profiles", v, userId)}
+                key={data.profile?.display_name}
+                fields={[
+                  {
+                    name: "display_name",
+                    label: "Nome de exibição",
+                    value: data.profile?.display_name ?? "",
+                  },
+                ]}
+                submit={async (v) => {
+                  await save("profiles", v, userId);
+                  await refresh();
+                }}
               />
               <p>Moeda BRL · Português brasileiro · America/Sao_Paulo</p>
             </section>
@@ -771,6 +832,7 @@ export function Workspace({ userId }: { userId: string }) {
                 Exportar JSON completo
               </button>
             </section>
+            <Restore refresh={refresh} />
             <section>
               <h2>Solicitar exclusão da conta</h2>
               <p>

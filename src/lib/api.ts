@@ -28,9 +28,14 @@ export async function save(
     );
 }
 export function downloadJson(value: unknown, name: string) {
-  const blob = new Blob([JSON.stringify(value, null, 2)], {
-    type: "application/json",
-  });
+  downloadText(JSON.stringify(value, null, 2), name, "application/json");
+}
+export function downloadText(
+  value: string,
+  name: string,
+  type = "text/csv;charset=utf-8",
+) {
+  const blob = new Blob([value], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

@@ -181,6 +181,7 @@ export function Imports({
                   {brl(r.proposal.amount_cents)}{" "}
                   {matches.length ? " · possível duplicidade" : ""}
                 </summary>
+                {(r.proposal.original_row || r.proposal.original_text) && <details><summary>Dados originais da linha</summary><pre className="raw-row">{r.proposal.original_text ?? JSON.stringify(r.proposal.original_row,null,2)}</pre></details>}
                 <TransactionForm
                   data={data}
                   accountId={batch.account_id}
