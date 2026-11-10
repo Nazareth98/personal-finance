@@ -21,3 +21,21 @@
 - Supabase CLI fixada em 3.1.0; auth.email.enabled controla provedor e auth.enable_signup controla cadastro.
 - Open Finance real permanece bloqueado. Não ler private-data para gerar exemplos, seeds ou testes. Não versionar .env nem arquivos temporários da CLI.
 - Por instrução expressa do usuário, não iniciar nem testar Supabase local. Homologar Auth/API/Storage quando o ambiente real for disponibilizado. Testes unitários, HTTP sintético no navegador e SQL em PostgreSQL descartável continuam disponíveis.
+
+## Como buscar o contexto do projeto
+
+- No início de cada tarefa, leia `docs/brain/README.md`. Use-o como índice,
+  sem carregar todo o Brain automaticamente.
+- Antes de alterar uma área, consulte os documentos indicados no índice:
+  - regras e cálculos: `BUSINESS_RULES.md` e `CALCULATION_POLICIES.md`;
+  - categorias: `CATEGORIZATION.md` e `ENTITY_CATALOG.md`;
+  - banco e isolamento: `SCHEMA.md`, `TENANCY_AUTH.md` e as migrations relacionadas;
+  - importação e conciliação: `IMPORTERS.md` e `RECONCILIATION.md`;
+  - Open Finance: `OPEN_FINANCE.md` e `OPEN_FINANCE_PROVIDER_COMPARISON.md`;
+  - deploy e pendências: `OPERATIONS.md`, `DEPLOY_VALIDATION.md` e `KNOWN_ISSUES.md`.
+- Consulte `TEST_PLAN.md` ao mudar código ou comportamento. Atualize a
+  documentação do Brain quando a mudança alterar uma regra ou decisão.
+- Leia `PROMPT_CODEX.md` e arquivos de `private-data/` somente quando a tarefa
+  depender deles. Nunca copie dados privados para código, exemplos ou testes.
+- Se a documentação e o código divergirem, confira as migrations e a
+  implementação atual; registre a divergência antes de decidir.
