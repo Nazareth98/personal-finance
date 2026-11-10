@@ -7,7 +7,7 @@
 
 16 testes unitários passaram na etapa de domínio/importação: dinheiro exato, calendário, competência vs caixa, metas mensais/anuais, renda desconhecida, holerite, parcelas, estorno, regras literais, repetição legítima, CSV, OFX e PDF conservador. PostgreSQL: 72 verificações aprovadas, incluindo RLS de todas as tabelas financeiras, agregação/exportação, escrita cruzada por FK, importação/revisão com UUID de outro usuário, operação atômica e idempotência. Dependências de produção: npm audit sem vulnerabilidades após atualizar PDF.js e substituir ExcelJS.
 
-Após mock: 18 testes unitários e 94 verificações PostgreSQL. Incluem state errado/reutilizado, isolamento de consentimento, sync antes de autorização, revogação, expiração, renovação, falha sem avançar cursor, vínculo manual/mock sem nova despesa e rejeição de adaptadores comerciais.
+A evidência histórica de testes antes da retirada do mock não valida o fluxo Meu Pluggy. A próxima execução autorizada dos testes deve cobrir isolamento owner-only, allowlist, expiração, paginação por cursor, deduplicação, revogação e restauração dos nomes de snapshot novos/legados. Não executar Supabase local; a homologação da Edge Function ocorre no Supabase remoto.
 
 ## Evidência atual — 09/11/2026
 

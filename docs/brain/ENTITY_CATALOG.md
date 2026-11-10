@@ -34,16 +34,18 @@ Todas as linhas têm `id UUID`, `workspace_id UUID NOT NULL`, UNIQUE(workspace_i
 
 Normalização adotada: income_entries, benefit_movements, savings_movements e installment_occurrences são movimentos tipados no livro; benefit_wallets são contas. Não existem cópias contábeis independentes. Compra parcelada completa, rubricas detalhadas e reconciliação de fatura serão ampliadas em migrations próprias, sem reinterpretar dados históricos.
 
-## Open Finance mock — migration 003
+## Conexão pessoal Meu Pluggy — migrations 003, 010 e 011
 
-| Entidade | Campos e relações |
+Migrations 003 e 010 são histórico de implementação, não capacidades ativas. Migration 011 revoga RPCs anteriores, encerra o mock e limita a conexão ao Meu Pluggy pessoal do proprietário. As tabelas abaixo mantêm nomes legados para compatibilidade de backup:
+
+| Entidade interna legada | Campos e relações |
 |---|---|
-| open_finance_connections | id/workspace/account, provider_code in ('mock','pluggy'), institution, status, scopes[], expires_at, last_sync_at, cursor, pluggy_item_id, pluggy_account_id, created_at; FK composta à conta |
-| open_finance_consents | id/workspace/connection, action authorize/renew/revoke, scopes[], expires_at, actor_user_id, created_at; histórico de consentimentos |
-| open_finance_sync_runs | id/workspace/connection/batch, status success/error, rows_received, error_code sanitizado, created_at |
-| private.connection_intents | connection_id PK, state UUID, user_id, expires_at; nenhum grant ao cliente, uso único |
+| open_finance_connections | id/workspace/account, provider_code histórico revogado ou `meupluggy`, instituição, status, scopes, expiração, última sync, item e conta Pluggy; FK composta à conta |
+| open_finance_consents | trilha de autorização/revogação associada ao workspace e vínculo |
+| open_finance_sync_runs | resultado de sync, lote, linhas recebidas e erro sanitizado |
+| private.connection_intents | intenção legada sem grants ao cliente; RPCs antigas sem EXECUTE |
 
-Provedores/instituições são enums restringidos ao mock, sem tabela global editável. account_mappings está normalizado no vínculo conexão-conta nesta fase. Webhook_events não existe enquanto webhook de provedor real não for implementado.
+A API de snapshot expõe `meupluggy_connections`; novos fluxos não devem depender dos nomes internos `open_finance_*`. Vínculo é sempre validado por workspace e conta local. Webhooks, renovação automática e conexão para outros usuários não existem.
 
 ## Detalhes financeiros — migrations 004–006
 
@@ -65,4 +67,4 @@ Após migration 007, a PK efetiva de cada entidade financeira é `(workspace_id,
 
 Migration 008 valida `import_raw_rows.proposal` no servidor; JSON pode conter original_row/original_text privados e imutáveis. Constraint relaciona status de revisão e transaction_id. Migration 009 inclui profile/workspace próprios no snapshot/exportação; restauração rejeita perfil/proprietário incompatíveis e preserva o perfil existente, conforme política aditiva.
 
-Migration 010 habilita o provedor oficial `pluggy` na tabela `open_finance_connections` (adiciona `pluggy_item_id` e `pluggy_account_id`), removendo a restrição fixa de instituições simuladas e disponibilizando as RPCs seguras `pluggy_register_connection` e `pluggy_stage_transactions` com integração à fila de revisão humana (`stage_import`).
+Migration 010 é histórico do adaptador Pluggy anterior; migration 011 revoga essas RPCs e habilita somente o fluxo pessoal Meu Pluggy, com conta e workspace validados, allowlist de itens no backend e staging idempotente na revisão humana.

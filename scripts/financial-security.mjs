@@ -172,109 +172,8 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
     5,
   );
   checks++;
-  const intent = (
-    await db.query(
-      "select public.mock_connection_intent($1,'Caixa',array['accounts','transactions']) data",
-      [account],
-    )
-  ).rows[0].data;
-  await denied(
-    "select public.mock_connection_intent($1,'Caixa',array['credit_cards'])",
-    [account],
-  );
-  await denied("select public.mock_sync($1)", [intent.connection_id]);
-  await denied("select public.mock_authorize($1,$2)", [
-    intent.connection_id,
-    randomUUID(),
-  ]);
-  await db.query("select public.mock_authorize($1,$2)", [
-    intent.connection_id,
-    intent.state,
-  ]);
-  await denied("select public.mock_authorize($1,$2)", [
-    intent.connection_id,
-    intent.state,
-  ]);
-  assert.equal(
-    (
-      await db.query("select public.mock_sync($1,true) data", [
-        intent.connection_id,
-      ])
-    ).rows[0].data.status,
-    "error",
-  );
-  checks++;
-  assert.equal(
-    (
-      await db.query(
-        "select cursor from public.open_finance_connections where id=$1",
-        [intent.connection_id],
-      )
-    ).rows[0].cursor,
-    0,
-  );
-  checks++;
-  const sync = (
-    await db.query("select public.mock_sync($1) data", [intent.connection_id])
-  ).rows[0].data;
-  assert.equal(sync.rows, 1);
-  checks++;
-  await db.query("select public.mock_consent_action($1,'revoke')", [
-    intent.connection_id,
-  ]);
-  await denied("select public.mock_sync($1)", [intent.connection_id]);
-  await db.query("select public.mock_consent_action($1,'renew')", [
-    intent.connection_id,
-  ]);
-  await db.query("reset role");
-  await db.query(
-    "update public.open_finance_connections set expires_at=now()-interval '1 day' where id=$1",
-    [intent.connection_id],
-  );
-  await as(a);
-  await denied("select public.mock_sync($1)", [intent.connection_id]);
-  await db.query("select public.mock_consent_action($1,'renew')", [
-    intent.connection_id,
-  ]);
-  // Uma origem manual e uma origem mock da mesma compra são vinculadas por revisão humana.
-  const mockRow = (
-    await db.query(
-      "select id,proposal from public.import_raw_rows where batch_id=$1",
-      [sync.batch_id],
-    )
-  ).rows[0];
-  const manual = (
-    await db.query("select public.record_transaction($1) id", [
-      { ...mockRow.proposal, account_id: account, source_key: randomUUID() },
-    ])
-  ).rows[0].id;
-  await db.query("select public.review_import($1,'link','{}',$2)", [
-    mockRow.id,
-    manual,
-  ]);
-  const beforeHybrid = (
-    await db.query("select count(*)::int n from public.transactions")
-  ).rows[0].n;
-  const again = (
-    await db.query("select public.stage_import($1,$2,$3,$4) id", [
-      account,
-      "second-source",
-      "csv-v1",
-      JSON.stringify([mockRow.proposal]),
-    ])
-  ).rows[0].id;
-  const againRow = (
-    await db.query("select id from public.import_raw_rows where batch_id=$1", [
-      again,
-    ])
-  ).rows[0].id;
-  await db.query("select public.review_import($1,'approve')", [againRow]);
-  assert.equal(
-    (await db.query("select count(*)::int n from public.transactions")).rows[0]
-      .n,
-    beforeHybrid,
-  );
-  checks++;
+  await denied("select public.mock_connection_intent($1,$2,$3)", [account, "Synthetic", ["accounts"]]);
+  await denied("select public.pluggy_register_connection($1,$2,$3,$4,$5)", [account, "synthetic", ["accounts"], "Synthetic", "synthetic"]);
   const { detailsSecurity } = await import("./details-security.mjs");
   checks += await detailsSecurity(db, { wa, account, category, tx });
   const snap = (await db.query("select public.workspace_snapshot() data"))
@@ -288,7 +187,7 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
       [wb],
     )
   ).rows[0].id;
-  for (const table of Object.keys(snap).filter((k) => Array.isArray(snap[k]))) {
+  for (const table of Object.keys(snap).filter((k) => k !== "meupluggy_connections")) {
     assert.equal(
       (
         await db.query(
@@ -354,10 +253,6 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
   await denied("select public.void_transaction($1)", [tx]);
   await denied("select public.review_import($1,'approve')", [rows[0].id]);
   await denied("select public.stage_import($1,'test','csv','[]')", [account]);
-  await denied("select public.mock_sync($1)", [intent.connection_id]);
-  await denied("select public.mock_consent_action($1,'renew')", [
-    intent.connection_id,
-  ]);
   await denied("select * from private.connection_intents");
   assert.equal(
     (await db.query("select public.workspace_snapshot() data")).rows[0].data

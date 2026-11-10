@@ -8,7 +8,7 @@
 6. Holerite → conferir componentes → vincular créditos reais → visualizar diferença.
 7. Anular → confirmação → preservar histórico → retirar do realizado e anular par quando patrimonial.
 
-Sem conexão com provedor pago, todos esses fluxos seguem disponíveis. Conta não autenticada nunca vê dados financeiros.
+A conexão bancária automatizada está disponível somente para o proprietário via Meu Pluggy pessoal; os demais usuários seguem com contas manuais e importação de arquivos. Conta não autenticada nunca vê dados financeiros.
 
 8. Cartões → fatura com competência/vencimento/total declarado → conferir itens/diferença → registrar pagamento total ou parcial sem novo consumo.
 9. Parcelamento → valor integral e N → agenda exata em centavos → confirmar ocorrência faturada OU vincular lançamento importado compatível.

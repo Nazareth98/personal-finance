@@ -229,8 +229,8 @@ export function Imports({
           .map((r) => {
             const batch = data.import_batches.find((b) => b.id === r.batch_id)!;
             const isPluggy =
-              batch?.parser_version === "pluggy-v1" ||
-              r.proposal.external_key?.startsWith("pluggy:");
+              batch?.parser_version === "meupluggy-v1" ||
+              r.proposal.external_key?.startsWith("meupluggy:");
             const rule = suggest(
               r.proposal.description,
               data.categorization_rules,
@@ -317,7 +317,7 @@ export function Imports({
         <h2>Histórico de lotes</h2>
         {data.import_batches.map((b) => {
           const rows = data.import_raw_rows.filter((r) => r.batch_id === b.id);
-          const parserLabel = b.parser_version === "pluggy-v1" ? "Pluggy Open Finance" : b.parser_version;
+          const parserLabel = b.parser_version === "meupluggy-v1" ? "Meu Pluggy" : b.parser_version;
           return (
             <p key={b.id}>
               {parserLabel} ·{" "}

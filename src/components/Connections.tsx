@@ -1,13 +1,6 @@
 import { useState } from "react";
-import { PluggyConnect } from "react-pluggy-connect";
-import {
-  provider,
-  type ConnectionIntent,
-  type Scope,
-} from "../open-finance/provider";
-import { pluggyClient } from "../open-finance/pluggy-client";
 import type { Snapshot } from "../domain/finance";
-import { Form } from "./Form";
+import { meuPluggy, type MeuPluggyItem } from "../meupluggy/client";
 
 export function Connections({
   data,
@@ -16,317 +9,210 @@ export function Connections({
   data: Snapshot;
   refresh: () => Promise<void>;
 }) {
-  const [providerType, setProviderType] = useState<"pluggy" | "mock">("pluggy");
-  const [targetAccount, setTargetAccount] = useState<string>(
-    data.financial_accounts[0]?.id || "",
-  );
-  const [connectToken, setConnectToken] = useState<string | null>(null);
-  const [intent, setIntent] = useState<ConnectionIntent | null>(null);
+  const [items, setItems] = useState<MeuPluggyItem[]>([]);
+  const [selections, setSelections] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const connections = (data.meupluggy_connections ?? []).filter(
+    (connection) => connection.provider_code === "meupluggy",
+  );
 
-  const mockAdapter = provider("mock");
-  const pluggyAdapter = provider("pluggy");
-
-  async function action(fn: () => Promise<unknown>) {
+  async function run(action: () => Promise<void>) {
     setBusy(true);
     setMessage("");
     try {
-      await fn();
+      await action();
       await refresh();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Não foi possível concluir.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleStartPluggyConnect() {
-    if (!targetAccount) {
-      setMessage("Selecione uma conta local de destino para vincular.");
-      return;
-    }
-    setBusy(true);
-    setMessage("Obtendo autorização segura com a Pluggy…");
-    try {
-      const token = await pluggyClient.getConnectToken();
-      setConnectToken(token);
-      setMessage("");
-    } catch (e) {
+    } catch (error) {
       setMessage(
-        e instanceof Error
-          ? `Falha ao iniciar Pluggy Connect: ${e.message}`
-          : "Não foi possível iniciar o Pluggy Connect.",
+        error instanceof Error
+          ? error.message
+          : "Não foi possível concluir a operação.",
       );
     } finally {
       setBusy(false);
     }
   }
 
+  async function loadItems() {
+    await run(async () => {
+      const result = await meuPluggy.listAccounts();
+      setItems(result.items);
+      setMessage(
+        result.items.length
+          ? `${result.items.length} conexão(ões) encontrada(s) no Meu Pluggy.`
+          : "Nenhuma conta foi retornada. Confira as conexões no Meu Pluggy e tente novamente.",
+      );
+    });
+  }
+
   return (
-    <>
-      <section>
-        <h2>Conexões Open Finance</h2>
-        <p>
-          Conecte suas contas bancárias e cartões de crédito para importar
-          lançamentos automaticamente via Open Finance da Pluggy.
-        </p>
+    <section>
+      <h2>Meu Pluggy</h2>
+      <p>
+        Esta conexão pessoal importa somente os dados do titular autorizado. Ela
+        não oferece conexão bancária para outros usuários do aplicativo.
+      </p>
+      <ol>
+        <li>Conecte suas instituições em meu.pluggy.ai.</li>
+        <li>
+          No Dashboard da Pluggy, autorize o conector MeuPluggy para sua
+          aplicação e copie os IDs dos itens.
+        </li>
+        <li>
+          O responsável pela implantação configura credenciais, IDs dos itens e
+          o usuário proprietário nos secrets da Edge Function.
+        </li>
+        <li>Carregue as contas, vincule cada uma à conta local correspondente e sincronize.</li>
+      </ol>
+      <p>
+        Os movimentos passam pela revisão manual antes de entrar no livro. A
+        autorização do Meu Pluggy precisa ser renovada no Dashboard quando
+        expirar; sincronizar não renova consentimento.
+      </p>
+      <button disabled={busy} onClick={() => void loadItems()}>
+        {busy ? "Consultando…" : "Carregar minhas contas Meu Pluggy"}
+      </button>
+      {message && <p role="status">{message}</p>}
 
-        <div className="actions" style={{ marginBottom: "16px" }}>
-          <button
-            type="button"
-            className={providerType === "pluggy" ? "" : "secondary"}
-            onClick={() => {
-              setProviderType("pluggy");
-              setMessage("");
-            }}
-          >
-            Pluggy Open Finance (Oficial / Sandbox)
-          </button>
-          <button
-            type="button"
-            className={providerType === "mock" ? "" : "secondary"}
-            onClick={() => {
-              setProviderType("mock");
-              setMessage("");
-            }}
-          >
-            Ambiente Simulado (Mock)
-          </button>
-        </div>
+      {items.map((item) => {
+        const expired =
+          item.consentExpiresAt !== null &&
+          new Date(item.consentExpiresAt).getTime() <= Date.now();
+        const unavailable =
+          expired || ["LOGIN_ERROR", "WAITING_USER_INPUT"].includes(item.status);
+        const itemConnections = connections.filter(
+          (connection) => connection.pluggy_item_id === item.itemId,
+        );
+        const revoked =
+          itemConnections.length > 0 &&
+          itemConnections.every((connection) => connection.status === "revoked");
 
-        {providerType === "pluggy" ? (
-          <div>
-            <p className="notice">
-              <strong>Integração Pluggy:</strong> Suporta bancos brasileiros (Itaú,
-              Nubank, Bradesco, BB, Santander, etc.) e o ambiente Pluggy Bank (Sandbox).
-              As transações importadas vão para a tela de revisão antes de entrar no seu extrato.
+        return (
+          <article key={item.itemId}>
+            <h3>{item.institution}</h3>
+            <p>
+              Acesso: {revoked ? "revogado neste aplicativo" : expired ? "consentimento expirado" : item.status}
+              {item.consentExpiresAt &&
+                ` · validade ${new Date(item.consentExpiresAt).toLocaleDateString("pt-BR")}`}
             </p>
+            {item.accounts.map((providerAccount) => {
+              const mapping = itemConnections.find(
+                (connection) =>
+                  connection.pluggy_account_id === providerAccount.id,
+              );
+              const key = `${item.itemId}:${providerAccount.id}`;
+              const expectedKind = providerAccount.type === "CREDIT" ? "credit" : null;
+              const localAccounts = data.financial_accounts.filter(
+                (account) =>
+                  !account.archived &&
+                  (expectedKind
+                    ? account.kind === expectedKind
+                    : ["checking", "cash", "savings"].includes(account.kind)),
+              );
+              const selected =
+                selections[key] ?? mapping?.account_id ?? "";
 
-            <label>
-              Conta local de destino:
-              <select
-                value={targetAccount}
-                onChange={(e) => setTargetAccount(e.target.value)}
-              >
-                {data.financial_accounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.institution}) · {a.kind}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="actions">
+              return (
+                <div key={providerAccount.id} className="card-row">
+                  <strong>
+                    {providerAccount.name} · {providerAccount.type === "CREDIT" ? "Cartão" : "Conta"}
+                  </strong>
+                  {mapping && mapping.status === "active" ? (
+                    <>
+                      <p>
+                        Vinculada a {data.financial_accounts.find((account) => account.id === mapping.account_id)?.name ?? "conta local"}
+                      </p>
+                      <button
+                        disabled={busy || unavailable || revoked}
+                        onClick={() =>
+                          void run(async () => {
+                            const result = await meuPluggy.synchronize(mapping.id);
+                            setMessage(
+                              `${result.rows} lançamento(s) novo(s) enviado(s) para revisão.`,
+                            );
+                          })
+                        }
+                      >
+                        Sincronizar
+                      </button>
+                    </>
+                  ) : (
+                    <div className="actions">
+                      <label>
+                        Conta local correspondente
+                        <select
+                          value={selected}
+                          disabled={unavailable || revoked}
+                          onChange={(event) =>
+                            setSelections((current) => ({
+                              ...current,
+                              [key]: event.target.value,
+                            }))
+                          }
+                        >
+                          <option value="">Selecione</option>
+                          {localAccounts.map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        disabled={busy || unavailable || revoked || !selected || !item.consentExpiresAt}
+                        onClick={() =>
+                          void run(async () => {
+                            await meuPluggy.linkAccount({
+                              account: selected,
+                              itemId: item.itemId,
+                              providerAccountId: providerAccount.id,
+                              providerAccountType: providerAccount.type,
+                              institution: item.institution,
+                              consentExpiresAt: item.consentExpiresAt!,
+                            });
+                            setMessage("Conta vinculada. Você já pode sincronizar os lançamentos.");
+                          })
+                        }
+                      >
+                        Vincular conta
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {itemConnections.some((connection) => connection.status === "active") && (
               <button
-                type="button"
-                disabled={busy || !targetAccount}
-                onClick={() => void handleStartPluggyConnect()}
-              >
-                {busy ? "Preparando…" : "Conectar Instituição (Pluggy Connect)"}
-              </button>
-            </div>
-
-            {connectToken && (
-              <PluggyConnect
-                connectToken={connectToken}
-                includeSandbox={true}
-                onSuccess={(itemData) => {
-                  setConnectToken(null);
-                  void action(async () => {
-                    setMessage("Conexão autorizada! Registrando e importando lançamentos…");
-                    const itemId = itemData.item?.id;
-                    const institutionName =
-                      itemData.item?.connector?.name || "Instituição Pluggy";
-
-                    await pluggyAdapter.completeAuthorization({
-                      connection_id: "",
-                      state: "",
-                      provider: "pluggy",
-                      itemId,
-                      account: targetAccount,
-                      institution: institutionName,
-                      scopes: ["accounts", "transactions"] as Scope[],
+                className="secondary"
+                disabled={busy || revoked}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Revogar o item Meu Pluggy neste aplicativo? A ação também remove o item da aplicação Pluggy e não apaga lançamentos já aprovados.",
+                    )
+                  )
+                    void run(async () => {
+                      const result = await meuPluggy.revokeItem(item.itemId);
+                      setMessage(
+                        result.providerDeleted
+                          ? "Acesso local revogado e item excluído na Pluggy."
+                          : "Acesso local revogado. A exclusão remota falhou; remova o item no Dashboard da Pluggy.",
+                      );
                     });
-
-                    // Procura o ID da conexão recém-criada ou atualizada
-                    const updatedSnapshot = await refresh().then(() => data);
-                    const newConn = updatedSnapshot.open_finance_connections?.find(
-                      (c: any) => (c as any).pluggy_item_id === itemId,
-                    );
-
-                    if (newConn) {
-                      const syncRes = await pluggyAdapter.synchronize(newConn.id);
-                      setMessage(
-                        `Conectado ao ${institutionName} com sucesso! ${syncRes.rows ?? 0} movimento(s) importados para revisão.`,
-                      );
-                    } else {
-                      setMessage(`Conectado ao ${institutionName} com sucesso!`);
-                    }
-                  });
                 }}
-                onError={(error) => {
-                  setConnectToken(null);
-                  setMessage(
-                    `Falha na conexão Pluggy: ${error?.message || "Erro desconhecido"}`,
-                  );
-                }}
-                onClose={() => {
-                  setConnectToken(null);
-                }}
-              />
+              >
+                Revogar item Meu Pluggy
+              </button>
             )}
-          </div>
-        ) : (
-          <div>
-            <p className="notice">
-              Somente dados fictícios. Nenhuma conexão com Itaú, Nubank ou Caixa é
-              feita. O consentimento simulado permite testar o fluxo de leitura e revisão.
-            </p>
-            <Form
-              fields={[
-                {
-                  name: "account",
-                  label: "Conta local para o sandbox",
-                  options: data.financial_accounts.map((a) => [a.id, a.name]),
-                },
-                {
-                  name: "institution",
-                  label: "Cenário de instituição",
-                  options: [
-                    ["Itaú", "Itaú (simulado)"],
-                    ["Nubank", "Nubank (simulado)"],
-                    ["Caixa", "Caixa (simulado, cobertura parcial)"],
-                  ],
-                },
-              ]}
-              label="Preparar consentimento"
-              submit={async (v) => {
-                setIntent(
-                  await mockAdapter.createConnectionIntent({
-                    account: v.account,
-                    institution: v.institution,
-                    scopes: ["accounts", "transactions"] as Scope[],
-                  }),
-                );
-                await refresh();
-              }}
-            />
-            {intent && (
-              <div className="notice">
-                <p>
-                  Autorizo a geração de movimentos fictícios neste workspace, para
-                  testar o fluxo de leitura e revisão.
-                </p>
-                <button
-                  disabled={busy}
-                  onClick={() =>
-                    void action(async () => {
-                      await mockAdapter.completeAuthorization(intent);
-                      setIntent(null);
-                    })
-                  }
-                >
-                  Confirmar consentimento simulado
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {message && <p role="status" style={{ fontWeight: 600 }}>{message}</p>}
-      </section>
-
-      <div className="cards">
-        {data.open_finance_connections?.map((c) => {
-          const expired = new Date(c.expires_at) <= new Date();
-          const active = c.status === "active" && !expired;
-          const isPluggy = (c as any).provider_code === "pluggy" || Boolean((c as any).pluggy_item_id);
-          const currentAdapter = isPluggy ? pluggyAdapter : mockAdapter;
-
-          return (
-            <article key={c.id}>
-              <h2>
-                {c.institution} · {isPluggy ? "Pluggy" : "Mock"}
-              </h2>
-              <p>
-                Conta vinculada:{" "}
-                <strong>
-                  {
-                    data.financial_accounts.find((a) => a.id === c.account_id)
-                      ?.name || "Conta não encontrada"
-                  }
-                </strong>
-              </p>
-              <p>
-                Status:{" "}
-                {c.status === "revoked"
-                  ? "Revogado"
-                  : expired
-                    ? "Precisa renovar consentimento"
-                    : c.status === "active"
-                      ? "Conectado e ativo"
-                      : c.status === "pending"
-                        ? "Aguardando autorização"
-                        : "Falhou"}
-              </p>
-              <small>
-                Escopos: {c.scopes.join(", ")} · validade{" "}
-                {new Date(c.expires_at).toLocaleDateString("pt-BR")}
-              </small>
-              <p>
-                Última sincronização:{" "}
-                {c.last_sync_at
-                  ? new Date(c.last_sync_at).toLocaleString("pt-BR")
-                  : "Ainda não realizada"}
-              </p>
-              <div className="actions">
-                <button
-                  disabled={!active || busy}
-                  onClick={() =>
-                    void action(async () => {
-                      const result = await currentAdapter.synchronize(c.id);
-                      setMessage(
-                        `${result.rows ?? 0} movimento(s) recebido(s). Consulte a aba "Importar e revisar". ${result.has_more ? "Há outra página disponível." : ""}`,
-                      );
-                    })
-                  }
-                >
-                  Sincronizar lançamentos
-                </button>
-                <button
-                  className="secondary"
-                  disabled={c.status === "pending" || busy}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Renovar consentimento por mais 90 dias?",
-                      )
-                    )
-                      void action(() => currentAdapter.renewConsent(c.id));
-                  }}
-                >
-                  Renovar
-                </button>
-                <button
-                  className="secondary"
-                  disabled={c.status === "revoked" || busy}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Revogar consentimento e impedir novas sincronizações? Seu histórico local será preservado.",
-                      )
-                    )
-                      void action(() => currentAdapter.revokeConnection(c.id));
-                  }}
-                >
-                  Revogar
-                </button>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </>
+          </article>
+        );
+      })}
+      {connections.length > 0 && (
+        <p>
+          {connections.filter((connection) => connection.status === "active").length} vínculo(s) ativo(s) neste workspace.
+        </p>
+      )}
+    </section>
   );
 }

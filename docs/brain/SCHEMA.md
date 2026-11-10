@@ -28,7 +28,7 @@ erDiagram
  FINANCIAL_ACCOUNTS ||--o| SAVINGS_GOALS : acompanha
 ```
 
-Migration 003 adiciona conexões/consentimentos/sync com RLS somente leitura e intenções em schema privado. RPCs derivam workspace do Auth e bloqueiam por estado, escopo e expiração. SELECT FOR UPDATE serializa sincronização e revogação.
+Migration 003 documenta a conexão simulada histórica, desativada na migration 011. A migração 011 mantém tabelas internas para compatibilidade, revoga RPCs de mock/Pluggy comercial e valida o Meu Pluggy pessoal do proprietário por workspace e conta. Snapshot público usa `meupluggy_connections`; restauração aceita backups históricos e não reativa vínculos revogados.
 
 Migrations 004–006: grants de cadastro por coluna, tipos de conta imutáveis, restauração atômica, faturas/pagamentos, planejamento/ocorrências de parcelas, rubricas/bases e histórico de classificação. Índice parcial `one_counterpart_per_event` e trigger diferido validam pares patrimoniais com contas distintas, natureza e status iguais, valores opostos. UUIDs, workspace e timestamps de cadastros não podem ser escolhidos/alterados por escrita direta.
 

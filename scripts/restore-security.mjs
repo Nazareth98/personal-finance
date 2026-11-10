@@ -32,18 +32,6 @@ export async function restoreSecurity(db, { a, b, wa, wb }) {
     archived: false,
   });
   await denied(forged);
-  const pending = (
-    await db.query(
-      "select public.mock_connection_intent($1,'Itaú',array['accounts']) data",
-      [backup.financial_accounts.find((x) => x.kind === "checking").id],
-    )
-  ).rows[0].data;
-  const pendingRow = (
-    await db.query(
-      "select * from public.open_finance_connections where id=$1",
-      [pending.connection_id],
-    )
-  ).rows[0];
   await as(b);
   await denied(backup);
   const ownBackup = (await db.query("select public.workspace_snapshot() data"))
@@ -53,12 +41,6 @@ export async function restoreSecurity(db, { a, b, wa, wb }) {
     ...backup.categories[0],
     workspace_id: wb,
     name: "Categoria independente B",
-  });
-  ownBackup.open_finance_connections.push({
-    ...pendingRow,
-    workspace_id: wb,
-    account_id: ownBackup.financial_accounts[0].id,
-    status: "revoked",
   });
   await db.query("select public.restore_backup($1,true)", [ownBackup]);
   assert.equal(
@@ -70,15 +52,7 @@ export async function restoreSecurity(db, { a, b, wa, wb }) {
     "Categoria independente B",
   );
   checks++;
-  await db.query("select public.mock_consent_action($1,'revoke')", [
-    pending.connection_id,
-  ]);
   await as(a);
-  await db.query("select public.mock_authorize($1,$2)", [
-    pending.connection_id,
-    pending.state,
-  ]);
-  checks++;
   assert.equal(
     (
       await db.query("select name from public.categories where id=$1", [
@@ -156,7 +130,7 @@ export async function restoreSecurity(db, { a, b, wa, wb }) {
     checks++;
   }
   assert.ok(
-    after.open_finance_connections.every((c) => c.status === "revoked"),
+    after.meupluggy_connections.every((c) => c.status === "revoked"),
   );
   checks++;
   assert.equal(

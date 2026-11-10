@@ -30,7 +30,7 @@ const pages = [
   "Caixinhas",
   "Receitas e holerites",
   "Importar e revisar",
-  "Conexões bancárias",
+  "Meu Pluggy",
   "Categorias e regras",
   "Perfil e backup",
 ] as const;
@@ -714,7 +714,7 @@ export function Workspace({ userId }: { userId: string }) {
         {page === "Importar e revisar" && (
           <Imports data={data} refresh={refresh} />
         )}
-        {page === "Conexões bancárias" && (
+        {page === "Meu Pluggy" && (
           <Connections data={data} refresh={refresh} />
         )}
         {page === "Categorias e regras" && (

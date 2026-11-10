@@ -16,7 +16,7 @@ const empty: Snapshot = {
   import_batches: [],
   import_raw_rows: [],
   credit_cards: [],
-  open_finance_connections: [],
+  meupluggy_connections: [],
 };
 async function mockApi(page: Page) {
   const data = structuredClone(empty);

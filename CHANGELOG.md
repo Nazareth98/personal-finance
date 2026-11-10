@@ -12,3 +12,8 @@
 - Validação de propostas no servidor, preservação da linha original, candidatos de duplicidade entre descrições diferentes e relatório CSV com proteção contra fórmulas.
 - Exportação de metadados próprios do perfil; roteiro de homologação no ambiente real, sem execução de Supabase local.
 - Seletores dependentes de categoria/subcategoria em regras; edição preserva a subcategoria válida, troca de categoria a limpa e revisão aplica o par sugerido pela mesma regra.
+
+## 0.1.1 — 10/11/2026
+
+- Removidos o mock Open Finance e o adaptador Pluggy comercial/widget. RPCs legadas foram revogadas; tabelas permanecem apenas para compatibilidade histórica e de backup.
+- Integração Meu Pluggy pessoal limitada ao proprietário por identidade fixa, allowlist de itens, secrets backend, revisão/deduplicação e revogação segura.

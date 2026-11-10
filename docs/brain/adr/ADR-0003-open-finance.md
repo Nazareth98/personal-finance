@@ -1,7 +1,5 @@
-# ADR 0003 — Mock seguro antes do provedor comercial
+# ADR 0003 — Mock Open Finance (retirado)
 
-Aceita em 09/11/2026. Escolher implementação mock persistida, com consentimentos e regras de autorização no servidor. O contrato TypeScript é substituível; nenhuma implementação de produção é habilitada por variável de frontend.
+Status: desativado pela migration `202611100011_meupluggy_personal.sql` e substituído pela ADR 0006.
 
-Motivo: não há contrato, credenciais ou autorização para serviço comercial. Matriz documental indica disponibilidade de instituições, mas não prova todos os produtos em cada conector. Não simular conexão real nem reutilizar credenciais de um usuário.
-
-O mock injeta somente movimentos sintéticos após consentimento explícito e passa pelo mesmo lote/revisão/deduplicação de arquivos. Lock por conexão protege revogação concorrente. State privado de uso único protege autorização. Não implementar webhook real com protocolo inventado. Quando fornecedor for escolhido, uma nova ADR registrará termos, custo, credenciais, cobertura e homologação.
+Esta decisão histórica descrevia um mock persistido para desenvolver a arquitetura. As RPCs de mock foram revogadas e os vínculos antigos foram marcados como revogados. Não implementar nem expor esta integração. O único fluxo bancário automatizado atual é Meu Pluggy pessoal e owner-only, documentado em [MEUPLUGGY.md](../MEUPLUGGY.md).

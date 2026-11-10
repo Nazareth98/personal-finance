@@ -135,12 +135,15 @@ export interface Card extends Entity {
 }
 export interface Connection extends Entity {
   account_id: string;
+  provider_code: "meupluggy";
   institution: string;
   status: string;
-  expires_at: string;
+  expires_at: string | null;
   last_sync_at: string | null;
   cursor: number;
   scopes: string[];
+  pluggy_item_id?: string | null;
+  pluggy_account_id?: string | null;
 }
 export interface Snapshot extends DetailSnapshot {
   version: 1;
@@ -156,7 +159,7 @@ export interface Snapshot extends DetailSnapshot {
   import_batches: Batch[];
   import_raw_rows: RawRow[];
   credit_cards: Card[];
-  open_finance_connections?: Connection[];
+  meupluggy_connections?: Connection[];
 }
 
 export function cents(input: string): bigint {
