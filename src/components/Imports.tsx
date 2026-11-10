@@ -66,6 +66,59 @@ export function Imports({
     await rpc("review_import", { target, decision, changes, existing });
     await refresh();
   }
+  async function approveAllSafe() {
+    const pendingRows = data.import_raw_rows.filter((r) => r.status === "pending");
+    const safeRows = pendingRows.filter((r) => {
+      const batch = data.import_batches.find((b) => b.id === r.batch_id);
+      if (!batch) return false;
+      const matches = duplicateCandidates(r.proposal, batch.account_id, data.transactions);
+      return matches.length === 0;
+    });
+
+    if (!safeRows.length) {
+      setMessage("Não há linhas pendentes sem possível duplicidade para aprovação em lote.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Deseja aprovar ${safeRows.length} movimento(s) sem suspeita de duplicidade de uma só vez?`,
+      )
+    ) {
+      return;
+    }
+
+    setBusy(true);
+    setMessage(`Aprovando ${safeRows.length} movimento(s)…`);
+    try {
+      for (const r of safeRows) {
+        const rule = suggest(r.proposal.description, data.categorization_rules);
+        const suggestedCategory = r.proposal.category_id ?? rule?.category_id;
+        const suggestedSubcategory =
+          r.proposal.subcategory_id ??
+          (suggestedCategory === rule?.category_id
+            ? (rule?.subcategory_id ?? undefined)
+            : undefined);
+
+        await rpc("review_import", {
+          target: r.id,
+          decision: "approve",
+          changes: {
+            ...r.proposal,
+            category_id: suggestedCategory,
+            subcategory_id: suggestedSubcategory,
+          },
+          existing: null,
+        });
+      }
+      await refresh();
+      setMessage(`${safeRows.length} movimento(s) aprovado(s) com sucesso.`);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Falha ao aprovar lote.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <>
       <section>
@@ -161,10 +214,23 @@ export function Imports({
           repetidas legítimas podem ser aprovadas separadamente. Créditos e
           intermediadores precisam de confirmação da natureza.
         </p>
+        {data.import_raw_rows.some((r) => r.status === "pending") && (
+          <div className="actions" style={{ marginBottom: "16px" }}>
+            <button
+              disabled={busy}
+              onClick={() => void approveAllSafe()}
+            >
+              Aprovar todos sem duplicidade em lote
+            </button>
+          </div>
+        )}
         {data.import_raw_rows
           .filter((r) => r.status === "pending")
           .map((r) => {
             const batch = data.import_batches.find((b) => b.id === r.batch_id)!;
+            const isPluggy =
+              batch?.parser_version === "pluggy-v1" ||
+              r.proposal.external_key?.startsWith("pluggy:");
             const rule = suggest(
               r.proposal.description,
               data.categorization_rules,
@@ -184,8 +250,10 @@ export function Imports({
             return (
               <details key={r.id}>
                 <summary>
+                  {isPluggy ? "🔌 " : ""}
                   {r.proposal.event_date} · {r.proposal.description} ·{" "}
                   {brl(r.proposal.amount_cents)}{" "}
+                  {isPluggy ? " · Pluggy" : ""}
                   {matches.length ? " · possível duplicidade" : ""}
                 </summary>
                 {(r.proposal.original_row || r.proposal.original_text) && <details><summary>Dados originais da linha</summary><pre className="raw-row">{r.proposal.original_text ?? JSON.stringify(r.proposal.original_row,null,2)}</pre></details>}
@@ -249,9 +317,10 @@ export function Imports({
         <h2>Histórico de lotes</h2>
         {data.import_batches.map((b) => {
           const rows = data.import_raw_rows.filter((r) => r.batch_id === b.id);
+          const parserLabel = b.parser_version === "pluggy-v1" ? "Pluggy Open Finance" : b.parser_version;
           return (
             <p key={b.id}>
-              {b.parser_version} ·{" "}
+              {parserLabel} ·{" "}
               {data.financial_accounts.find((a) => a.id === b.account_id)?.name}{" "}
               · {rows.length} linhas ·{" "}
               {rows.filter((r) => r.status === "pending").length} pendentes ·{" "}

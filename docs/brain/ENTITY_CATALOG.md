@@ -1,4 +1,4 @@
-﻿# Catálogo de entidades implementadas
+# Catálogo de entidades implementadas
 
 Migrations são fonte estrutural. IDs UUID; timestamps UTC; UI pt-BR e data de negócio America/Sao_Paulo. Exemplos sintéticos.
 
@@ -38,7 +38,7 @@ Normalização adotada: income_entries, benefit_movements, savings_movements e i
 
 | Entidade | Campos e relações |
 |---|---|
-| open_finance_connections | id/workspace/account, provider_code=mock, institution, status, scopes[], expires_at, last_sync_at, cursor, created_at; FK composta à conta |
+| open_finance_connections | id/workspace/account, provider_code in ('mock','pluggy'), institution, status, scopes[], expires_at, last_sync_at, cursor, pluggy_item_id, pluggy_account_id, created_at; FK composta à conta |
 | open_finance_consents | id/workspace/connection, action authorize/renew/revoke, scopes[], expires_at, actor_user_id, created_at; histórico de consentimentos |
 | open_finance_sync_runs | id/workspace/connection/batch, status success/error, rows_received, error_code sanitizado, created_at |
 | private.connection_intents | connection_id PK, state UUID, user_id, expires_at; nenhum grant ao cliente, uso único |
@@ -64,3 +64,5 @@ Migration 004 restringe grants por coluna e acrescenta restauração. Migration 
 Após migration 007, a PK efetiva de cada entidade financeira é `(workspace_id,id)`, preservando UUID como identificador local do registro. `private.connection_intents` inclui workspace_id derivado pelo backend, com PK composta workspace/connection. Essa regra substitui referências anteriores a ID globalmente único no domínio financeiro.
 
 Migration 008 valida `import_raw_rows.proposal` no servidor; JSON pode conter original_row/original_text privados e imutáveis. Constraint relaciona status de revisão e transaction_id. Migration 009 inclui profile/workspace próprios no snapshot/exportação; restauração rejeita perfil/proprietário incompatíveis e preserva o perfil existente, conforme política aditiva.
+
+Migration 010 habilita o provedor oficial `pluggy` na tabela `open_finance_connections` (adiciona `pluggy_item_id` e `pluggy_account_id`), removendo a restrição fixa de instituições simuladas e disponibilizando as RPCs seguras `pluggy_register_connection` e `pluggy_stage_transactions` com integração à fila de revisão humana (`stage_import`).

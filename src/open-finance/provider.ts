@@ -1,8 +1,11 @@
 import { rpc } from "../lib/api";
+import { PluggyOpenFinanceProvider } from "./pluggy-provider";
 export interface ConnectionIntent {
   connection_id: string;
   state: string;
-  provider: "mock";
+  provider: "mock" | "pluggy";
+  connect_token?: string;
+  [key: string]: unknown;
 }
 export interface SyncResult {
   status: "success" | "error";
@@ -19,7 +22,7 @@ export interface OpenFinanceProvider {
     institution: string;
     scopes: Scope[];
   }): Promise<ConnectionIntent>;
-  completeAuthorization(intent: ConnectionIntent): Promise<void>;
+  completeAuthorization(intent: ConnectionIntent & Record<string, unknown>): Promise<void>;
   synchronize(
     connection: string,
     simulateFailure?: boolean,
@@ -78,9 +81,7 @@ export class MockOpenFinanceProvider implements OpenFinanceProvider {
   }
 }
 export function provider(code: string): OpenFinanceProvider {
-  if (code !== "mock")
-    throw new Error(
-      "Integração real indisponível: depende de contrato, autorização e adaptador seguro no backend.",
-    );
-  return new MockOpenFinanceProvider();
+  if (code === "pluggy") return new PluggyOpenFinanceProvider();
+  if (code === "mock") return new MockOpenFinanceProvider();
+  throw new Error(`Provedor desconhecido: ${code}`);
 }
