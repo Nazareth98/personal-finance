@@ -1,8 +1,8 @@
 # Design system — Grafite e Âmbar
 
-Versão 1.0 · 10/11/2026 · Referência normativa para refatorações visuais e novas funcionalidades.
+Versão 1.3 · 10/11/2026 · Referência normativa para refatorações visuais e novas funcionalidades.
 
-Este documento define a experiência desejada. A interface atual ainda precisa ser migrada; a existência desta especificação não comprova conformidade das telas. O tema inicial é claro. Um tema escuro futuro exige tokens próprios e nova validação de contraste.
+Este documento define a experiência desejada e os tokens implementados para os temas claro e escuro. A interface permite escolher tema claro/escuro e lembra a preferência neste navegador; na primeira visita, segue a preferência do sistema.
 
 ## 1. Princípios e escopo
 
@@ -120,7 +120,7 @@ Cabeçalho de página: título único `h1`, descrição curta quando útil, per�
 | --- | --- |
 | Menor que 768 px | Uma coluna; navegação recolhível; formulários empilhados; cards de resumo em uma coluna quando valores não couberem |
 | 768–1199 px | Navegação recolhível; até duas colunas de cards/campos relacionados |
-| A partir de 1200 px | Sidebar de 240 px; conteúdo fluido até 1440 px; até quatro indicadores |
+| A partir de 1200 px | Sidebar de 240 px ou faixa compacta de 80 px; conteúdo fluido até 1440 px; até quatro indicadores |
 
 Breakpoints orientam a composição, mas o conteúdo determina quando quebrar. Usar `minmax(0, 1fr)`, quebra de texto e largura mínima de campo compatível. Não truncar valores financeiros para caber. A página deve funcionar a 320 CSS px e com zoom de 400%, sem rolagem horizontal global; tabelas genuinamente bidimensionais podem ter rolagem própria identificada.
 
@@ -252,3 +252,129 @@ Toda entrega visual deve atender ao checklist:
 - [ ] Evidências visuais usam somente dados sintéticos; limitações verificadas são registradas em KNOWN_ISSUES.
 
 Mudança de token ou contrato compartilhado deve atualizar este documento no mesmo commit e revisar os componentes afetados. Exceções devem ser justificadas e documentadas, mantendo os requisitos de acessibilidade e a reserva do verde. Não declarar a interface acessível ou a migração completa sem evidências.
+
+## 11. Tema escuro e biblioteca de ícones
+
+O tema escuro reutiliza os mesmos tokens semânticos do tema claro; componentes não escolhem cores por contexto com valores hexadecimais próprios. A aplicação troca `data-theme` no elemento raiz, respeita `prefers-color-scheme` na primeira visita e persiste a escolha localmente. Contraste-alvo: WCAG 2.2 AA para texto (4,5:1) e controles/indicadores (3:1).
+
+| Token | Dark | Uso |
+| --- | --- | --- |
+| `--color-bg` | `#11100F` | Fundo geral |
+| `--color-surface` | `#1C1917` | Cards, formulários e diálogos |
+| `--color-surface-muted` | `#292524` | Áreas secundárias e controles neutros |
+| `--color-text` | `#FAFAF9` | Texto principal |
+| `--color-text-secondary` | `#D6D3D1` | Texto secundário e navegação |
+| `--color-text-muted` | `#A8A29E` | Texto auxiliar |
+| `--color-border` / `--color-border-control` | `#44403C` / `#78716C` | Divisores / contorno de controles |
+| `--color-primary` / `--color-on-primary` | `#FBBF24` / `#1C1917` | Ação principal e texto nela |
+| `--color-primary-hover` / `--color-primary-pressed` | `#FCD34D` / `#F59E0B` | Estados da ação principal |
+| `--color-selected-bg` / `--color-selected-text` | `#422006` / `#FDE68A` | Seleção com contraste independente da cor |
+| `--color-nav-bg` / `--color-nav-text` | `#0C0A09` / `#FAFAF9` | Navegação |
+| `--color-positive` / `--color-positive-bg` | `#4ADE80` / `#052E16` | Valores financeiros positivos, com rótulo/sinal |
+| `--color-negative` / `--color-negative-bg` | `#FCA5A5` / `#450A0A` | Valores negativos e erros contextualizados |
+| `--color-warning` / `--color-warning-bg` | `#FCD34D` / `#422006` | Alertas e revisão pendente |
+| `--color-info` / `--color-info-bg` | `#D6D3D1` / `#292524` | Informação neutra |
+| `--color-disabled-bg` / `--color-disabled-text` | `#44403C` / `#A8A29E` | Controles indisponíveis |
+| `--color-focus` | `#FCD34D` | Foco visível no tema escuro |
+
+Combinações verificadas por cálculo: texto principal/fundo 18,2:1; texto secundário/superfície 11,7:1; auxiliar/superfície 6,9:1; texto da ação/âmbar 10,5:1; texto selecionado/fundo selecionado 11,7:1; contorno de controle/superfície 3,65:1. Revalidar em capturas reais após mudanças nos componentes. Verde continua reservado a valores financeiros positivos; sucesso genérico, aporte e transferência permanecem neutros.
+
+### Ícones
+
+A biblioteca é `lucide-react`. Importar ícones individualmente do pacote para permitir tree-shaking. Tamanho padrão 18–20 px, traço coerente e cor herdada do texto/tokens. Ícones ao lado de um rótulo visível usam `aria-hidden="true"`; controles apenas com ícone precisam de nome acessível (`aria-label` ou texto oculto) e foco visível. Não usar cor do ícone como único sinal de estado.
+
+A navegação expandida usa ícone e nome textual. O controle de tema é um botão circular discreto de 44 px com sol/lua; seu nome acessível e `title` informam a ação disponível (“Usar tema claro/escuro”). A escolha persiste no navegador. A saída usa explicitamente `--color-nav-text`, inclusive no tema escuro, sem herdar a cor de texto do botão primário.
+## 12. Aplicação na navegação e na Visão geral
+
+A sidebar mantém marca, contexto privado, destinos e ações de tema/sair. O item atual combina nome, ícone, fundo e marcador lateral âmbar; cada alvo tem no mínimo 44 px de altura e expõe `aria-current="page"`. No desktop, o botão “Minimizar menu lateral” recolhe a sidebar para 80 px, mantendo os ícones, nomes acessíveis e indicação da página atual. “Expandir menu lateral” restaura 240 px. A preferência fica em `personal-finance-sidebar-collapsed` no navegador; armazenamento bloqueado não impede a interação.
+
+Abaixo de 1200 px, a preferência compacta do desktop não oculta os rótulos: a navegação vira um painel acionado por “Abrir navegação”, expõe `aria-expanded`, fecha por Escape ou seleção e devolve foco ao acionador. Tema e saída ficam no rodapé da navegação, sempre disponíveis mesmo com o painel móvel fechado. Em janelas de pouca altura, a sidebar permite rolar até suas ações.
+
+A Visão geral começa com a descrição do período e quatro indicadores no máximo: renda confirmada, consumo, resultado e aportes. Cada card mostra nome, ícone decorativo, valor em algarismos tabulares e qualificador. Renda só usa verde quando positiva; resultado recebe cor pelo sinal; consumo, aportes e saldos de conta permanecem neutros, pois transferências e saldos de passivos não são, por si, ganhos. Cards ficam em quatro colunas largas, duas em tablet e uma em telas estreitas. Disponibilidade por categoria, contas e próximos passos seguem abaixo, sem tornar o card inteiro clicável.
+## 13. Aplicação nas telas restantes
+
+- Lançamentos usa formulário destacado, busca por descrição e tabela com cabeçalhos semânticos, competência, natureza e valores alinhados. A exportação CSV e a ação de anulação mantêm os comandos existentes.
+- Contas apresenta cartões responsivos com tipo, instituição, saldo calculado e estado arquivado; arquivar/reativar continua usando a mutação existente.
+- Cartões destaca configuração, limite, fechamento, vencimento e consumo da competência. Faturas e parcelamentos recebem títulos com ícones para facilitar a leitura.
+- A tabela permanece rolável em telas estreitas; campos, bordas, superfícies e estados usam tokens de tema claro/escuro.
+- A atualização é visual: não altera cálculos, persistência, autorização, importação ou regras de conciliação.
+Orçamentos, caixinhas, holerites, importação/revisão, Meu Pluggy, categorias/regras e perfil/backup seguem o mesmo cabeçalho de seção com ícone decorativo, descrição curta e ações identificadas. Listas usam cards e estados vazios; prévias, revisões e restauração preservam seus avisos e confirmações. Os componentes usam tokens semânticos nos dois temas e continuam responsivos.
+## 14. Sinais financeiros e Livro financeiro
+
+Saldos com sinal seguem o mesmo contrato em toda tela: valores acima de zero usam `--color-positive`, abaixo de zero usam `--color-negative` e zero permanece neutro. O Livro financeiro agrupa conta e natureza junto à descrição; categoria e subcategoria aparecem juntas, com ação contextual de categorizar, adicionar subcategoria ou editar classificação. Em telas estreitas, cada movimento vira um cartão legível sem remover informação ou ações.
+
+## 15. Composição de cards, cabeçalhos e ícones
+
+### Card padrão
+
+- O card é uma superfície de conteúdo agrupado, não um contêiner genérico para cada parágrafo. Use-o para indicadores, contas, objetivos, itens de revisão ou grupos de informação com relação clara.
+- Fundo `--color-surface`, borda de 1 px `--color-border`, raio de 12 px e sem sombra em repouso. A sombra é reservada a elementos que flutuam sobre o conteúdo, como popovers e diálogos.
+- Padding interno: 24 px em desktop e 16 px abaixo de 768 px. Use 16 px entre blocos independentes; 8 px entre título e descrição ou rótulo e valor relacionado; 4 px entre valor e qualificador.
+- Cards da mesma grade compartilham alinhamento, padding e estrutura. Use `minmax(0, 1fr)` e `align-items: stretch`; não alinhe cards pela quantidade de texto nem fixe alturas que cortem conteúdo.
+- O conteúdo não pode encostar na borda. Textos longos quebram linha; valores monetários completos não são truncados. Ações ficam no rodapé ou no canto superior direito, sempre com área de toque adequada.
+- Não use card dentro de card para representar uma simples subdivisão. Separe o conteúdo com subtítulo, divisor ou superfície secundária `--color-surface-muted`.
+
+### Hierarquia e alinhamento
+
+- Cabeçalho de card ou seção segue a ordem: ícone decorativo opcional, título, descrição curta opcional e ação contextual. O título fica à esquerda; ação secundária pode ficar à direita no desktop e abaixo do texto no celular.
+- O ícone fica centralizado verticalmente na primeira linha do título, mesmo quando o título quebra ou há descrição. A descrição começa na mesma coluna do texto do título. `SectionTitle` compartilha essa estrutura; não compensar alinhamento com margens fixas no ícone.
+- Títulos de seção usam `h2`; títulos de cards usam `h3`. Não escolha a tag pelo tamanho visual. Não pule níveis para obter aparência.
+- Em cards de indicador, mantenha título no topo, valor em destaque no meio e período/qualificador abaixo. Alinhe valores de cards irmãos pela mesma linha de base; não deixe descrições de comprimentos diferentes deslocarem os valores.
+- Em cards de conta ou objetivo, agrupe nome e tipo no cabeçalho, apresente saldo/meta em bloco próprio e deixe prazo, instituição e estado como metadados secundários.
+- Texto e descrições ficam alinhados à esquerda. Valores financeiros em uma lista/tabulação ficam alinhados à direita e usam algarismos tabulares. Em mobile, preserve a relação visual entre rótulo e valor; não force alinhamento à direita se isso separar os dois.
+- Marcadores de estado usam texto explícito e tokens semânticos. Cor não substitui rótulo; cor de marca não indica estado financeiro.
+- Se o card inteiro navega, ele não contém botões, links, campos ou outros controles interativos. Havendo ação interna, torne clicável somente o controle correspondente.
+
+### Ícones
+
+- Biblioteca do produto: `lucide-react`. Importe cada ícone pelo nome, sem imagens emoji ou caracteres Unicode como ícones de interface.
+- Tamanhos: 20 px para navegação e cabeçalhos de seção; 18 px para ações e metadados; 16 px somente em contextos densos. Use traço padrão da biblioteca, alinhamento central e tamanho uniforme entre elementos equivalentes.
+- Escolha pelo significado do objeto ou da ação (conta, cartão, busca, edição, exportação). Não reutilize um ícone apenas por semelhança visual se ele sugerir outro significado financeiro.
+- Ícones decorativos ao lado de texto usam `aria-hidden="true"` e herdam cor do texto/tokens. Não colorir ícones isoladamente para indicar status.
+- Botão somente com ícone tem nome acessível que identifica a ação e o objeto, por exemplo “Editar conta Reserva”; alvo mínimo de 44 × 44 px e foco visível. Tooltip é complementar e acessível por foco e ponteiro.
+- Ícones não substituem título, rótulo de campo, natureza financeira, estado ou texto de botão. Não use ícones diferentes para a mesma ação em telas distintas sem uma razão semântica.
+
+### Ajuda contextual
+
+- `ContextHelp` oferece botão “Ajuda” com ícone, área mínima de 44 px e nome acessível “Ajuda sobre [assunto]”. `SectionTitle` aceita conteúdo opcional de ajuda e alinha o acionador ao título.
+- O conteúdo abre em `dialog` modal nativo, com título associado, fundo inerte, foco inicial no botão “Fechar ajuda” e fechamento por esse botão ou Escape. Ao fechar, o foco volta ao acionador. O conteúdo pode conter texto e controles nomeados; ações que trocam de aba precisam respeitar o trabalho em andamento.
+- O diálogo usa superfície e texto do tema, borda, raio de 16 px, backdrop com `--color-overlay`, largura limitada e rolagem interna para telas pequenas. Em conteúdos longos, título e botão de fechar permanecem visíveis durante a rolagem. Informações indispensáveis a uma decisão continuam visíveis junto ao controle correspondente, inclusive quando a ajuda está fechada.
+- Todas as áreas inventariadas em H01–H30 usam o componente, inclusive acesso, cabeçalho global e cards repetidos que exigem orientação própria. Estados orientados, atalhos seguros e validação completa com leitor de tela e contraste continuam no [plano de ajuda contextual](PLANO_AJUDA_CONTEXTO.md).
+
+## 16. Campos e controles de formulário
+
+### Estrutura visual
+
+- Cada campo apresenta rótulo visível acima do controle. O rótulo permanece visível durante o preenchimento; placeholder serve apenas como exemplo e nunca substitui o rótulo.
+- Alinhamento: rótulo, controle, texto de ajuda e erro compartilham a mesma largura e borda esquerda. Distância rótulo–controle: 8 px; controle–ajuda/erro: 4 px; distância entre campos: 16 px. Use 24 px para separar grupos diferentes.
+- Altura mínima do controle: 44 px, padding horizontal de 12 px e raio de 8 px. O texto digitado tem pelo menos 16 px para evitar zoom automático em celular. Textareas podem crescer; não reduza a área de digitação para caber na grade.
+- Campos relacionados usam colunas de largura equivalente e quebram para uma coluna quando qualquer controle fica estreito ou o zoom aumenta. Campos de texto podem ocupar a largura disponível; datas, valores e seletores não devem ter larguras tão curtas que escondam o valor atual.
+- Agrupe escolhas relacionadas com `fieldset` e `legend`. Não use apenas espaçamento ou cor para sugerir que campos pertencem ao mesmo grupo.
+
+### Cores e foco
+
+- Repouso: fundo `--color-surface`, texto `--color-text`, borda `--color-border-control`. Ajuda usa `--color-text-secondary`. Placeholder usa `--color-text-muted`, com contraste legível.
+- Hover pode alterar sutilmente a borda, sem mover, redimensionar ou depender exclusivamente do ponteiro. Campo focado recebe anel contínuo de 3 px, offset de 2 px, com `--color-focus`; não remova o contorno nativo sem substituto equivalente.
+- O anel de foco deve contrastar com o controle e com a superfície ao redor nos temas claro e escuro. Não dependa apenas de uma mudança de cor da borda. Em `forced-colors`, preserve o indicador do sistema.
+- Erro: manter o fundo legível, usar borda `--color-negative`, texto explicativo e ícone/rótulo quando útil. Associar mensagem ao controle com `aria-describedby` e marcar `aria-invalid="true"`. Não sinalizar erro apenas pela cor.
+- Sucesso genérico não torna o campo verde. A confirmação de salvamento é uma mensagem separada e neutra. Valores monetários positivos/negativos seguem a semântica financeira definida neste documento.
+- Desabilitado: usar `--color-disabled-bg` e `--color-disabled-text`, explicar indisponibilidade quando não for óbvia e manter o rótulo legível. Campo somente leitura preserva contraste e pode ser selecionável/copíavel; não deve parecer desabilitado.
+- Checkbox, radio e switch mantêm foco visível, alvo de toque de 44 × 44 px e rótulo clicável. Select nativo conserva indicador de abertura e operação por teclado. Não desenhe um controle customizado sem reproduzir estados e semântica nativos.
+
+### Tipos e entrada de dados
+
+| Dado | Controle recomendado | Regras de interação |
+| --- | --- | --- |
+| Nome, instituição, descrição e palavra-chave | `text` | Limite e exemplo ficam na ajuda; preservar espaços e caracteres válidos do idioma. |
+| E-mail | `email` | `autocomplete="email"`; explicar o formato sem bloquear colagem. |
+| Senha | `password` | `autocomplete` apropriado para cadastro/login; permitir colar e usar gerenciador de senhas. |
+| Busca | `search` | Rótulo persistente; botão de limpar nomeado se existir; não mover foco após filtrar. |
+| Dinheiro em reais | `text` com `inputmode="decimal"` | Aceitar vírgula decimal e colagem em formato brasileiro; mostrar unidade “R$”; nunca usar `type="number"` nem converter para ponto flutuante. |
+| Percentual | `text` com `inputmode="decimal"` ou `number` com passo explícito | Mostrar `%`, limites e precisão permitida; a validação do domínio continua autoritativa. |
+| Data do evento, vencimento e prazo | `date` | Rótulo identifica qual data; não confundir com competência. |
+| Competência mensal | `month` ou seletor equivalente | Mostrar mês/ano; persistir no padrão definido pelo domínio. |
+| Quantidade, dia do mês e prioridade | `number` com `min`, `max` e `step` explícitos | Usar somente para valores realmente inteiros/numéricos; informar unidade e limites. |
+| Opção única | `select` ou radio | Incluir opção inicial clara quando for necessário escolher; ordenar opções de forma previsível. |
+| Sim/não independente | Checkbox; switch apenas para efeito imediato e reversível | O rótulo descreve o estado/efeito, e não apenas “Ativo”. |
+
+Não aplique máscaras que impeçam setas, seleção, colagem, leitor de tela ou correção manual. A formatação pode ocorrer ao sair do campo ou após confirmação, sem reposicionar o cursor a cada tecla. Valide no envio e, quando necessário, após interação; preserve valores digitados após erro. Ao falhar, explique a correção específica e leve foco ao resumo de erros ou ao primeiro campo inválido sem interromper a digitação.

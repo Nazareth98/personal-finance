@@ -1,4 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Banknote,
+  CircleDollarSign,
+  ChartPie,
+  CreditCard,
+  Download,
+  FileText,
+  Landmark,
+  LayoutDashboard,
+  Link2,
+  ListChecks,
+  LogOut,
+  Menu,
+  Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PiggyBank,
+  Receipt,
+  Settings2,
+  Search,
+  ShoppingBag,
+  Sun,
+  Tags,
+  type LucideIcon,
+  WalletCards,
+  X,
+} from "lucide-react";
 import {
   accountBalance,
   brl,
@@ -7,6 +34,7 @@ import {
   natureLabels,
   today,
   totals,
+  type Account,
   type Snapshot,
 } from "./domain/finance";
 import { downloadJson, downloadText, rpc, save, snapshot } from "./lib/api";
@@ -22,6 +50,9 @@ import { CategoryEditors, GoalEditor } from "./components/Editors";
 import { Connections } from "./components/Connections";
 import { CategorySubcategoryFields } from "./components/CategorySubcategoryFields";
 import { PrivateConfigurationImport } from "./components/PrivateConfigurationImport";
+import { SectionTitle } from "./components/SectionTitle";
+import { MoneyValue } from "./components/MoneyValue";
+import { ContextHelp } from "./components/ContextHelp";
 
 const pages = [
   "Visão geral",
@@ -37,13 +68,74 @@ const pages = [
 ] as const;
 
 type Page = (typeof pages)[number];
+type Theme = "light" | "dark";
+const pageIcons: Record<Page, LucideIcon> = {
+  [pages[0]]: LayoutDashboard,
+  [pages[1]]: Receipt,
+  [pages[2]]: Landmark,
+  [pages[3]]: ChartPie,
+  [pages[4]]: PiggyBank,
+  [pages[5]]: FileText,
+  [pages[6]]: ListChecks,
+  [pages[7]]: Link2,
+  [pages[8]]: Tags,
+  [pages[9]]: Settings2,
+};
+const accountKindLabels: Record<Account["kind"], string> = {
+  checking: "Conta corrente",
+  cash: "Dinheiro",
+  credit: "Cartão de crédito",
+  benefit: "VR/VA",
+  savings: "Caixinha/investimento",
+  loan: "Empréstimo",
+};
+const accountKindIcons: Record<Account["kind"], LucideIcon> = {
+  checking: Landmark,
+  cash: Banknote,
+  credit: CreditCard,
+  benefit: WalletCards,
+  savings: PiggyBank,
+  loan: CircleDollarSign,
+};
+const displayDate = (value: string) =>
+  new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T12:00:00Z`));
+const displayMonth = (value: string) => {
+  const [year, month] = value.slice(0, 7).split("-");
+  return `${month}/${year}`;
+};
+function initialTheme(): Theme {
+  try {
+    const stored = localStorage.getItem("personal-finance-theme");
+    if (stored === "dark" || stored === "light") return stored;
+  } catch {
+    // Use a preferência do sistema quando o armazenamento local está bloqueado.
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
 export function Workspace({ userId }: { userId: string }) {
   const [data, setData] = useState<Snapshot | null>(null),
     [page, setPage] = useState<Page>("Visão geral"),
     [error, setError] = useState(""),
     [period, setPeriod] = useState(today().slice(0, 7)),
     [annual, setAnnual] = useState(false),
+    [theme, setTheme] = useState<Theme>(initialTheme),
+    [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+      try {
+        return localStorage.getItem("personal-finance-sidebar-collapsed") === "true";
+      } catch {
+        return false;
+      }
+    }),
+    [mobileNavOpen, setMobileNavOpen] = useState(false),
     [search, setSearch] = useState("");
+  const mobileNavButton = useRef<HTMLButtonElement>(null);
   const refresh = useCallback(async () => {
     setError("");
     try {
@@ -57,6 +149,34 @@ export function Workspace({ userId }: { userId: string }) {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem("personal-finance-theme", theme);
+    } catch {
+      // A preferência segue ativa nesta sessão.
+    }
+  }, [theme]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("personal-finance-sidebar-collapsed", String(sidebarCollapsed));
+    } catch {
+      // O menu continua funcionando quando o armazenamento está bloqueado.
+    }
+  }, [sidebarCollapsed]);
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileNavOpen(false);
+        if (window.matchMedia("(max-width: 1199px)").matches) {
+          mobileNavButton.current?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [mobileNavOpen]);
   async function mutate(
     table: string,
     v: Record<string, unknown>,
@@ -100,6 +220,20 @@ export function Workspace({ userId }: { userId: string }) {
     .filter((c) => !c.archived)
     .map((c) => [c.id, c.name] as [string, string]);
   const periodKey = annual ? period.slice(0, 4) : period;
+  const ledgerRows = data.transactions.filter(
+    (transaction) =>
+      transaction.competence.startsWith(periodKey) &&
+      transaction.description
+        .toLocaleLowerCase("pt-BR")
+        .includes(search.trim().toLocaleLowerCase("pt-BR")),
+  );
+  const periodLabel = annual
+    ? periodKey
+    : new Intl.DateTimeFormat("pt-BR", {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(`${periodKey}-01T00:00:00Z`));
   const summary = totals(data.transactions, periodKey);
   const name = (id: string) =>
     data.financial_accounts.find((a) => a.id === id)?.name ?? "Conta";
@@ -116,41 +250,108 @@ export function Workspace({ userId }: { userId: string }) {
     options: categories,
   };
   return (
-    <div className="app-shell">
+    <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
+      <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
       <aside>
-        <a className="brand" href="#">
-          ◒ Meu financeiro
-        </a>
-        <p className="workspace-label">ESPAÇO PESSOAL · PRIVADO</p>
-        <nav aria-label="Menu principal">
-          {pages.map((p) => (
-            <button
-              key={p}
-              className={page === p ? "selected" : ""}
-              onClick={() => setPage(p)}
-            >
-              {p}
-            </button>
-          ))}
-        </nav>
+        <div className="sidebar-header">
+          <a className="brand" href="#" aria-label="Meu financeiro">
+            <WalletCards size={24} aria-hidden="true" />
+            <span>Meu financeiro</span>
+          </a>
+          <button
+            className="sidebar-toggle"
+            type="button"
+            aria-label={sidebarCollapsed ? "Expandir menu lateral" : "Minimizar menu lateral"}
+            title={sidebarCollapsed ? "Expandir menu lateral" : "Minimizar menu lateral"}
+            aria-expanded={!sidebarCollapsed}
+            aria-controls="main-navigation"
+            onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+          </button>
+        </div>
+        <p className="workspace-label">Espaço pessoal · privado</p>
         <button
-          className="logout"
-          onClick={() =>
-            void action(() =>
-              supabase!.auth.signOut().then(({ error }) => {
-                if (error) throw error;
-              }),
-            )
-          }
+          ref={mobileNavButton}
+          className="mobile-nav-toggle"
+          type="button"
+          aria-controls="main-navigation"
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen((open) => !open)}
         >
-          Sair da conta
+          {mobileNavOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+          <span>{mobileNavOpen ? "Fechar navegação" : "Abrir navegação"}</span>
         </button>
+        <nav id="main-navigation" className={mobileNavOpen ? "open" : ""} aria-label="Menu principal">
+          {pages.map((p) => {
+            const Icon = pageIcons[p];
+            return (
+              <button
+                key={p}
+                className={`nav-item${page === p ? " selected" : ""}`}
+                aria-current={page === p ? "page" : undefined}
+                aria-label={p}
+                title={p}
+                onClick={() => {
+                  setPage(p);
+                  if (window.matchMedia("(max-width: 1199px)").matches) {
+                    setMobileNavOpen(false);
+                    requestAnimationFrame(() => mobileNavButton.current?.focus());
+                  }
+                }}
+              >
+                <Icon size={18} aria-hidden="true" />
+                <span className="nav-label">{p}</span>
+              </button>
+            );
+          })}
+        </nav>
+        <div className="sidebar-footer">
+          <button
+            className="logout"
+            type="button"
+            aria-label="Sair da conta"
+            title="Sair da conta"
+            onClick={() =>
+              void action(() =>
+                supabase!.auth.signOut().then(({ error }) => {
+                  if (error) throw error;
+                }),
+              )
+            }
+          >
+            <LogOut size={18} aria-hidden="true" />
+            <span className="nav-label">Sair da conta</span>
+          </button>
+          <button
+            className="theme-toggle"
+            type="button"
+            aria-label={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+            title={theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+            onClick={() =>
+              setTheme((current) => (current === "dark" ? "light" : "dark"))
+            }
+          >
+            {theme === "dark" ? (
+              <Sun size={18} aria-hidden="true" />
+            ) : (
+              <Moon size={18} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </aside>
-      <main className="workspace">
+      <main className="workspace" id="main-content" tabIndex={-1}>
         <header>
-          <div>
-            <span className="eyebrow">SEU DINHEIRO, COM CLAREZA</span>
-            <h1>{page}</h1>
+          <div className="page-heading">
+            <div>
+              <span className="eyebrow">Seu dinheiro, com clareza</span>
+              <h1>{page}</h1>
+            </div>
+            <ContextHelp title="navegação e período">
+              <p>Use o menu para trocar de área. No celular, abra a navegação; em telas maiores, você pode minimizar a barra lateral sem perder os atalhos.</p>
+              <p>O período selecionado muda os resumos, metas e o Livro financeiro. Ative Visão anual para consultar o ano da data escolhida.</p>
+              <p>O controle de tema alterna entre claro e escuro. Sair da conta encerra a sessão e remove os dados financeiros da tela.</p>
+            </ContextHelp>
           </div>
           <div className="period">
             <label>
@@ -181,13 +382,27 @@ export function Workspace({ userId }: { userId: string }) {
         )}
         {page === "Visão geral" && (
           <>
-            <p className="muted">
-              Consumo por competência. Saldos por data bancária.
-            </p>
-            <div className="metrics">
+            <div className="overview-intro">
+              <div>
+                <p className="muted">
+                  Consumo por competência. Saldos por data bancária.
+                </p>
+                <ContextHelp title="indicadores da visão geral">
+                  <p>Renda confirmada soma receitas elegíveis registradas. Consumo soma compras e parcelas, descontando estornos.</p>
+                  <p>Resultado do período é renda menos consumo. Aportes mostram transferências para objetivos e não são tratados como despesa nem como renda.</p>
+                  <p>Esses indicadores seguem a competência selecionada; os saldos das contas usam a data bancária.</p>
+                </ContextHelp>
+              </div>
+              <span className="overview-period">
+                {annual ? "Ano" : "Competência"} · {periodLabel}
+              </span>
+            </div>
+            <div className="metrics overview-metrics">
               <Metric
                 title="Renda confirmada"
                 value={brl(summary.income)}
+                icon={CircleDollarSign}
+                tone={summary.income > 0n ? "positive" : undefined}
                 detail={
                   summary.confirmed
                     ? "Créditos elegíveis registrados"
@@ -197,34 +412,48 @@ export function Workspace({ userId }: { userId: string }) {
               <Metric
                 title="Consumo"
                 value={brl(summary.consumption)}
+                icon={ShoppingBag}
+                tone={summary.consumption > 0n ? "negative" : undefined}
                 detail="Compras menos estornos"
               />
               <Metric
                 title="Resultado do período"
                 value={brl(summary.income - summary.consumption)}
+                icon={ChartPie}
+                tone={summary.income > summary.consumption ? "positive" : summary.income < summary.consumption ? "negative" : undefined}
                 detail="Renda menos consumo"
               />
               <Metric
                 title="Aportes"
                 value={brl(summary.contributions)}
+                icon={PiggyBank}
                 detail="Movimentos para seus objetivos"
               />
             </div>
             <section>
-              <h2>Disponível por categoria</h2>
+              <SectionTitle
+                icon={ChartPie}
+                title="Disponível por categoria"
+                help={
+                  <>
+                    <p>Veja quanto ainda pode gastar em cada categoria, conforme a meta e a renda consideradas no período.</p>
+                    <p>Para começar, crie uma meta na aba Orçamentos. Metas percentuais usam renda confirmada ou a previsão informada por você.</p>
+                  </>
+                }
+              />
               <Budgets data={data} period={periodKey} />
             </section>
             <section>
-              <h2>Minhas contas</h2>
+              <SectionTitle icon={Landmark} title="Minhas contas" help={<><p>O saldo parte do valor inicial e considera movimentos aprovados até a data bancária de hoje.</p><p>Se a lista estiver vazia, cadastre sua primeira conta em Contas e cartões. Importações e lançamentos precisam de uma conta local.</p></>} />
               {!accounts.length && (
                 <p>
                   Comece cadastrando sua primeira conta. Seu espaço começa
                   vazio.
                 </p>
               )}
-              <div className="cards">
+              <div className="cards overview-account-grid">
                 {data.financial_accounts.map((a) => (
-                  <article key={a.id}>
+                  <article className="overview-account-card" key={a.id}>
                     <small>
                       {a.institution} ·{" "}
                       {a.kind === "benefit"
@@ -234,23 +463,26 @@ export function Workspace({ userId }: { userId: string }) {
                           : "Conta"}
                     </small>
                     <h3>{a.name}</h3>
-                    <strong>
-                      {brl(accountBalance(a, data.transactions, today()))}
-                    </strong>
+                    <MoneyValue
+                      value={accountBalance(a, data.transactions, today())}
+                      className="account-balance"
+                    />
                   </article>
                 ))}
               </div>
             </section>
             <section>
-              <h2>Próximos passos</h2>
+              <SectionTitle icon={ListChecks} title="Próximos passos" help={<><p>Cadastre uma conta para registrar movimentos ou vincular uma origem externa. Para trazer um extrato, use Importar arquivo e revise cada linha antes de contabilizar.</p><p>Os atalhos apenas trocam de aba; nenhuma informação é gravada ao usá-los.</p></>} />
               <div className="actions">
                 <button onClick={() => setPage("Contas e cartões")}>
+                  <Landmark size={18} aria-hidden="true" />
                   Cadastrar conta
                 </button>
                 <button
                   className="secondary"
                   onClick={() => setPage("Importar e revisar")}
                 >
+                  <FileText size={18} aria-hidden="true" />
                   Importar arquivo
                 </button>
               </div>
@@ -267,7 +499,8 @@ export function Workspace({ userId }: { userId: string }) {
         {page === "Contas e cartões" && (
           <>
             <section>
-              <h2>Nova conta financeira</h2>
+              <SectionTitle icon={Landmark} title="Contas financeiras" description="Consulte saldos e gerencie as contas usadas pelos seus lançamentos." help={<><p>Cadastre uma conta para cada conta bancária, cartão ou caixinha que deseja acompanhar. Escolha o tipo correspondente.</p><p>O saldo inicial é o valor anterior aos movimentos que você vai registrar. Para um cartão com dívida, informe um saldo negativo.</p><p>Arquivar preserva o histórico e retira a conta dos seletores que mostram contas ativas. Reative-a quando precisar usá-la novamente.</p></>} />
+              <h3 className="form-subheading">Adicionar conta</h3>
               <Form
                 fields={[
                   { name: "name", label: "Nome da conta" },
@@ -309,34 +542,37 @@ export function Workspace({ userId }: { userId: string }) {
                   })
                 }
               />
-              <div className="cards">
+              <div className="account-grid">
                 {data.financial_accounts.map((a) => (
-                  <article key={a.id}>
-                    <h3>{a.name}</h3>
-                    <p>{a.institution}</p>
-                    <strong>{brl(accountBalance(a, data.transactions))}</strong>
-                    <button
-                      className="secondary"
-                      onClick={() =>
-                        void action(() =>
-                          mutate(
-                            "financial_accounts",
-                            { archived: !a.archived },
-                            a.id,
-                          ),
-                        )
-                      }
-                    >
-                      {a.archived ? "Reativar" : "Arquivar"}
+                  <article className="account-card" key={a.id}>
+                    <div className="account-card-top">
+                      <span className="account-kind-icon" aria-hidden="true">
+                        {(() => { const Icon = accountKindIcons[a.kind]; return <Icon size={21} />; })()}
+                      </span>
+                      <div>
+                        <span className="account-kind">{accountKindLabels[a.kind]}</span>
+                        <h3>{a.name}</h3>
+                      </div>
+                      {a.archived && <span className="status-badge">Arquivada</span>}
+                    </div>
+                    <p className="account-institution">{a.institution}</p>
+                    <ContextHelp title={`conta ${a.name}`}><p>O saldo parte do valor inicial e inclui movimentos aprovados. Arquivar preserva o histórico e impede o uso em seletores que mostram apenas contas ativas; você pode reativá-la.</p></ContextHelp>
+                    <span className="account-balance-label">Saldo atual</span>
+                    <MoneyValue
+                      value={accountBalance(a, data.transactions)}
+                      className="account-balance"
+                    />
+                    <button className="secondary" onClick={() => void action(() => mutate("financial_accounts", { archived: !a.archived }, a.id))}>
+                      {a.archived ? "Reativar conta" : "Arquivar conta"}
                     </button>
                   </article>
                 ))}
               </div>
             </section>
             <section>
-              <h2>Configurar cartão</h2>
+              <SectionTitle icon={CreditCard} title="Cartões de crédito" help={<><p>Primeiro, cadastre acima uma conta financeira do tipo Cartão de crédito. Depois selecione essa conta para informar fechamento, vencimento e limite.</p><p>Para importar pelo Meu Pluggy, vincule o cartão remoto a essa conta local na aba Meu Pluggy.</p></>} />
               {creditAccounts.length === 0 ? (
-                <p>Cadastre primeiro uma conta financeira do tipo cartao de credito no formulario acima. Depois ela aparecera aqui para configurar fechamento, vencimento e limite.</p>
+                <p className="section-description">Cadastre uma conta do tipo cartão de crédito acima para configurar fechamento, vencimento e limite.</p>
               ) : (<Form
                 fields={[
                   {
@@ -375,11 +611,14 @@ export function Workspace({ userId }: { userId: string }) {
                 }
               />
               )}
-              {data.credit_cards.map((c) => (
-                <article key={c.id}>
+              {data.credit_cards.length === 0 ? <p className="empty-state">Nenhum cartão configurado ainda.</p> : data.credit_cards.map((c) => (
+                <article className="credit-card-summary" key={c.id}>
                   <h3>
-                    {name(c.account_id)}{" "}
-                    {c.last_four ? `•••• ${c.last_four}` : ""}
+                    <CreditCard size={18} aria-hidden="true" />
+                    <span>
+                      {name(c.account_id)}{" "}
+                      {c.last_four ? `•••• ${c.last_four}` : ""}
+                    </span>
                   </h3>
                   <p>
                     Fecha dia {c.closing_day} · vence dia {c.due_day} · limite{" "}
@@ -406,99 +645,105 @@ export function Workspace({ userId }: { userId: string }) {
         )}
         {page === "Lançamentos" && (
           <>
-            <section>
-              <h2>Registrar movimento</h2>
+            <section className="transaction-entry-section">
+              <SectionTitle
+                icon={Receipt}
+                title="Registrar movimento"
+                description="Informe os dados do movimento. A natureza indica se o valor é uma entrada, saída ou transferência."
+                help={<><p>Escolha a conta, informe um valor positivo e selecione a natureza do movimento. Para transferência, aporte, resgate e pagamento de fatura, selecione também a conta de destino.</p><p>Data do evento é quando o movimento aconteceu; data bancária afeta o saldo; competência determina o período financeiro. Categoria e subcategoria são opcionais, e a subcategoria pertence à categoria escolhida.</p><p>Para um estorno, selecione a compra aprovada. Se a receita corresponde a um holerite cadastrado, você pode vinculá-lo.</p></>}
+              />
               <TransactionForm
                 data={data}
+                className="transaction-form"
+                label="Registrar lançamento"
                 submit={(p) => command("record_transaction", { p })}
               />
             </section>
-            <section>
-              <h2>Livro financeiro</h2>
-              <button
-                className="secondary"
-                onClick={() =>
-                  downloadText(
-                    ledgerCsv(
-                      data.transactions.filter((t) =>
-                        t.competence.startsWith(periodKey),
-                      ),
-                    ),
-                    `lancamentos-${periodKey}.csv`,
-                  )
-                }
-              >
-                Exportar período em CSV
-              </button>
-              <label>
-                Buscar descrição
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </label>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Data / competência</th>
-                      <th>Descrição</th>
-                      <th>Conta</th>
-                      <th>Natureza</th>
-                      <th>Categoria</th>
-                      <th>Valor</th>
-                      <th>Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.transactions
-                      .filter(
-                        (t) =>
-                          t.competence.startsWith(periodKey) &&
-                          t.description
-                            .toLocaleLowerCase("pt-BR")
-                            .includes(search.toLocaleLowerCase("pt-BR")),
-                      )
-                      .map((t) => (
-                        <tr key={t.id}>
+            <section className="ledger-section">
+              <div className="ledger-heading">
+                <SectionTitle icon={Landmark} title="Livro financeiro" description={`${ledgerRows.length} movimento(s) em ${periodLabel}.`} help={<><p>O livro mostra movimentos da competência selecionada. Pesquise pela descrição e use a classificação na linha para adicionar ou editar categoria e subcategoria.</p><p>Anular preserva o histórico e também anula o par, quando houver. O CSV exporta o período; para restaurar os dados, use o backup JSON em Perfil e backup.</p></>} />
+                <button
+                  className="secondary export-button"
+                  onClick={() => downloadText(ledgerCsv(ledgerRows), `lancamentos-${periodKey}.csv`)}
+                >
+                  <Download size={18} aria-hidden="true" />
+                  Exportar período em CSV
+                </button>
+              </div>
+              <div className="ledger-toolbar">
+                <label className="search-field">
+                  <Search size={18} aria-hidden="true" />
+                  <span>Buscar descrição</span>
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Descrição do lançamento"
+                  />
+                </label>
+              </div>
+              {ledgerRows.length === 0 ? (
+                <div className="empty-state" role="status">
+                  <Receipt size={24} aria-hidden="true" />
+                  <p>
+                    {search.trim()
+                      ? "Nenhum lançamento corresponde à busca."
+                      : "Não há lançamentos neste período."}
+                  </p>
+                </div>
+              ) : (
+                <div className="table-wrap ledger-table-wrap" tabIndex={0} aria-label="Livro financeiro">
+                  <table className="ledger-table">
+                    <caption className="visually-hidden">
+                      Lançamentos por data, descrição, conta, natureza, categoria e valor.
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Movimento</th>
+                        <th scope="col">Classificação</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ledgerRows.map((t) => (
+                        <tr key={t.id} className={t.status === "void" ? "void-row" : ""}>
                           <td>
-                            {t.event_date}
-                            <small>{t.competence.slice(0, 7)}</small>
+                            {displayDate(t.event_date)}
+                            <small>Competência {displayMonth(t.competence)}</small>
                           </td>
-                          <td>
-                            {t.description}
-                            <small>
-                              {t.status === "void" ? "Anulado" : t.source}
-                            </small>
+                          <td className="ledger-description-cell">
+                            <strong>{t.description}</strong>
+                            <div className="ledger-row-meta">
+                              <span>{name(t.account_id)}</span>
+                              <span className="nature-label">{natureLabels[t.nature]}</span>
+                              {t.status === "void" && <span className="status-badge">Anulado</span>}
+                            </div>
                           </td>
-                          <td>{name(t.account_id)}</td>
-                          <td>{natureLabels[t.nature]}</td>
-                          <td>
-                            {category(t.category_id)}
+                          <td className="ledger-classification-cell">
+                            <strong>{category(t.category_id)}</strong>
+                            {t.subcategory_id && (
+                              <small>{data.subcategories.find((subcategory) => subcategory.id === t.subcategory_id)?.name ?? "Subcategoria"}</small>
+                            )}
                             {t.status === "approved" && (
-                              <Classification
-                                data={data}
-                                transaction={t}
-                                refresh={refresh}
-                              />
+                              <Classification data={data} transaction={t} refresh={refresh} />
                             )}
                           </td>
-                          <td className="money">{brl(t.amount_cents)}</td>
+                          <td className="money">
+                            <MoneyValue
+                              value={t.amount_cents}
+                              tone={t.nature === "income" ? "positive" : t.nature === "expense" ? "negative" : "neutral"}
+                              className="ledger-amount"
+                            />
+                          </td>
                           <td>
                             {t.status === "approved" && (
                               <button
-                                className="secondary"
+                                className="secondary void-button"
                                 onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      "Anular este movimento e, se houver, seu par patrimonial? O histórico será preservado.",
-                                    )
-                                  )
-                                    void action(() =>
-                                      command("void_transaction", {
-                                        target: t.id,
-                                      }),
-                                    );
+                                  if (window.confirm("Anular este movimento e, se houver, seu par patrimonial? O histórico será preservado."))
+                                    void action(() => command("void_transaction", { target: t.id }));
                                 }}
                               >
                                 Anular
@@ -507,16 +752,17 @@ export function Workspace({ userId }: { userId: string }) {
                           </td>
                         </tr>
                       ))}
-                  </tbody>
-                </table>
-              </div>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
           </>
         )}
         {page === "Orçamentos" && (
           <>
             <section>
-              <h2>Definir meta</h2>
+              <SectionTitle icon={ChartPie} title="Definir meta" description="Planeje limites fixos ou percentuais sem alterar os lançamentos já registrados." help={<><p>Escolha uma categoria, o primeiro dia do período e a periodicidade. Informe um limite fixo ou um percentual da renda.</p><p>Na meta percentual, deixe a previsão vazia para usar somente renda confirmada. Uma previsão informada é uma base de planejamento e não vira receita.</p><p>Salvar novamente a mesma categoria, período e periodicidade atualiza a meta existente.</p></>} />
               <Form
                 fields={[
                   categoryField,
@@ -573,6 +819,7 @@ export function Workspace({ userId }: { userId: string }) {
               />
             </section>
             <section>
+              <SectionTitle icon={ChartPie} title="Metas do período" help={<><p>As metas desta competência ou ano comparam o limite ao consumo aprovado da categoria.</p><p>Sem renda confirmada ou previsão, uma meta percentual permanece a confirmar. Disponível nunca fica negativo; o valor excedido aparece separadamente.</p></>} />
               <Budgets data={data} period={periodKey} />
             </section>
           </>
@@ -580,7 +827,7 @@ export function Workspace({ userId }: { userId: string }) {
         {page === "Caixinhas" && (
           <>
             <section>
-              <h2>Novo objetivo</h2>
+              <SectionTitle icon={PiggyBank} title="Novo objetivo" description="Associe o objetivo a uma conta de caixinha e acompanhe aportes e resgates." help={<><p>Cadastre antes uma conta financeira do tipo Caixinha/investimento e associe o objetivo a ela.</p><p>Depois registre aportes ou resgates em Lançamentos, escolhendo as contas de origem e destino. Criar ou editar o objetivo não movimenta dinheiro.</p></>} />
               <Form
                 fields={[
                   { name: "name", label: "Nome do objetivo" },
@@ -614,7 +861,10 @@ export function Workspace({ userId }: { userId: string }) {
                 em Lançamentos, selecionando origem e destino.
               </p>
             </section>
-            <div className="cards">
+            <section className="goal-list-section">
+              <SectionTitle icon={PiggyBank} title="Seus objetivos" help={<><p>O progresso usa o saldo da conta de caixinha: saldo inicial mais movimentos aprovados. A meta e o prazo servem para acompanhamento.</p><p>Se não houver objetivos, crie uma conta de caixinha e depois cadastre o objetivo acima.</p></>} />
+              {data.savings_goals.length === 0 && <p className="empty-state">Você ainda não cadastrou objetivos.</p>}
+              <div className="cards goal-grid">
               {data.savings_goals.map((g) => {
                 const a = data.financial_accounts.find(
                   (a) => a.id === g.account_id,
@@ -622,8 +872,9 @@ export function Workspace({ userId }: { userId: string }) {
                 const balance = accountBalance(a, data.transactions);
                 return (
                   <article key={g.id}>
-                    <h2>{g.name}</h2>
-                    <strong>{brl(balance)}</strong>
+                    <h3>{g.name}</h3>
+                    <ContextHelp title={`objetivo ${g.name}`}><p>O progresso acompanha o saldo aprovado da conta de caixinha associada. Para aumentar ou reduzir esse saldo, registre um aporte ou resgate em Lançamentos; editar a meta não movimenta dinheiro.</p></ContextHelp>
+                    <MoneyValue value={balance} className="goal-balance" />
                     <p>
                       Meta {brl(g.target_cents)} · {g.deadline ?? "Sem prazo"}
                     </p>
@@ -643,14 +894,15 @@ export function Workspace({ userId }: { userId: string }) {
                   </article>
                 );
               })}
-            </div>
+              </div>
+            </section>
           </>
         )}
         {page === "Caixinhas" && <GoalEditor data={data} refresh={refresh} />}
         {page === "Receitas e holerites" && (
           <>
             <section>
-              <h2>Conferir holerite</h2>
+              <SectionTitle icon={FileText} title="Conferir holerite" description="Registre a composição da remuneração e concilie adiantamento e líquido com as receitas." help={<><p>Informe proventos, descontos sem adiantamento, adiantamento já recebido e líquido final. O cadastro só é aceito quando os valores fecham.</p><p>O holerite documenta a remuneração, mas não cria receita. Registre os créditos bancários em Lançamentos e vincule-os ao holerite; VR/VA usa uma conta de benefício.</p></>} />
               <p>
                 O holerite documenta a composição; vincule adiantamento e
                 líquido às receitas em Lançamentos. VR/VA deve entrar em conta
@@ -684,6 +936,7 @@ export function Workspace({ userId }: { userId: string }) {
                   })
                 }
               />
+              {data.payslips.length === 0 && <p className="empty-state">Nenhum holerite cadastrado.</p>}
               {data.payslips.map((p) => {
                 const linked = data.transactions
                   .filter(
@@ -691,19 +944,20 @@ export function Workspace({ userId }: { userId: string }) {
                   )
                   .reduce((s, t) => s + BigInt(t.amount_cents), 0n);
                 return (
-                  <article key={p.id}>
+                  <article className="summary-card" key={p.id}>
                     <h3>
                       {p.employer} · {p.competence.slice(0, 7)}
                     </h3>
+                    <ContextHelp title={`holerite ${p.employer}`}><p>Compare o adiantamento e o líquido aos créditos aprovados vinculados. O holerite não cria receita; registre e vincule os créditos em Lançamentos.</p></ContextHelp>
                     <p>
                       Adiantamento {brl(p.advance_cents)} + líquido{" "}
                       {brl(p.net_cents)}
                     </p>
                     <p>
                       Créditos vinculados {brl(linked)} · diferença a conciliar{" "}
-                      {brl(
-                        BigInt(p.advance_cents) + BigInt(p.net_cents) - linked,
-                      )}
+                      <MoneyValue
+                        value={BigInt(p.advance_cents) + BigInt(p.net_cents) - linked}
+                      />
                     </p>
                   </article>
                 );
@@ -727,19 +981,19 @@ export function Workspace({ userId }: { userId: string }) {
         {page === "Categorias e regras" && (
           <>
             <section>
-              <h2>Nova categoria</h2>
+              <SectionTitle icon={Tags} title="Nova categoria" description="Organize lançamentos com categorias próprias deste workspace." help={<><p>Crie categorias para organizar seus lançamentos, como alimentação ou transporte. Elas pertencem somente ao seu espaço.</p><p>Depois você pode criar subcategorias e regras que sugerem a classificação na revisão. A categoria não determina a natureza do movimento.</p></>} />
               <Form
                 fields={[{ name: "name", label: "Nome" }]}
                 submit={(v) => mutate("categories", v)}
               />
-              <div className="chips">
+              <div className="chips category-chips">
                 {data.categories.map((c) => (
                   <span key={c.id}>{c.name}</span>
                 ))}
               </div>
             </section>
             <section>
-              <h2>Nova subcategoria</h2>
+              <SectionTitle icon={Tags} title="Nova subcategoria" help={<><p>Cadastre primeiro a categoria e selecione-a aqui. A subcategoria detalha essa categoria e só poderá ser escolhida junto dela.</p><p>Ao trocar de categoria em um formulário, selecione novamente uma subcategoria compatível.</p></>} />
               <Form
                 fields={[
                   categoryField,
@@ -749,7 +1003,7 @@ export function Workspace({ userId }: { userId: string }) {
               />
             </section>
             <section>
-              <h2>Regra de sugestão</h2>
+              <SectionTitle icon={ListChecks} title="Regra de sugestão" description="Regras sugerem categorias para itens pendentes; não definem a natureza nem alteram itens aprovados." help={<><p>Cadastre a categoria e, se desejar, a subcategoria. Informe um trecho literal da descrição e a prioridade: um número menor tem preferência.</p><p>Na revisão, uma regra ativa pode sugerir a classificação. Confira a natureza separadamente. Ativar, desativar ou editar uma regra não altera movimentos já aprovados.</p></>} />
               <p>
                 Correspondência literal, sem regex. Prioridade menor vence.
                 Regras nunca alteram natureza financeira ou decisões já
@@ -774,9 +1028,12 @@ export function Workspace({ userId }: { userId: string }) {
                   })
                 }
               />
+              {data.categorization_rules.length === 0 && <p className="empty-state">Nenhuma regra de sugestão cadastrada.</p>}
+              <div className="rule-list">
               {data.categorization_rules.map((r) => (
-                <article key={r.id}>
+                <article className="rule-card" key={r.id}>
                   <strong>{r.keyword}</strong>
+                  <ContextHelp title={`regra ${r.keyword}`}><p>Esta regra ativa pode sugerir uma categoria para linhas pendentes cuja descrição contenha o texto informado. Desativá-la impede novas sugestões por ela; movimentos já aprovados não são alterados.</p></ContextHelp>
                   <p>
                     {category(r.category_id)} · prioridade {r.priority}
                   </p>
@@ -796,6 +1053,7 @@ export function Workspace({ userId }: { userId: string }) {
                   </button>
                 </article>
               ))}
+              </div>
             </section>
           </>
         )}
@@ -808,7 +1066,7 @@ export function Workspace({ userId }: { userId: string }) {
         {page === "Perfil e backup" && (
           <>
             <section>
-              <h2>Meu perfil</h2>
+              <SectionTitle icon={Settings2} title="Meu perfil" description="Preferências de exibição e idioma da sua área pessoal." help={<><p>Você pode alterar o nome exibido na aplicação. A tela informa as configurações atualmente adotadas: real brasileiro, português do Brasil e fuso America/Sao_Paulo.</p><p>Moeda, idioma e fuso ainda não são editáveis neste formulário.</p></>} />
               <Form
                 key={data.profile?.display_name}
                 fields={[
@@ -826,7 +1084,7 @@ export function Workspace({ userId }: { userId: string }) {
               <p>Moeda BRL · Português brasileiro · America/Sao_Paulo</p>
             </section>
             <section>
-              <h2>Backup privado</h2>
+              <SectionTitle icon={Download} title="Backup privado" description="Exporte e restaure somente os dados deste workspace." help={<><p>Exporte o JSON completo e guarde-o em local protegido: o arquivo contém o histórico financeiro do seu espaço.</p><p>O CSV do Livro financeiro serve para consulta do período e não substitui este backup. Para recuperar dados, use Restaurar backup abaixo.</p></>} />
               <p>
                 Exporta somente seu workspace. Guarde o arquivo em local
                 protegido; ele contém seu histórico financeiro.
@@ -846,7 +1104,7 @@ export function Workspace({ userId }: { userId: string }) {
             </section>
             <Restore refresh={refresh} />
             <section>
-              <h2>Solicitar exclusão da conta</h2>
+              <SectionTitle icon={Settings2} title="Solicitar exclusão da conta" description="Revise as consequências e exporte seus dados antes de registrar a solicitação." help={<><p>Exporte seu backup antes de solicitar a exclusão. O botão registra o pedido, mas não apaga os dados imediatamente.</p><p>Um operador precisa confirmar sua identidade e acompanhar o procedimento. A exclusão autônoma ainda não está disponível.</p></>} />
               <p>
                 A solicitação preserva o histórico até confirmação da identidade
                 e do procedimento de exclusão. Exporte seus dados antes.
@@ -884,15 +1142,24 @@ function Metric({
   title,
   value,
   detail,
+  icon: Icon,
+  tone,
 }: {
   title: string;
   value: string;
   detail: string;
+  icon: LucideIcon;
+  tone?: "positive" | "negative";
 }) {
   return (
     <article className="metric">
-      <span>{title}</span>
-      <strong>{value}</strong>
+      <div className="metric-heading">
+        <span>{title}</span>
+        <Icon size={20} aria-hidden="true" />
+      </div>
+      <strong className={tone ? `metric-value ${tone}` : "metric-value"}>
+        {value}
+      </strong>
       <small>{detail}</small>
     </article>
   );
@@ -915,9 +1182,11 @@ function Budgets({ data, period }: { data: Snapshot; period: string }) {
               {b.cadence === "annual" ? "Anual" : "Mensal"}
             </small>
             <strong>
-              {r.available === null
-                ? "Renda ainda não confirmada"
-                : `${brl(r.available)} disponíveis`}
+              {r.available === null ? (
+                "Renda ainda não confirmada"
+              ) : (
+                <><MoneyValue value={r.available} /> disponíveis</>
+              )}
             </strong>
             <p>
               Consumo {brl(r.consumption)} · limite{" "}
@@ -930,7 +1199,7 @@ function Budgets({ data, period }: { data: Snapshot; period: string }) {
                 value={Number(r.consumption > 0n ? r.consumption : 0n)}
               />
             )}
-            <small>Excedente {brl(r.excess ?? 0n)}</small>
+            <small>Excedente <MoneyValue value={r.excess ?? 0n} tone={(r.excess ?? 0n) > 0n ? "negative" : "neutral"} /></small>
           </article>
         );
       })}

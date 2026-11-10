@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { CreditCard, Receipt } from "lucide-react";
 import { brl, cents, today, totals, type Snapshot } from "../domain/finance";
 import { Form } from "./Form";
 import { rpc, save } from "../lib/api";
 import type { DetailSnapshot } from "../domain/details";
+import { SectionTitle } from "./SectionTitle";
+import { MoneyValue } from "./MoneyValue";
+import { ContextHelp } from "./ContextHelp";
 export function CardDetails({
   data,
   refresh,
@@ -20,8 +24,8 @@ export function CardDetails({
   };
   return (
     <>
-      <section>
-        <h2>Faturas e conciliação</h2>
+      <section className="detail-section">
+        <SectionTitle icon={CreditCard} title="Faturas e conciliação" help={<><p>Cadastre uma conta de cartão e informe o total e o vencimento da fatura. Compare o total informado com as compras reconhecidas na competência e confira a diferença.</p><p>Para registrar um pagamento, escolha uma conta pagadora. O pagamento reduz a obrigação do cartão e não é uma nova compra; pode ser parcial.</p></>} />
         <Form
           fields={[
             { name: "account_id", label: "Cartão da fatura", options: cards },
@@ -75,9 +79,10 @@ export function CardDetails({
                     ? "Parcial"
                     : "Em aberto"}
               </summary>
+              <ContextHelp title="conferir fatura"><p>Compare o total informado com as compras reconhecidas e confira a diferença. Para pagar, escolha uma conta pagadora e informe a data e o valor; o pagamento pode ser parcial.</p></ContextHelp>
               <p>
                 Vencimento {s.due_date} · Itens reconhecidos {brl(spent)} ·
-                Diferença a conciliar {brl(BigInt(s.declared_cents) - spent)} ·
+                Diferença a conciliar <MoneyValue value={BigInt(s.declared_cents) - spent} /> ·
                 Pago {brl(paid)}
               </p>
               <Form
@@ -112,8 +117,8 @@ export function CardDetails({
           );
         })}
       </section>
-      <section>
-        <h2>Planejar parcelamento</h2>
+      <section className="detail-section">
+        <SectionTitle icon={Receipt} title="Planejar parcelamento" help={<><p>Selecione uma conta de cartão e informe o valor integral, o número de parcelas e a primeira competência. O planejamento não é uma compra já realizada.</p><p>Quando uma parcela for faturada, confirme a ocorrência ou vincule uma compra já aprovada e compatível. Confira antes de confirmar para evitar contá-la duas vezes.</p></>} />
         <p>
           O valor integral é apenas planejamento. Confirme cada ocorrência
           faturada ou vincule uma compra já importada; parcelas futuras não
@@ -166,10 +171,12 @@ export function CardDetails({
             <summary>
               {p.description} · {p.installments} parcelas · {brl(p.total_cents)}
             </summary>
+            <ContextHelp title="acompanhar parcelamento"><p>Confirme cada parcela somente quando for faturada ou vincule um movimento aprovado compatível. O planejamento, sozinho, não entra no consumo realizado.</p></ContextHelp>
             {data.installment_occurrences
               ?.filter((o) => o.purchase_id === p.id)
               .map((o) => (
                 <article key={o.id}>
+                  <ContextHelp title={`parcela ${o.occurrence}`}><p>Confirme se esta parcela foi faturada ou vincule uma compra já aprovada da mesma conta, competência e valor. Use uma única opção para não duplicar o movimento.</p></ContextHelp>
                   <strong>
                     {o.occurrence}/{p.installments} · {o.competence.slice(0, 7)}{" "}
                     · {brl(o.amount_cents)}
@@ -252,8 +259,8 @@ export function PayslipDetails({
     await refresh();
   }
   return (
-    <section>
-      <h2>Rubricas e bases informativas</h2>
+    <section className="detail-section">
+      <SectionTitle icon={Receipt} title="Rubricas e bases informativas" description="Dados complementares do holerite para conferência e histórico." help={<><p>Cadastre primeiro um holerite. Depois inclua proventos, descontos, adiantamento e bases como INSS, IRRF ou FGTS para conferir a composição.</p><p>Rubricas e bases são informativas: não criam receitas nem movimentos. Diferenças em relação ao cabeçalho permanecem visíveis para conferência.</p></>} />
       <Form
         fields={[
           {
@@ -310,11 +317,12 @@ export function PayslipDetails({
             <summary>
               {p.employer} · {p.competence.slice(0, 7)}
             </summary>
+            <ContextHelp title="conferir rubricas do holerite"><p>Compare as somas cadastradas com os totais do holerite. Uma diferença indica informação ausente ou divergente; ela não é corrigida automaticamente.</p></ContextHelp>
             <p>
               Diferença das rubricas para o cabeçalho: proventos{" "}
-              {brl(BigInt(p.earnings_cents) - sum("earning"))}, descontos{" "}
-              {brl(BigInt(p.deductions_cents) - sum("deduction"))}, adiantamento{" "}
-              {brl(BigInt(p.advance_cents) - sum("advance"))}.
+              <MoneyValue value={BigInt(p.earnings_cents) - sum("earning")} />, descontos{" "}
+              <MoneyValue value={BigInt(p.deductions_cents) - sum("deduction")} />, adiantamento{" "}
+              <MoneyValue value={BigInt(p.advance_cents) - sum("advance")} />.
             </p>
             {items.map((i) => (
               <p key={i.id}>

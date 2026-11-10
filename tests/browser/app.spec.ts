@@ -87,20 +87,159 @@ async function mockApi(page: Page) {
 }
 async function login(page: Page) {
   await page.goto("/");
-  await page.getByLabel("E-mail", { exact: true }).fill("usuario@example.test");
+  await page.getByRole("textbox", { name: "E-mail", exact: true }).fill("usuario@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-sintetica-123");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Visão geral", exact: true }),
   ).toBeVisible();
 }
+async function navigate(page: Page, name: string) {
+  const menu = page.getByRole("button", { name: "Abrir navegação", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("button", { name, exact: true }).click();
+}
+test("ajudas da jornada prioritária explicam pré-requisitos sem apagar o formulário", async ({ page }) => {
+  await mockApi(page);
+  await login(page);
+  const sections: [string, string[]][] = [
+    ["Contas e cartões", ["Contas financeiras", "Cartões de crédito", "Faturas e conciliação", "Planejar parcelamento"]],
+    ["Categorias e regras", ["Nova categoria", "Nova subcategoria", "Regra de sugestão", "Importar categorias e regras privadas", "Editar cadastros"]],
+    ["Meu Pluggy", ["Meu Pluggy"]],
+    ["Importar e revisar", ["Importar arquivo", "Revisar antes de contabilizar", "Histórico de lotes"]],
+    ["Lançamentos", ["Registrar movimento", "Livro financeiro"]],
+  ];
+  for (const [pageName, titles] of sections) {
+    await navigate(page, pageName);
+    for (const title of titles) {
+      const trigger = page.getByRole("button", { name: `Ajuda sobre ${title}`, exact: true });
+      await expect(trigger).toBeVisible();
+      await trigger.click();
+      const dialog = page.getByRole("dialog", { name: `Ajuda: ${title}`, exact: true });
+      await expect(dialog).toBeVisible();
+      if (title === "Revisar antes de contabilizar") {
+        await expect(dialog).toContainText("não define a natureza");
+        await expect(dialog).toContainText("não garante categoria");
+        await dialog.evaluate(element => { element.scrollTop = element.scrollHeight; });
+        await expect(dialog.getByRole("button", { name: "Fechar ajuda" })).toBeInViewport();
+      }
+      if (title === "Meu Pluggy") await expect(dialog).toContainText("somente ao titular autorizado");
+      await dialog.getByRole("button", { name: "Fechar ajuda" }).click();
+      await expect(trigger).toBeFocused();
+    }
+    if (pageName === "Contas e cartões") {
+      const field = page.getByRole("textbox", { name: "Nome da conta", exact: true });
+      await field.fill("Conta de exemplo");
+      await page.getByRole("button", { name: "Ajuda sobre Contas financeiras" }).click();
+      await page.getByRole("button", { name: "Fechar ajuda" }).click();
+      await expect(field).toHaveValue("Conta de exemplo");
+    }
+  }
+});
+
+test("ajudas das demais áreas completam o inventário sem executar ações", async ({ page }) => {
+  const { data, requests } = await mockApi(page);
+  const savingsAccount = "30000000-0000-4000-8000-000000000030";
+  data.financial_accounts.push({ id: savingsAccount, workspace_id: workspace, name: "Reserva fictícia", institution: "Outra", kind: "savings", opening_cents: "1000", archived: false });
+  data.savings_goals.push({ id: "40000000-0000-4000-8000-000000000040", workspace_id: workspace, name: "Objetivo fictício", account_id: savingsAccount, target_cents: "10000", deadline: null });
+  data.payslips.push({ id: "50000000-0000-4000-8000-000000000050", workspace_id: workspace, employer: "Vínculo fictício", competence: "2026-01-01", earnings_cents: "100000", deductions_cents: "10000", advance_cents: "20000", net_cents: "70000" });
+  await page.goto("/");
+  const accessHelp = page.getByRole("button", { name: "Ajuda sobre acesso à conta", exact: true });
+  await accessHelp.click();
+  await expect(page.getByRole("dialog", { name: "Ajuda: acesso à conta", exact: true })).toContainText("pelo menos 12 caracteres");
+  await page.getByRole("button", { name: "Fechar ajuda" }).click();
+  await login(page);
+
+  const areas: [string, string[]][] = [
+    ["Visão geral", ["navegação e período", "indicadores da visão geral", "Minhas contas", "Próximos passos"]],
+    ["Orçamentos", ["Definir meta", "Metas do período"]],
+    ["Caixinhas", ["Novo objetivo", "Seus objetivos", "Editar objetivo"]],
+    ["Receitas e holerites", ["Conferir holerite", "Rubricas e bases informativas"]],
+    ["Perfil e backup", ["Meu perfil", "Backup privado", "Restaurar backup", "Solicitar exclusão da conta"]],
+  ];
+  for (const [pageName, titles] of areas) {
+    if (pageName !== "Visão geral") await navigate(page, pageName);
+    for (const title of titles) {
+      const trigger = page.getByRole("button", { name: `Ajuda sobre ${title}`, exact: true });
+      await expect(trigger).toBeVisible();
+      await trigger.click();
+      const dialog = page.getByRole("dialog", { name: `Ajuda: ${title}`, exact: true });
+      await expect(dialog).toBeVisible();
+      if (title === "indicadores da visão geral") await expect(dialog).toContainText("não são tratados como despesa nem como renda");
+      if (title === "Conferir holerite") await expect(dialog).toContainText("não cria receita");
+      if (title === "Restaurar backup") await expect(dialog).toContainText("somente registros ausentes são adicionados");
+      await dialog.getByRole("button", { name: "Fechar ajuda" }).click();
+    }
+    if (pageName === "Caixinhas") await expect(page.getByRole("button", { name: "Ajuda sobre objetivo Objetivo fictício" })).toBeVisible();
+    if (pageName === "Receitas e holerites") await expect(page.getByRole("button", { name: "Ajuda sobre holerite Vínculo fictício" })).toBeVisible();
+  }
+  expect(requests.some(({ path }) => path.endsWith("/restore_backup") || path.endsWith("/profiles"))).toBe(false);
+});
+
+test("falha parcial da aprovação em lote atualiza pendências e informa o resultado incerto", async ({ page }) => {
+  const { data } = await mockApi(page);
+  const account = "30000000-0000-4000-8000-000000000003";
+  const batch = "40000000-0000-4000-8000-000000000004";
+  data.financial_accounts.push({ id: account, workspace_id: workspace, name: "Conta sintética", institution: "Outra", kind: "checking", opening_cents: "0", archived: false });
+  data.import_batches.push({ id: batch, workspace_id: workspace, account_id: account, file_hash: "sintetico", parser_version: "csv" });
+  for (const [index, description] of ["Primeira compra fictícia", "Segunda compra fictícia"].entries()) {
+    data.import_raw_rows.push({ id: `row-${index}`, workspace_id: workspace, batch_id: batch, row_index: index, status: "pending", transaction_id: null, proposal: { description, amount_cents: "-1000", event_date: "2026-01-09", bank_date: "2026-01-09", competence: "2026-01-01", nature: "expense" } });
+  }
+  let attempts = 0;
+  await page.route("**/rest/v1/rpc/review_import", async route => {
+    attempts += 1;
+    if (attempts === 1) {
+      data.import_raw_rows[0].status = "approved";
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("transacao-sintetica") });
+    } else {
+      await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "falha sintética" }) });
+    }
+  });
+  await login(page);
+  await navigate(page, "Importar e revisar");
+  await page.getByText("Primeira compra fictícia").click();
+  await page.getByRole("button", { name: "Ajuda sobre revisar movimento" }).click();
+  await expect(page.getByRole("dialog", { name: "Ajuda: revisar movimento" })).toContainText("não define a natureza");
+  await page.getByRole("button", { name: "Fechar ajuda" }).click();
+  page.once("dialog", dialog => void dialog.accept());
+  await page.getByRole("button", { name: "Aprovar todos sem duplicidade em lote" }).click();
+  await expect(page.getByRole("status").first()).toContainText("1 movimento(s) tiveram resposta confirmada");
+  await expect(page.getByRole("status").first()).toContainText("última tentativa também pode ter sido concluída");
+  await expect(page.getByText("Primeira compra fictícia")).toHaveCount(0);
+  await expect(page.getByText("Segunda compra fictícia")).toBeVisible();
+  expect(attempts).toBe(2);
+});
+test("ajuda contextual abre por teclado, mantém o foco e fecha sem alterar dados", async ({ page }) => {
+  const { requests } = await mockApi(page);
+  await login(page);
+  const trigger = page.getByRole("button", { name: "Ajuda sobre Disponível por categoria" });
+  const dialog = page.getByRole("dialog", { name: "Ajuda: Disponível por categoria" });
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeVisible();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  const close = dialog.getByRole("button", { name: "Fechar ajuda" });
+  await expect(close).toBeFocused();
+  await expect(dialog.getByText(/crie uma meta na aba Orçamentos/)).toBeVisible();
+  await page.evaluate(() => document.querySelector<HTMLButtonElement>(".logout")?.focus());
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await trigger.click();
+  await close.click();
+  await expect(trigger).toBeFocused();
+  expect(requests.some(({ path }) => path.endsWith("/review_import") || path.endsWith("/stage_import"))).toBe(false);
+});
 test("cadastro e recuperação apresentam mensagens e chamam Auth", async ({
   page,
 }) => {
   const { requests } = await mockApi(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Criar conta", exact: true }).click();
-  await page.getByLabel("E-mail", { exact: true }).fill("usuario@example.test");
+  await page.getByRole("textbox", { name: "E-mail", exact: true }).fill("usuario@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-sintetica-123");
   await page.getByRole("button", { name: "Cadastrar", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Confira seu e-mail");
@@ -118,15 +257,13 @@ test("novo usuário vazio, gravação de conta, logout e layout móvel", async (
   await expect(
     page.getByText("Seu espaço começa vazio.", { exact: false }),
   ).toBeVisible();
+  await navigate(page, "Contas e cartões");
   await page
-    .getByRole("button", { name: "Contas e cartões", exact: true })
-    .click();
-  await page
-    .getByLabel("Nome da conta", { exact: true })
+    .getByRole("textbox", { name: "Nome da conta", exact: true })
     .fill("Conta fictícia");
-  await page.getByLabel("Instituição", { exact: true }).selectOption("Outra");
-  await page.getByLabel("Tipo", { exact: true }).selectOption("checking");
-  await page.getByLabel("Saldo inicial (R$)", { exact: true }).fill("100,00");
+  await page.getByRole("combobox", { name: "Instituição", exact: true }).selectOption("Outra");
+  await page.getByRole("combobox", { name: "Tipo", exact: true }).selectOption("checking");
+  await page.getByRole("textbox", { name: /^Saldo inicial \(R\$\)/ }).fill("100,00");
   await page
     .getByRole("button", { name: "Salvar", exact: true })
     .first()
@@ -134,6 +271,9 @@ test("novo usuário vazio, gravação de conta, logout e layout móvel", async (
   await expect(
     page.getByRole("heading", { name: "Conta fictícia", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Ajuda sobre conta Conta fictícia" }).click();
+  await expect(page.getByRole("dialog", { name: "Ajuda: conta Conta fictícia" })).toContainText("Arquivar preserva o histórico");
+  await page.getByRole("button", { name: "Fechar ajuda" }).click();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -163,13 +303,11 @@ test("upload exige prévia e confirmação antes de persistir", async ({
     archived: false,
   });
   await login(page);
-  await page
-    .getByRole("button", { name: "Importar e revisar", exact: true })
-    .click();
+  await navigate(page, "Importar e revisar");
   await page
     .getByRole("combobox", { name: "Conta de destino", exact: true })
     .selectOption(data.financial_accounts[0].id);
-  await page.getByLabel("Arquivo", { exact: true }).setInputFiles({
+  await page.getByLabel(/^Arquivo\b/).setInputFiles({
     name: "sintetico.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(
@@ -198,9 +336,64 @@ test("falha de autenticação não libera dados", async ({ page }) => {
     }),
   );
   await page.goto("/");
-  await page.getByLabel("E-mail", { exact: true }).fill("usuario@example.test");
+  await page.getByRole("textbox", { name: "E-mail", exact: true }).fill("usuario@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("incorreta");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Não foi possível");
   await expect(page.getByRole("navigation")).toHaveCount(0);
+});
+
+test("menu compacto persiste, tema mantém saída legível e navegação funciona no celular", async ({ page }) => {
+  await mockApi(page);
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await login(page);
+  await page.getByRole("button", { name: "Minimizar menu lateral" }).press("Enter");
+  const expand = page.getByRole("button", { name: "Expandir menu lateral" });
+  await expect(expand).toHaveAttribute("aria-expanded", "false");
+  expect((await page.getByRole("complementary").boundingBox())!.width).toBe(80);
+  await navigate(page, "Lançamentos");
+  await expect(page.getByRole("heading", { name: "Registrar movimento" })).toBeVisible();
+  await page.getByRole("button", { name: "Usar tema escuro" }).press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const logout = page.getByRole("button", { name: "Sair da conta" });
+  await expect(logout).toBeVisible();
+  const contrast = await logout.evaluate(button => {
+    const luminance = (color: string) => {
+      const rgb = color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map(value => {
+        const srgb = value / 255;
+        return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+      });
+      return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+    };
+    const foreground = luminance(getComputedStyle(button).color);
+    const background = luminance(getComputedStyle(button.closest("aside")!).backgroundColor);
+    return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+  });
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+  await page.reload();
+  await expect(expand).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  await page.setViewportSize({ width: 320, height: 900 });
+  await expect(expand).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const openMenu = page.getByRole("button", { name: "Abrir navegação" });
+  await openMenu.click();
+  await expect(page.getByRole("button", { name: "Contas e cartões", exact: true }).locator("span")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(openMenu).toBeFocused();
+  await navigate(page, "Contas e cartões");
+  await expect(page.getByRole("heading", { name: "Contas financeiras" })).toBeVisible();
+  await expect(openMenu).toHaveAttribute("aria-expanded", "false");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(logout).toBeVisible();
+  await page.getByRole("button", { name: "Usar tema claro" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expand.click();
+  expect((await page.getByRole("complementary").boundingBox())!.width).toBe(240);
+  await logout.click();
+  await expect(page.getByRole("button", { name: "Entrar", exact: true })).toBeVisible();
 });

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { RotateCcw } from "lucide-react";
 import { rpc } from "../lib/api";
+import { SectionTitle } from "./SectionTitle";
 type Report = {
   total: number;
   new: number;
@@ -65,8 +67,8 @@ export function Restore({ refresh }: { refresh: () => Promise<void> }) {
     }
   }
   return (
-    <section>
-      <h2>Restaurar backup</h2>
+    <section className="workflow-section restore-section">
+      <SectionTitle icon={RotateCcw} title="Restaurar backup" description="A prévia valida o arquivo; a confirmação adiciona registros ausentes sem substituir os existentes." help={<><p>Selecione um backup JSON exportado deste mesmo espaço. A prévia valida o arquivo no seu Supabase sem gravar dados.</p><p>Após sua confirmação, somente registros ausentes são adicionados de forma atômica; existentes não são substituídos. Conexões recuperadas ficam revogadas e precisam ser conectadas novamente.</p><p>O arquivo pode conter dados financeiros privados. Use somente seu próprio backup e guarde-o em local protegido.</p></>} />
       <p>
         Aceita apenas exportação deste mesmo workspace. Não mistura dados de
         pessoas diferentes e não sobrescreve registros alterados. A prévia envia
@@ -74,20 +76,18 @@ export function Restore({ refresh }: { refresh: () => Promise<void> }) {
         confirmação.
       </p>
       <label>
-        Backup JSON
+        <span>Backup JSON<span className="required-marker" aria-hidden="true"> *</span></span>
         <input
           type="file"
           accept=".json"
+          required
           disabled={busy}
           onChange={(e) => void preview(e.target.files?.[0])}
         />
       </label>
       {report && (
         <>
-          <p>
-            {report.total} registros · {report.new} ausentes · {report.existing}{" "}
-            já existentes
-          </p>
+          <p>Prévia validada: {report.total} registros no arquivo.</p>
           <button
             disabled={busy || report.applied}
             onClick={() => void restore()}
@@ -96,7 +96,8 @@ export function Restore({ refresh }: { refresh: () => Promise<void> }) {
           </button>
         </>
       )}
-      <p role="status">{message}</p>
+      {report && <div className="restore-summary"><strong>{report.new}</strong><span>registros ausentes</span><strong>{report.existing}</strong><span>já existentes</span></div>}
+      {message && <p role="status" className="inline-feedback">{message}</p>}
     </section>
   );
 }

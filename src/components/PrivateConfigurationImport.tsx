@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Tags } from "lucide-react";
 import {
   hashPrivateConfiguration,
   parsePrivateConfiguration,
   type PrivateConfiguration,
 } from "../domain/private-configuration";
 import { rpc } from "../lib/api";
+import { SectionTitle } from "./SectionTitle";
 
 type ImportResult = {
   already_imported: boolean;
@@ -72,23 +74,26 @@ export function PrivateConfigurationImport({
   }
 
   return (
-    <section>
-      <h2>Importar categorias e regras privadas</h2>
+    <section className="workflow-section private-import-section">
+      <SectionTitle icon={Tags} title="Importar categorias e regras privadas" description="Arquivos lidos no navegador e enviados somente ao workspace autenticado." help={<><p>Selecione os dois arquivos JSON do seu pacote de categorias e regras. A prévia mostra quantidades sem revelar palavras-chave.</p><p>Confira e confirme para importar no espaço da sua sessão. Depois, as regras ativas podem sugerir categorias na revisão; elas não definem a natureza financeira.</p></>} />
       <p>Os arquivos são lidos no navegador e enviados apenas ao workspace da sua sessão autenticada. A prévia mostra contagens, sem exibir palavras-chave.</p>
+      <p className="form-required-note">Selecione os dois arquivos para validar o pacote.</p>
       <label>
-        Arquivo de categorias (.json)
+        <span>Arquivo de categorias (.json)<span className="required-marker" aria-hidden="true"> *</span></span>
         <input type="file" accept="application/json,.json" disabled={busy} onChange={(e) => void loadFile(e.target.files?.[0], "categories")} />
       </label>
       <label>
-        Arquivo de regras (.json)
+        <span>Arquivo de regras (.json)<span className="required-marker" aria-hidden="true"> *</span></span>
         <input type="file" accept="application/json,.json" disabled={busy} onChange={(e) => void loadFile(e.target.files?.[0], "rules")} />
       </label>
       {preview && (
         <>
+          <div className="configuration-preview">
           <h3>Prévia validada</h3>
           <p>{preview.categoryCount} categorias · {preview.subcategoryCount} subcategorias · {preview.rules.length} regras</p>
           <p>{preview.rulesRequiringNatureReview} regras exigem revisão manual da natureza financeira. A regra nunca define a natureza do lançamento.</p>
           <button disabled={busy} onClick={() => void importConfiguration()}>{busy ? "Importando…" : "Confirmar importação no meu workspace"}</button>
+          </div>
         </>
       )}
       {error && <p className="notice" role="alert">{error}</p>}

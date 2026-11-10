@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useId, useState, type FormEvent, type ReactNode } from "react";
 export type Field = {
   name: string;
   label: string;
@@ -21,6 +21,7 @@ export function Form({
   label?: string;
   children?: ReactNode;
 }) {
+  const formId = useId();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function handle(e: FormEvent<HTMLFormElement>) {
@@ -43,15 +44,19 @@ export function Form({
     }
   }
   return (
-    <form onSubmit={handle} className="entry-form">
+    <form onSubmit={handle} className="entry-form" aria-busy={busy}>
+      {fields.some((field) => field.required !== false) && (
+        <p className="form-required-note">Campos com * são obrigatórios.</p>
+      )}
       <div className="form-grid">
         {fields.map((f) => (
           <label key={f.name}>
-            {f.label}
+            <span>{f.label}{f.required !== false && <span className="required-marker" aria-hidden="true"> *</span>}</span>
             {f.options ? (
               <select
                 name={f.name}
-                aria-label={f.label}
+                id={`${formId}-${f.name}`}
+                aria-describedby={f.help ? `${formId}-${f.name}-help` : undefined}
                 defaultValue={f.value ?? ""}
                 required={f.required !== false}
               >
@@ -65,8 +70,10 @@ export function Form({
             ) : (
               <input
                 name={f.name}
-                aria-label={f.label}
+                id={`${formId}-${f.name}`}
+                aria-describedby={f.help ? `${formId}-${f.name}-help` : undefined}
                 type={f.type ?? "text"}
+                inputMode={f.type !== "number" && /R\$|%/.test(f.label) ? "decimal" : undefined}
                 defaultValue={f.value}
                 required={f.required !== false}
                 min={f.min}
@@ -74,13 +81,13 @@ export function Form({
                 maxLength={500}
               />
             )}{" "}
-            {f.help && <small>{f.help}</small>}
+            {f.help && <small id={`${formId}-${f.name}-help`}>{f.help}</small>}
           </label>
         ))}
       </div>
       {children}
       <button disabled={busy}>{busy ? "Salvando…" : label}</button>
-      <p role="status">{error}</p>
+      {error && <p role="alert" className="form-error">{error}</p>}
     </form>
   );
 }

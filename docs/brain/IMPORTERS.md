@@ -1,6 +1,8 @@
 # Importadores
 
-Processamento local, sem envio de arquivos a IA/OCR externo. Limites: 10 MiB, 2000 linhas/lote, 100 páginas PDF. Dados persistem somente após prévia e autorização; contabilização exige revisão individual. Arquivo original não é armazenado automaticamente.
+Processamento local, sem envio de arquivos a IA/OCR externo. Limites: 10 MiB, 2000 linhas/lote, 100 páginas PDF. Dados persistem somente após prévia e autorização; a contabilização ocorre após decisão na revisão, individual ou em lote mediante confirmação. Arquivo original não é armazenado automaticamente.
+
+A aprovação em lote atual filtra itens pendentes sem candidatos de duplicidade entre movimentos já aprovados no snapshot e sem regra marcada para revisão de natureza. Não exige categoria, não verifica se a natureza está correta e não compara entre si os pendentes selecionados. As RPCs são sequenciais: falha pode deixar aprovações anteriores registradas. A interface tenta atualizar os dados, informa a quantidade com resposta confirmada e orienta conferir a lista ou recarregar antes de nova tentativa; a última chamada pode ter sido concluída mesmo sem resposta. Consulte [PLANO_AJUDA_CONTEXTO.md](PLANO_AJUDA_CONTEXTO.md) e [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 | Formato | Suporte entregue | Limitação |
 |---|---|---|

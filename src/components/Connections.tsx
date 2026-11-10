@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { CreditCard, Link2 } from "lucide-react";
 import type { Snapshot } from "../domain/finance";
 import { meuPluggy, type MeuPluggyItem } from "../meupluggy/client";
+import { SectionTitle } from "./SectionTitle";
+import { ContextHelp } from "./ContextHelp";
 
 export function Connections({
   data,
@@ -49,13 +52,13 @@ export function Connections({
   }
 
   return (
-    <section>
-      <h2>Meu Pluggy</h2>
-      <p>
+    <section className="workflow-section connection-section">
+      <SectionTitle icon={Link2} title="Meu Pluggy" description="Conexão pessoal do titular autorizado; os movimentos sincronizados continuam sujeitos à revisão." help={<><p>Esta conexão pessoal atende somente ao titular autorizado. Conecte suas instituições no Meu Pluggy e peça ao responsável pela implantação que configure o acesso seguro.</p><p>Cadastre em Contas e cartões uma conta local ativa e compatível para cada conta ou cartão remoto. Carregue as contas aqui, faça o vínculo e sincronize. Os movimentos recebidos ficam em Importar e revisar.</p><p>Se a autorização expirar, renove-a no Dashboard da Pluggy. Revogar interrompe o acesso local e solicita a remoção do item; movimentos já aprovados permanecem. Se a remoção remota falhar, remova o item no Dashboard.</p><p>Os demais usuários podem cadastrar contas e importar arquivos manualmente.</p></>} />
+      <p className="connection-notice">
         Esta conexão pessoal importa somente os dados do titular autorizado. Ela
         não oferece conexão bancária para outros usuários do aplicativo.
       </p>
-      <ol>
+      <ol className="setup-steps">
         <li>Conecte suas instituições em meu.pluggy.ai.</li>
         <li>
           No Dashboard da Pluggy, autorize o conector MeuPluggy para sua
@@ -75,7 +78,9 @@ export function Connections({
       <button disabled={busy} onClick={() => void loadItems()}>
         {busy ? "Consultando…" : "Carregar minhas contas Meu Pluggy"}
       </button>
-      {message && <p role="status">{message}</p>}
+      {message && <p role="status" className="inline-feedback">{message}</p>}
+
+      {items.length === 0 && !busy && <p className="empty-state">Carregue suas conexões para consultar contas e consentimentos disponíveis.</p>}
 
       {items.map((item) => {
         const expired =
@@ -91,8 +96,9 @@ export function Connections({
           itemConnections.every((connection) => connection.status === "revoked");
 
         return (
-          <article key={item.itemId}>
+          <article className="connection-card" key={item.itemId}>
             <h3>{item.institution}</h3>
+            <ContextHelp title={`conexão ${item.institution}`}><p>Vincule cada conta ou cartão a uma conta local ativa e compatível. Depois, sincronize para enviar movimentos à revisão.</p><p>Se a autorização expirou, renove-a no Dashboard. Revogar interrompe o acesso local e solicita a remoção remota; movimentos aprovados permanecem.</p></ContextHelp>
             <p>
               Acesso: {revoked ? "revogado neste aplicativo" : expired ? "consentimento expirado" : item.status}
               {item.consentExpiresAt &&
@@ -116,8 +122,9 @@ export function Connections({
                 selections[key] ?? mapping?.account_id ?? "";
 
               return (
-                <div key={providerAccount.id} className="card-row">
+                <div key={providerAccount.id} className="card-row provider-account-row">
                   <strong>
+                    {providerAccount.type === "CREDIT" ? <CreditCard size={17} aria-hidden="true" /> : null}{" "}
                     {providerAccount.name} · {providerAccount.type === "CREDIT" ? "Cartão" : "Conta"}
                   </strong>
                   {mapping && mapping.status === "active" ? (
@@ -153,9 +160,10 @@ export function Connections({
                   ) : (
                     <div className="actions">
                       <label>
-                        Conta local correspondente
+                        <span>Conta local correspondente<span className="required-marker" aria-hidden="true"> *</span></span>
                         <select
                           value={selected}
+                          required
                           disabled={unavailable || revoked}
                           onChange={(event) =>
                             setSelections((current) => ({
@@ -222,7 +230,7 @@ export function Connections({
         );
       })}
       {connections.length > 0 && (
-        <p>
+        <p className="connection-count">
           {connections.filter((connection) => connection.status === "active").length} vínculo(s) ativo(s) neste workspace.
         </p>
       )}

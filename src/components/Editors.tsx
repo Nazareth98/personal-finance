@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Pencil, PiggyBank } from "lucide-react";
 import { brl, cents, type Snapshot } from "../domain/finance";
 import { Form } from "./Form";
 import { CategorySubcategoryFields } from "./CategorySubcategoryFields";
 import { save } from "../lib/api";
+import { SectionTitle } from "./SectionTitle";
 export function CategoryEditors({
   data,
   refresh,
@@ -21,8 +23,8 @@ export function CategoryEditors({
     await refresh();
   }
   return (
-    <section>
-      <h2>Editar cadastros</h2>
+    <section className="workflow-section editor-section">
+      <SectionTitle icon={Pencil} title="Editar cadastros" description="Edite categorias, subcategorias e regras sem apagar referências do histórico." help={<><p>Selecione uma categoria, subcategoria ou regra para editar seus dados. Arquivar uma categoria preserva suas referências no histórico.</p><p>Regras alteradas sugerem classificações para linhas pendentes e não mudam movimentos já aprovados.</p></>} />
       <label>
         Categoria para editar
         <select value={id} onChange={(e) => setId(e.target.value)}>
@@ -141,8 +143,8 @@ export function GoalEditor({
   const [id, setId] = useState("");
   const goal = data.savings_goals.find((g) => g.id === id);
   return (
-    <section>
-      <h2>Editar objetivo</h2>
+    <section className="workflow-section editor-section">
+      <SectionTitle icon={PiggyBank} title="Editar objetivo" description="Atualize o nome, a meta ou o prazo do objetivo selecionado." help={<><p>Selecione um objetivo e altere seu nome, valor ou prazo. Essas alterações não criam aporte, resgate nem outro movimento.</p><p>Para alterar o saldo, registre um aporte ou resgate em Lançamentos usando a conta de caixinha associada.</p></>} />
       <label>
         Objetivo
         <select value={id} onChange={(e) => setId(e.target.value)}>

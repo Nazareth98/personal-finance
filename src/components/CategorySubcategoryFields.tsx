@@ -36,7 +36,7 @@ export function CategorySubcategoryFields({
   return (
     <>
       <label>
-        Categoria
+        <span>Categoria{requiredCategory && <span className="required-marker" aria-hidden="true"> *</span>}</span>
         <select
           aria-label="Categoria"
           value={selectedCategory}

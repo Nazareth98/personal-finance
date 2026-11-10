@@ -13,6 +13,7 @@ export function TransactionForm({
   initial,
   accountId,
   label = "Registrar",
+  className = "",
   children,
 }: {
   data: Snapshot;
@@ -20,6 +21,7 @@ export function TransactionForm({
   initial?: Proposal;
   accountId?: string;
   label?: string;
+  className?: string;
   children?: React.ReactNode;
 }) {
   const [category, setCategory] = useState(initial?.category_id ?? ""),
@@ -88,10 +90,11 @@ export function TransactionForm({
     }
   }
   return (
-    <form onSubmit={handle} className="entry-form">
+    <form onSubmit={handle} className={`entry-form ${className}`.trim()} aria-busy={busy}>
+      <p className="form-required-note">Campos com * são obrigatórios.</p>
       <div className="form-grid">
         <label>
-          Descrição
+          <span>Descrição<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             name="description"
             defaultValue={initial?.description}
@@ -100,9 +103,10 @@ export function TransactionForm({
           />
         </label>
         <label>
-          Valor absoluto (R$)
+          <span>Valor absoluto (R$)<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             name="amount"
+            inputMode="decimal"
             defaultValue={
               initial
                 ? (
@@ -122,7 +126,7 @@ export function TransactionForm({
           />
         </label>
         <label>
-          Natureza
+          <span>Natureza<span className="required-marker" aria-hidden="true"> *</span></span>
           <select
             value={nature}
             onChange={(e) => setNature(e.target.value as Nature)}
@@ -136,7 +140,7 @@ export function TransactionForm({
         </label>
         {!accountId && (
           <label>
-            Conta de origem
+            <span>Conta de origem<span className="required-marker" aria-hidden="true"> *</span></span>
             <select name="account_id" required>
               <option value="">Selecione</option>
               {data.financial_accounts
@@ -151,9 +155,9 @@ export function TransactionForm({
         )}
         {(paired || nature === "loan") && (
           <label>
-            {nature === "loan"
+            <span>{nature === "loan"
               ? "Conta de passivo do empréstimo"
-              : "Conta de destino"}
+              : "Conta de destino"}<span className="required-marker" aria-hidden="true"> *</span></span>
             <select name="counterpart_account_id" required>
               <option value="">Selecione</option>
               {data.financial_accounts
@@ -167,7 +171,7 @@ export function TransactionForm({
           </label>
         )}
         <label>
-          Data do evento
+          <span>Data do evento<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             name="event_date"
             type="date"
@@ -176,7 +180,7 @@ export function TransactionForm({
           />
         </label>
         <label>
-          Data bancária
+          <span>Data bancária<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             name="bank_date"
             type="date"
@@ -185,7 +189,7 @@ export function TransactionForm({
           />
         </label>
         <label>
-          Competência
+          <span>Competência<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             name="competence"
             type="month"
@@ -235,7 +239,7 @@ export function TransactionForm({
         </label>
         {nature === "refund" && (
           <label>
-            Compra estornada
+              <span>Compra estornada<span className="required-marker" aria-hidden="true"> *</span></span>
             <select name="related_id" required>
               <option value="">Selecione</option>
               {data.transactions
@@ -290,7 +294,7 @@ export function TransactionForm({
       </div>
       {children}
       <button disabled={busy}>{busy ? "Salvando…" : label}</button>
-      <p role="status">{error}</p>
+      {error && <p role="alert" className="form-error">{error}</p>}
     </form>
   );
 }

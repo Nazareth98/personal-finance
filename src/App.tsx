@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
+import { ContextHelp } from "./components/ContextHelp";
 const Workspace = lazy(() =>
   import("./Workspace").then((module) => ({ default: module.Workspace })),
 );
@@ -116,32 +117,40 @@ function Auth({
   }
   return (
     <main className="auth">
-      <span className="eyebrow">FINANÇAS PESSOAIS</span>
+      <span className="eyebrow">Finanças pessoais</span>
       <h1>
         Mais clareza.
         <br />
         Mais tranquilidade.
       </h1>
       <p>Seu dinheiro organizado em um espaço só seu.</p>
-      <form onSubmit={submit}>
-        <h2>
-          {recovery
-            ? "Definir nova senha"
-            : mode === "signup"
-              ? "Criar minha conta"
-              : mode === "reset"
-                ? "Recuperar acesso"
-                : "Entrar no meu espaço"}
-        </h2>
+      <form onSubmit={submit} aria-busy={busy}>
+        <div className="auth-form-heading">
+          <h2>
+            {recovery
+              ? "Definir nova senha"
+              : mode === "signup"
+                ? "Criar minha conta"
+                : mode === "reset"
+                  ? "Recuperar acesso"
+                  : "Entrar no meu espaço"}
+          </h2>
+          <ContextHelp title="acesso à conta">
+            <p>Crie uma conta com seu e-mail e uma senha de pelo menos 12 caracteres. Confirme o e-mail recebido antes de entrar.</p>
+            <p>Se esquecer a senha, solicite as instruções pelo e-mail cadastrado. A mensagem de recuperação não informa se o endereço possui uma conta.</p>
+            <p>Ao abrir o link de recuperação, defina uma nova senha. Cada usuário acessa somente o próprio espaço pessoal e privado.</p>
+          </ContextHelp>
+        </div>
+        <p className="form-required-note">Campos com * são obrigatórios.</p>
         {!recovery && (
           <label>
-            E-mail
+            <span>E-mail<span className="required-marker" aria-hidden="true"> *</span></span>
             <input name="email" type="email" autoComplete="email" required />
           </label>
         )}
         {(recovery || mode !== "reset") && (
           <label>
-            Senha
+            <span>Senha<span className="required-marker" aria-hidden="true"> *</span></span>
             <input
               name="password"
               aria-label="Senha"

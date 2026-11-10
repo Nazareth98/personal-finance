@@ -12,9 +12,16 @@ export function Classification({
   refresh: () => Promise<void>;
 }) {
   const [category, setCategory] = useState(transaction.category_id ?? "");
+  const hasCategory = Boolean(transaction.category_id);
   return (
     <details>
-      <summary>Classificar</summary>
+      <summary>
+        {!hasCategory
+          ? "Categorizar lançamento"
+          : transaction.subcategory_id
+            ? "Editar classificação"
+            : "Adicionar subcategoria"}
+      </summary>
       <label>
         Nova categoria
         <select value={category} onChange={(e) => setCategory(e.target.value)}>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FileUp, History, Link2, ListChecks } from "lucide-react";
 import {
   brl,
   duplicateCandidates,
@@ -8,6 +9,8 @@ import {
 import { fileHash, parseFile, type ParseResult } from "../importers";
 import { rpc } from "../lib/api";
 import { TransactionForm } from "./TransactionForm";
+import { SectionTitle } from "./SectionTitle";
+import { ContextHelp } from "./ContextHelp";
 export function Imports({
   data,
   refresh,
@@ -91,6 +94,7 @@ export function Imports({
 
     setBusy(true);
     setMessage(`Aprovando ${safeRows.length} movimento(s)…`);
+    let confirmed = 0;
     try {
       for (const r of safeRows) {
         const rule = suggest(r.proposal.description, data.categorization_rules);
@@ -111,27 +115,30 @@ export function Imports({
           },
           existing: null,
         });
+        confirmed += 1;
       }
       await refresh();
       setMessage(`${safeRows.length} movimento(s) aprovado(s) com sucesso.`);
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Falha ao aprovar lote.");
+    } catch {
+      await refresh().catch(() => undefined);
+      setMessage(`Não foi possível concluir a aprovação em lote. ${confirmed} movimento(s) tiveram resposta confirmada. A última tentativa também pode ter sido concluída. Confira a lista atualizada ou recarregue a página antes de tentar novamente.`);
     } finally {
       setBusy(false);
     }
   }
   return (
     <>
-      <section>
-        <h2>Importar arquivo</h2>
+      <section className="workflow-section">
+        <SectionTitle icon={FileUp} title="Importar arquivo" description="A prévia é processada no navegador; confira conta, totais e avisos antes de enviar para revisão." help={<><p>Cadastre uma conta local e escolha-a como destino. Selecione um arquivo CSV, OFX, QFX, XLSX ou PDF digital; arquivos XLS precisam ser convertidos para XLSX.</p><p>A leitura ocorre no navegador. Confira a prévia, os totais e os avisos e confirme o envio. Os movimentos ficam pendentes em Revisar antes de contabilizar.</p><p>O leitor de PDF é conservador e não reconhece imagens por OCR. Confira o resultado com o documento original.</p></>} />
         <p>
           Processamento local. Formatos: CSV, OFX, QFX, XLSX e PDF digital.
           Cabeçalhos de tabela: data, descrição, valor, competência (opcional),
           id (opcional). Valores negativos representam saídas.
         </p>
+        <p className="form-required-note">Campos com * são obrigatórios para enviar o lote.</p>
         <label>
-          Conta de destino
-          <select value={account} onChange={(e) => setAccount(e.target.value)}>
+          <span>Conta de destino<span className="required-marker" aria-hidden="true"> *</span></span>
+          <select value={account} required onChange={(e) => setAccount(e.target.value)}>
             <option value="">Selecione</option>
             {data.financial_accounts.map((a) => (
               <option key={a.id} value={a.id}>
@@ -141,7 +148,7 @@ export function Imports({
           </select>
         </label>
         <label>
-          Arquivo
+          <span>Arquivo<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
             type="file"
             accept=".csv,.ofx,.qfx,.xlsx,.pdf"
@@ -164,8 +171,8 @@ export function Imports({
                 {w}
               </p>
             ))}
-            <div className="table-wrap">
-              <table>
+            <div className="table-wrap data-table-wrap">
+              <table className="data-table">
                 <thead>
                   <tr>
                     <th>Data</th>
@@ -208,15 +215,15 @@ export function Imports({
           </>
         )}
       </section>
-      <section>
-        <h2>Revisar antes de contabilizar</h2>
+      <section className="workflow-section">
+        <SectionTitle icon={ListChecks} title="Revisar antes de contabilizar" description="Confirme a natureza e possíveis duplicidades antes de aprovar cada movimento." help={<><p>Abra cada movimento para conferir valor, datas, natureza, categoria e subcategoria. Uma regra ativa pode sugerir a classificação, mas não define a natureza. Você pode consultar os dados originais da linha.</p><p>Se houver um movimento aprovado da mesma conta, data e valor, confira se é o mesmo: vincule a origem quando for igual ou aprove separadamente se for outro movimento. Você também pode ignorar a linha.</p><p>A aprovação em lote pede sua confirmação e seleciona pendentes sem candidato semelhante entre movimentos já aprovados e sem regra marcada para revisão de natureza. Ela não garante categoria, natureza ou ausência de duplicidades entre pendentes. Confira antes de confirmar.</p><p>Se o lote falhar, algumas aprovações podem ter sido registradas. Confira a lista atualizada ou recarregue a página antes de tentar novamente.</p></>} />
         <p>
           Correspondências por conteúdo exigem decisão explícita. Compras
           repetidas legítimas podem ser aprovadas separadamente. Créditos e
           intermediadores precisam de confirmação da natureza.
         </p>
         {data.import_raw_rows.some((r) => r.status === "pending") && (
-          <div className="actions" style={{ marginBottom: "16px" }}>
+          <div className="actions safe-bulk-actions">
             <button
               disabled={busy}
               onClick={() => void approveAllSafe()}
@@ -249,14 +256,15 @@ export function Imports({
               data.transactions,
             );
             return (
-              <details key={r.id}>
+              <details className="review-item" key={r.id}>
                 <summary>
-                  {isPluggy ? "🔌 " : ""}
+                  {isPluggy && <Link2 size={16} aria-hidden="true" />}{" "}
                   {r.proposal.event_date} · {r.proposal.description} ·{" "}
                   {brl(r.proposal.amount_cents)}{" "}
                   {isPluggy ? " · Pluggy" : ""}
                   {matches.length ? " · possível duplicidade" : ""}
                 </summary>
+                <ContextHelp title="revisar movimento"><p>Confira natureza, datas, valor e classificação. A regra pode sugerir categoria e subcategoria, mas não define a natureza.</p><p>Se um movimento semelhante for o mesmo, vincule a origem. Se for uma compra diferente, aprove separadamente; você também pode ignorar a linha.</p></ContextHelp>
                 {(r.proposal.original_row || r.proposal.original_text) && <details><summary>Dados originais da linha</summary><pre className="raw-row">{r.proposal.original_text ?? JSON.stringify(r.proposal.original_row,null,2)}</pre></details>}
                 <TransactionForm
                   data={data}
@@ -316,22 +324,23 @@ export function Imports({
             );
           })}
         {!data.import_raw_rows.some((r) => r.status === "pending") && (
-          <p>Nenhum movimento pendente.</p>
+          <p className="empty-state">Nenhum movimento pendente de revisão.</p>
         )}
       </section>
-      <section>
-        <h2>Histórico de lotes</h2>
+      <section className="workflow-section">
+        <SectionTitle icon={History} title="Histórico de lotes" description="Acompanhe o resultado das importações anteriores." help={<><p>Acompanhe os lotes enviados e a quantidade de linhas por estado. Enviar um lote não significa que seus movimentos foram aprovados.</p><p>Para decidir sobre linhas pendentes, use a seção Revisar antes de contabilizar acima.</p></>} />
+        {data.import_batches.length === 0 && <p className="empty-state">Nenhum lote importado.</p>}
         {data.import_batches.map((b) => {
           const rows = data.import_raw_rows.filter((r) => r.batch_id === b.id);
           const parserLabel = b.parser_version === "meupluggy-v1" ? "Meu Pluggy" : b.parser_version;
           return (
-            <p key={b.id}>
+            <article className="batch-card" key={b.id}>
               {parserLabel} ·{" "}
               {data.financial_accounts.find((a) => a.id === b.account_id)?.name}{" "}
               · {rows.length} linhas ·{" "}
               {rows.filter((r) => r.status === "pending").length} pendentes ·{" "}
               {rows.filter((r) => r.status === "approved").length} aprovadas
-            </p>
+            </article>
           );
         })}
       </section>
