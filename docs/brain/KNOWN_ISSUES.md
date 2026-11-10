@@ -30,3 +30,9 @@ Não habilitar Open Finance real sem contrato e autorização. Cobertura bancár
 - Média: política final de retenção precisa de definição antes de disponibilização pública.
 
 Configuração revisada contra o template da Supabase CLI 3.1.0: `auth.email.enabled=true`. Isso não comprova os serviços integrados. Por instrução do proprietário, não executar Supabase local; validar no ambiente real conforme [DEPLOY_VALIDATION.md](DEPLOY_VALIDATION.md). Não executar db reset em projeto com histórico; o harness SQL cria e elimina exclusivamente bancos PostgreSQL descartáveis.
+
+## Verificação documental do design system — 10/11/2026
+
+- A migração visual para [Grafite e Âmbar](DESIGN_SYSTEM.md) ainda não foi executada; o documento é a referência para as próximas entregas, sem declaração de conformidade atual com WCAG.
+- Na base `4e03655`, `npm run lint` apresenta 12 erros preexistentes em `src/components/Connections.tsx` e `src/open-finance/pluggy-provider.ts` (tipos `any` e parâmetros não utilizados).
+- Na mesma base, `npm test` executa 28 testes: 27 passam e 1 falha em `tests/provider.test.ts:7`. O teste espera rejeição de `provider("pluggy")`, enquanto a integração adicionada passou a aceitar esse provedor. É necessário reconciliar o contrato e o teste em tarefa de código; as asserções foram preservadas.

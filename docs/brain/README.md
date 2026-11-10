@@ -14,3 +14,5 @@ O estado verificável de cada fluxo fica no TEST_PLAN e KNOWN_ISSUES. Requisitos
 - [Importadores](IMPORTERS.md), [categorização](CATEGORIZATION.md), [conciliação](RECONCILIATION.md), [fluxos](UX_FLOWS.md).
 - [Open Finance](OPEN_FINANCE.md), [provedores e cobertura](OPEN_FINANCE_PROVIDER_COMPARISON.md), [migração histórica](MIGRATION_REPORT.md).
 - [Homologação no ambiente real](DEPLOY_VALIDATION.md): Supabase local não deve ser executado por decisão do proprietário.
+
+- [Design system — Grafite e Âmbar](DESIGN_SYSTEM.md): referência normativa de identidade visual, componentes, interação e acessibilidade para refatorações e novas telas.

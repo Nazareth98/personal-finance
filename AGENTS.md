@@ -10,6 +10,7 @@
 8. Execute checagem de tipos, lint, testes e build antes de declarar concluída cada fase.
 9. Mantenha arquivo `docs/brain/KNOWN_ISSUES.md` atualizado com pendências verificadas.
 10. Use português brasileiro em UX e documentação técnica clara para continuidade.
+11. Siga o [Design system — Grafite e Âmbar](docs/brain/DESIGN_SYSTEM.md) como princípio obrigatório em toda refatoração visual e nova funcionalidade: use seus tokens, componentes, padrões de interação e critérios de acessibilidade. Reserve verde exclusivamente para valores financeiros positivos. Atualize o documento no mesmo commit quando alterar um contrato visual compartilhado.
 
 ## Continuidade da implementação
 
