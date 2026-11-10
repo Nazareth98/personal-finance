@@ -69,10 +69,14 @@ export interface Account extends Entity {
 export interface Category extends Entity {
   name: string;
   archived: boolean;
+  budget_nature: string | null;
+  sort_order: number;
 }
 export interface Subcategory extends Entity {
   name: string;
   category_id: string;
+  sort_order: number;
+  budget_nature: string | null;
 }
 export interface Rule extends Entity {
   keyword: string;
@@ -80,6 +84,9 @@ export interface Rule extends Entity {
   category_id: string;
   subcategory_id: string | null;
   active: boolean;
+  match_mode: "contains_literal";
+  requires_financial_nature_review: boolean;
+  source_key: string | null;
 }
 export interface Transaction
   extends Entity, Omit<Proposal, "category_id" | "subcategory_id"> {
@@ -202,7 +209,10 @@ export function normalize(v: string): string {
 export function suggest(description: string, rules: Rule[]): Rule | undefined {
   return [...rules]
     .filter(
-      (r) => r.active && normalize(description).includes(normalize(r.keyword)),
+      (r) =>
+        r.active &&
+        r.match_mode === "contains_literal" &&
+        normalize(description).includes(normalize(r.keyword)),
     )
     .sort(
       (a, b) =>

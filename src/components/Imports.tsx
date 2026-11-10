@@ -72,7 +72,8 @@ export function Imports({
       const batch = data.import_batches.find((b) => b.id === r.batch_id);
       if (!batch) return false;
       const matches = duplicateCandidates(r.proposal, batch.account_id, data.transactions);
-      return matches.length === 0;
+      const rule = suggest(r.proposal.description, data.categorization_rules);
+      return matches.length === 0 && !rule?.requires_financial_nature_review;
     });
 
     if (!safeRows.length) {
@@ -269,6 +270,11 @@ export function Imports({
                   submit={(p) => decide(r.id, "approve", p)}
                 >
                   {rule && <p>Sugestão pela regra: {rule.keyword}</p>}
+                  {rule?.requires_financial_nature_review && (
+                    <p className="notice">
+                      Esta regra exige conferir manualmente a natureza financeira antes de aprovar. A categoria sugerida não define a natureza.
+                    </p>
+                  )}
                   {matches.length > 0 && (
                     <p className="notice">
                       Existe movimento semelhante. Aprove somente se for uma

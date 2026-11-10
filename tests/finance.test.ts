@@ -13,6 +13,7 @@ import {
   type Budget,
   type Rule,
 } from "../src/domain/finance";
+import { parsePrivateConfiguration } from "../src/domain/private-configuration";
 const tx = (
   nature: Transaction["nature"],
   amount: string,
@@ -159,6 +160,9 @@ test("regras literais, acentos e prioridade", () => {
     category_id: "food",
     subcategory_id: null,
     active: true,
+    match_mode: "contains_literal",
+    requires_financial_nature_review: false,
+    source_key: null,
   };
   expect(suggest("cafe * fictício", [base])?.id).toBe("1");
   expect(suggest("cafe qualquer", [base])).toBeUndefined();
@@ -180,4 +184,32 @@ test("descrições diferentes entre origens continuam candidatas, sem juntar com
     duplicateCandidates(t, "account", [other, t]).map((row) => row.id),
   ).toEqual([t.id, other.id]);
   expect(duplicateCandidates(t, "outra-conta", [other])).toHaveLength(0);
+});
+
+test("importação privada valida referências e contagens sem dados pessoais", () => {
+  const categories = JSON.stringify({ items: [
+    { order: 1, category: "Categoria sintética", subcategory: "Sub sintética", nature: "expense" },
+  ] });
+  const rules = JSON.stringify({ items: [
+    { priority: 2, keyword: "termo sintético", category: "Categoria sintética", subcategory: "Sub sintética", matchMode: "contains_literal", isActive: true, requiresFinancialNatureReview: true },
+  ] });
+  const result = parsePrivateConfiguration(categories, rules);
+  expect(result.categoryCount).toBe(1);
+  expect(result.subcategoryCount).toBe(1);
+  expect(result.rulesRequiringNatureReview).toBe(1);
+  expect(() => parsePrivateConfiguration(categories, rules.replace("Categoria sintética", "Categoria ausente"))).toThrow();
+  expect(() => parsePrivateConfiguration(categories, rules.replace("contains_literal", "regex"))).toThrow();
+});
+
+test("natureza pode variar entre subcategorias, mas não dentro do mesmo par", () => {
+  const categories = JSON.stringify({ items: [
+    { order: 1, category: "Categoria sintética", subcategory: "Sub A", nature: "expense" },
+    { order: 2, category: "Categoria sintética", subcategory: "Sub B", nature: "income" },
+  ] });
+  const rules = JSON.stringify({ items: [
+    { priority: 1, keyword: "termo", category: "Categoria sintética", subcategory: "Sub A", matchMode: "contains_literal", isActive: true, requiresFinancialNatureReview: false },
+  ] });
+  expect(parsePrivateConfiguration(categories, rules).subcategoryCount).toBe(2);
+  const conflict = categories.replace('"subcategory":"Sub B","nature":"income"', '"subcategory":"Sub A","nature":"income"');
+  expect(() => parsePrivateConfiguration(conflict, rules)).toThrow(/subcategoria/i);
 });

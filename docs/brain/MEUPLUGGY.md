@@ -25,7 +25,7 @@ Para obter os itens pessoais, entre no Meu Pluggy e conecte seus bancos; no Dash
 
 1. O titular conecta os bancos no Meu Pluggy e configura o conector MeuPluggy na aplicação Pluggy.
 2. A operação de listar contas consulta apenas os itens da allowlist e confirma que o conector do item é MeuPluggy.
-3. O titular mapeia explicitamente cada conta/cartão remoto a uma conta local do próprio workspace; tipos incompatíveis são recusados.
+3. O titular mapeia explicitamente cada conta/cartão remoto a uma conta local do próprio workspace; tipos incompatíveis são recusados. Para cartões, primeiro cadastre uma conta financeira local do tipo crédito; a configuração de fechamento, vencimento e limite é feita separadamente em Contas e cartões.
 4. A sincronização confere sessão, identidade proprietária, workspace, vínculo, item, conta remota, estado e validade do consentimento no servidor.
 5. Transações usam `/v2/transactions` e paginação por cursor. Valores são convertidos em centavos exatos, IDs externos estáveis evitam reimportação e novos itens seguem para a fila de revisão humana.
 6. Revogar marca primeiro os vínculos locais como revogados; depois solicita a exclusão remota do item. Se a operação remota falhar, o acesso local permanece revogado e o titular recebe a orientação de removê-lo no Dashboard. O item revogado deixa de ser consultado e suas contas não aparecem como sincronizáveis.

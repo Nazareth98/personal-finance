@@ -12,8 +12,7 @@ Data: 10/11/2026.
 
 ## Produto financeiro e importação
 
-- Alta: não existe importador de inicialização dos JSONs privados de categorias/regras. Exige prévia, validação de referências, preservação de literais/ordem, idempotência e confirmação exclusiva no workspace do titular.
-- Média: ordem de categorias e metadados históricos de natureza/revisão não possuem mapeamento completo. Não descartar campos silenciosamente.
+- Alta: migrations 012 e 013 e importador dos JSONs privados ainda precisam ser aplicados e homologados no Supabase remoto; conferir importação e isolamento no ambiente real.
 - Média: faltam contextos por banco/cartão/direção nas regras, histórico de versões e fluxo para salvar classificação como regra com prévia de impacto.
 - Média: projeções, alertas configuráveis, base por média histórica e filtros/gráficos avançados não estão integralmente implementados.
 - Média: parsers específicos de faturas Itaú/Nubank/Caixa, OCR e migração multiaba não estão homologados. PDF genérico pode reconhecer só parte das linhas; conferência manual é necessária.

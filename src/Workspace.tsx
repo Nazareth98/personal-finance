@@ -21,6 +21,7 @@ import { Classification } from "./components/Classification";
 import { CategoryEditors, GoalEditor } from "./components/Editors";
 import { Connections } from "./components/Connections";
 import { CategorySubcategoryFields } from "./components/CategorySubcategoryFields";
+import { PrivateConfigurationImport } from "./components/PrivateConfigurationImport";
 
 const pages = [
   "Visão geral",
@@ -92,6 +93,9 @@ export function Workspace({ userId }: { userId: string }) {
   const accounts = data.financial_accounts.map(
     (a) => [a.id, a.name] as [string, string],
   );
+  const creditAccounts = data.financial_accounts
+    .filter((account) => !account.archived && account.kind === "credit")
+    .map((account) => [account.id, account.name] as [string, string]);
   const categories = data.categories
     .filter((c) => !c.archived)
     .map((c) => [c.id, c.name] as [string, string]);
@@ -331,15 +335,13 @@ export function Workspace({ userId }: { userId: string }) {
             </section>
             <section>
               <h2>Configurar cartão</h2>
-              <Form
+              {creditAccounts.length === 0 ? (
+                <p>Cadastre primeiro uma conta financeira do tipo cartao de credito no formulario acima. Depois ela aparecera aqui para configurar fechamento, vencimento e limite.</p>
+              ) : (<Form
                 fields={[
                   {
                     ...accountField,
-                    options: accounts.filter(
-                      ([id]) =>
-                        data.financial_accounts.find((a) => a.id === id)
-                          ?.kind === "credit",
-                    ),
+                    options: creditAccounts,
                   },
                   {
                     name: "closing_day",
@@ -372,6 +374,7 @@ export function Workspace({ userId }: { userId: string }) {
                   })
                 }
               />
+              )}
               {data.credit_cards.map((c) => (
                 <article key={c.id}>
                   <h3>
@@ -715,7 +718,11 @@ export function Workspace({ userId }: { userId: string }) {
           <Imports data={data} refresh={refresh} />
         )}
         {page === "Meu Pluggy" && (
-          <Connections data={data} refresh={refresh} />
+          <Connections
+            data={data}
+            refresh={refresh}
+            openAccounts={() => setPage(pages[2])}
+          />
         )}
         {page === "Categorias e regras" && (
           <>
@@ -793,7 +800,10 @@ export function Workspace({ userId }: { userId: string }) {
           </>
         )}
         {page === "Categorias e regras" && (
-          <CategoryEditors data={data} refresh={refresh} />
+          <>
+            <PrivateConfigurationImport refresh={refresh} />
+            <CategoryEditors data={data} refresh={refresh} />
+          </>
         )}
         {page === "Perfil e backup" && (
           <>

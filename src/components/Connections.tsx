@@ -5,9 +5,11 @@ import { meuPluggy, type MeuPluggyItem } from "../meupluggy/client";
 export function Connections({
   data,
   refresh,
+  openAccounts,
 }: {
   data: Snapshot;
   refresh: () => Promise<void>;
+  openAccounts: () => void;
 }) {
   const [items, setItems] = useState<MeuPluggyItem[]>([]);
   const [selections, setSelections] = useState<Record<string, string>>({});
@@ -137,6 +139,17 @@ export function Connections({
                         Sincronizar
                       </button>
                     </>
+                  ) : localAccounts.length === 0 ? (
+                    <div>
+                      <p>
+                        {providerAccount.type === "CREDIT"
+                          ? "Cadastre primeiro uma conta financeira do tipo Cartão de crédito. Depois volte aqui para vinculá-la e, em Contas e cartões, configure fechamento, vencimento e limite."
+                          : "Cadastre primeiro uma conta local compatível (corrente ou investimento). Depois volte aqui para fazer o vínculo."}
+                      </p>
+                      <button type="button" onClick={openAccounts}>
+                        Ir para Contas e cartões
+                      </button>
+                    </div>
                   ) : (
                     <div className="actions">
                       <label>

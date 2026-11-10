@@ -38,6 +38,8 @@ export interface DatabaseRows {
     workspace_id: string;
     name: string;
     archived: boolean;
+    budget_nature: string | null;
+    sort_order: number;
   };
   categorization_rules: {
     id: string;
@@ -47,6 +49,9 @@ export interface DatabaseRows {
     category_id: string;
     subcategory_id: string | null;
     active: boolean;
+    match_mode: string;
+    requires_financial_nature_review: boolean;
+    source_key: string | null;
   };
   credit_cards: {
     id: string;
@@ -202,6 +207,8 @@ export interface DatabaseRows {
     workspace_id: string;
     category_id: string;
     name: string;
+    sort_order: number;
+    budget_nature: string | null;
   };
   transaction_classifications: {
     id: string;

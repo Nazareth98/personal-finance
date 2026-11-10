@@ -17,3 +17,6 @@ Chave forte: conta/workspace/ID de banco. Repetição exata do arquivo usa SHA-2
 Complemento (migration 008): validação de descrição, centavos textuais, calendário, competência, natureza, ID externo e índice/total de parcela também ocorre no PostgreSQL. Um lote com qualquer proposta inválida é revertido integralmente, inclusive suas linhas e auditoria. Aprovações/vínculos precisam referenciar uma transação; pendências/ignoradas não podem aparentar contabilização.
 
 CSV/XLSX preservam campos originais da linha; OFX e PDF preservam o bloco/linha original junto da proposta. A revisão exibe o original em contexto privado. Não são enviados a IA ou OCR externo. Data e valor iguais agora bastam para sugerir duplicidade mesmo com descrições diferentes; descrição idêntica tem prioridade na apresentação, sem fusão automática.
+# Pacote privado de categorias e regras
+
+Em “Categorias e regras”, o proprietário seleciona os dois JSONs. O navegador valida estrutura/referências e exibe apenas contagens, sem listar valores privados. A confirmação chama RPC autenticada que deriva o workspace e repete as validações no PostgreSQL antes da gravação transacional. O hash do pacote torna reenvio idempotente. Migrations 012 e 013 deve estar aplicada no Supabase remoto; não executar Supabase local.
