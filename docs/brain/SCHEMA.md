@@ -36,6 +36,8 @@ Migration 007: PK composta `(workspace_id,id)` em todas as entidades financeiras
 
 Migrations 008–009: validação de propostas no servidor (aplica-se também a restore), coerência entre status e vínculo contábil, exportação dos metadados próprios de perfil/workspace e proteção contra perfil cruzado na restauração. RPCs antigas usadas como implementação interna têm EXECUTE revogado de authenticated/public.
 
+Migration 014: a conta do lote passa a representar a perna observada do extrato. `record_transaction` valida aporte, resgate e pagamento pelos tipos, sinais e contas das duas pernas, independentemente de qual foi observada. Regras recebem escopo de conta/direção e automação opt-in. `process_imports` serializa e processa pendências em uma transação, vinculando identidade bancária forte, bloqueando candidatos por conteúdo e registrando regra/motivo em linhas e decisões.
+
 ```mermaid
 erDiagram
  FINANCIAL_ACCOUNTS ||--o{ BILLING_STATEMENTS : recebe

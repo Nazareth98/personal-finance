@@ -52,6 +52,11 @@ export interface DatabaseRows {
     match_mode: string;
     requires_financial_nature_review: boolean;
     source_key: string | null;
+    account_id: string | null;
+    amount_direction: string;
+    transaction_nature: string | null;
+    counterpart_account_id: string | null;
+    auto_approve: boolean;
   };
   credit_cards: {
     id: string;
@@ -90,6 +95,8 @@ export interface DatabaseRows {
     proposal: unknown;
     status: string;
     transaction_id: string | null;
+    review_reason: string | null;
+    automation_rule_id: string | null;
   };
   installment_occurrences: {
     id: string;
@@ -119,10 +126,12 @@ export interface DatabaseRows {
     institution: string;
     status: string;
     scopes: string[];
-    expires_at: string;
+    expires_at: string | null;
     last_sync_at: string | null;
     cursor: number;
     created_at: string;
+    pluggy_item_id: string | null;
+    pluggy_account_id: string | null;
   };
   open_finance_consents: {
     id: string;
@@ -186,6 +195,8 @@ export interface DatabaseRows {
     transaction_id: string | null;
     actor_user_id: string;
     created_at: string;
+    automation_rule_id: string | null;
+    decision_reason: string | null;
   };
   savings_goals: {
     id: string;

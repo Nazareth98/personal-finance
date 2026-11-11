@@ -1003,11 +1003,10 @@ export function Workspace({ userId }: { userId: string }) {
               />
             </section>
             <section>
-              <SectionTitle icon={ListChecks} title="Regra de sugestão" description="Regras sugerem categorias para itens pendentes; não definem a natureza nem alteram itens aprovados." help={<><p>Cadastre a categoria e, se desejar, a subcategoria. Informe um trecho literal da descrição e a prioridade: um número menor tem preferência.</p><p>Na revisão, uma regra ativa pode sugerir a classificação. Confira a natureza separadamente. Ativar, desativar ou editar uma regra não altera movimentos já aprovados.</p></>} />
+              <SectionTitle icon={ListChecks} title="Regra de classificação e automação" description="Classifique pendências e, quando explicitamente autorizado, aprove movimentos completos e sem duplicidade." help={<><p>Informe um trecho literal, categoria e prioridade. Você pode limitar a regra à conta observada e à direção do valor.</p><p>Para automatizar, defina também tipo de movimentação, subcategoria e, nos movimentos patrimoniais, a contrapartida. A automação ainda bloqueia possíveis duplicidades.</p><p>Ativar, desativar ou editar uma regra não altera movimentos já aprovados.</p></>} />
               <p>
                 Correspondência literal, sem regex. Prioridade menor vence.
-                Regras nunca alteram natureza financeira ou decisões já
-                aprovadas.
+                A automação é opcional e nunca altera decisões já aprovadas.
               </p>
               <Form
                 fields={[
@@ -1018,6 +1017,47 @@ export function Workspace({ userId }: { userId: string }) {
                     type: "number",
                     value: "100",
                   },
+                  {
+                    name: "account_id",
+                    label: "Conta observada (opcional)",
+                    required: false,
+                    options: data.financial_accounts
+                      .filter((item) => !item.archived)
+                      .map((item) => [item.id, `${item.name} · ${item.institution}`]),
+                  },
+                  {
+                    name: "amount_direction",
+                    label: "Direção na conta observada",
+                    value: "any",
+                    options: [
+                      ["any", "Entrada ou saída"],
+                      ["debit", "Somente saída"],
+                      ["credit", "Somente entrada"],
+                    ],
+                  },
+                  {
+                    name: "transaction_nature",
+                    label: "Tipo de movimentação para automação",
+                    required: false,
+                    options: Object.entries(natureLabels),
+                  },
+                  {
+                    name: "counterpart_account_id",
+                    label: "Conta de contrapartida (quando exigida)",
+                    required: false,
+                    options: data.financial_accounts
+                      .filter((item) => !item.archived)
+                      .map((item) => [item.id, `${item.name} · ${item.institution}`]),
+                  },
+                  {
+                    name: "auto_approve",
+                    label: "Aprovação automática",
+                    value: "false",
+                    options: [
+                      ["false", "Não; manter para revisão"],
+                      ["true", "Sim; se completa e sem duplicidade"],
+                    ],
+                  },
                 ]}
                 children={<CategorySubcategoryFields data={data} />}
                 submit={(v) =>
@@ -1025,6 +1065,11 @@ export function Workspace({ userId }: { userId: string }) {
                     ...v,
                     priority: Number(v.priority),
                     subcategory_id: v.subcategory_id || null,
+                    account_id: v.account_id || null,
+                    amount_direction: v.amount_direction,
+                    transaction_nature: v.transaction_nature || null,
+                    counterpart_account_id: v.counterpart_account_id || null,
+                    auto_approve: v.auto_approve === "true",
                   })
                 }
               />
@@ -1036,6 +1081,12 @@ export function Workspace({ userId }: { userId: string }) {
                   <ContextHelp title={`regra ${r.keyword}`}><p>Esta regra ativa pode sugerir uma categoria para linhas pendentes cuja descrição contenha o texto informado. Desativá-la impede novas sugestões por ela; movimentos já aprovados não são alterados.</p></ContextHelp>
                   <p>
                     {category(r.category_id)} · prioridade {r.priority}
+                  </p>
+                  <p>
+                    {r.transaction_nature
+                      ? natureLabels[r.transaction_nature]
+                      : "Somente sugestão"}
+                    {r.auto_approve ? " · aprovação automática" : " · revisão manual"}
                   </p>
                   <button
                     className="secondary"

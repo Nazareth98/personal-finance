@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Pencil, PiggyBank } from "lucide-react";
-import { brl, cents, type Snapshot } from "../domain/finance";
+import {
+  brl,
+  cents,
+  natureLabels,
+  type Snapshot,
+} from "../domain/finance";
 import { Form } from "./Form";
 import { CategorySubcategoryFields } from "./CategorySubcategoryFields";
 import { save } from "../lib/api";
@@ -108,6 +113,53 @@ export function CategoryEditors({
               type: "number",
               value: String(rule.priority),
             },
+            {
+              name: "account_id",
+              label: "Conta observada (opcional)",
+              required: false,
+              value: rule.account_id ?? "",
+              options: data.financial_accounts
+                .filter((account) => !account.archived)
+                .map((account) => [account.id, `${account.name} · ${account.institution}`]),
+              help: "Limita a regra ao extrato desta conta.",
+            },
+            {
+              name: "amount_direction",
+              label: "Direção na conta observada",
+              value: rule.amount_direction ?? "any",
+              options: [
+                ["any", "Entrada ou saída"],
+                ["debit", "Somente saída"],
+                ["credit", "Somente entrada"],
+              ],
+            },
+            {
+              name: "transaction_nature",
+              label: "Tipo de movimentação para automação",
+              required: false,
+              value: rule.transaction_nature ?? "",
+              options: Object.entries(natureLabels),
+              help: "O tipo é independente da categoria e define o efeito financeiro.",
+            },
+            {
+              name: "counterpart_account_id",
+              label: "Conta de contrapartida (quando exigida)",
+              required: false,
+              value: rule.counterpart_account_id ?? "",
+              options: data.financial_accounts
+                .filter((account) => !account.archived)
+                .map((account) => [account.id, `${account.name} · ${account.institution}`]),
+            },
+            {
+              name: "auto_approve",
+              label: "Aprovação automática",
+              value: String(rule.auto_approve ?? false),
+              options: [
+                ["false", "Não; manter para revisão"],
+                ["true", "Sim; somente se completa e sem duplicidade"],
+              ],
+              help: "A regra ainda será bloqueada por campos ausentes, contrapartida ou possível duplicidade.",
+            },
           ]}
           children={
             <CategorySubcategoryFields
@@ -122,13 +174,18 @@ export function CategoryEditors({
               priority: Number(v.priority),
               category_id: v.category_id,
               subcategory_id: v.subcategory_id || null,
+              account_id: v.account_id || null,
+              amount_direction: v.amount_direction,
+              transaction_nature: v.transaction_nature || null,
+              counterpart_account_id: v.counterpart_account_id || null,
+              auto_approve: v.auto_approve === "true",
             })
           }
         />
       )}
       <p>
-        Arquivar preserva referências e histórico. Regras alteradas só sugerem
-        categorias para linhas ainda pendentes.
+        Arquivar preserva referências e histórico. Regras alteradas podem ser
+        reaplicadas às linhas pendentes; movimentos já aprovados não são alterados.
       </p>
     </section>
   );

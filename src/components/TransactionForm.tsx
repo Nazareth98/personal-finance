@@ -35,6 +35,9 @@ export function TransactionForm({
         : "",
     ),
     [nature, setNature] = useState<Nature>(initial?.nature ?? "expense"),
+    [direction, setDirection] = useState<"debit" | "credit">(
+      initial && BigInt(initial.amount_cents) > 0n ? "credit" : "debit",
+    ),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const paired = [
@@ -43,6 +46,36 @@ export function TransactionForm({
     "redemption",
     "card_payment",
   ].includes(nature);
+  const observedAccount = accountId
+    ? data.financial_accounts.find((account) => account.id === accountId)
+    : undefined;
+  const counterpartLabel =
+    nature === "loan"
+      ? "Conta de passivo do empréstimo"
+      : nature === "redemption"
+        ? direction === "credit"
+          ? "Conta de investimento de origem"
+          : "Conta de caixa de destino"
+        : nature === "contribution"
+          ? direction === "debit"
+            ? "Conta de investimento de destino"
+            : "Conta de caixa de origem"
+          : nature === "card_payment"
+            ? direction === "debit"
+              ? "Cartão de destino"
+              : "Conta de caixa de origem"
+            : "Conta de contrapartida";
+  function counterpartAllowed(kind: Snapshot["financial_accounts"][number]["kind"]): boolean {
+    if (!accountId || !initial) return true;
+    if (nature === "contribution")
+      return direction === "debit" ? kind === "savings" : ["checking", "cash"].includes(kind);
+    if (nature === "redemption")
+      return direction === "credit" ? kind === "savings" : ["checking", "cash"].includes(kind);
+    if (nature === "card_payment")
+      return direction === "debit" ? kind === "credit" : ["checking", "cash"].includes(kind);
+    if (nature === "loan") return kind === "loan";
+    return true;
+  }
   async function handle(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -61,9 +94,13 @@ export function TransactionForm({
       await submit({
         account_id: accountId || v.account_id,
         description: v.description,
-        amount_cents: (nature === "expense" || paired
-          ? -amount
-          : amount
+        amount_cents: (accountId && initial
+          ? direction === "debit"
+            ? -amount
+            : amount
+          : nature === "expense" || paired
+            ? -amount
+            : amount
         ).toString(),
         nature,
         event_date: v.event_date,
@@ -92,6 +129,13 @@ export function TransactionForm({
   return (
     <form onSubmit={handle} className={`entry-form ${className}`.trim()} aria-busy={busy}>
       <p className="form-required-note">Campos com * são obrigatórios.</p>
+      {observedAccount && (
+        <div className="import-observed-account">
+          <span>Conta observada no extrato</span>
+          <strong>{observedAccount.name}</strong>
+          <small>{observedAccount.institution}</small>
+        </div>
+      )}
       <div className="form-grid">
         <label>
           <span>Descrição<span className="required-marker" aria-hidden="true"> *</span></span>
@@ -102,6 +146,19 @@ export function TransactionForm({
             required
           />
         </label>
+        {accountId && initial && (
+          <label>
+            <span>Movimento na conta observada<span className="required-marker" aria-hidden="true"> *</span></span>
+            <select
+              value={direction}
+              onChange={(event) => setDirection(event.target.value as "debit" | "credit")}
+            >
+              <option value="debit">Saída da conta</option>
+              <option value="credit">Entrada na conta</option>
+            </select>
+            <small>Altere somente se o arquivo trouxe a direção incorreta.</small>
+          </label>
+        )}
         <label>
           <span>Valor absoluto (R$)<span className="required-marker" aria-hidden="true"> *</span></span>
           <input
@@ -140,7 +197,7 @@ export function TransactionForm({
         </label>
         {!accountId && (
           <label>
-            <span>Conta de origem<span className="required-marker" aria-hidden="true"> *</span></span>
+            <span>Conta do lançamento<span className="required-marker" aria-hidden="true"> *</span></span>
             <select name="account_id" required>
               <option value="">Selecione</option>
               {data.financial_accounts
@@ -155,13 +212,20 @@ export function TransactionForm({
         )}
         {(paired || nature === "loan") && (
           <label>
-            <span>{nature === "loan"
-              ? "Conta de passivo do empréstimo"
-              : "Conta de destino"}<span className="required-marker" aria-hidden="true"> *</span></span>
-            <select name="counterpart_account_id" required>
+            <span>{counterpartLabel}<span className="required-marker" aria-hidden="true"> *</span></span>
+            <select
+              name="counterpart_account_id"
+              required
+              defaultValue={initial?.counterpart_account_id ?? ""}
+            >
               <option value="">Selecione</option>
               {data.financial_accounts
-                .filter((a) => !a.archived)
+                .filter(
+                  (a) =>
+                    !a.archived &&
+                    a.id !== accountId &&
+                    counterpartAllowed(a.kind),
+                )
                 .map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}

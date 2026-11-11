@@ -49,6 +49,7 @@ export const proposalSchema = z.object({
   external_key: z.string().optional(),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
+  counterpart_account_id: z.string().optional(),
   installment_index: z.number().int().positive().optional(),
   installment_count: z.number().int().positive().optional(),
   original_row: z.record(z.string(), z.string()).optional(),
@@ -87,6 +88,11 @@ export interface Rule extends Entity {
   match_mode: "contains_literal";
   requires_financial_nature_review: boolean;
   source_key: string | null;
+  account_id?: string | null;
+  amount_direction?: "any" | "debit" | "credit";
+  transaction_nature?: Nature | null;
+  counterpart_account_id?: string | null;
+  auto_approve?: boolean;
 }
 export interface Transaction
   extends Entity, Omit<Proposal, "category_id" | "subcategory_id"> {
@@ -127,11 +133,14 @@ export interface RawRow extends Entity {
   proposal: Proposal;
   status: string;
   transaction_id: string | null;
+  review_reason?: ReviewReason | null;
+  automation_rule_id?: string | null;
 }
 export interface Batch extends Entity {
   account_id: string;
   file_hash: string;
   parser_version: string;
+  created_at?: string;
 }
 export interface Card extends Entity {
   account_id: string;
@@ -167,6 +176,24 @@ export interface Snapshot extends DetailSnapshot {
   import_raw_rows: RawRow[];
   credit_cards: Card[];
   meupluggy_connections?: Connection[];
+}
+
+export const reviewReasonLabels = {
+  no_automation_rule: "Sem regra de automação",
+  automation_disabled: "Aprovação automática desativada",
+  nature_review_required: "Natureza financeira exige revisão",
+  missing_category: "Categoria não preenchida",
+  missing_subcategory: "Subcategoria não preenchida",
+  missing_counterpart: "Conta de contrapartida não preenchida",
+  possible_duplicate: "Possível duplicidade",
+  unsupported_automatic_nature: "Tipo exige decisão manual",
+} as const;
+export type ReviewReason = keyof typeof reviewReasonLabels;
+
+export interface ImportProcessingResult {
+  approved: number;
+  linked: number;
+  pending: number;
 }
 
 export function cents(input: string): bigint {
@@ -206,12 +233,22 @@ export function normalize(v: string): string {
     .toLocaleLowerCase("pt-BR")
     .trim();
 }
-export function suggest(description: string, rules: Rule[]): Rule | undefined {
+export function suggest(
+  description: string,
+  rules: Rule[],
+  context?: { accountId?: string; amountCents?: string },
+): Rule | undefined {
+  const amount = context?.amountCents ? BigInt(context.amountCents) : null;
   return [...rules]
     .filter(
       (r) =>
         r.active &&
         r.match_mode === "contains_literal" &&
+        (!r.account_id || !context?.accountId || r.account_id === context.accountId) &&
+        ((r.amount_direction ?? "any") === "any" ||
+          amount === null ||
+          (r.amount_direction === "debit" && amount < 0n) ||
+          (r.amount_direction === "credit" && amount > 0n)) &&
         normalize(description).includes(normalize(r.keyword)),
     )
     .sort(
@@ -220,6 +257,29 @@ export function suggest(description: string, rules: Rule[]): Rule | undefined {
         b.keyword.length - a.keyword.length ||
         a.id.localeCompare(b.id),
     )[0];
+}
+
+export function pendingDuplicateCandidates(
+  row: RawRow,
+  batch: Batch,
+  rows: RawRow[],
+  batches: Batch[],
+): RawRow[] {
+  return rows.filter((candidate) => {
+    if (candidate.id === row.id || candidate.status === "ignored") return false;
+    const candidateBatch = batches.find((item) => item.id === candidate.batch_id);
+    if (!candidateBatch || candidateBatch.account_id !== batch.account_id) return false;
+    const comesFirst =
+      candidate.batch_id === row.batch_id
+        ? candidate.row_index < row.row_index
+        : `${candidateBatch.created_at ?? ""}:${candidateBatch.id}` <
+          `${batch.created_at ?? ""}:${batch.id}`;
+    return (
+      comesFirst &&
+      BigInt(candidate.proposal.amount_cents) === BigInt(row.proposal.amount_cents) &&
+      candidate.proposal.event_date === row.proposal.event_date
+    );
+  });
 }
 export function totals(
   transactions: Transaction[],

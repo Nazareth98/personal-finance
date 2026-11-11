@@ -216,6 +216,8 @@ Animações de estado duram 120–200 ms e não carregam informação essencial.
 | Open Finance | Estado textual da conexão, consentimento, última sincronização e revogação; distinguir mock e integração real |
 | Backup/restauração | Exportação JSON para restauração; prévia aditiva do próprio workspace, quantidades/avisos e confirmação; conexões restauradas revogadas |
 
+Na fila de importação, cada resumo pendente deve mostrar antes da expansão: motivo da revisão, descrição, valor e direção, conta observada, tipo proposto, datas, categoria, subcategoria e contrapartida. O detalhe apresenta regra correspondente, dados originais e candidatos de duplicidade. Filtros por motivo e carregamento progressivo preservam legibilidade em filas extensas. Verde continua reservado ao valor positivo; aprovação automática e sucesso usam estados neutros.
+
 Não solicitar arquivos financeiros para exemplos de interface. Usar dados sintéticos. Não exibir dados pessoais em capturas, logs ou fixtures. Controles de privacidade devem ocultar valores também dos nomes acessíveis quando a intenção for ocultação na apresentação; explicar que isso não substitui autenticação nem protege o DOM.
 
 ## 9. Acessibilidade verificável

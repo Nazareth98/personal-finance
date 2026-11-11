@@ -1,4 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
+const executablePath = process.env.PLAYWRIGHT_EXECUTABLE_PATH;
+
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: false,
@@ -6,7 +8,9 @@ export default defineConfig({
   timeout: 30000,
   use: {
     baseURL: "http://127.0.0.1:5179",
-    channel: "chromium",
+    ...(executablePath
+      ? { launchOptions: { executablePath } }
+      : { channel: "chromium" }),
     trace: "retain-on-failure",
   },
   webServer:

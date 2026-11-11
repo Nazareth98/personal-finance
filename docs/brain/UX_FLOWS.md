@@ -2,7 +2,7 @@
 
 1. Cadastro → confirmar e-mail → entrada → workspace vazio → primeira conta/categoria.
 2. Movimento → natureza explícita → datas independentes → conta(s) → gravar atomicamente.
-3. Arquivo local → parser → prévia/totais/avisos → autorização → lote privado → revisão → aprovar, ignorar ou vincular individualmente; a interface também oferece aprovação em lote mediante confirmação, com os limites em [IMPORTERS.md](IMPORTERS.md).
+3. Arquivo local → conta observada → parser → prévia/totais/avisos → autorização → lote privado → automação segura → resumo de aprovados/vinculados/pendentes → fila por motivo → aprovar, ignorar ou vincular individualmente.
 4. Meta → categoria/período/cadência → valor fixo OU percentual → renda confirmada ou previsão explicitamente informada → disponibilidade/excedente.
 5. Caixinha → conta investimento → objetivo → aporte entre contas → progresso derivado do saldo.
 6. Holerite → conferir componentes → vincular créditos reais → visualizar diferença.

@@ -167,6 +167,43 @@ test("regras literais, acentos e prioridade", () => {
   expect(suggest("cafe * fictício", [base])?.id).toBe("1");
   expect(suggest("cafe qualquer", [base])).toBeUndefined();
 });
+test("automação respeita conta observada e direção do extrato", () => {
+  const base: Rule = {
+    id: "resgate",
+    workspace_id: "a",
+    keyword: "resgate investimento",
+    priority: 1,
+    category_id: "investments",
+    subcategory_id: "redemption",
+    active: true,
+    match_mode: "contains_literal",
+    requires_financial_nature_review: false,
+    source_key: null,
+    account_id: "itau-checking",
+    amount_direction: "credit",
+    transaction_nature: "redemption",
+    counterpart_account_id: "itau-investments",
+    auto_approve: true,
+  };
+  expect(
+    suggest("RESGATE INVESTIMENTO", [base], {
+      accountId: "itau-checking",
+      amountCents: "10000",
+    })?.id,
+  ).toBe("resgate");
+  expect(
+    suggest("RESGATE INVESTIMENTO", [base], {
+      accountId: "itau-checking",
+      amountCents: "-10000",
+    }),
+  ).toBeUndefined();
+  expect(
+    suggest("RESGATE INVESTIMENTO", [base], {
+      accountId: "outra-conta",
+      amountCents: "10000",
+    }),
+  ).toBeUndefined();
+});
 test("fingerprint sugere, não funde duas compras iguais", () => {
   const t = tx("expense", "-10000");
   expect(

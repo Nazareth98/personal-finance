@@ -38,10 +38,12 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
       [wa],
     )
   ).rows[0].id;
-  await db.query(
-    "insert into public.subcategories(workspace_id,category_id,name) values($1,$2,'Subcategoria sintética')",
-    [wa, category],
-  );
+  const subcategory = (
+    await db.query(
+      "insert into public.subcategories(workspace_id,category_id,name) values($1,$2,'Subcategoria sintética') returning id",
+      [wa, category],
+    )
+  ).rows[0].id;
   await db.query(
     "insert into public.categorization_rules(workspace_id,category_id,keyword) values($1,$2,'loja fictícia')",
     [wa, category],
@@ -172,6 +174,102 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
     5,
   );
   checks++;
+  const redemption = (
+    await db.query("select public.record_transaction($1) id", [
+      {
+        ...p,
+        description: "Resgate sintético observado na conta corrente",
+        amount_cents: "25000",
+        nature: "redemption",
+        counterpart_account_id: dest,
+        source_key: randomUUID(),
+      },
+    ])
+  ).rows[0].id;
+  assert.deepEqual(
+    (
+      await db.query(
+        "select account_id,amount_cents::text amount from public.transactions where id=$1 or related_id=$1 order by amount_cents",
+        [redemption],
+      )
+    ).rows,
+    [
+      { account_id: dest, amount: "-25000" },
+      { account_id: account, amount: "25000" },
+    ],
+  );
+  checks++;
+  await db.query(
+    `insert into public.categorization_rules(
+      workspace_id,category_id,subcategory_id,keyword,account_id,
+      amount_direction,transaction_nature,auto_approve
+    ) values($1,$2,$3,'mercado automático',$4,'debit','expense',true)`,
+    [wa, category, subcategory, account],
+  );
+  const automaticProposal = {
+    ...p,
+    description: "Mercado automático sintético",
+    amount_cents: "-2375",
+    event_date: "2026-03-10",
+    bank_date: "2026-03-10",
+    competence: "2026-03-01",
+    external_key: undefined,
+  };
+  const automaticBatch = (
+    await db.query("select public.stage_import($1,$2,$3,$4) id", [
+      account,
+      "automatic-synthetic-file",
+      "csv-v1",
+      JSON.stringify([automaticProposal, automaticProposal]),
+    ])
+  ).rows[0].id;
+  const automationResult = (
+    await db.query("select public.process_imports($1) result", [automaticBatch])
+  ).rows[0].result;
+  assert.deepEqual(automationResult, { approved: 1, linked: 0, pending: 1 });
+  assert.equal(
+    (
+      await db.query(
+        "select review_reason from public.import_raw_rows where batch_id=$1 and status='pending'",
+        [automaticBatch],
+      )
+    ).rows[0].review_reason,
+    "possible_duplicate",
+  );
+  checks += 2;
+  const unclassifiedProposal = {
+    ...automaticProposal,
+    description: "Movimento sem regra sintético",
+    amount_cents: "-4812",
+    event_date: "2026-03-11",
+    bank_date: "2026-03-11",
+  };
+  const unclassifiedBatch = (
+    await db.query("select public.stage_import($1,$2,$3,$4) id", [
+      account,
+      "unclassified-synthetic-file",
+      "csv-v1",
+      JSON.stringify([unclassifiedProposal, unclassifiedProposal]),
+    ])
+  ).rows[0].id;
+  assert.deepEqual(
+    (
+      await db.query("select public.process_imports($1) result", [
+        unclassifiedBatch,
+      ])
+    ).rows[0].result,
+    { approved: 0, linked: 0, pending: 2 },
+  );
+  assert.deepEqual(
+    (
+      await db.query(
+        "select review_reason from public.import_raw_rows where batch_id=$1 order by row_index",
+        [unclassifiedBatch],
+      )
+    ).rows.map((row) => row.review_reason),
+    ["no_automation_rule", "possible_duplicate"],
+  );
+  checks += 2;
   await denied("select public.mock_connection_intent($1,$2,$3)", [account, "Synthetic", ["accounts"]]);
   await denied("select public.pluggy_register_connection($1,$2,$3,$4,$5)", [account, "synthetic", ["accounts"], "Synthetic", "synthetic"]);
   const { detailsSecurity } = await import("./details-security.mjs");
@@ -187,7 +285,9 @@ export async function financialSecurity(db, { a, b, wa, wb }) {
       [wb],
     )
   ).rows[0].id;
-  for (const table of Object.keys(snap).filter((k) => k !== "meupluggy_connections")) {
+  for (const table of Object.keys(snap).filter(
+    (key) => key !== "meupluggy_connections" && Array.isArray(snap[key]),
+  )) {
     assert.equal(
       (
         await db.query(

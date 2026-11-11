@@ -11,6 +11,7 @@ Ordem: identidade/RLS → livro financeiro e revisão → importadores → Meu P
 - [Importadores](IMPORTERS.md), [categorização](CATEGORIZATION.md), [conciliação](RECONCILIATION.md), [fluxos](UX_FLOWS.md).
 - [Meu Pluggy](MEUPLUGGY.md), [migração histórica](MIGRATION_REPORT.md).
 - [ADR-0007 — importação privada de categorias e regras](adr/ADR-0007-private-categories-rules-import.md).
+- [ADR-0008 — conta observada e automação segura](adr/ADR-0008-import-automation-observed-account.md).
 - [Homologação no ambiente real](DEPLOY_VALIDATION.md). Por decisão do proprietário, Supabase local não deve ser executado.
 - [Design system — Grafite e Âmbar](DESIGN_SYSTEM.md): tokens claros/escuros, ícones, componentes, interação e acessibilidade.
 - [Plano vivo de ajuda contextual](PLANO_AJUDA_CONTEXTO.md): etapas, inventário de todas as abas, pré-requisitos, textos propostos, pendências e evidências de implementação.

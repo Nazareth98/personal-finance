@@ -2,6 +2,8 @@
 
 Importação privada (migrations 012 e 013): cobrir JSON malformado, campos/match mode não suportados, categoria/subcategoria inexistente, associação de naturezas conflitante, hash repetido, reimportação com linhas removidas e isolamento por workspace. Usar somente dados sintéticos. Homologar a RPC apenas no Supabase remoto; não iniciar Supabase local.
 
+Importação automática (migration 014): cobrir resgate positivo observado em conta corrente com contrapartida negativa em investimento; aporte no sentido inverso; regra limitada por conta e direção; ausência de subcategoria/contrapartida; regra sem autorização; identidade externa repetida; possível duplicidade contra transação aprovada e linha anterior do lote; rollback integral da RPC; isolamento por workspace. No navegador, conferir motivo, conta observada, direção, datas, classificação, contrapartida, candidatos, filtros e carregamento progressivo em desktop e celular.
+
 - npm run typecheck, npm run lint, npm test, npm run build: obrigatórios por fase.
 - npm run test:security: cria banco PostgreSQL descartável, aplica migrations e usa roles anon/authenticated e duas identidades sintéticas. Testa provisionamento, leitura agregada, alteração de dono/membership e Storage cruzado/traversal. Auth e Storage são schemas mínimos para teste SQL, não substituem e2e dos serviços Supabase.
 - Login, confirmação de e-mail e recuperação devem ser homologados no ambiente real, conforme instrução do proprietário; teste SQL não comprova entrega de e-mail. Não executar Supabase local.
@@ -53,3 +55,10 @@ Estado atual: 21 testes unitários e 195 verificações PostgreSQL. Adicionados 
 - A regressão percorre H01–H30: acesso, navegação/período, indicadores, contas e próximos passos, orçamentos, caixinhas, holerites/rubricas, perfil, backup/restauração e exclusão, além da jornada prioritária. Confere que consultar ajuda não chama restauração nem alteração de perfil.
 - Textos críticos verificados: aporte não é renda nem despesa, holerite não cria receita e restauração adiciona somente registros ausentes. A inspeção visual via Playwright CLI conferiu a ajuda de acesso em viewport móvel, com foco visível, conteúdo completo e sem corte horizontal.
 - Supabase local não foi iniciado. Auth, RLS, restauração e integrações reais permanecem para homologação remota; leitor de tela e auditoria completa de contraste seguem pendentes para a etapa 6.
+
+## Automação de importação e fila de decisão — 11/11/2026
+
+- Tipagem, lint, 22 testes unitários e build de produção aprovados. A regressão unitária cobre seleção de regra por conta observada e direção.
+- 180 verificações no PostgreSQL descartável aprovadas. Os cenários novos cobrem resgate do Itaú observado como crédito na conta corrente com débito pareado no investimento, aprovação automática de regra completa, bloqueio da segunda linha duplicada no mesmo lote e comparação com uma linha pendente anterior. Nenhum Supabase local foi iniciado.
+- Os 18 cenários Playwright passaram em desktop e Pixel 7 com Chromium instalado e API HTTP sintética. A fila foi verificada com motivo da pendência, conta observada, direção, classificação, contrapartida e candidato anterior, inclusive filtro por motivo e layout móvel.
+- Tipos gerados novamente a partir das migrations, sem edição manual. A migration 014 e a integração real continuam pendentes de aplicação e homologação no Supabase remoto antes da publicação do frontend correspondente.

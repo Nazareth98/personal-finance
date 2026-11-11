@@ -77,6 +77,12 @@ async function mockApi(page: Page) {
       });
       response = null;
     } else if (path.endsWith("/stage_import")) response = "synthetic-batch";
+    else if (path.endsWith("/process_imports"))
+      response = {
+        approved: 0,
+        linked: 0,
+        pending: data.import_raw_rows.filter((row) => row.status === "pending").length,
+      };
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -104,7 +110,7 @@ test("ajudas da jornada prioritária explicam pré-requisitos sem apagar o formu
   await login(page);
   const sections: [string, string[]][] = [
     ["Contas e cartões", ["Contas financeiras", "Cartões de crédito", "Faturas e conciliação", "Planejar parcelamento"]],
-    ["Categorias e regras", ["Nova categoria", "Nova subcategoria", "Regra de sugestão", "Importar categorias e regras privadas", "Editar cadastros"]],
+    ["Categorias e regras", ["Nova categoria", "Nova subcategoria", "Regra de classificação e automação", "Importar categorias e regras privadas", "Editar cadastros"]],
     ["Meu Pluggy", ["Meu Pluggy"]],
     ["Importar e revisar", ["Importar arquivo", "Revisar antes de contabilizar", "Histórico de lotes"]],
     ["Lançamentos", ["Registrar movimento", "Livro financeiro"]],
@@ -118,8 +124,8 @@ test("ajudas da jornada prioritária explicam pré-requisitos sem apagar o formu
       const dialog = page.getByRole("dialog", { name: `Ajuda: ${title}`, exact: true });
       await expect(dialog).toBeVisible();
       if (title === "Revisar antes de contabilizar") {
-        await expect(dialog).toContainText("não define a natureza");
-        await expect(dialog).toContainText("não garante categoria");
+        await expect(dialog).toContainText("conta observada");
+        await expect(dialog).toContainText("conta de contrapartida");
         await dialog.evaluate(element => { element.scrollTop = element.scrollHeight; });
         await expect(dialog.getByRole("button", { name: "Fechar ajuda" })).toBeInViewport();
       }
@@ -176,7 +182,7 @@ test("ajudas das demais áreas completam o inventário sem executar ações", as
   expect(requests.some(({ path }) => path.endsWith("/restore_backup") || path.endsWith("/profiles"))).toBe(false);
 });
 
-test("falha parcial da aprovação em lote atualiza pendências e informa o resultado incerto", async ({ page }) => {
+test("fila pendente mostra motivo, conta, direção e duplicidade anterior", async ({ page }) => {
   const { data } = await mockApi(page);
   const account = "30000000-0000-4000-8000-000000000003";
   const batch = "40000000-0000-4000-8000-000000000004";
@@ -185,29 +191,21 @@ test("falha parcial da aprovação em lote atualiza pendências e informa o resu
   for (const [index, description] of ["Primeira compra fictícia", "Segunda compra fictícia"].entries()) {
     data.import_raw_rows.push({ id: `row-${index}`, workspace_id: workspace, batch_id: batch, row_index: index, status: "pending", transaction_id: null, proposal: { description, amount_cents: "-1000", event_date: "2026-01-09", bank_date: "2026-01-09", competence: "2026-01-01", nature: "expense" } });
   }
-  let attempts = 0;
-  await page.route("**/rest/v1/rpc/review_import", async route => {
-    attempts += 1;
-    if (attempts === 1) {
-      data.import_raw_rows[0].status = "approved";
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("transacao-sintetica") });
-    } else {
-      await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "falha sintética" }) });
-    }
-  });
   await login(page);
   await navigate(page, "Importar e revisar");
-  await page.getByText("Primeira compra fictícia").click();
+  const first = page.getByText("Primeira compra fictícia", { exact: true });
+  await expect(first).toBeVisible();
+  await expect(page.getByText("Sem regra de automação", { exact: true })).toBeVisible();
+  await expect(page.getByText("Conta sintética", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Saída", { exact: true }).first()).toBeVisible();
+  await first.click();
   await page.getByRole("button", { name: "Ajuda sobre revisar movimento" }).click();
-  await expect(page.getByRole("dialog", { name: "Ajuda: revisar movimento" })).toContainText("não define a natureza");
+  await expect(page.getByRole("dialog", { name: "Ajuda: revisar movimento" })).toContainText("conta observada");
   await page.getByRole("button", { name: "Fechar ajuda" }).click();
-  page.once("dialog", dialog => void dialog.accept());
-  await page.getByRole("button", { name: "Aprovar todos sem duplicidade em lote" }).click();
-  await expect(page.getByRole("status").first()).toContainText("1 movimento(s) tiveram resposta confirmada");
-  await expect(page.getByRole("status").first()).toContainText("última tentativa também pode ter sido concluída");
-  await expect(page.getByText("Primeira compra fictícia")).toHaveCount(0);
-  await expect(page.getByText("Segunda compra fictícia")).toBeVisible();
-  expect(attempts).toBe(2);
+  await page.getByRole("combobox", { name: "Motivo da pendência" }).selectOption("possible_duplicate");
+  await expect(page.getByText("Primeira compra fictícia", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Segunda compra fictícia", { exact: true })).toBeVisible();
+  await expect(page.getByText("Possível duplicidade", { exact: true })).toBeVisible();
 });
 test("ajuda contextual abre por teclado, mantém o foco e fecha sem alterar dados", async ({ page }) => {
   const { requests } = await mockApi(page);
@@ -305,7 +303,7 @@ test("upload exige prévia e confirmação antes de persistir", async ({
   await login(page);
   await navigate(page, "Importar e revisar");
   await page
-    .getByRole("combobox", { name: "Conta de destino", exact: true })
+    .getByRole("combobox", { name: "Conta observada no extrato", exact: true })
     .selectOption(data.financial_accounts[0].id);
   await page.getByLabel(/^Arquivo\b/).setInputFiles({
     name: "sintetico.csv",
@@ -321,7 +319,7 @@ test("upload exige prévia e confirmação antes de persistir", async ({
   expect(requests.some((r) => r.path.endsWith("/stage_import"))).toBe(false);
   await page.getByRole("checkbox").last().check();
   await page.getByRole("button", { name: "Enviar para revisão" }).click();
-  await expect(page.getByRole("status").first()).toContainText("Lote enviado");
+  await expect(page.getByRole("status").first()).toContainText("Lote processado");
   expect(requests.some((r) => r.path.endsWith("/stage_import"))).toBe(true);
 });
 test("falha de autenticação não libera dados", async ({ page }) => {

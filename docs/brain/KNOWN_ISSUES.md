@@ -1,6 +1,6 @@
 # Pendências verificadas
 
-Data: 10/11/2026.
+Data: 11/11/2026.
 
 ## Identidade e homologação
 
@@ -12,10 +12,11 @@ Data: 10/11/2026.
 
 ## Produto financeiro e importação
 
-- Alta: a aprovação em lote continua sequencial e pode registrar parte das decisões se uma RPC falhar ou perder a resposta. A tela tenta atualizar a lista e informa as respostas confirmadas e a incerteza da última tentativa; se a atualização falhar, é necessário recarregar. O filtro não garante categoria ou natureza correta e não compara os pendentes entre si; ver [PLANO_AJUDA_CONTEXTO.md](PLANO_AJUDA_CONTEXTO.md).
+- Alta: migration 014 de conta observada e automação ainda precisa ser aplicada e homologada no Supabase remoto. Até isso ocorrer, o frontend novo não deve ser publicado isoladamente.
+- Média: a conta de investimento concilia aportes e resgates pelo fluxo de caixa; posição de ativos, custo médio, rendimentos incorporados à cota e valor de mercado ainda não possuem modelo próprio.
 - Média: o componente de ajuda e os pontos H01–H30 estão implementados em todas as abas inventariadas. Restam estados orientados, atalhos entre seções com proteção contra perda de formulários, conferência com leitor de tela e validação completa de contraste no [plano vivo](PLANO_AJUDA_CONTEXTO.md).
 - Alta: migrations 012 e 013 e importador dos JSONs privados ainda precisam ser aplicados e homologados no Supabase remoto; conferir importação e isolamento no ambiente real.
-- Média: faltam contextos por banco/cartão/direção nas regras, histórico de versões e fluxo para salvar classificação como regra com prévia de impacto.
+- Média: regras já aceitam conta observada, direção, tipo e contrapartida. Ainda faltam histórico de versões e fluxo para salvar uma classificação da fila como regra com prévia de impacto.
 - Média: projeções, alertas configuráveis, base por média histórica e filtros/gráficos avançados não estão integralmente implementados.
 - Média: parsers específicos de faturas Itaú/Nubank/Caixa, OCR e migração multiaba não estão homologados. PDF genérico pode reconhecer só parte das linhas; conferência manual é necessária.
 - Média: XLS binário requer conversão para XLSX; snapshots completos precisarão paginação para históricos extensos.
