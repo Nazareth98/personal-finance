@@ -50,3 +50,12 @@
 36. Pagamento de fatura reduz dívida, não constitui consumo adicional; não somar fatura e lançamentos sem conciliação.
 37. Não ligar templates a dados reais, bancos ou API sem aprovação explícita.
 38. Testar cenários de contas, faturas, orçamentos e relatórios com `bigint` antes de promover versões.
+
+## Complemento v0.5.1 — Semântica, gráficos e carregamento
+
+39. Consulte `docs/design-system/CHARTS_AND_COLORS.md` antes de representar valores negativos, positivos ou séries temporais.
+40. Use `finance-positive`/`finance-negative` para **resultado assinado**; `finance-income`/`finance-expense` para **natureza**. Transferência própria é terceira natureza.
+41. Cores dos gráficos são tokens `chart-*`. Sempre mostre rótulos, valores e legendas; nunca use somente a cor.
+42. Componentes `CashFlowChart`, `TrendLineChart` e `CategoryDonutChart` recebem valores monetários como bigint em centavos. Converta somente proporções limitadas para coordenadas CSS/SVG.
+43. Para tabelas use `TableSkeleton`; para gráficos `ChartSkeleton`. Preserve estrutura visual e anuncie status com `role=status`, sem loops de loading artificiais em produção.
+44. Não apresentar dados sintéticos como histórico bancário real.

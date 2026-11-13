@@ -3,7 +3,7 @@
   "meta": {
     "name": "Corporate UI",
     "purpose": "Personal finance dashboards",
-    "version": "0.2.0",
+    "version": "0.5.1",
     "figma": "https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr"
   },
   "primitive": {
@@ -43,7 +43,19 @@
       "finance-transfer": "#2563EB",
       "text-on-action": "#FFFFFF",
       "text-on-danger": "#FFFFFF",
-      "border-focus": "#2563EB"
+      "border-focus": "#2563EB",
+      "chart-category-1": "#2563EB",
+      "chart-category-2": "#0F766E",
+      "chart-category-3": "#7C3AED",
+      "chart-category-4": "#B45309",
+      "chart-category-5": "#64748B",
+      "finance-positive": "#15803D",
+      "finance-negative": "#B91C1C",
+      "finance-neutral": "#64748B",
+      "chart-income": "#15803D",
+      "chart-expense": "#B91C1C",
+      "chart-neutral": "#2563EB",
+      "chart-grid": "#E2E8F0"
     },
     "dark": {
       "bg-canvas": "#0B1220",
@@ -62,7 +74,19 @@
       "finance-transfer": "#60A5FA",
       "text-on-action": "#FFFFFF",
       "text-on-danger": "#0B1220",
-      "border-focus": "#93C5FD"
+      "border-focus": "#93C5FD",
+      "chart-category-1": "#60A5FA",
+      "chart-category-2": "#2DD4BF",
+      "chart-category-3": "#C4B5FD",
+      "chart-category-4": "#FBBF24",
+      "chart-category-5": "#94A3B8",
+      "finance-positive": "#4ADE80",
+      "finance-negative": "#F87171",
+      "finance-neutral": "#94A3B8",
+      "chart-income": "#4ADE80",
+      "chart-expense": "#F87171",
+      "chart-neutral": "#60A5FA",
+      "chart-grid": "#334155"
     }
   },
   "spacing": {

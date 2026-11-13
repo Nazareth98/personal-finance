@@ -95,3 +95,11 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .transaction-amount--transfer{color:var(--color-finance-transfer)}
 @media(max-width:1050px){.transactions-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.transactions-filters>.ui-field:first-child{grid-column:1/-1}}
 @media(max-width:680px){.transactions-filters,.transactions-metrics{grid-template-columns:1fr}.transactions-filters>.ui-field:first-child{grid-column:auto}.transactions-table-card>.ui-pagination{padding:var(--spacing-3)}}
+
+/* Composite financial chart layouts. */
+.template-chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-4)}
+.template-chart-grid .ui-card{min-width:0}
+.template-chart-grid .ui-card>h2,.template-chart-grid .ui-card>.muted{margin-bottom:var(--spacing-3)}
+.chart-demo-toggle{background:transparent;border:1px solid var(--color-border-default);color:var(--color-text-primary);border-radius:var(--radius-md);padding:var(--spacing-2);cursor:pointer;font:600 var(--font-size-xs)/1.4 var(--font-family-sans)}
+.chart-demo-toggle:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+@media(max-width:1100px){.template-chart-grid{grid-template-columns:1fr}}

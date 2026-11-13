@@ -73,3 +73,12 @@ Documentação de implementação: [Data Display](docs/design-system/DATA_DISPLA
 Seis telas funcionais de demonstração via navegação na lateral: **Visão geral, Transações, Contas, Cartões e faturas, Orçamentos e Relatórios**. Os dados são fictícios e não há persistência nem acesso bancário.
 
 Acesse cada tela em `/#overview`, `/#transactions`, `/#accounts`, `/#cards`, `/#budgets` e `/#reports`. O Storybook inclui prévias dos templates. Consulte [TEMPLATES.md](docs/design-system/TEMPLATES.md).
+
+## Cores financeiras, gráficos e loading — v0.5.1
+
+- Semântica positiva/negativa/neutra independente de receita/despesa/transferência e pareada em Light/Dark.
+- Gráficos reutilizáveis: fluxo de caixa comparativo, linha de evolução e rosca de categorias, com valores exatos em centavos (`bigint`).
+- Skeletons estruturais para tabela e gráficos: `TableSkeleton`, `ChartSkeleton`, com estados acessíveis e respeito a movimento reduzido.
+- Storybook documenta os novos componentes com exemplos totalmente fictícios.
+
+Consulte [Charts & Colors](docs/design-system/CHARTS_AND_COLORS.md).

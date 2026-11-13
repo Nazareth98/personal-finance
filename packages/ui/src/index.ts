@@ -31,3 +31,11 @@ export type { MetricCardProps } from './components/MetricCard';
 export { Pagination } from './components/Pagination';
 export type { PaginationProps } from './components/Pagination';
 export { sortRows,paginateRows } from './lib/table-data';
+
+export { CashFlowChart } from './components/CashFlowChart';
+export type { CashFlowChartProps,CashFlowPoint } from './components/CashFlowChart';
+export { TrendLineChart } from './components/TrendLineChart';
+export type { TrendLineChartProps,TrendPoint } from './components/TrendLineChart';
+export { CategoryDonutChart } from './components/CategoryDonutChart';
+export type { CategoryDonutChartProps,CategorySlice } from './components/CategoryDonutChart';
+export { percentage,signedRatio,categoryPercentages } from './lib/chart-data';

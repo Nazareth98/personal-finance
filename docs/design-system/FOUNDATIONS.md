@@ -42,3 +42,7 @@ Outros tokens (`status-*`) estão no JSON. Valores financeiros positivos e negat
 - Evitar tooltips como única fonte de informação; usar rótulos explícitos para saldos, valores e competência.
 - Estado vazio, carregamento, erro e confirmação de ações destrutivas.
 - Não usar valores financeiros de produção em exemplos ou testes.
+
+## Cores para valores positivos e negativos — atualização v0.5.1
+
+Ver [Semântica financeira, gráficos e loading](CHARTS_AND_COLORS.md). Foram criados tokens independentes de `finance-income` / `finance-expense` para representar resultados positivos, negativos e neutros. Esse contrato deve ser reproduzido nas coleções Light e Dark do Figma.

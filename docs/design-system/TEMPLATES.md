@@ -34,3 +34,9 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 ## Critérios para v1 estável
 
 Aprovação de interação com teclado/leitores de tela, revisão de contraste real, testes de navegadores, regressão visual, contratos completos no Figma e consumo por dados reais autorizados com autenticação. Antes disso, os templates seguem **Beta**.
+
+## Complemento v0.5.1
+
+Visão geral: gráfico comparativo de fluxo de caixa com alternância demonstrativa para ChartSkeleton. Relatórios: fluxo de caixa, evolução do resultado acumulado e rosca de despesas por categoria. Em tabelas, loading preserva a altura e as colunas por meio de TableSkeleton.
+
+Valores exibidos e cores seguem `docs/design-system/CHARTS_AND_COLORS.md`. Não inferir que a série sintética representa histórico real.

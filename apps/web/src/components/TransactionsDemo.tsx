@@ -1,5 +1,5 @@
 import {useMemo,useState} from 'react';
-import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,Skeleton,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
+import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,TableSkeleton,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
 import {demoTransactions,filterTransactions,formatCentsBRL,formatLocalDate,transactionKindLabel,totalsFromTransactions,type DemoTransaction,type TransactionType} from '../lib/demo-transactions';
 
 const PAGE_SIZE=5;
@@ -35,8 +35,7 @@ onChange={e=>{setKind(e.target.value as 'all'|TransactionType);setPage(1)}}/>
 <MetricCard label="Resultado" value={formatCentsBRL(totals.income-totals.expense)} supportingText="Entradas menos despesas"/>
 </div>
 <Card className="transactions-table-card">{loading?
-<div role="status" aria-label="Carregando transações" className="transactions-loading">
-{Array.from({length:5},(_,i)=><Skeleton key={i} height="35px"/>)}</div>:<>
+<TableSkeleton rows={5} columns={5} label="Carregando movimentações demonstrativas"/>:<>
 {rows.length?<DataTable ariaLabel="Tabela de transações fictícias" columns={columns} rows={paginateRows(rows,currentPage,PAGE_SIZE)}
 getRowKey={row=>row.id} sort={sort} onSortChange={setSort}/>:
 <EmptyState title="Nenhuma movimentação encontrada" description="Altere a busca ou redefina os filtros."
