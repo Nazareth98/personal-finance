@@ -19,7 +19,7 @@ Novos objetos em `public` não concedem privilégios automaticamente a `anon` ou
 | planejamento | `category_budgets`, `savings_boxes`, `savings_movements` |
 | integração | `pluggy_connections`, `sync_runs`, `webhook_events` |
 
-As tabelas serão criadas na etapa que as utiliza. Não antecipar o modelo completo em uma migration única.
+As tabelas são criadas na etapa que as utiliza. O grupo `livro`, as categorias e a base de cartões foram entregues na Etapa 2; veja [`LEDGER.md`](LEDGER.md). Os demais grupos permanecem planejados.
 
 ## Execução das migrations
 

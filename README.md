@@ -45,7 +45,7 @@ O plano Starter do Figma não permite usar múltiplos modos na mesma coleção. 
 
 ## Estado da implementação
 
-A fundação de interface e domínio e o acesso do único proprietário estão implementados. O dashboard financeiro ainda usa dados fictícios; persistência do livro, Open Finance e importações serão adicionados incrementalmente. Não copiar dados privados ou históricos para fixtures.
+A fundação, o acesso do único proprietário e o livro financeiro persistente estão implementados. O modo visual de teste usa dados fictícios; em produção, contas e lançamentos vêm do Supabase. Metas, Open Finance e importações serão adicionados incrementalmente. Não copiar dados privados ou históricos para fixtures.
 
 ## Documentação do Design System (v0.2)
 

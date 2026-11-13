@@ -9,6 +9,9 @@ import { AccountsPage } from './pages/AccountsPage';
 import { CardsPage } from './pages/CardsPage';
 import { BudgetsPage } from './pages/BudgetsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import type { LedgerRepository } from './ledger/contracts';
+import { useLedger, type LedgerState } from './ledger/useLedger';
+import { ManualTransactionForm } from './components/ManualTransactionForm';
 
 export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'reports';
 const navigation: { id: PageId; title: string; icon: string }[] = [
@@ -25,7 +28,7 @@ function getPage(): PageId {
   return navigation.some(item => item.id === fragment) ? fragment as PageId : 'overview';
 }
 
-const pages: Record<PageId, ComponentType> = {
+const pages: Record<PageId, ComponentType<{ ledger?: LedgerState }>> = {
   overview: OverviewPage,
   transactions: TransactionsPage,
   accounts: AccountsPage,
@@ -37,13 +40,15 @@ const pages: Record<PageId, ComponentType> = {
 type DashboardAppProps = {
   userEmail?: string;
   onSignOut?: () => Promise<void>;
+  ledgerRepository?: LedgerRepository;
 };
 
-export function DashboardApp({ userEmail, onSignOut }: DashboardAppProps) {
+export function DashboardApp({ userEmail, onSignOut, ledgerRepository }: DashboardAppProps) {
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { preference, setPreference } = useTheme();
+  const ledger = useLedger(ledgerRepository);
 
   useEffect(() => {
     const onHashChange = () => setPage(getPage());
@@ -73,22 +78,25 @@ export function DashboardApp({ userEmail, onSignOut }: DashboardAppProps) {
           <span aria-hidden="true">{item.icon}</span>{item.title}
         </a>)}
       </nav>
-      <p className="sidebar-note">Corporate UI v0.5 · Todos os dados são fictícios.</p>
+      <p className="sidebar-note">{ledgerRepository ? 'Livro financeiro pessoal.' : 'Corporate UI v0.5 · Todos os dados são fictícios.'}</p>
     </aside>
     <main id="conteudo" className="main">
       <div className="app-toolbar">
         <span><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
         <div className="app-toolbar__actions">
           <div className="app-theme-control"><Select label="Aparência" value={preference} onChange={event => setPreference(event.target.value as ThemePreference)} options={[{ value: 'system', label: 'Automático' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} /></div>
-          <Button size="sm" onClick={() => setFormOpen(true)}>+ Nova movimentação (demo)</Button>
+          <Button size="sm" onClick={() => setFormOpen(true)}>+ Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
           {onSignOut && <Button size="sm" variant="ghost" loading={signingOut} onClick={signOut}>Sair</Button>}
         </div>
       </div>
-      <p className="sample-warning" role="note">
+      {!ledgerRepository && <p className="sample-warning" role="note">
         Valores e instituições fictícios. Esta demonstração não consulta contas, não envia dados e não salva transações.
-      </p>
-      <CurrentPage />
+      </p>}
+      {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
+      <CurrentPage ledger={ledgerRepository ? ledger : undefined} />
     </main>
-    <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />
+    {ledgerRepository
+      ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />
+      : <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />}
   </div>;
 }

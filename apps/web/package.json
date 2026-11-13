@@ -12,6 +12,7 @@
     "test": "node --experimental-strip-types --test src/lib/*.test.ts src/auth/*.test.ts"
   },
   "dependencies": {
+    "@personal-finance/domain": "workspace:*",
     "@personal-finance/tokens": "workspace:*",
     "@personal-finance/ui": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",

@@ -54,6 +54,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@personal-finance/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@personal-finance/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

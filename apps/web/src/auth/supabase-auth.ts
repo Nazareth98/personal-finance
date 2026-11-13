@@ -4,7 +4,6 @@ import type { AuthEvent, AuthGateway, AuthListener, AuthUser } from './contracts
 function toAuthUser(user: User | null): AuthUser | null {
   return user?.email ? { id: user.id, email: user.email } : null;
 }
-
 export class SupabaseAuthGateway implements AuthGateway {
   constructor(private readonly client: SupabaseClient) {}
 
@@ -63,12 +62,12 @@ export class SupabaseAuthGateway implements AuthGateway {
   }
 }
 
-export function createAuthGateway(): AuthGateway | null {
+export function createSupabaseClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL;
   const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !publishableKey) return null;
 
-  return new SupabaseAuthGateway(createClient(url, publishableKey, {
+  return createClient(url, publishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  }));
+  });
 }

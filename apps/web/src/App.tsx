@@ -1,10 +1,13 @@
 import { Card } from '@personal-finance/ui';
 import { AuthGate } from './auth/AuthGate';
-import { createAuthGateway } from './auth/supabase-auth';
+import { createSupabaseClient, SupabaseAuthGateway } from './auth/supabase-auth';
 import { DashboardApp } from './DashboardApp';
+import { SupabaseLedgerRepository } from './ledger/supabase-ledger';
 
 const demoMode = import.meta.env.MODE === 'test';
-const authGateway = demoMode ? null : createAuthGateway();
+const supabase = demoMode ? null : createSupabaseClient();
+const authGateway = supabase ? new SupabaseAuthGateway(supabase) : null;
+const ledgerRepository = supabase ? new SupabaseLedgerRepository(supabase) : undefined;
 
 export default function App() {
   if (demoMode) return <DashboardApp />;
@@ -18,6 +21,6 @@ export default function App() {
   </main>;
 
   return <AuthGate gateway={authGateway}>
-    {(user, signOut) => <DashboardApp userEmail={user.email} onSignOut={signOut} />}
+    {(user, signOut) => <DashboardApp userEmail={user.email} onSignOut={signOut} ledgerRepository={ledgerRepository} />}
   </AuthGate>;
 }

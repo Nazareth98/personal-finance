@@ -24,6 +24,7 @@ Entidades previstas: perfil, conta, conexão Pluggy, execução de sincronizaç�
 
 O contrato detalhado e incremental está em [`../architecture/DATABASE.md`](../architecture/DATABASE.md).
 O fluxo de login, recuperação e provisionamento do único proprietário está em [`../architecture/AUTH.md`](../architecture/AUTH.md).
+Os sinais monetários, totais, vínculos e procedimentos atômicos do livro estão em [`../architecture/LEDGER.md`](../architecture/LEDGER.md).
 
 ## MeuPluggy
 
