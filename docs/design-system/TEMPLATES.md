@@ -9,6 +9,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 | Contas | Saldos de contas corrente, reserva e investimento | Valores ilustrativos; transferência própria não é receita |
 | Cartões e faturas | Compras declaradas, pagamentos, status e pendências | Pagamento reduz saldo devido, **não cria nova despesa** |
 | Orçamentos | Limites, consumo, excedentes por categoria, progresso | Progresso visual limitado a 100%; excedente permanece textual |
+| Caixinhas | Saldo, meta, aportes, resgates e progresso | Movimentos patrimoniais neutros e rastreáveis |
 | Relatórios | Resultado sintético e despesas por categoria | `bigint` para todos os totais; porcentagem é somente visual |
 
 ## Contrato técnico
@@ -19,7 +20,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 - Composição: componentes genéricos em `packages/ui`; dados e regras de domínio demonstrativo em `apps/web/src/lib`; templates em `apps/web/src/pages`.
 - Dados são **100% fictícios**, não enviados a API e não persistidos.
 - O formulário de nova movimentação permanece demonstração sem armazenamento.
-- Storybook contém os seis templates para revisão visual.
+- Storybook contém os sete templates para revisão visual.
 - Respeitar responsividade; navegação vertical em desktop e faixa rolável no mobile.
 
 ## Regras financeiras críticas

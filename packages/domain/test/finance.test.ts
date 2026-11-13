@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountBalance, categoryBudgetProgress, isConsumption, ledgerTotals, requireNonZeroCents, transactionNatures, validateTransaction, type CategoryBudget, type TransactionContract } from '../src/index.ts';
+import { accountBalance, categoryBudgetProgress, isConsumption, ledgerTotals, requireNonZeroCents, savingsBoxProgress, transactionNatures, validateTransaction, type CategoryBudget, type SavingsBox, type SavingsMovement, type TransactionContract } from '../src/index.ts';
 
 const base: TransactionContract = {
   id: 't1', accountId: 'a1', description: 'Teste', amountCents: -1000n,
@@ -87,4 +87,28 @@ test('alerta gasto sem receita confirmada no período', () => {
   assert.equal(progress.limitCents, 0n);
   assert.equal(progress.status, 'exceeded');
   assert.equal(progress.usageBasisPoints, 10001n);
+});
+
+test('reconstrói saldo e progresso da caixinha somente pelos movimentos vinculados', () => {
+  const box: SavingsBox = { id: 'box', name: 'Reserva', openingBalanceCents: 10000n, targetCents: 100000n };
+  const movements: SavingsMovement[] = [
+    { id: 'm1', savingsBoxId: 'box', transactionId: 't1', type: 'contribution', amountCents: 25000n, eventDate: '2026-11-01' },
+    { id: 'm2', savingsBoxId: 'box', transactionId: 't2', type: 'withdrawal', amountCents: 5000n, eventDate: '2026-11-02' }
+  ];
+
+  assert.deepEqual(savingsBoxProgress(box, movements), {
+    balanceCents: 30000n,
+    contributionCents: 25000n,
+    withdrawalCents: 5000n,
+    remainingCents: 70000n,
+    progressBasisPoints: 3000n
+  });
+});
+
+test('rejeita caixinha ou movimento que resulte em saldo inválido', () => {
+  const box: SavingsBox = { id: 'box', name: 'Reserva', openingBalanceCents: 1000n, targetCents: 10000n };
+  assert.throws(() => savingsBoxProgress({ ...box, targetCents: 0n }, []), RangeError);
+  assert.throws(() => savingsBoxProgress(box, [
+    { id: 'm', savingsBoxId: 'box', transactionId: 't', type: 'withdrawal', amountCents: 1001n, eventDate: '2026-11-01' }
+  ]), RangeError);
 });

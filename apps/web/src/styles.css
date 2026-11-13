@@ -68,6 +68,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .budget-toolbar{display:flex;align-items:end;justify-content:space-between;gap:var(--spacing-3);flex-wrap:wrap}
 .budget-toolbar>.ui-field{min-width:min(100%,240px)}
 .budget-card .muted{margin-bottom:0}
+.savings-card-actions{display:flex;gap:var(--spacing-2);flex-wrap:wrap;margin-top:var(--spacing-2)}
 .budget-card__top{display:flex;justify-content:space-between;gap:var(--spacing-3);align-items:start;flex-wrap:wrap}
 .budget-card__top h2{margin:0}
 .budget-result{margin:0;font-size:var(--font-size-sm);font-weight:700;color:var(--color-text-primary)}

@@ -74,7 +74,8 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         { id: '11111111-2222-4111-8111-111111111111', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Receita mensal', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'manual', event_date: '2026-11-05', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '22222222-2222-4222-8222-222222222222', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'groceries', description: 'Mercado', amount_cents: '-10000', nature: 'expense', reporting: 'expense', source: 'manual', event_date: '2026-11-06', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '33333333-2222-4333-8333-333333333333', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '-50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null },
-        { id: '44444444-2222-4444-8444-444444444444', account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null }
+        { id: '44444444-2222-4444-8444-444444444444', account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null },
+        { id: '88888888-2222-4888-8888-888888888888', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'savings', description: 'Aplicação importada', amount_cents: '-25000', nature: 'own_transfer', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'confirmed', external_key: 'pluggy-savings-1' }
       ]) });
       return;
     }
@@ -86,6 +87,16 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
         { id: '77777777-2222-4777-8777-777777777777', category_id: 'groceries', percentage_basis_points: 1000 }
       ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/savings_boxes') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', name: 'Reserva de emergência', opening_balance_cents: '100000', target_cents: '1000000', target_date: '2027-12-31' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/savings_movements') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
       return;
     }
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
@@ -218,10 +229,48 @@ test('calcula e atualiza meta percentual por categoria', async ({ page }) => {
   expect(writes[0].body).toContain('1250');
 });
 
+test('cadastra caixinha, registra aporte neutro e associa lançamento importado', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.getByRole('link', { name: /Caixinhas/ }).click();
+
+  await expect(page.getByText('R$ 1.000,00 de R$ 10.000,00')).toBeVisible();
+  await page.getByRole('button', { name: 'Nova caixinha' }).click();
+  const boxDialog = page.getByRole('dialog', { name: 'Nova caixinha' });
+  await boxDialog.getByLabel('Nome da caixinha').fill('Viagem');
+  await boxDialog.getByLabel('Saldo inicial (R$)').fill('100,00');
+  await boxDialog.getByLabel('Meta (R$)').fill('2.000,00');
+  await boxDialog.getByRole('button', { name: 'Cadastrar caixinha' }).click();
+  await expect(page.getByText('Caixinha cadastrada.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Registrar movimento' }).click();
+  const movementDialog = page.getByRole('dialog', { name: 'Registrar movimento' });
+  await movementDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  await movementDialog.getByLabel('Descrição').fill('Aporte mensal');
+  await movementDialog.getByLabel('Valor (R$)').fill('250,00');
+  await movementDialog.getByRole('button', { name: 'Salvar movimento' }).click();
+  await expect(page.getByText('Movimento da caixinha registrado.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Associar importado' }).click();
+  const linkDialog = page.getByRole('dialog', { name: 'Associar lançamento importado' });
+  await linkDialog.getByLabel('Lançamento importado').selectOption('88888888-2222-4888-8888-888888888888');
+  await linkDialog.getByRole('button', { name: 'Salvar movimento' }).click();
+  await expect(page.getByText('Lançamento associado à caixinha.')).toBeVisible();
+
+  expect(writes.map(write => write.path)).toEqual([
+    '/rest/v1/rpc/create_savings_box',
+    '/rest/v1/rpc/create_savings_movement',
+    '/rest/v1/rpc/link_savings_movement'
+  ]);
+  expect(writes[1].body).toContain('25000');
+  expect(writes[2].body).toContain('88888888-2222-4888-8888-888888888888');
+});
+
 test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  for (const destination of ['overview', 'transactions', 'accounts', 'budgets']) {
+  for (const destination of ['overview', 'transactions', 'accounts', 'budgets', 'savings']) {
     await page.goto(`/#${destination}`);
     await expect(page.getByRole('main')).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();

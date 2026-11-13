@@ -4,6 +4,7 @@ export {
   categoryBudgetProgress,
   ledgerTotals,
   requireNonZeroCents,
+  savingsBoxProgress,
   transactionNatures,
   validateTransaction
 } from './finance.ts';
@@ -13,6 +14,9 @@ export type {
   CategoryBudgetProgress,
   ClassificationStatus,
   FinancialAccount,
+  SavingsBox,
+  SavingsBoxProgress,
+  SavingsMovement,
   TransactionContract,
   TransactionNature,
   TransactionReporting,

@@ -11,6 +11,7 @@ export {
   Gem as BrandIcon,
   Landmark as AccountsIcon,
   LayoutDashboard as DashboardIcon,
+  PiggyBank as SavingsIcon,
   Plus as PlusIcon
 } from 'lucide-react';
 export { Card } from './components/Card';

@@ -13,13 +13,14 @@ test('temas explícitos prevalecem sobre preferência do sistema',async ({page})
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
 
-test('navegação entre seis templates funciona com histórico hash',async ({page})=>{
+test('navegação entre sete templates funciona com histórico hash',async ({page})=>{
   await page.goto('/#overview');
   for(const [slug,title] of [
     ['transactions','Transações'],
     ['accounts','Contas'],
     ['cards','Cartões e faturas'],
     ['budgets','Orçamentos'],
+    ['savings','Caixinhas'],
     ['reports','Relatórios'],
   ]){
     await page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(title,'i')}).click();

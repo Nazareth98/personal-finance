@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, SavingsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import type { ThemePreference } from './lib/theme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
@@ -9,17 +9,19 @@ import { AccountsPage } from './pages/AccountsPage';
 import { CardsPage } from './pages/CardsPage';
 import { BudgetsPage } from './pages/BudgetsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { SavingsPage } from './pages/SavingsPage';
 import type { LedgerRepository } from './ledger/contracts';
 import { useLedger, type LedgerState } from './ledger/useLedger';
 import { ManualTransactionForm } from './components/ManualTransactionForm';
 
-export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'reports';
+export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'reports';
 const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
   { id: 'overview', title: 'Visão geral', icon: DashboardIcon },
   { id: 'transactions', title: 'Transações', icon: TransactionsIcon },
   { id: 'accounts', title: 'Contas', icon: AccountsIcon },
   { id: 'cards', title: 'Cartões e faturas', icon: CardsIcon },
   { id: 'budgets', title: 'Orçamentos', icon: BudgetsIcon },
+  { id: 'savings', title: 'Caixinhas', icon: SavingsIcon },
   { id: 'reports', title: 'Relatórios', icon: ReportsIcon }
 ];
 
@@ -34,6 +36,7 @@ const pages: Record<PageId, ComponentType<{ ledger?: LedgerState }>> = {
   accounts: AccountsPage,
   cards: CardsPage,
   budgets: BudgetsPage,
+  savings: SavingsPage,
   reports: ReportsPage
 };
 

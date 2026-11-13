@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, CategoryBudgetDraft, LedgerData, LedgerRepository, ManualTransactionDraft } from './contracts';
+import type { AccountDraft, CategoryBudgetDraft, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -9,6 +9,9 @@ export type LedgerState = {
   createAccount: (draft: AccountDraft) => Promise<void>;
   createTransaction: (draft: ManualTransactionDraft) => Promise<void>;
   saveBudget: (draft: CategoryBudgetDraft) => Promise<void>;
+  createSavingsBox: (draft: SavingsBoxDraft) => Promise<void>;
+  createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
+  linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
 };
 
 export function useLedger(repository?: LedgerRepository): LedgerState {
@@ -49,5 +52,23 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
-  return { data, status, error, reload, createAccount, createTransaction, saveBudget };
+  async function createSavingsBox(draft: SavingsBoxDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.createSavingsBox(draft);
+    await reload();
+  }
+
+  async function createSavingsMovement(draft: SavingsMovementDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.createSavingsMovement(draft);
+    await reload();
+  }
+
+  async function linkSavingsMovement(draft: SavingsMovementLinkDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.linkSavingsMovement(draft);
+    await reload();
+  }
+
+  return { data, status, error, reload, createAccount, createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement };
 }

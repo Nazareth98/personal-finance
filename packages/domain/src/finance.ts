@@ -37,6 +37,31 @@ export type CategoryBudgetProgress = {
   status: 'within' | 'approaching' | 'exceeded';
 };
 
+export type SavingsBox = {
+  id: string;
+  name: string;
+  openingBalanceCents: bigint;
+  targetCents: bigint;
+  targetDate?: string;
+};
+
+export type SavingsMovement = {
+  id: string;
+  savingsBoxId: string;
+  transactionId: string;
+  type: 'contribution' | 'withdrawal';
+  amountCents: bigint;
+  eventDate: string;
+};
+
+export type SavingsBoxProgress = {
+  balanceCents: bigint;
+  contributionCents: bigint;
+  withdrawalCents: bigint;
+  remainingCents: bigint;
+  progressBasisPoints: bigint;
+};
+
 export type TransactionContract = {
   id: string;
   accountId: string;
@@ -107,6 +132,26 @@ export function categoryBudgetProgress(
       : 'within';
 
   return { incomeCents, limitCents, usedCents, remainingCents, usageBasisPoints, status };
+}
+
+export function savingsBoxProgress(box: SavingsBox, movements: readonly SavingsMovement[]): SavingsBoxProgress {
+  if (box.openingBalanceCents < 0n || box.targetCents <= 0n) {
+    throw new RangeError('Saldo inicial e meta da caixinha são inválidos.');
+  }
+  let contributionCents = 0n;
+  let withdrawalCents = 0n;
+  for (const movement of movements) {
+    if (movement.savingsBoxId !== box.id || movement.amountCents <= 0n) {
+      throw new RangeError('Movimento da caixinha é inválido.');
+    }
+    if (movement.type === 'contribution') contributionCents += movement.amountCents;
+    else withdrawalCents += movement.amountCents;
+  }
+  const balanceCents = box.openingBalanceCents + contributionCents - withdrawalCents;
+  if (balanceCents < 0n) throw new RangeError('O saldo da caixinha não pode ser negativo.');
+  const remainingCents = box.targetCents > balanceCents ? box.targetCents - balanceCents : 0n;
+  const progressBasisPoints = balanceCents * 10000n / box.targetCents;
+  return { balanceCents, contributionCents, withdrawalCents, remainingCents, progressBasisPoints };
 }
 
 export function accountBalance(account: FinancialAccount, transactions: readonly TransactionContract[]): bigint {

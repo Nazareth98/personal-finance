@@ -5,6 +5,7 @@ import { TransactionsPage } from '../../web/src/pages/TransactionsPage';
 import { AccountsPage } from '../../web/src/pages/AccountsPage';
 import { CardsPage } from '../../web/src/pages/CardsPage';
 import { BudgetsPage } from '../../web/src/pages/BudgetsPage';
+import { SavingsPage } from '../../web/src/pages/SavingsPage';
 import { ReportsPage } from '../../web/src/pages/ReportsPage';
 import '../../web/src/styles.css';
 
@@ -25,4 +26,5 @@ export const Transactions: Story = { render: () => frame(<TransactionsPage/>) };
 export const Accounts: Story = { render: () => frame(<AccountsPage/>) };
 export const CardsAndInvoices: Story = { render: () => frame(<CardsPage/>) };
 export const Budgets: Story = { render: () => frame(<BudgetsPage/>) };
+export const Savings: Story = { render: () => frame(<SavingsPage/>) };
 export const Reports: Story = { render: () => frame(<ReportsPage/>) };

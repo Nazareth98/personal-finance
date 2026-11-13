@@ -27,6 +27,10 @@ Vincular os dois lados por valor, proximidade de data, contas e descrição norm
 
 Toda receita recebida, inclusive extraordinária, entra na base do período. O saldo de meta não acumula. A visualização mostra gasto, teto em reais e percentual consumido nos recortes mensal e anual.
 
+## Caixinhas
+
+O saldo é sempre reconstruído pelo saldo inicial, aportes e resgates vinculados. Aporte e resgate são movimentos patrimoniais neutros e não compõem renda ou consumo. Um lançamento importado indistinguível só pode ser associado manualmente; o sistema não cria sugestão sem evidência histórica confirmada.
+
 ## Previsão
 
 Usar os seis meses anteriores de receitas recorrentes, despesas recorrentes, parcelas futuras, metas e aportes planejados. Receita extraordinária permanece no realizado, mas é excluída da média futura.

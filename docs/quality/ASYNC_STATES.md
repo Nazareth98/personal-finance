@@ -26,7 +26,7 @@ pnpm check
 
 `states.spec.ts` verifica ciclos loading → erro → retry → sucesso, preservação de filtros e auditoria axe em estados não ideais.
 
-`states-visual.spec.ts` acrescenta **24 snapshots** (quatro estados × três viewports × Light/Dark), que se somam aos 36 templates existentes, totalizando **60 screenshots**. Todos são capturados em Chromium no Ubuntu 24.04.
+`states-visual.spec.ts` acrescenta **24 snapshots** (quatro estados × três viewports × Light/Dark), que se somam aos 42 templates, totalizando **66 screenshots**. Todos são capturados em Chromium no Ubuntu 24.04.
 
 A revisão visual dos diffs precisa ser consciente. A atualização de baseline em `main` exige a marca `[update visual baselines]` no commit. Os dados são somente fictícios, sem APIs externas. Testes em browser e axe automatizado não substituem navegação com leitores de tela ou aprovação manual WCAG.
 

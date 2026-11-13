@@ -1,12 +1,13 @@
 import {expect,test} from '@playwright/test';
 
-type PageName='overview'|'transactions'|'accounts'|'cards'|'budgets'|'reports';
+type PageName='overview'|'transactions'|'accounts'|'cards'|'budgets'|'savings'|'reports';
 const templates:{slug:PageName;title:string}[]=[
   {slug:'overview',title:'Visão geral'},
   {slug:'transactions',title:'Transações'},
   {slug:'accounts',title:'Contas'},
   {slug:'cards',title:'Cartões e faturas'},
   {slug:'budgets',title:'Orçamentos'},
+  {slug:'savings',title:'Caixinhas'},
   {slug:'reports',title:'Relatórios'},
 ];
 

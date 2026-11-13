@@ -2,12 +2,12 @@
 
 ## Matriz
 
-São **36 snapshots de templates**, seis telas por três viewports (`mobile=390×844`, `tablet=768×1024`, `desktop=1440×900`) e por dois temas (`light`, `dark`). As capturas incluem a página inteira, dados fictícios, fuso horário fixo, `locale=pt-BR`, densidade de pixels 1 e animações desabilitadas.
+São **42 snapshots de templates**, sete telas por três viewports (`mobile=390×844`, `tablet=768×1024`, `desktop=1440×900`) e por dois temas (`light`, `dark`). As capturas incluem a página inteira, dados fictícios, fuso horário fixo, `locale=pt-BR`, densidade de pixels 1 e animações desabilitadas.
 
 - As capturas de referência residem em `apps/web/tests/e2e/__screenshots__/{projectName}/{page}.png`.
 - `visual.spec.ts` compara screenshots com `toHaveScreenshot`, tolerando variações pequenas de antialiasing (`threshold=0.2`, `maxDiffPixelRatio=0.002`).
 - **O primeiro baseline deve ser gerado apenas uma vez em um ambiente Linux conhecido e revisado**. Não atualizar os snapshots automaticamente em cada PR.
-- `pnpm test:visual`: compara os 36 baselines versionados. `pnpm test:visual:update`: recria todos — usar apenas quando uma mudança visual foi analisada e aprovada.
+- `pnpm test:visual`: compara os 66 baselines esperados. `pnpm test:visual:update`: recria todos — usar apenas quando uma mudança visual foi analisada e aprovada.
 - O workflow inicial gera os snapshots ausentes e os salva no GitHub pela conta de automação apenas na primeira execução em `main`; após essa inicialização, capturas divergentes falham e precisam ser revisadas.
 
 ## Diagnóstico
@@ -37,8 +37,8 @@ pnpm test:a11y
 
 O screenshot de Relatórios em 390px mostrou expansão horizontal do grid raiz. A correção define `minmax(0,1fr)` no breakpoint mobile e `min-width:0` nos contêineres dos templates, preservando rolagem local das tabelas.
 
-Atualização **intencional** dos 36 baselines no CI Linux: somente um commit explícito na `main` com `[update visual baselines]` permite refazer e commitar automaticamente os arquivos; os demais commits verificam e falham em diferenças inesperadas.
+Atualização **intencional** dos 66 baselines no CI Linux: somente um commit explícito na `main` com `[update visual baselines]` permite refazer e commitar automaticamente os arquivos; os demais commits verificam e falham em diferenças inesperadas.
 
 ## Ampliação v0.6.2 — estados de gráfico e tabela
 
-Adicionados 24 baselines: `chart-loading`, `chart-error`, `table-loading`, `table-error`, cada um nos dois temas e três viewports. A matriz total passa a **60 screenshots**. Veja [ASYNC_STATES.md](ASYNC_STATES.md).
+Adicionados 24 baselines: `chart-loading`, `chart-error`, `table-loading`, `table-error`, cada um nos dois temas e três viewports. Com a tela de caixinhas, a matriz total passa a **66 screenshots**. Veja [ASYNC_STATES.md](ASYNC_STATES.md).
