@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ReactNode } from 'react';
 import { OverviewPage } from '../../web/src/pages/OverviewPage';
 import { TransactionsPage } from '../../web/src/pages/TransactionsPage';
 import { AccountsPage } from '../../web/src/pages/AccountsPage';
@@ -15,7 +16,7 @@ const meta = {
 } satisfies Meta<typeof OverviewPage>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-const frame = (children: React.ReactNode) => <div style={{
+const frame = (children: ReactNode) => <div style={{
   width: 'min(1120px, 100%)', margin: '0 auto', padding: '24px',
   background: 'var(--color-bg-canvas)', color: 'var(--color-text-primary)'
 }}>{children}</div>;

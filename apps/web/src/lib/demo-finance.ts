@@ -1,4 +1,4 @@
-import { demoTransactions, type DemoTransaction, formatCentsBRL, totalsFromTransactions } from './demo-transactions';
+import { totalsFromTransactions, type DemoTransaction } from './demo-transactions.ts';
 
 export type DemoAccount = { id: string; name: string; type: 'checking' | 'savings' | 'investment'; balanceCents: bigint };
 export type DemoBudget = { id: string; category: string; limitCents: bigint; usedCents: bigint };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { Badge, Button } from '@personal-finance/ui';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
@@ -22,7 +22,7 @@ function getPage(): PageId {
   const fragment=window.location.hash.replace(/^#/, '');
   return navigation.some(x=>x.id===fragment) ? fragment as PageId : 'overview';
 }
-const pages: Record<PageId, () => React.ReactNode> = {
+const pages: Record<PageId, ComponentType> = {
   overview: OverviewPage,
   transactions: TransactionsPage,
   accounts: AccountsPage,
