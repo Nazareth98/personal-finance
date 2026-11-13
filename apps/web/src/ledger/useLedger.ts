@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, LedgerData, LedgerRepository, ManualTransactionDraft } from './contracts';
+import type { AccountDraft, CategoryBudgetDraft, LedgerData, LedgerRepository, ManualTransactionDraft } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -8,6 +8,7 @@ export type LedgerState = {
   reload: () => Promise<void>;
   createAccount: (draft: AccountDraft) => Promise<void>;
   createTransaction: (draft: ManualTransactionDraft) => Promise<void>;
+  saveBudget: (draft: CategoryBudgetDraft) => Promise<void>;
 };
 
 export function useLedger(repository?: LedgerRepository): LedgerState {
@@ -42,5 +43,11 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
-  return { data, status, error, reload, createAccount, createTransaction };
+  async function saveBudget(draft: CategoryBudgetDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.saveCategoryBudget(draft);
+    await reload();
+  }
+
+  return { data, status, error, reload, createAccount, createTransaction, saveBudget };
 }

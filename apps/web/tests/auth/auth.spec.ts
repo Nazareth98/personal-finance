@@ -82,6 +82,12 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: '55555555-2222-4555-8555-555555555555', source_transaction_id: '33333333-2222-4333-8333-333333333333', target_transaction_id: '44444444-2222-4444-8444-444444444444', link_type: 'own_transfer' }]) });
       return;
     }
+    if (url.pathname === '/rest/v1/category_budgets') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: '77777777-2222-4777-8777-777777777777', category_id: 'groceries', percentage_basis_points: 1000 }
+      ]) });
+      return;
+    }
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
       rpcCalls.push({ path: url.pathname, body: route.request().postData() });
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify('66666666-2222-4666-8666-666666666666') });
@@ -191,10 +197,31 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   expect(writes[1].body).toContain('-1250');
 });
 
+test('calcula e atualiza meta percentual por categoria', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.getByRole('link', { name: /Orçamentos/ }).click();
+
+  await expect(page.getByLabel('Resumo das metas por categoria').getByText('R$ 5.000,00')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Supermercado' })).toBeVisible();
+  await expect(page.getByText('R$ 100,00 utilizados de R$ 500,00')).toBeVisible();
+  await page.getByRole('button', { name: 'Definir meta' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Definir meta' });
+  await dialog.getByLabel('Categoria').selectOption('groceries');
+  await dialog.getByLabel('Percentual da receita').fill('12,50');
+  await dialog.getByRole('button', { name: 'Salvar meta' }).click();
+
+  await expect(page.getByText('Meta por categoria salva.')).toBeVisible();
+  expect(writes).toHaveLength(1);
+  expect(writes[0].path).toContain('set_category_budget');
+  expect(writes[0].body).toContain('1250');
+});
+
 test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  for (const destination of ['overview', 'transactions', 'accounts']) {
+  for (const destination of ['overview', 'transactions', 'accounts', 'budgets']) {
     await page.goto(`/#${destination}`);
     await expect(page.getByRole('main')).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();

@@ -1,4 +1,4 @@
-import type { Category, FinancialAccount, TransactionContract } from '@personal-finance/domain';
+import type { Category, CategoryBudget, FinancialAccount, TransactionContract } from '@personal-finance/domain';
 
 export type TransactionLink = {
   id: string;
@@ -10,11 +10,13 @@ export type TransactionLink = {
 export type LedgerData = {
   accounts: FinancialAccount[];
   categories: Category[];
+  budgets: CategoryBudget[];
   transactions: TransactionContract[];
   links: TransactionLink[];
 };
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;
+export type CategoryBudgetDraft = Pick<CategoryBudget, 'categoryId' | 'percentageBasisPoints'>;
 
 export type ManualTransactionDraft = {
   accountId: string;
@@ -33,4 +35,5 @@ export interface LedgerRepository {
   load(): Promise<LedgerData>;
   createAccount(draft: AccountDraft): Promise<void>;
   createManualTransaction(draft: ManualTransactionDraft): Promise<void>;
+  saveCategoryBudget(draft: CategoryBudgetDraft): Promise<void>;
 }

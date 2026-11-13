@@ -1,6 +1,7 @@
 export {
   isConsumption,
   accountBalance,
+  categoryBudgetProgress,
   ledgerTotals,
   requireNonZeroCents,
   transactionNatures,
@@ -8,6 +9,8 @@ export {
 } from './finance.ts';
 export type {
   Category,
+  CategoryBudget,
+  CategoryBudgetProgress,
   ClassificationStatus,
   FinancialAccount,
   TransactionContract,
