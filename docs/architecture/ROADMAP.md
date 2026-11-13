@@ -1,5 +1,7 @@
 # Roadmap — Corporate UI para Personal Finance
 
+> Este arquivo acompanha a maturidade do design system. O plano de entrega do produto financeiro está em [`../brain/PLAN.md`](../brain/PLAN.md).
+
 | Marco | Escopo | Situação |
 | --- | --- | --- |
 | v0.1 Foundations | Tokens Light/Dark, Button, Card, Badge | Entregue |

@@ -26,9 +26,14 @@ pnpm typecheck
 - `apps/web`: demonstração React de dashboard financeiro (dados fictícios).
 - `packages/tokens`: fonte de verdade dos tokens semânticos e geração de CSS.
 - `packages/ui`: componentes reutilizáveis React.
+- `docs/brain`: contexto enxuto, regras de domínio, arquitetura e plano do produto.
 - `docs/design-system`: contratos de foundations, componentes e vínculo Figma.
 - `docs/architecture`: decisões e próximos incrementos.
 - `AGENTS.md`: instruções para Codex.
+
+## Contexto do produto
+
+Comece por [`docs/brain/CONTEXT.md`](docs/brain/CONTEXT.md) e [`docs/brain/STATUS.md`](docs/brain/STATUS.md). O índice [`docs/brain/README.md`](docs/brain/README.md) indica qual documento adicional ler por tipo de tarefa, evitando carregar toda a documentação em cada prompt.
 
 ## Design no Figma
 
