@@ -141,3 +141,25 @@
 
 .ui-chart-skeleton__svg line{stroke:var(--color-border-default);stroke-dasharray:6 6}
 .ui-chart-skeleton__svg path{fill:none;stroke:var(--color-border-default);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+
+/* Semantic financial outcomes and layout-preserving loading states */
+.ui-financial-value{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ui-financial-value--positive{color:var(--color-finance-positive)}
+.ui-financial-value--negative{color:var(--color-finance-negative)}
+.ui-financial-value--neutral{color:var(--color-finance-neutral)}
+.ui-table-skeleton{display:grid;min-width:0}
+.ui-table-skeleton__header,.ui-table-skeleton__row{
+  display:grid;grid-template-columns:repeat(var(--ui-skeleton-columns,4),minmax(0,1fr));
+  gap:var(--spacing-4);align-items:center;padding:var(--spacing-3) var(--spacing-4);
+  border-bottom:1px solid var(--color-border-default)
+}
+.ui-table-skeleton__header{background:var(--color-bg-subtle)}
+.ui-table-skeleton__footer{display:flex;justify-content:space-between;gap:var(--spacing-4);padding:var(--spacing-4)}
+.ui-chart-skeleton{display:grid;gap:var(--spacing-3);min-width:0}
+.ui-chart-skeleton__plot{
+  display:flex;align-items:end;justify-content:space-around;gap:var(--spacing-4);
+  padding:var(--spacing-4);border:1px solid var(--color-border-default);border-radius:var(--radius-md)
+}
+.ui-chart-skeleton__donut{display:flex;align-items:center;gap:var(--spacing-6)}
+.ui-chart-skeleton__ring{aspect-ratio:1;width:min(170px,50%);border:32px solid var(--color-bg-subtle);border-radius:50%;display:block;flex:none}
+.ui-chart-skeleton__legend{display:grid;gap:var(--spacing-4);flex:1}
