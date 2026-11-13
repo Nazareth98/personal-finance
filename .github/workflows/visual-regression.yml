@@ -48,6 +48,8 @@ jobs:
         run: pnpm test:e2e
       - name: Accessibility audit (WCAG A/AA)
         run: pnpm test:a11y
+      - name: Async chart, error and loading behavior
+        run: pnpm test:states
       - uses: actions/upload-artifact@v4
         if: always()
         with:

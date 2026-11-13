@@ -10,7 +10,8 @@
 | v0.5.1 Cores, gráficos e loading | Tokens positivos/negativos, 3 gráficos reutilizáveis, skeletons estruturais | Entregue — Beta |
 | v0.5.2 Consolidação Light/Dark | Preferência Automático/Light/Dark, tokens e contraste, preview simultânea | Entregue — Beta |
 | v0.6.1 Testes visuais | Playwright 36 snapshots Light/Dark, acessibilidade axe e navegação | Implementação em validação |
-| v0.6.2 Integração | Testes profundos de componentes, Figma/Code Connect | Planejado |
+| v0.6.2 Estados de dados | Erros, gráficos, skeletons, retry, testes E2E e 24 snapshots adicionais | Implementação em validação |
+| v0.6.3 Integração | Testes profundos dos demais componentes, Figma/Code Connect | Planejado |
 | v1.0 Estável | API consolidada, revisão WCAG, integração controlada e releases | Pendente |
 
 ## Decisões e limites

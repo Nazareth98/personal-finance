@@ -102,3 +102,14 @@ pnpm test:a11y
 ```
 
 Leia [VISUAL_REGRESSION.md](docs/quality/VISUAL_REGRESSION.md). A certificação acessível e a integração Figma/Code Connect permanecem pendentes.
+
+## Testes de gráficos, erros e loading — v0.6.2
+
+`DataState` alterna sucesso, skeleton e erro com retry, sem acoplamento à fonte de dados. O app demonstrativo permite simular erro e loading nos gráficos e nas transações.
+
+```bash
+pnpm test:states
+pnpm test:states:visual
+```
+
+60 capturas agora cobrem seis templates e quatro estados adicionais por viewport e tema. Consulte [ASYNC_STATES](docs/quality/ASYNC_STATES.md).

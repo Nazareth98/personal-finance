@@ -73,3 +73,11 @@
 50. Execute `pnpm test:visual`, `pnpm test:e2e` e `pnpm test:a11y`; commits visuais exigem revisão dos diffs.
 51. Testes Playwright usam somente os dados sintéticos da aplicação; nunca conectar serviços externos ou contas reais.
 52. O primeiro baseline será capturado no CI Linux e versionado uma única vez; os próximos commits somente verificam.
+
+## v0.6.2 — Estados gráficos e loading
+
+53. Use `DataState` com `status='loading' | 'error' | 'success'` nos contêineres de dados remotos; não apresente simultaneamente gráficos antigos e loading.
+54. Em erro, mostre `ErrorState`, título e opção de retry. Retry é responsabilidade da aplicação; não inventar respostas do backend.
+55. Skeletons devem ter `aria-busy` e nome acessível; `ErrorState` usa alerta sem depender exclusivamente de vermelho.
+56. Mantenha e revise **60 screenshots** (36 templates + 24 estados) para mobile, tablet e desktop, Light/Dark.
+57. Testes `pnpm test:states` e `pnpm test:states:visual` integram o quality gate; exemplos continuam inteiramente fictícios.

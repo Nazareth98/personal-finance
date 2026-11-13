@@ -124,3 +124,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 
 /* Accessible text accent distinct from action button fill in Dark mode. */
 .navigation a.is-active,.eyebrow,.brand-mark{color:var(--color-text-accent)}
+
+/* Async feedback controls must wrap without expanding mobile layouts. */
+.section-heading{flex-wrap:wrap;gap:var(--spacing-3);align-items:center}
+.transactions-demo .section-heading > div:first-child{flex:1 1 235px;min-width:0}

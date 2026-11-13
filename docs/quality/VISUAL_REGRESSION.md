@@ -38,3 +38,7 @@ pnpm test:a11y
 O screenshot de Relatórios em 390px mostrou expansão horizontal do grid raiz. A correção define `minmax(0,1fr)` no breakpoint mobile e `min-width:0` nos contêineres dos templates, preservando rolagem local das tabelas.
 
 Atualização **intencional** dos 36 baselines no CI Linux: somente um commit explícito na `main` com `[update visual baselines]` permite refazer e commitar automaticamente os arquivos; os demais commits verificam e falham em diferenças inesperadas.
+
+## Ampliação v0.6.2 — estados de gráfico e tabela
+
+Adicionados 24 baselines: `chart-loading`, `chart-error`, `table-loading`, `table-error`, cada um nos dois temas e três viewports. A matriz total passa a **60 screenshots**. Veja [ASYNC_STATES.md](ASYNC_STATES.md).

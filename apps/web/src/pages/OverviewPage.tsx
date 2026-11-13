@@ -1,4 +1,4 @@
-import { Badge, Card, MetricCard, CashFlowChart, ChartSkeleton } from '@personal-finance/ui';
+import { Badge, Card, MetricCard, CashFlowChart, DataState, type DataStatus } from '@personal-finance/ui';
 import { useState } from 'react';
 import { demoCashFlow } from '../lib/demo-charts';
 import { TransactionsDemo } from '../components/TransactionsDemo';
@@ -6,7 +6,7 @@ import { accountsBalance, demoAccounts, demoBudgets, demoInvoices, invoiceOpenCe
 import { demoTransactions, formatCentsBRL } from '../lib/demo-transactions';
 
 export function OverviewPage() {
-  const [chartLoading,setChartLoading]=useState(false);
+  const [chartStatus,setChartStatus]=useState<DataStatus>('success');
   const report = monthlyReport(demoTransactions);
   const openInvoices = demoInvoices.reduce((sum, row) => sum + invoiceOpenCents(row), 0n);
   const budgetWarnings = demoBudgets.filter(row => row.usedCents > row.limitCents).length;
@@ -32,8 +32,13 @@ export function OverviewPage() {
         <p className="muted">Saldo operacional do período fictício, não saldo bancário.</p>
       </Card>
     </div>
-    <Card><div className="section-heading"><div><h2>Fluxo de caixa</h2><p className="muted">Comparativo mensal demonstrativo de receitas e despesas.</p></div><button className="chart-demo-toggle" type="button" onClick={()=>setChartLoading(x=>!x)}>{chartLoading?'Exibir gráfico':'Simular loading do gráfico'}</button></div>
-      {chartLoading?<ChartSkeleton title="Carregando fluxo de caixa" height={245} kind="bars"/>:<CashFlowChart data={demoCashFlow} formatValue={formatCentsBRL}/>}
+    <Card><div className="section-heading"><div><h2>Fluxo de caixa</h2><p className="muted">Comparativo mensal demonstrativo de receitas e despesas.</p></div><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus(s=>s==='loading'?'success':'loading')}>{chartStatus==='loading'?'Exibir gráfico':'Simular loading do gráfico'}</button><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus('error')}>Simular erro do gráfico</button></div>
+      <DataState kind="chart" chartKind="bars" label="Carregando fluxo de caixa" status={chartStatus}
+        errorTitle="Erro ao carregar o fluxo de caixa"
+        errorDescription="Não foi possível exibir os dados demonstrativos."
+        onRetry={()=>setChartStatus('success')}>
+        <CashFlowChart data={demoCashFlow} formatValue={formatCentsBRL}/>
+      </DataState>
     </Card>
     <TransactionsDemo/>
   </div>;

@@ -3,13 +3,14 @@ import {EmptyState} from './EmptyState';
 export type CategorySlice={label:string;valueCents:bigint};
 export type CategoryDonutChartProps={data:readonly CategorySlice[];formatValue:(value:bigint)=>string;title?:string};
 export function CategoryDonutChart({data,formatValue,title='Distribuição das despesas'}:CategoryDonutChartProps){
- const clean=data.map(p=>p.valueCents>0n?p.valueCents:0n);
- const total=clean.reduce((sum,v)=>sum+v,0n);
+ // Nonpositive values are invalid donut slices; omit them rather than displaying a negative wedge.
+ const positive=data.filter(p=>p.valueCents>0n);
+ const total=positive.reduce((sum,p)=>sum+p.valueCents,0n);
  if(total<=0n)return <EmptyState title="Sem despesas no período" description="Não há categorias com valores positivos para representar."/>;
  // Use 0.01%-resolution integer boundaries and a deterministic last segment.
  let start=0;
- const slices=data.map((p,i)=>{
-   const width=i===data.length-1?100-start:percentage(clean[i],total);
+ const slices=positive.map((p,i)=>{
+   const width=i===positive.length-1?100-start:percentage(p.valueCents,total);
    const result={...p,index:i,start,end:Math.min(100,start+width),percent:percentage(clean[i],total)};
    start=result.end;return result;
  });

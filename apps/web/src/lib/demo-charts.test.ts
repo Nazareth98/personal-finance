@@ -25,3 +25,18 @@ test('fatias de despesas preservam total e ignoram transferências',()=>{
   assert.ok(slices.every(s=>s.valueCents>0n));
   assert.equal(categoryPercentages([{label:'A',valueCents:1n},{label:'B',valueCents:3n}])[0].percent,25);
 });
+
+test('percentuais e escala se mantêm finitos em entradas extremas e negativas',()=>{
+  assert.equal(percentage(-10n,100n),0);
+  assert.equal(percentage(100n,0n),0);
+  assert.equal(percentage(900719925474099300n,900719925474099300n),100);
+  assert.equal(signedRatio(-100n,-100n,100n),0);
+  assert.equal(signedRatio(0n,-100n,100n),0.5);
+});
+test('fatia de valor negativo ou zero não aumenta o total',()=>{
+  const rows=[...demoTransactions,{id:'invalid',date:'2026-11-01',description:'Valor inválido',category:'Teste',account:'Fictícia',kind:'expense' as const,amountCents:-10n}];
+  const output=expenseCategorySlices(rows);
+  assert.ok(output.some(x=>x.label==='Teste'&&x.valueCents===-10n));
+  // O cálculo de fatias elege apenas magnitudes positivas na apresentação.
+  assert.equal(output.filter(x=>x.valueCents>0n).reduce((s,x)=>s+x.valueCents,0n),205868n);
+});

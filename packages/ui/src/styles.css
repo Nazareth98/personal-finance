@@ -163,3 +163,9 @@
 .ui-chart-skeleton__donut{display:flex;align-items:center;gap:var(--spacing-6)}
 .ui-chart-skeleton__ring{aspect-ratio:1;width:min(170px,50%);border:32px solid var(--color-bg-subtle);border-radius:50%;display:block;flex:none}
 .ui-chart-skeleton__legend{display:grid;gap:var(--spacing-4);flex:1}
+
+/* Error feedback: roles and labels communicate failure independently of the color. */
+.ui-error-state{min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--spacing-3);text-align:center;padding:var(--spacing-6);color:var(--color-text-primary)}
+.ui-error-state__icon{color:var(--color-status-danger);font-size:var(--font-size-xl)}
+.ui-error-state p{margin:0;max-width:46ch;color:var(--color-text-secondary);font-size:var(--font-size-sm)}
+.ui-error-state .ui-button{margin-top:var(--spacing-2)}

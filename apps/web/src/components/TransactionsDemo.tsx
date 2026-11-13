@@ -1,5 +1,5 @@
 import {useMemo,useState} from 'react';
-import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,TableSkeleton,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
+import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,DataState,type DataStatus,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
 import {demoTransactions,filterTransactions,formatCentsBRL,formatLocalDate,transactionKindLabel,totalsFromTransactions,type DemoTransaction,type TransactionType} from '../lib/demo-transactions';
 
 const PAGE_SIZE=5;
@@ -15,7 +15,7 @@ const columns:DataTableColumn<DemoTransaction>[]=[
 const categories=[{value:'all',label:'Todas as categorias'},...Array.from(new Set(demoTransactions.map(x=>x.category))).sort((a,b)=>a.localeCompare(b,'pt-BR')).map(value=>({value,label:value}))];
 export function TransactionsDemo(){
 const [query,setQuery]=useState(''),[kind,setKind]=useState<'all'|TransactionType>('all'),[category,setCategory]=useState('all');
-const [sort,setSort]=useState<SortState>({key:'date',direction:'desc'}),[page,setPage]=useState(1),[loading,setLoading]=useState(false);
+const [sort,setSort]=useState<SortState>({key:'date',direction:'desc'}),[page,setPage]=useState(1),[status,setStatus]=useState<DataStatus>('success');
 const filtered=useMemo(()=>filterTransactions(demoTransactions,{query,kind,category}),[query,kind,category]);
 const rows=useMemo(()=>sortRows(filtered,sort,columns),[filtered,sort]);
 const currentPage=Math.min(page,Math.max(1,Math.ceil(rows.length/PAGE_SIZE)));
@@ -23,7 +23,8 @@ const totals=useMemo(()=>totalsFromTransactions(filtered),[filtered]);
 return <section className="transactions-demo" aria-labelledby="transactions-title">
 <div className="section-heading"><div><h2 id="transactions-title">Movimentações demonstrativas</h2>
 <p className="muted">Pesquisa, filtros e paginação locais; nenhum dado real.</p></div>
-<Button variant="secondary" onClick={()=>setLoading(x=>!x)}>{loading?'Exibir dados':'Simular loading'}</Button></div>
+<Button variant="secondary" onClick={()=>setStatus(s=>s==='loading'?'success':'loading')}>{status==='loading'?'Exibir dados':'Simular loading'}</Button>
+<Button variant="secondary" onClick={()=>setStatus('error')}>Simular erro na tabela</Button></div>
 <div className="transactions-filters">
 <Input label="Pesquisar" placeholder="Descrição, categoria ou conta" value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}}/>
 <Select label="Tipo" value={kind} options={[{value:'all',label:'Todos'},{value:'income',label:'Receitas'},{value:'expense',label:'Despesas'},{value:'transfer',label:'Transferências'}]}
@@ -34,13 +35,14 @@ onChange={e=>{setKind(e.target.value as 'all'|TransactionType);setPage(1)}}/>
 <MetricCard label="Despesas filtradas" value={formatCentsBRL(totals.expense)} supportingText="Consumo demonstrativo" tone="expense"/>
 <MetricCard label="Resultado" value={formatCentsBRL(totals.income-totals.expense)} supportingText="Entradas menos despesas"/>
 </div>
-<Card className="transactions-table-card">{loading?
-<TableSkeleton rows={5} columns={5} label="Carregando movimentações demonstrativas"/>:<>
+<Card className="transactions-table-card"><DataState status={status} kind="table" rows={5} columns={5}
+  label="Carregando movimentações demonstrativas" errorTitle="Erro ao carregar movimentações"
+  errorDescription="Não foi possível exibir as transações demonstrativas." onRetry={()=>setStatus('success')}>
 {rows.length?<DataTable ariaLabel="Tabela de transações fictícias" columns={columns} rows={paginateRows(rows,currentPage,PAGE_SIZE)}
 getRowKey={row=>row.id} sort={sort} onSortChange={setSort}/>:
 <EmptyState title="Nenhuma movimentação encontrada" description="Altere a busca ou redefina os filtros."
 action={<Button variant="secondary" onClick={()=>{setQuery('');setKind('all');setCategory('all');setPage(1)}}>Limpar filtros</Button>}/>}
 <Pagination page={currentPage} pageSize={PAGE_SIZE} totalItems={rows.length} onPageChange={setPage}/>
-</>}</Card>
+</DataState></Card>
 </section>;
 }
