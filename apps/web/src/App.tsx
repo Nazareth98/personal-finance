@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
+import { TransactionsDemo } from './components/TransactionsDemo';
 import { Badge, Button, Card } from '@personal-finance/ui';
 
 type Theme = 'light' | 'dark';
@@ -60,6 +61,7 @@ export default function App() {
             <p className="muted footnote">Transferências próprias não devem ser interpretadas como despesas.</p>
           </Card>
         </section>
+        <TransactionsDemo />
       </main>
       <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />
     </div>

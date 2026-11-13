@@ -59,3 +59,11 @@ O Storybook apresenta os componentes Beta, mas não é evidência suficiente de 
 O dashboard demonstra `Select`, `Checkbox`, `RadioGroup`, `Dialog`, `ToastProvider` e `Button.loading`. Use o botão **Nova movimentação (demo)**, preencha os campos e valide: nada é persistido. A validação de valor financeiro usa centavos exatos (`bigint`).
 
 Documentação: [Formulários](docs/design-system/FORMS.md). Stories: `pnpm storybook`.
+
+## Data Display (v0.4 Beta)
+
+O dashboard agora possui uma tabela de **movimentações fictícias** com busca, filtros, ordenação e paginação. KPI filtrados e a formatação BRL utilizam `bigint` para evitar perda de precisão; transferências internas não entram em totais de consumo/renda.
+
+Componentes no Storybook: `DataTable`, `Pagination`, `MetricCard`, `Skeleton` e `EmptyState`.
+
+Documentação de implementação: [Data Display](docs/design-system/DATA_DISPLAY.md).

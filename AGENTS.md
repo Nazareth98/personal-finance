@@ -31,3 +31,12 @@
 23. Nunca persistir uma transação real a partir de um componente de apresentação ou da demo; validação do cliente é apenas auxílio de UX.
 24. Para dinheiro, converter string de BRL em `bigint` centavos sem ponto flutuante; conferir nomes de natureza financeira.
 25. Todo novo componente de formulário exige Storybook e teste de estado crítico antes de estabilizar API.
+
+## Dados e dashboards — v0.4
+
+26. Leia `docs/design-system/DATA_DISPLAY.md` antes de criar tabelas, filtros, KPI ou componentes de resultado.
+27. Use `DataTable`, `Pagination`, `MetricCard`, `EmptyState`, `Skeleton` da biblioteca antes de criar variantes no app.
+28. Filtre, ordene e só depois pagine; use chave estável e status de página acessível.
+29. Valores monetários pertencem a `bigint` centavos e ordenação numérica precisa ser exata, sem `Number` em cálculos de domínio.
+30. Transferências próprias são movimentações patrimoniais e não alteram totais de renda/consumo na demo.
+31. Exemplos públicos são fictícios. Estados remotos, API, autenticação, paginação server-side e importações exigem implementação explícita posterior.
