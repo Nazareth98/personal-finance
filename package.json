@@ -1,18 +1,24 @@
 {
   "name": "personal-finance",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "predev": "pnpm --filter @personal-finance/tokens build",
     "dev": "pnpm --filter @personal-finance/web dev",
     "build": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/web build",
-    "typecheck": "pnpm --filter @personal-finance/ui typecheck && pnpm --filter @personal-finance/web typecheck"
+    "typecheck": "pnpm --filter @personal-finance/ui typecheck && pnpm --filter @personal-finance/web typecheck",
+    "tokens:check": "pnpm --filter @personal-finance/tokens check",
+    "test": "pnpm --filter @personal-finance/tokens test",
+    "storybook": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook storybook",
+    "storybook:build": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook build-storybook",
+    "check": "pnpm tokens:check && pnpm test && pnpm typecheck && pnpm build && pnpm storybook:build"
   },
   "engines": {
     "node": ">=22.12.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
-  }
+  },
+  "packageManager": "pnpm@10.21.0"
 }

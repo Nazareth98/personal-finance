@@ -3,7 +3,7 @@
   "meta": {
     "name": "Corporate UI",
     "purpose": "Personal finance dashboards",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "figma": "https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr"
   },
   "primitive": {
@@ -40,7 +40,10 @@
       "status-danger": "#B91C1C",
       "finance-income": "#15803D",
       "finance-expense": "#B91C1C",
-      "finance-transfer": "#2563EB"
+      "finance-transfer": "#2563EB",
+      "text-on-action": "#FFFFFF",
+      "text-on-danger": "#FFFFFF",
+      "border-focus": "#2563EB"
     },
     "dark": {
       "bg-canvas": "#0B1220",
@@ -49,14 +52,17 @@
       "text-primary": "#F8FAFC",
       "text-secondary": "#94A3B8",
       "border-default": "#334155",
-      "action-primary": "#3B82F6",
-      "action-hover": "#60A5FA",
+      "action-primary": "#2563EB",
+      "action-hover": "#1D4ED8",
       "status-success": "#4ADE80",
       "status-warning": "#FBBF24",
       "status-danger": "#F87171",
       "finance-income": "#4ADE80",
       "finance-expense": "#F87171",
-      "finance-transfer": "#60A5FA"
+      "finance-transfer": "#60A5FA",
+      "text-on-action": "#FFFFFF",
+      "text-on-danger": "#0B1220",
+      "border-focus": "#93C5FD"
     }
   },
   "spacing": {

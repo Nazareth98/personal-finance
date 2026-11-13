@@ -1,0 +1,2 @@
+html, body, #storybook-root { background: var(--color-bg-canvas); color: var(--color-text-primary); font-family: var(--font-family-sans); }
+#storybook-root { min-width: 300px; padding: 36px; }

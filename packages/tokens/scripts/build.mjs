@@ -2,8 +2,12 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+import { validateTokens } from './validate.mjs';
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const tokens = JSON.parse(await readFile(resolve(root, 'src/themes.json'), 'utf8'));
+const problems = validateTokens(tokens);
+if (problems.length) throw new Error(problems.join('\n'));
 const light = tokens.semantic.light;
 const dark = tokens.semantic.dark;
 
