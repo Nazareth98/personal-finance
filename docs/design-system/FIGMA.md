@@ -31,3 +31,9 @@ Os seis componentes na página de formulários são **referências visuais nativ
 6. Dados financeiros reais nunca entram em Figma, screenshots, Stories nem fixtures públicas.
 
 A sincronização Figma ↔ GitHub ainda **não é automática**. A criação completa de variantes, estados e Code Connect permanece no roadmap.
+
+## Templates v0.5 no Figma
+
+Na página `03 — Forms`, abaixo dos componentes de formulários e Data Display, foram criadas seis pranchas editáveis de referência: `Template / Visão geral`, `Template / Transações`, `Template / Contas`, `Template / Cartões e faturas`, `Template / Orçamentos`, `Template / Relatórios`.
+
+Estas pranchas são **composições visuais esquemáticas**, não telas completas com interações ou Code Connect. A implementação navegável funcional está em `apps/web/src/pages` e as prévias no Storybook. Não foi criada outra página devido ao limite de três páginas do Figma Starter.

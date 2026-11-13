@@ -81,3 +81,17 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .report-row__top span{font-variant-numeric:tabular-nums;color:var(--color-text-secondary)}
 @media(max-width:850px){.template-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.template-metrics{grid-template-columns:1fr}.app-toolbar__actions{width:100%}.navigation a{padding:10px}}
+
+/* Data table template layout */
+.transactions-demo{margin-top:var(--spacing-8);display:grid;gap:var(--spacing-4)}
+.transactions-filters{display:grid;grid-template-columns:minmax(200px,2fr) repeat(2,minmax(150px,1fr));gap:var(--spacing-3)}
+.transactions-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--spacing-3)}
+.transactions-table-card{padding:0;overflow:hidden}
+.transactions-table-card>.ui-pagination{padding:var(--spacing-4)}
+.transactions-loading{padding:var(--spacing-4);display:grid;gap:var(--spacing-3)}
+.transaction-amount{white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
+.transaction-amount--income{color:var(--color-finance-income)}
+.transaction-amount--expense{color:var(--color-finance-expense)}
+.transaction-amount--transfer{color:var(--color-finance-transfer)}
+@media(max-width:1050px){.transactions-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.transactions-filters>.ui-field:first-child{grid-column:1/-1}}
+@media(max-width:680px){.transactions-filters,.transactions-metrics{grid-template-columns:1fr}.transactions-filters>.ui-field:first-child{grid-column:auto}.transactions-table-card>.ui-pagination{padding:var(--spacing-3)}}
