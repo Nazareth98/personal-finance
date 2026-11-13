@@ -1,8 +1,9 @@
 import {expect,test} from '@playwright/test';
 
 test('temas explícitos prevalecem sobre preferência do sistema',async ({page})=>{
-  await page.addInitScript(()=>localStorage.setItem('pf-theme','dark'));
   await page.goto('/#overview');
+  await page.evaluate(()=>localStorage.setItem('pf-theme','dark'));
+  await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   const select=page.getByRole('combobox',{name:'Aparência'});
   await select.selectOption('light');
