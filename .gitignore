@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vite/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+.private/
+private-data/
+*.ofx
+*.qfx
+*.xlsx
+*.xls
+*.csv
+*.pdf
