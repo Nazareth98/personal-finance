@@ -88,3 +88,17 @@ Consulte [Charts & Colors](docs/design-system/CHARTS_AND_COLORS.md).
 Escolha **Aparência → Automático, Light ou Dark** no app. O padrão Automático segue a preferência do sistema e reage às mudanças, sem flash inicial. A escolha é persistida em `localStorage['pf-theme']` quando disponível.
 
 A story `Foundations/Light & Dark` compara os dois temas simultaneamente. Regras completas: [THEMING.md](docs/design-system/THEMING.md).
+
+## Validação visual e acessibilidade — v0.6
+
+O Playwright captura 36 combinações de telas Light/Dark em mobile, tablet e desktop. A primeira execução em Linux inicia os baselines no GitHub; execuções posteriores comparam diferenças e bloqueiam regressões.
+
+```bash
+pnpm build
+pnpm exec playwright install --with-deps chromium
+pnpm test:visual
+pnpm test:e2e
+pnpm test:a11y
+```
+
+Leia [VISUAL_REGRESSION.md](docs/quality/VISUAL_REGRESSION.md). A certificação acessível e a integração Figma/Code Connect permanecem pendentes.

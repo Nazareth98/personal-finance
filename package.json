@@ -1,7 +1,7 @@
 {
   "name": "personal-finance",
   "private": true,
-  "version": "0.5.2",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "predev": "pnpm --filter @personal-finance/tokens build",
@@ -12,13 +12,19 @@
     "test": "pnpm --filter @personal-finance/tokens test && pnpm --filter @personal-finance/web test",
     "storybook": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook storybook",
     "storybook:build": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook build-storybook",
-    "check": "pnpm tokens:check && pnpm test && pnpm typecheck && pnpm build && pnpm storybook:build"
+    "check": "pnpm tokens:check && pnpm test && pnpm typecheck && pnpm build && pnpm storybook:build",
+    "test:visual": "playwright test visual.spec.ts",
+    "test:visual:update": "playwright test visual.spec.ts --update-snapshots",
+    "test:e2e": "playwright test behavior.spec.ts",
+    "test:a11y": "playwright test accessibility.spec.ts"
   },
   "engines": {
     "node": ">=22.12.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@playwright/test": "1.58.2",
+    "@axe-core/playwright": "^4.11.0"
   },
   "packageManager": "pnpm@10.21.0"
 }

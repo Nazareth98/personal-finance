@@ -66,3 +66,10 @@
 46. Escopos CSS são `[data-theme="light"]` e `[data-theme="dark"]`. O modo system é resolvido antes de aplicar `data-theme`.
 47. Sempre atualize os dois modos e confira a story `Foundations/Light & Dark` e os testes de contraste.
 48. Não edite CSS gerado. Tokens têm fonte técnica exclusiva em `packages/tokens/src/themes.json`.
+
+## v0.6 — Contratos de regressão
+
+49. Qualquer mudança visual deve manter e revisar os 36 baselines em `apps/web/tests/e2e/__screenshots__` nos dois temas e três viewports. Nunca aprovar diferenças silenciosamente.
+50. Execute `pnpm test:visual`, `pnpm test:e2e` e `pnpm test:a11y`; commits visuais exigem revisão dos diffs.
+51. Testes Playwright usam somente os dados sintéticos da aplicação; nunca conectar serviços externos ou contas reais.
+52. O primeiro baseline será capturado no CI Linux e versionado uma única vez; os próximos commits somente verificam.
