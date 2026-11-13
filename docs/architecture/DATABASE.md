@@ -21,12 +21,8 @@ Novos objetos em `public` não concedem privilégios automaticamente a `anon` ou
 
 As tabelas serão criadas na etapa que as utiliza. Não antecipar o modelo completo em uma migration única.
 
-## Acesso local
+## Execução das migrations
 
-1. Copie `.env.example` para `.env` e preencha apenas valores locais.
-2. Execute `pnpm supabase:start`.
-3. Crie o usuário proprietário pelo Supabase Studio local ou pela API administrativa local.
-4. Execute `pnpm supabase:reset` para recriar o banco a partir das migrations.
-5. Execute `pnpm supabase:test` para validar grants e RLS.
+As migrations são aplicadas no projeto Supabase hospedado. Esta máquina não possui Docker, portanto o fluxo local (`supabase start`, `supabase db reset` e `supabase test db`) não faz parte da validação corrente.
 
-O seed não contém usuário ou senha. Cadastro público e cadastro anônimo permanecem desativados.
+O seed não contém usuário ou senha. Cadastro público e cadastro anônimo permanecem desativados. O provisionamento do proprietário e as validações disponíveis estão em [`AUTH.md`](AUTH.md).

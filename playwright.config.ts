@@ -23,6 +23,7 @@ export default defineConfig({
   snapshotPathTemplate:'{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   use:{
     baseURL:'http://127.0.0.1:5173',
+    channel:process.env.PLAYWRIGHT_CHANNEL||undefined,
     trace:'retain-on-failure',
     screenshot:'only-on-failure',
     reducedMotion:'reduce',
@@ -36,8 +37,8 @@ export default defineConfig({
       use:{...devices['Desktop Chrome'],viewport,colorScheme:theme,deviceScaleFactor:1},
     }))
   ),
-  webServer:{
-    command:'pnpm --filter @personal-finance/web dev --host 127.0.0.1',
+  webServer:process.env.PLAYWRIGHT_EXTERNAL_SERVER?undefined:{
+    command:'node apps/web/node_modules/vite/bin/vite.js apps/web --mode test --host 127.0.0.1',
     url:'http://127.0.0.1:5173',
     reuseExistingServer:!process.env.CI,
     timeout:120_000,

@@ -2,11 +2,14 @@ node_modules/
 .tools/
 dist/
 storybook-static/
+playwright-report/
+test-results/
 .vite/
 coverage/
 .env
 .env.*
 !.env.example
+!apps/web/.env.auth-test
 *.tsbuildinfo
 .DS_Store
 .private/

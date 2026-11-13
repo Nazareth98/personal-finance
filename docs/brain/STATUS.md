@@ -5,21 +5,27 @@ Atualizado em: 13/11/2026.
 ## Situação
 
 - Design system Corporate UI v0.6.2 implementado com tokens Light/Dark, biblioteca React, Storybook, templates, estados assíncronos e 60 baselines visuais.
-- Aplicação atual usa somente dados fictícios.
-- Fundação Supabase local, contrato do domínio e fixtures MeuPluggy sintéticas implementados; autenticação e persistência financeira ainda não.
+- Dashboard ainda usa dados financeiros fictícios, mas agora exige sessão válida do proprietário.
+- Fundação Supabase, contrato do domínio, fixtures MeuPluggy sintéticas, login, logout e recuperação de senha implementados.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 1 — acesso**, sem restaurar o backend antigo.
+**Etapa 2 — livro financeiro**, sem restaurar o backend antigo.
 
 Próximas entregas, nesta ordem:
 
-1. implementar autenticação de usuário único;
-2. proteger a aplicação e adicionar recuperação de senha;
-3. validar grants e RLS estaticamente e em testes preparados para Supabase;
-4. iniciar o livro financeiro persistente após o aceite da Etapa 1.
+1. modelar contas, lançamentos e vínculos entre movimentações;
+2. implementar migrations incrementais com RLS e grants explícitos;
+3. substituir os dados fictícios do livro por repositórios Supabase;
+4. implementar ajustes manuais e conciliação sem duplicar consumo ou receita.
+
+## Última validação
+
+- Etapa 0: validações estáticas, testes unitários, typecheck, build web e Storybook aprovados.
+- Etapa 1: 3 fluxos de autenticação, 14 cenários comportamentais e 54 cenários de acessibilidade/estados aprovados no Chromium.
+- Migration de acesso verificada estaticamente; execução real no PostgreSQL/RLS permanece pendente para o Supabase hospedado.
 
 ## Bloqueios
 

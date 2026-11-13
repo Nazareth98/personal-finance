@@ -125,6 +125,14 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 /* Accessible text accent distinct from action button fill in Dark mode. */
 .navigation a.is-active,.eyebrow,.brand-mark{color:var(--color-text-accent)}
 
+.auth-page{min-height:100vh;display:grid;place-items:center;padding:var(--spacing-4);background:var(--color-bg-canvas)}
+.auth-card{width:min(100%,420px);display:flex;flex-direction:column;gap:var(--spacing-4)}
+.auth-card h1{margin:0;font-size:var(--font-size-2xl);line-height:1.2}
+.auth-brand{font-size:40px;color:var(--color-text-accent)}
+.auth-copy{margin:0;color:var(--color-text-secondary);font-size:var(--font-size-sm);line-height:1.6}
+.auth-form{display:flex;flex-direction:column;gap:var(--spacing-4)}
+.auth-form>.ui-button{width:100%}
+
 /* Async feedback controls must wrap without expanding mobile layouts. */
 .section-heading{flex-wrap:wrap;gap:var(--spacing-3);align-items:center}
 .transactions-demo .section-heading > div:first-child{flex:1 1 235px;min-width:0}

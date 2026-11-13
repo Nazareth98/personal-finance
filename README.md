@@ -21,7 +21,7 @@ pnpm build
 pnpm typecheck
 ```
 
-O backend local é versionado em `supabase/`. O cadastro público permanece desativado; consulte [`docs/architecture/DATABASE.md`](docs/architecture/DATABASE.md) antes de criar migrations. A execução local do Supabase requer Docker, mas build, testes TypeScript e validações estáticas não dependem dele.
+O backend é versionado em `supabase/`. O cadastro público permanece desativado; consulte [`docs/architecture/DATABASE.md`](docs/architecture/DATABASE.md) antes de criar migrations e [`docs/architecture/AUTH.md`](docs/architecture/AUTH.md) para provisionar o proprietário. Nesta máquina, a validação não usa Docker: migrations e RLS devem ser confirmadas no Supabase hospedado.
 
 ## Estrutura
 
@@ -43,9 +43,9 @@ Comece por [`docs/brain/CONTEXT.md`](docs/brain/CONTEXT.md) e [`docs/brain/STATU
 
 O plano Starter do Figma não permite usar múltiplos modos na mesma coleção. Por isso, os temas foram representados em coleções separadas. **Os JSONs deste repositório são a fonte de verdade para a implementação**; veja `docs/design-system/FIGMA.md`.
 
-## Escopo deste PR
+## Estado da implementação
 
-Uma fundação **de interface e documentação**. Não implementa autenticação, persistência, Supabase, Open Finance, importações ou cálculos financeiros de produção. Não copiar dados privados ou históricos para fixtures.
+A fundação de interface e domínio e o acesso do único proprietário estão implementados. O dashboard financeiro ainda usa dados fictícios; persistência do livro, Open Finance e importações serão adicionados incrementalmente. Não copiar dados privados ou históricos para fixtures.
 
 ## Documentação do Design System (v0.2)
 
