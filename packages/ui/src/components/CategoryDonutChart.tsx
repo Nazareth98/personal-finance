@@ -11,7 +11,7 @@ export function CategoryDonutChart({data,formatValue,title='Distribuição das d
  let start=0;
  const slices=positive.map((p,i)=>{
    const width=i===positive.length-1?100-start:percentage(p.valueCents,total);
-   const result={...p,index:i,start,end:Math.min(100,start+width),percent:percentage(clean[i],total)};
+   const result={...p,index:i,start,end:Math.min(100,start+width),percent:percentage(p.valueCents,total)};
    start=result.end;return result;
  });
  const palette=['var(--color-chart-category-1)','var(--color-chart-category-2)','var(--color-chart-category-3)','var(--color-chart-category-4)','var(--color-chart-category-5)'];
