@@ -67,3 +67,9 @@ O dashboard agora possui uma tabela de **movimentações fictícias** com busca,
 Componentes no Storybook: `DataTable`, `Pagination`, `MetricCard`, `Skeleton` e `EmptyState`.
 
 Documentação de implementação: [Data Display](docs/design-system/DATA_DISPLAY.md).
+
+## Templates financeiros — v0.5 Beta
+
+Seis telas funcionais de demonstração via navegação na lateral: **Visão geral, Transações, Contas, Cartões e faturas, Orçamentos e Relatórios**. Os dados são fictícios e não há persistência nem acesso bancário.
+
+Acesse cada tela em `/#overview`, `/#transactions`, `/#accounts`, `/#cards`, `/#budgets` e `/#reports`. O Storybook inclui prévias dos templates. Consulte [TEMPLATES.md](docs/design-system/TEMPLATES.md).

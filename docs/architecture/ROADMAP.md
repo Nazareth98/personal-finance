@@ -6,8 +6,14 @@
 | v0.2 Qualidade | Contraste, Storybook, CI, Input | Entregue |
 | v0.3 Forms | Select, Checkbox, Radio, Dialog, Toast e demo | Entregue — Beta |
 | v0.4 Data Display | DataTable, filtros, paginação, EmptyState, Skeleton, MetricCard | Entregue — Beta |
-| v0.5 Templates | Contas, transações, orçamento, cartões e relatórios | Próxima |
-| v0.6 Integração | Testes navegador, axe, regressão visual, Figma/Code Connect | Planejado |
-| v1.0 Estável | API consolidada, revisão WCAG e releases | Pendente |
+| v0.5 Templates | Visão geral, contas, transações, cartões/faturas, orçamentos e relatórios | Entregue — Beta |
+| v0.6 Integração | Testes navegador, axe, regressão visual, Figma/Code Connect | Próxima etapa |
+| v1.0 Estável | API consolidada, revisão WCAG, integração controlada e releases | Pendente |
 
-Os dados financeiros da aplicação de demonstração são fictícios. O contrato de interface não implementa backend, banco de dados, autenticação nem importações. Consulte `docs/design-system/DATA_DISPLAY.md`.
+## Decisões e limites
+
+- Templates utilizam apenas dados inventados e não tocam bancos, autenticação ou Open Finance.
+- A UI é composta de biblioteca de componentes genéricos e templates financeiros em `apps/web`.
+- Testes comprovam contratos de cálculo dos dados de demonstração; não substituem testes de segurança ou integração reais.
+- Os valores de faturas não são automaticamente somados ao consumo; pagamento é liquidação patrimonial.
+- Figma é a referência visual e JSON versionado é fonte de verdade dos tokens.

@@ -40,3 +40,13 @@
 29. Valores monetários pertencem a `bigint` centavos e ordenação numérica precisa ser exata, sem `Number` em cálculos de domínio.
 30. Transferências próprias são movimentações patrimoniais e não alteram totais de renda/consumo na demo.
 31. Exemplos públicos são fictícios. Estados remotos, API, autenticação, paginação server-side e importações exigem implementação explícita posterior.
+
+## Templates de aplicativo — v0.5
+
+32. Consulte `docs/design-system/TEMPLATES.md` antes de alterar navegação e layouts de domínio.
+33. Templates do app ficam em `apps/web/src/pages`, e primitives reaproveitáveis permanecem em `packages/ui`.
+34. A navegação demonstrativa atual é baseada em fragmentos hash e não representa autenticação ou autorização.
+35. Jamais inferir que o saldo de contas corresponde ao resultado do mês.
+36. Pagamento de fatura reduz dívida, não constitui consumo adicional; não somar fatura e lançamentos sem conciliação.
+37. Não ligar templates a dados reais, bancos ou API sem aprovação explícita.
+38. Testar cenários de contas, faturas, orçamentos e relatórios com `bigint` antes de promover versões.

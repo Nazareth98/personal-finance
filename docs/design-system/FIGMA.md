@@ -31,14 +31,3 @@ Os seis componentes na página de formulários são **referências visuais nativ
 6. Dados financeiros reais nunca entram em Figma, screenshots, Stories nem fixtures públicas.
 
 A sincronização Figma ↔ GitHub ainda **não é automática**. A criação completa de variantes, estados e Code Connect permanece no roadmap.
-
-## Catálogo de dados — v0.4
-
-Na página `03 — Forms`, abaixo da seção de formulários, existe uma seção **Corporate UI / Data Display v0.4** com componentes Figma editáveis de referência:
-- `DataTable / Default`
-- `Pagination / Default`
-- `MetricCard / Income`
-- `EmptyState / Default`
-- `Skeleton / Loading`
-
-A quantidade de páginas permanece em três devido ao limite do Figma Starter. Estas representações não possuem ainda conjuntos completos de variantes, interações de navegação ou Code Connect: a implementação executável e os contratos de tipos pertencem ao React/Storybook. Ver `DATA_DISPLAY.md`.
