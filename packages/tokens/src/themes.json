@@ -31,7 +31,7 @@
       "bg-surface": "#FFFFFF",
       "bg-subtle": "#F1F5F9",
       "text-primary": "#0F172A",
-      "text-secondary": "#64748B",
+      "text-secondary": "#5B6B82",
       "border-default": "#E2E8F0",
       "action-primary": "#2563EB",
       "action-hover": "#1D4ED8",
@@ -55,7 +55,8 @@
       "chart-income": "#15803D",
       "chart-expense": "#B91C1C",
       "chart-neutral": "#2563EB",
-      "chart-grid": "#E2E8F0"
+      "chart-grid": "#E2E8F0",
+      "text-accent": "#1D4ED8"
     },
     "dark": {
       "bg-canvas": "#0B1220",
@@ -86,7 +87,8 @@
       "chart-income": "#4ADE80",
       "chart-expense": "#F87171",
       "chart-neutral": "#60A5FA",
-      "chart-grid": "#334155"
+      "chart-grid": "#334155",
+      "text-accent": "#93C5FD"
     }
   },
   "spacing": {

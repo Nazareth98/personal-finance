@@ -17,7 +17,7 @@ export function ToastProvider({children}:{children:ReactNode}){
   },[dismiss]);
   useEffect(()=>{const active=timers.current;return ()=>{for(const t of active.values())clearTimeout(t);active.clear()}},[]);
   return <Context.Provider value={{notify,dismiss}}>{children}
-    <div className="ui-toast-viewport" aria-label="Notificações">{items.map(item=>
+    <div className="ui-toast-viewport" role="region" aria-label="Notificações">{items.map(item=>
       <div className={`ui-toast ui-toast--${item.tone}`} key={item.id}
         role={item.tone==='error'?'alert':'status'}>
         <span>{item.message}</span>

@@ -121,3 +121,6 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .app-toolbar__actions .ui-button { max-width:100%; white-space:normal; text-align:center; }
   .template-heading,.section-heading { min-width:0; }
 }
+
+/* Accessible text accent distinct from action button fill in Dark mode. */
+.navigation a.is-active,.eyebrow,.brand-mark{color:var(--color-text-accent)}

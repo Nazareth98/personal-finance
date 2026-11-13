@@ -37,3 +37,11 @@ Testes de contrato verificam paridade de tokens, pares de contraste financeiros 
 ## Figma Starter
 
 Figma usa duas coleções separadas, `Corporate / Semantic Light` e `Corporate / Semantic Dark`, porque o plano Starter limita modos na mesma coleção. O JSON no GitHub continua sendo a fonte técnica única. A sincronização Figma↔código **não é automática**.
+
+## Ajustes encontrados nos testes axe-core
+
+- `text-secondary` no Light foi ajustado para `#5B6B82` para manter 4,5:1 em `bg-subtle`.
+- `text-accent` é independente de `action-primary`: Light `#1D4ED8` e Dark `#93C5FD`. A cor de botão não deve ser reutilizada automaticamente para texto.
+- O componente de notificações passou a utilizar região nomeada semanticamente.
+
+Mudanças visuais exigem atualização intencional dos baselines via GitHub Actions, acompanhada de nova verificação de contraste.
