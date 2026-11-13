@@ -25,8 +25,8 @@ const geometry = [
 ].join('\n');
 const css = [
   '/* Gerado por packages/tokens/scripts/build.mjs. Não edite manualmente. */',
-  ':root {', declarations(light), geometry, '  color-scheme: light;', '}',
-  ':root[data-theme="dark"] {', declarations(dark), '  color-scheme: dark;', '}',
+  ':root, [data-theme="light"] {', declarations(light), geometry, '  color-scheme: light;', '}',
+  '[data-theme="dark"] {', declarations(dark), '  color-scheme: dark;', '}',
   ''
 ].join('\n');
 await mkdir(resolve(root, 'dist'), { recursive: true });

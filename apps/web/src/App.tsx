@@ -1,5 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { Badge, Button } from '@personal-finance/ui';
+import { Badge, Button, Select } from '@personal-finance/ui';
+import { useTheme } from './hooks/useTheme';
+import type { ThemePreference } from './lib/theme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
 import { TransactionsPage } from './pages/TransactionsPage';
@@ -9,7 +11,6 @@ import { BudgetsPage } from './pages/BudgetsPage';
 import { ReportsPage } from './pages/ReportsPage';
 
 export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'reports';
-type Theme = 'light' | 'dark';
 const navigation: { id: PageId; title: string; icon: string }[] = [
   { id: 'overview', title: 'Visão geral', icon: '▦' },
   { id: 'transactions', title: 'Transações', icon: '⇄' },
@@ -33,12 +34,7 @@ const pages: Record<PageId, ComponentType> = {
 export default function App() {
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
-  const [theme, setTheme] = useState<Theme>(() => window.localStorage.getItem('pf-theme') === 'dark' ? 'dark' : 'light');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    window.localStorage.setItem('pf-theme', theme);
-  }, [theme]);
+  const {preference,setPreference} = useTheme();
   useEffect(() => {
     const onHashChange=()=>setPage(getPage());
     window.addEventListener('hashchange',onHashChange);
@@ -62,10 +58,7 @@ export default function App() {
       <div className="app-toolbar">
         <span><Badge>Ambiente demonstrativo</Badge></span>
         <div className="app-toolbar__actions">
-          <Button size="sm" variant="secondary" onClick={()=>setTheme(theme==='light'?'dark':'light')}
-            aria-label={theme==='light'?'Ativar modo escuro':'Ativar modo claro'}>
-            {theme==='light'?'◐ Modo escuro':'☀ Modo claro'}
-          </Button>
+          <div className="app-theme-control"><Select label="Aparência" value={preference} onChange={event=>setPreference(event.target.value as ThemePreference)} options={[{value:'system',label:'Automático'},{value:'light',label:'Light'},{value:'dark',label:'Dark'}]}/></div>
           <Button size="sm" onClick={()=>setFormOpen(true)}>+ Nova movimentação (demo)</Button>
         </div>
       </div>

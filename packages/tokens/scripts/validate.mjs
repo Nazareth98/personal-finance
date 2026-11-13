@@ -35,7 +35,18 @@ export function validateTokens(tokens) {
       ['text-secondary', 'bg-surface', 4.5],
       ['text-on-action', 'action-primary', 4.5],
       ['text-on-action', 'action-hover', 4.5],
-      ['text-on-danger', 'status-danger', 4.5]
+      ['text-on-danger', 'status-danger', 4.5],
+      ['finance-positive', 'bg-canvas', 4.5],
+      ['finance-negative', 'bg-canvas', 4.5],
+      ['finance-neutral', 'bg-canvas', 4.5],
+      ['finance-transfer', 'bg-canvas', 4.5],
+      ['finance-positive', 'bg-surface', 4.5],
+      ['finance-negative', 'bg-surface', 4.5],
+      ['finance-neutral', 'bg-surface', 4.5],
+      ['finance-transfer', 'bg-surface', 4.5],
+      ['status-danger', 'bg-surface', 4.5],
+      ['status-success', 'bg-surface', 4.5],
+      ['status-warning', 'bg-surface', 4.5]
     ];
     for (const [foreground, background, minimum] of pairs) {
       const a = values[foreground], b = values[background];

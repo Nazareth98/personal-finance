@@ -54,3 +54,7 @@ Foram criadas **24 variáveis adicionais** distribuídas nas coleções semânti
 Estas são **referências visuais editáveis**, ainda não ligadas automaticamente por Code Connect nem estruturadas como componentes com todas as variantes. A fonte técnica dos valores e regras é `packages/tokens/src/themes.json`; a biblioteca React e os exemplos completos do Storybook implementam o comportamento.
 
 Ver `CHARTS_AND_COLORS.md` para o contrato de semântica financeira e `TEMPLATES.md` para as telas que utilizam gráficos e loading.
+
+## Consolidação Light/Dark — v0.5.2
+
+A biblioteca mantém Light e Dark em coleções separadas pelo limite de modos do Starter. A equivalência de nomes e cores deve ser conferida com `packages/tokens/src/themes.json`. No Storybook, a story `Foundations/Light & Dark` usa os mesmos tokens para exibir componentes lado a lado. Consulte `THEMING.md`.

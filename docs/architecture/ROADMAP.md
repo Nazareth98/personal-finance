@@ -8,6 +8,7 @@
 | v0.4 Data Display | DataTable, filtros, paginação, EmptyState, Skeleton, MetricCard | Entregue — Beta |
 | v0.5 Templates | Visão geral, contas, transações, cartões/faturas, orçamentos e relatórios | Entregue — Beta |
 | v0.5.1 Cores, gráficos e loading | Tokens positivos/negativos, 3 gráficos reutilizáveis, skeletons estruturais | Entregue — Beta |
+| v0.5.2 Consolidação Light/Dark | Preferência Automático/Light/Dark, tokens e contraste, preview simultânea | Entregue — Beta |
 | v0.6 Integração | Testes navegador, axe, regressão visual, Figma/Code Connect | Próxima etapa |
 | v1.0 Estável | API consolidada, revisão WCAG, integração controlada e releases | Pendente |
 

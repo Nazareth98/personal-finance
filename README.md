@@ -82,3 +82,9 @@ Acesse cada tela em `/#overview`, `/#transactions`, `/#accounts`, `/#cards`, `/#
 - Storybook documenta os novos componentes com exemplos totalmente fictícios.
 
 Consulte [Charts & Colors](docs/design-system/CHARTS_AND_COLORS.md).
+
+## Consolidação de temas — v0.5.2
+
+Escolha **Aparência → Automático, Light ou Dark** no app. O padrão Automático segue a preferência do sistema e reage às mudanças, sem flash inicial. A escolha é persistida em `localStorage['pf-theme']` quando disponível.
+
+A story `Foundations/Light & Dark` compara os dois temas simultaneamente. Regras completas: [THEMING.md](docs/design-system/THEMING.md).

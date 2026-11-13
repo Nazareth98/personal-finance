@@ -59,3 +59,10 @@
 42. Componentes `CashFlowChart`, `TrendLineChart` e `CategoryDonutChart` recebem valores monetários como bigint em centavos. Converta somente proporções limitadas para coordenadas CSS/SVG.
 43. Para tabelas use `TableSkeleton`; para gráficos `ChartSkeleton`. Preserve estrutura visual e anuncie status com `role=status`, sem loops de loading artificiais em produção.
 44. Não apresentar dados sintéticos como histórico bancário real.
+
+## Consolidação Light/Dark
+
+45. Use `apps/web/src/hooks/useTheme.ts` para configuração do tema no app; não duplique `matchMedia` ou acesso ao localStorage nos componentes.
+46. Escopos CSS são `[data-theme="light"]` e `[data-theme="dark"]`. O modo system é resolvido antes de aplicar `data-theme`.
+47. Sempre atualize os dois modos e confira a story `Foundations/Light & Dark` e os testes de contraste.
+48. Não edite CSS gerado. Tokens têm fonte técnica exclusiva em `packages/tokens/src/themes.json`.
