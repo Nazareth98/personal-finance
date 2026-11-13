@@ -1,0 +1,93 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "meta": {
+    "name": "Corporate UI",
+    "purpose": "Personal finance dashboards",
+    "version": "0.1.0",
+    "figma": "https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr"
+  },
+  "primitive": {
+    "blue": {
+      "50": "#EFF6FF",
+      "100": "#DBEAFE",
+      "300": "#93C5FD",
+      "500": "#3B82F6",
+      "600": "#2563EB",
+      "700": "#1D4ED8"
+    },
+    "slate": {
+      "50": "#F8FAFC",
+      "100": "#F1F5F9",
+      "200": "#E2E8F0",
+      "400": "#94A3B8",
+      "500": "#64748B",
+      "700": "#334155",
+      "900": "#0F172A"
+    }
+  },
+  "semantic": {
+    "light": {
+      "bg-canvas": "#F8FAFC",
+      "bg-surface": "#FFFFFF",
+      "bg-subtle": "#F1F5F9",
+      "text-primary": "#0F172A",
+      "text-secondary": "#64748B",
+      "border-default": "#E2E8F0",
+      "action-primary": "#2563EB",
+      "action-hover": "#1D4ED8",
+      "status-success": "#15803D",
+      "status-warning": "#B45309",
+      "status-danger": "#B91C1C",
+      "finance-income": "#15803D",
+      "finance-expense": "#B91C1C",
+      "finance-transfer": "#2563EB"
+    },
+    "dark": {
+      "bg-canvas": "#0B1220",
+      "bg-surface": "#172235",
+      "bg-subtle": "#1E293B",
+      "text-primary": "#F8FAFC",
+      "text-secondary": "#94A3B8",
+      "border-default": "#334155",
+      "action-primary": "#3B82F6",
+      "action-hover": "#60A5FA",
+      "status-success": "#4ADE80",
+      "status-warning": "#FBBF24",
+      "status-danger": "#F87171",
+      "finance-income": "#4ADE80",
+      "finance-expense": "#F87171",
+      "finance-transfer": "#60A5FA"
+    }
+  },
+  "spacing": {
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "6": 24,
+    "8": 32,
+    "12": 48
+  },
+  "radius": {
+    "sm": 4,
+    "md": 8,
+    "lg": 12,
+    "xl": 16
+  },
+  "typography": {
+    "family": "Inter, ui-sans-serif, system-ui, sans-serif",
+    "scale": {
+      "xs": 12,
+      "sm": 14,
+      "base": 16,
+      "lg": 18,
+      "xl": 24,
+      "2xl": 32
+    }
+  },
+  "controlHeight": {
+    "sm": 32,
+    "md": 36,
+    "lg": 40
+  }
+}
