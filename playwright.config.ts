@@ -20,7 +20,7 @@ export default defineConfig({
     timeout:10_000,
     toHaveScreenshot:{animations:'disabled',caret:'hide',scale:'css',threshold:0.2,maxDiffPixelRatio:0.002},
   },
-  snapshotPathTemplate:'{testDir}/__screenshots__/{projectName}/{arg}',
+  snapshotPathTemplate:'{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   use:{
     baseURL:'http://127.0.0.1:5173',
     trace:'retain-on-failure',
