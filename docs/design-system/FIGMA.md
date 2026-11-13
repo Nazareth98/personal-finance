@@ -58,3 +58,9 @@ Ver `CHARTS_AND_COLORS.md` para o contrato de semântica financeira e `TEMPLATES
 ## Consolidação Light/Dark — v0.5.2
 
 A biblioteca mantém Light e Dark em coleções separadas pelo limite de modos do Starter. A equivalência de nomes e cores deve ser conferida com `packages/tokens/src/themes.json`. No Storybook, a story `Foundations/Light & Dark` usa os mesmos tokens para exibir componentes lado a lado. Consulte `THEMING.md`.
+
+## Comparativo visual da consolidação v0.5.2
+
+Foi criada na página `03 — Forms` a prancha editável `Foundations / Light & Dark unified v0.5.2` (node `33:2`), mostrando os dois temas lado a lado: superfícies, tipografia, saldos positivos, despesas, transferências e ação primária.
+
+A inspeção confirmou **29 variáveis semânticas com nomes correspondentes em cada coleção**. Como o plano Figma Starter não admite dois modos em uma mesma coleção, Light e Dark continuam separados no Figma e **unificados pela mesma estrutura JSON/CSS no código**. Esta prancha demonstra visualmente os temas; a validação automática ocorre no GitHub Actions e na story `Foundations/Light & Dark`.
