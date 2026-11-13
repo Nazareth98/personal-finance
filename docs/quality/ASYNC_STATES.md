@@ -29,3 +29,7 @@ pnpm check
 `states-visual.spec.ts` acrescenta **24 snapshots** (quatro estados × três viewports × Light/Dark), que se somam aos 36 templates existentes, totalizando **60 screenshots**. Todos são capturados em Chromium no Ubuntu 24.04.
 
 A revisão visual dos diffs precisa ser consciente. A atualização de baseline em `main` exige a marca `[update visual baselines]` no commit. Os dados são somente fictícios, sem APIs externas. Testes em browser e axe automatizado não substituem navegação com leitores de tela ou aprovação manual WCAG.
+
+## Revisão dos baselines
+
+A expansão do catálogo visual e a inclusão de controles demonstrativos alteram os templates de Visão geral e Transações. O commit de atualização da matriz utiliza a marca `[update visual baselines]` para regenerar e versionar as capturas no runner Linux. Não aceitar atualizações de imagens automaticamente em mudanças futuras sem revisão de conteúdo.
