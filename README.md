@@ -39,3 +39,17 @@ O plano Starter do Figma não permite usar múltiplos modos na mesma coleção. 
 ## Escopo deste PR
 
 Uma fundação **de interface e documentação**. Não implementa autenticação, persistência, Supabase, Open Finance, importações ou cálculos financeiros de produção. Não copiar dados privados ou históricos para fixtures.
+
+## Documentação do Design System (v0.2)
+
+```bash
+pnpm tokens:check     # Valida Light/Dark e contraste de pares essenciais
+pnpm test             # Node test runner: contratos de tokens
+pnpm storybook        # Catálogo interativo em http://localhost:6006
+pnpm storybook:build  # Compila a documentação
+pnpm check            # Validação completa do Design System
+```
+
+Veja [componentes](docs/design-system/COMPONENTS.md), [governança](docs/design-system/GOVERNANCE.md) e [roadmap](docs/architecture/ROADMAP.md).
+
+O Storybook apresenta os componentes Beta, mas não é evidência suficiente de acessibilidade completa. Os passos de CI usam instalação não congelada até ser gerado e revisado um `pnpm-lock.yaml`.

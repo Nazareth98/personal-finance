@@ -14,3 +14,12 @@
 12. Para componentes interativos: teclado, estados focus/disabled/loading, labels, contraste, testes e acessibilidade. Evitar cor como único meio de transmitir significado.
 13. O Figma é a referência visual: https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr . Código e tokens versionados no GitHub são a fonte de verdade técnica.
 14. Prefira alterações pequenas, documentadas, com PR; proteja a `main` de mudanças diretas não revisadas.
+
+## Contratos adicionais — v0.2
+
+15. Consulte `docs/design-system/COMPONENTS.md` e `docs/design-system/GOVERNANCE.md` ao criar ou refatorar componentes.
+16. Crie stories no Storybook para cada componente e variante; inclua estados disabled/error e testes de interação antes de classificar como Stable.
+17. Rode `pnpm check` e registre resultado; nunca alegue que testes foram executados se não foram.
+18. O CI verifica contraste mínimo de pares de texto críticos, mas não substitui auditoria acessível de todas as telas.
+19. Para codificar cores: `text-on-action` e `text-on-danger` são tokens obrigatórios de contraste; nenhuma cor hexadecimal inline em componentes.
+20. Toda nova variável semântica deve existir em Light e Dark e ser adicionada à documentação e ao Figma.
