@@ -1,20 +1,33 @@
 # Integração Figma ↔ GitHub ↔ Codex
 
-Arquivo: [Corporate UI — Design System Foundations](https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr).
+Arquivo: [Corporate UI — Design System](https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr).
 
-Criado no Figma:
-- `01 — Foundations`: cores primitivas, aliases de Light, escala geométrica e prancha.
-- `02 — Dark Foundations`: cores Dark e tokens específicos para finanças.
-- Coleções independentes `Corporate / Primitives`, `Corporate / Semantic Light`, `Corporate / Semantic Dark`, `Corporate / Geometry`.
+## Estrutura atual no Figma
 
-**Limitação do Figma Starter:** o plano não permite múltiplos modos na mesma coleção. São coleções separadas em Figma e dois conjuntos de semânticos no JSON, unificados pelo mesmo nome na geração CSS.
+- `01 — Foundations`: cores primitivas, aliases de Light, espaçamento, raios e hierarquia tipográfica.
+- `02 — Dark Foundations`: tokens de Dark e estados semânticos para finanças.
+- `03 — Forms`: catálogo de seis **componentes Figma nativos e editáveis**:
+  - Input / Default
+  - Select / Default
+  - Checkbox / Unchecked
+  - RadioGroup / Default
+  - Dialog / Base
+  - Toast / Info
+- Coleções de variáveis: `Corporate / Primitives`, `Corporate / Semantic Light`, `Corporate / Semantic Dark`, `Corporate / Geometry`.
+
+## Limites atuais e estágio de maturidade
+
+O plano Figma Starter oferece apenas **três páginas por arquivo** e apenas um modo por coleção. A página inicial vazia foi reaproveitada como `03 — Forms`, sem excluir as foundations anteriores. Os modos Light/Dark estão representados em coleções separadas.
+
+Os seis componentes na página de formulários são **referências visuais nativas**, não variantes completamente construídas nem componentes com Code Connect. O comportamento real, os estados, a lógica do formulário e a documentação interativa estão no React/Storybook; o Figma não substitui esses contratos.
 
 ## Contrato de sincronização
 
-1. Alterações técnicas nas cores, espaçamentos e nomes começam em `packages/tokens/src/themes.json`.
-2. Executar o gerador e revisar o CSS resultante.
-3. Atualizar visualmente as duas pranchas e variáveis do Figma de acordo com o contrato.
-4. Ao criar componentes, mapear propriedades e variantes: `Button / Variant / Size / State`; `Card`; `Badge / Tone`.
-5. Registrar mudanças relevantes nas foundations em `FOUNDATIONS.md` e via PR.
+1. Fonte técnica: `packages/tokens/src/themes.json`. Executar `pnpm tokens:check` e `pnpm build` após alterar tokens.
+2. Atualizar manualmente as coleções visuais do Figma para corresponder à implementação.
+3. Cada componente React deve possuir API tipada, Storybook, documentação e estados antes da promoção a Stable.
+4. Ao evoluir o Figma, adicionar variantes e ligações de variáveis aos componentes sem quebrar os componentes atuais.
+5. Trabalhar com commits versionados e executar `pnpm check` antes de declarar entrega. Branch `main` pode receber commits diretos quando explicitamente autorizado.
+6. Dados financeiros reais nunca entram em Figma, screenshots, Stories nem fixtures públicas.
 
-A sincronização Figma↔GitHub ainda **não é automática**. A biblioteca Figma ainda não possui todos os componentes React, nem Code Connect. Isso é uma etapa futura; não presumir publicação de biblioteca nem vínculo automático.
+A sincronização Figma ↔ GitHub ainda **não é automática**. A criação completa de variantes, estados e Code Connect permanece no roadmap.

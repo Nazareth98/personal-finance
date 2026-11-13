@@ -46,3 +46,7 @@ Não existe persistência, conexão a banco, autenticação, importação bancá
 - Storybook e UI com build verde;
 - API do componente estável;
 - contrato equivalente e variantes documentadas no Figma.
+
+## Referência visual Figma
+
+Os componentes Input, Select, Checkbox, RadioGroup, Dialog e Toast possuem versões visuais editáveis na página `03 — Forms` do [arquivo Corporate UI](https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr). Essas bases ainda não contêm todas as variantes e propriedades do React.
