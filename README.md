@@ -53,3 +53,9 @@ pnpm check            # Validação completa do Design System
 Veja [componentes](docs/design-system/COMPONENTS.md), [governança](docs/design-system/GOVERNANCE.md) e [roadmap](docs/architecture/ROADMAP.md).
 
 O Storybook apresenta os componentes Beta, mas não é evidência suficiente de acessibilidade completa. Os passos de CI usam instalação não congelada até ser gerado e revisado um `pnpm-lock.yaml`.
+
+## Formulários (v0.3 Beta)
+
+O dashboard demonstra `Select`, `Checkbox`, `RadioGroup`, `Dialog`, `ToastProvider` e `Button.loading`. Use o botão **Nova movimentação (demo)**, preencha os campos e valide: nada é persistido. A validação de valor financeiro usa centavos exatos (`bigint`).
+
+Documentação: [Formulários](docs/design-system/FORMS.md). Stories: `pnpm storybook`.

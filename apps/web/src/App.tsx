@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { Badge, Button, Card } from '@personal-finance/ui';
 
 type Theme = 'light' | 'dark';
@@ -10,6 +11,7 @@ const activity = [
 ];
 
 export default function App() {
+  const [formOpen, setFormOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(() => window.localStorage.getItem('pf-theme') === 'dark' ? 'dark' : 'light');
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function App() {
             {theme === 'light' ? '◐ Tema escuro' : '☼ Tema claro'}
           </Button>
         </div>
+        <div className="demo-action"><Button onClick={() => setFormOpen(true)}>+ Nova movimentação (demo)</Button></div>
         <p className="sample-warning" role="note">Os valores abaixo são fictícios e servem somente para demonstrar o Design System.</p>
         <section className="metrics" aria-label="Indicadores">
           <Card><p className="metric-label">Saldo consolidado</p><strong className="metric-value">{formatMoney(24850)}</strong><Badge tone="income">+8,2% no período</Badge></Card>
@@ -58,6 +61,7 @@ export default function App() {
           </Card>
         </section>
       </main>
+      <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />
     </div>
   );
 }

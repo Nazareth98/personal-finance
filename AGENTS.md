@@ -23,3 +23,11 @@
 18. O CI verifica contraste mínimo de pares de texto críticos, mas não substitui auditoria acessível de todas as telas.
 19. Para codificar cores: `text-on-action` e `text-on-danger` são tokens obrigatórios de contraste; nenhuma cor hexadecimal inline em componentes.
 20. Toda nova variável semântica deve existir em Light e Dark e ser adicionada à documentação e ao Figma.
+
+## Regras adicionais — formulários v0.3
+
+21. Consultar `docs/design-system/FORMS.md` antes de criar campos, validação ou diálogos.
+22. Usar primitives de `@personal-finance/ui` (Input, Select, Checkbox, RadioGroup, Dialog, Toast) em vez de recriar controles no app.
+23. Nunca persistir uma transação real a partir de um componente de apresentação ou da demo; validação do cliente é apenas auxílio de UX.
+24. Para dinheiro, converter string de BRL em `bigint` centavos sem ponto flutuante; conferir nomes de natureza financeira.
+25. Todo novo componente de formulário exige Storybook e teste de estado crítico antes de estabilizar API.
