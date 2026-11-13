@@ -21,6 +21,8 @@ pnpm build
 pnpm typecheck
 ```
 
+O backend local é versionado em `supabase/`. O cadastro público permanece desativado; consulte [`docs/architecture/DATABASE.md`](docs/architecture/DATABASE.md) antes de criar migrations. A execução local do Supabase requer Docker, mas build, testes TypeScript e validações estáticas não dependem dele.
+
 ## Estrutura
 
 - `apps/web`: demonstração React de dashboard financeiro (dados fictícios).

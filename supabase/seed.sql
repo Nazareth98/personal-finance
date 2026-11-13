@@ -1,0 +1,2 @@
+-- Usuários e dados financeiros não são versionados.
+-- Crie o proprietário local pelo comando documentado em docs/architecture/DATABASE.md.

@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "id": "fixture-transaction-001",
+      "accountId": "fixture-account-001",
+      "description": "IFOOD *RESTAURANTE TESTE",
+      "amount": -42.9,
+      "date": "2026-10-15T12:00:00.000Z",
+      "type": "DEBIT"
+    },
+    {
+      "id": "fixture-transaction-002",
+      "accountId": "fixture-account-001",
+      "description": "SALARIO EMPRESA EXEMPLO",
+      "amount": 5000,
+      "date": "2026-10-05T12:00:00.000Z",
+      "type": "CREDIT"
+    }
+  ],
+  "total": 2
+}

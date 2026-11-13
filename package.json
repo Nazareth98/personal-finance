@@ -7,26 +7,32 @@
     "predev": "pnpm --filter @personal-finance/tokens build",
     "dev": "pnpm --filter @personal-finance/web dev",
     "build": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/web build",
-    "typecheck": "pnpm --filter @personal-finance/ui typecheck && pnpm --filter @personal-finance/web typecheck",
+    "typecheck": "pnpm --filter @personal-finance/domain typecheck && pnpm --filter @personal-finance/ui typecheck && pnpm --filter @personal-finance/web typecheck",
     "tokens:check": "pnpm --filter @personal-finance/tokens check",
-    "test": "pnpm --filter @personal-finance/tokens test && pnpm --filter @personal-finance/web test",
+    "test": "pnpm --filter @personal-finance/tokens test && pnpm --filter @personal-finance/domain test && pnpm --filter @personal-finance/web test",
     "storybook": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook storybook",
     "storybook:build": "pnpm --filter @personal-finance/tokens build && pnpm --filter @personal-finance/storybook build-storybook",
-    "check": "pnpm tokens:check && pnpm test && pnpm typecheck && pnpm build && pnpm storybook:build",
+    "check": "pnpm foundation:check && pnpm tokens:check && pnpm test && pnpm typecheck && pnpm build && pnpm storybook:build",
+    "foundation:check": "node scripts/foundation-check.mjs",
     "test:visual": "playwright test visual.spec.ts states-visual.spec.ts",
     "test:visual:update": "playwright test visual.spec.ts states-visual.spec.ts --update-snapshots",
     "test:e2e": "playwright test behavior.spec.ts",
     "test:a11y": "playwright test accessibility.spec.ts",
     "test:states": "playwright test states.spec.ts",
-    "test:states:visual": "playwright test states-visual.spec.ts"
+    "test:states:visual": "playwright test states-visual.spec.ts",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:test": "supabase test db"
   },
   "engines": {
     "node": ">=22.12.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "@axe-core/playwright": "^4.11.0",
     "@playwright/test": "1.58.2",
-    "@axe-core/playwright": "^4.11.0"
+    "supabase": "^3.1.0",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.21.0"
 }
