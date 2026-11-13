@@ -37,3 +37,20 @@ A sincronização Figma ↔ GitHub ainda **não é automática**. A criação co
 Na página `03 — Forms`, abaixo dos componentes de formulários e Data Display, foram criadas seis pranchas editáveis de referência: `Template / Visão geral`, `Template / Transações`, `Template / Contas`, `Template / Cartões e faturas`, `Template / Orçamentos`, `Template / Relatórios`.
 
 Estas pranchas são **composições visuais esquemáticas**, não telas completas com interações ou Code Connect. A implementação navegável funcional está em `apps/web/src/pages` e as prévias no Storybook. Não foi criada outra página devido ao limite de três páginas do Figma Starter.
+
+## v0.5.1 — Cores financeiras, gráficos e loading
+
+Na página `03 — Forms`, seção `Corporate UI / Finance Colors & Charts v0.5.1`:
+
+- `Foundation / Finance Colors Light & Dark`: amostras de resultado positivo, negativo, neutro e transferência.
+- `Chart / Cash Flow`: comparativo de receitas/despesas.
+- `Chart / Trend Line`: evolução do resultado.
+- `Chart / Category Donut`: participação de despesas por categoria.
+- `Loading / Table Skeleton`: referência de tabela em carregamento.
+- `Loading / Chart Skeleton`: referência visual do carregamento de gráficos.
+
+Foram criadas **24 variáveis adicionais** distribuídas nas coleções semânticas Light/Dark, incluindo `finance/positive`, `finance/negative`, `finance/neutral`, `chart/income`, `chart/expense`, `chart/neutral`, `chart/grid` e cinco cores categóricas por tema.
+
+Estas são **referências visuais editáveis**, ainda não ligadas automaticamente por Code Connect nem estruturadas como componentes com todas as variantes. A fonte técnica dos valores e regras é `packages/tokens/src/themes.json`; a biblioteca React e os exemplos completos do Storybook implementam o comportamento.
+
+Ver `CHARTS_AND_COLORS.md` para o contrato de semântica financeira e `TEMPLATES.md` para as telas que utilizam gráficos e loading.
