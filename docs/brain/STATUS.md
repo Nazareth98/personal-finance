@@ -4,7 +4,7 @@ Atualizado em: 13/11/2026.
 
 ## Situação
 
-- Design system Corporate UI v0.6.2 implementado com tokens Light/Dark, biblioteca React, Storybook, templates, estados assíncronos e 60 baselines visuais.
+- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates, estados assíncronos e 60 baselines visuais.
 - Em produção, visão geral, contas, cartões-base, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Plano funcional e regras centrais documentados no brain.

@@ -5,6 +5,13 @@ import { readTokens, validateTokens, contrastRatio } from '../scripts/validate.m
 test('tokens Light e Dark seguem contrato e contraste mínimo', async () => {
   const tokens = await readTokens();
   assert.deepEqual(validateTokens(tokens), []);
+  assert.match(tokens.typography.family, /^"Inter Variable"/);
+});
+
+test('fonte variável é auto-hospedada pelo pacote de tokens', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const css = await readFile(new URL('../src/fonts.css', import.meta.url), 'utf8');
+  assert.match(css, /@fontsource-variable\/inter\/wght\.css/);
 });
 
 test('contraste é calculado segundo luminância relativa', () => {

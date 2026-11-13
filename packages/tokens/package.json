@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./fonts.css": "./src/fonts.css",
     "./theme.css": "./dist/theme.css",
     "./tokens": "./src/themes.json"
   },
@@ -15,5 +16,8 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/validate.mjs",
     "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0"
   }
 }

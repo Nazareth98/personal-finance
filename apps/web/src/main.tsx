@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ToastProvider } from '@personal-finance/ui';
+import '@personal-finance/tokens/fonts.css';
 import '@personal-finance/tokens/theme.css';
 import '@personal-finance/ui/styles.css';
 import './styles.css';

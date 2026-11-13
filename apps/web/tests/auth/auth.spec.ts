@@ -152,7 +152,7 @@ test('registra transferência manual nas duas pontas pelo procedimento atômico'
   const rpcCalls: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, rpcCalls);
   await login(page);
-  await page.getByRole('button', { name: '+ Nova movimentação' }).click();
+  await page.getByRole('button', { name: 'Nova movimentação' }).click();
   await page.getByLabel('Descrição').fill('Transferência para reserva');
   await page.getByLabel('Valor (R$)').fill('250,00');
   await page.getByLabel('Tipo').selectOption('transfer');
@@ -170,13 +170,13 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   await mockSupabase(page, true, writes);
   await login(page);
   await page.getByRole('link', { name: /Contas/ }).click();
-  await page.getByRole('button', { name: '+ Nova conta' }).click();
+  await page.getByRole('button', { name: 'Nova conta' }).click();
   await page.getByLabel('Nome da conta').fill('Conta de testes');
   await page.getByLabel('Saldo inicial (R$)').fill('1.000,00');
   await page.getByRole('button', { name: 'Cadastrar conta' }).click();
   await expect(page.getByText('Conta cadastrada.')).toBeVisible();
 
-  await page.getByRole('button', { name: '+ Nova movimentação' }).click();
+  await page.getByRole('button', { name: 'Nova movimentação' }).click();
   const transactionDialog = page.getByRole('dialog', { name: 'Nova movimentação' });
   await transactionDialog.getByLabel('Descrição').fill('Correção de tarifa');
   await transactionDialog.getByLabel('Valor (R$)').fill('12,50');

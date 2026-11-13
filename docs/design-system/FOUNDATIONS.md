@@ -28,7 +28,7 @@ Outros tokens (`status-*`) estão no JSON. Valores financeiros positivos e negat
 
 ## Escalas
 
-- Tipografia: Inter (fallback sistema); 12, 14, 16, 18, 24, 32px.
+- Tipografia: Inter Variable auto-hospedada, eixo de peso contínuo 100–900 e fallback de sistema; 12, 14, 16, 18, 24, 32px.
 - Espaçamento: 4, 8, 12, 16, 24, 32, 48px.
 - Raios: 4, 8, 12, 16px.
 - Alturas de controles: 32, 36, 40px.

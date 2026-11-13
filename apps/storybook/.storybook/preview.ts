@@ -1,4 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
+import '@personal-finance/tokens/fonts.css';
 import '@personal-finance/tokens/theme.css';
 import '@personal-finance/ui/styles.css';
 import './preview.css';

@@ -1,4 +1,6 @@
 import { createContext,useCallback,useContext,useEffect,useRef,useState,type ReactNode } from 'react';
+import { X } from 'lucide-react';
+import { Icon } from './Icon';
 export type ToastTone='info'|'success'|'error';
 export type ToastOptions={message:string;tone?:ToastTone;durationMs?:number};
 type ToastItem=Required<ToastOptions>&{id:number};
@@ -21,7 +23,7 @@ export function ToastProvider({children}:{children:ReactNode}){
       <div className={`ui-toast ui-toast--${item.tone}`} key={item.id}
         role={item.tone==='error'?'alert':'status'}>
         <span>{item.message}</span>
-        <button type="button" className="ui-toast__close" onClick={()=>dismiss(item.id)} aria-label="Dispensar notificação">✕</button>
+        <button type="button" className="ui-toast__close" onClick={()=>dismiss(item.id)} aria-label="Dispensar notificação"><Icon icon={X} size="sm" /></button>
       </div>)}</div>
   </Context.Provider>;
 }

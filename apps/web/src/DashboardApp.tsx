@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { Badge, Button, Select } from '@personal-finance/ui';
+import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import type { ThemePreference } from './lib/theme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
@@ -14,13 +14,13 @@ import { useLedger, type LedgerState } from './ledger/useLedger';
 import { ManualTransactionForm } from './components/ManualTransactionForm';
 
 export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'reports';
-const navigation: { id: PageId; title: string; icon: string }[] = [
-  { id: 'overview', title: 'Visão geral', icon: '▦' },
-  { id: 'transactions', title: 'Transações', icon: '⇄' },
-  { id: 'accounts', title: 'Contas', icon: '▤' },
-  { id: 'cards', title: 'Cartões e faturas', icon: '▣' },
-  { id: 'budgets', title: 'Orçamentos', icon: '◫' },
-  { id: 'reports', title: 'Relatórios', icon: '▥' }
+const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
+  { id: 'overview', title: 'Visão geral', icon: DashboardIcon },
+  { id: 'transactions', title: 'Transações', icon: TransactionsIcon },
+  { id: 'accounts', title: 'Contas', icon: AccountsIcon },
+  { id: 'cards', title: 'Cartões e faturas', icon: CardsIcon },
+  { id: 'budgets', title: 'Orçamentos', icon: BudgetsIcon },
+  { id: 'reports', title: 'Relatórios', icon: ReportsIcon }
 ];
 
 function getPage(): PageId {
@@ -70,12 +70,12 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository }: Dashboa
   return <div className="app-shell">
     <aside className="sidebar">
       <a className="brand" href="#overview" aria-label="Personal Finance — início">
-        <span className="brand-mark" aria-hidden="true">◈</span><span>Personal Finance</span>
+        <Icon icon={BrandIcon} size="lg" className="brand-mark"/><span>Personal Finance</span>
       </a>
       <nav className="navigation" aria-label="Navegação principal">
         {navigation.map(item => <a key={item.id} href={`#${item.id}`}
           aria-current={page === item.id ? 'page' : undefined} className={page === item.id ? 'is-active' : undefined}>
-          <span aria-hidden="true">{item.icon}</span>{item.title}
+          <Icon icon={item.icon}/>{item.title}
         </a>)}
       </nav>
       <p className="sidebar-note">{ledgerRepository ? 'Livro financeiro pessoal.' : 'Corporate UI v0.5 · Todos os dados são fictícios.'}</p>
@@ -85,7 +85,7 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository }: Dashboa
         <span><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
         <div className="app-toolbar__actions">
           <div className="app-theme-control"><Select label="Aparência" value={preference} onChange={event => setPreference(event.target.value as ThemePreference)} options={[{ value: 'system', label: 'Automático' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} /></div>
-          <Button size="sm" onClick={() => setFormOpen(true)}>+ Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
+          <Button size="sm" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
           {onSignOut && <Button size="sm" variant="ghost" loading={signingOut} onClick={signOut}>Sair</Button>}
         </div>
       </div>

@@ -1,5 +1,18 @@
 export { Button } from './components/Button';
 export type { ButtonProps } from './components/Button';
+export { Icon } from './components/Icon';
+export type { IconProps } from './components/Icon';
+export type { LucideIcon } from 'lucide-react';
+export {
+  ArrowLeftRight as TransactionsIcon,
+  ChartNoAxesColumnIncreasing as ReportsIcon,
+  ChartPie as BudgetsIcon,
+  CreditCard as CardsIcon,
+  Gem as BrandIcon,
+  Landmark as AccountsIcon,
+  LayoutDashboard as DashboardIcon,
+  Plus as PlusIcon
+} from 'lucide-react';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';
 export { Badge } from './components/Badge';

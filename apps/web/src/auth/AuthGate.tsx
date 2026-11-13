@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Button, Card, FormMessage, Input } from '@personal-finance/ui';
+import { BrandIcon, Button, Card, FormMessage, Icon, Input } from '@personal-finance/ui';
 import type { AuthGateway, AuthUser } from './contracts';
 import { authErrorMessage } from './errors';
 
@@ -150,7 +150,7 @@ export function AuthGate({ gateway, children }: AuthGateProps) {
 function AuthLayout({ children }: { children: ReactNode }) {
   return <main className="auth-page">
     <Card className="auth-card">
-      <span className="auth-brand" aria-hidden="true">◈</span>
+      <Icon icon={BrandIcon} size="lg" className="auth-brand" />
       {children}
     </Card>
   </main>;

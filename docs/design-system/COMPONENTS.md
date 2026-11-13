@@ -4,6 +4,7 @@
 
 - **Foundations**: cores, tipografia, espaçamento, raios, alturas e contraste.
 - **Primitives**: Button, Card, Badge.
+- **Icons**: `Icon` + catálogo semântico curado de `lucide-react`.
 - **Forms**: Input, Select, Checkbox, RadioGroup, Field, FormMessage, Dialog, ToastProvider/useToast.
 - **Data display (próxima etapa)**: DataTable, EmptyState, Skeleton, MetricCard, Progress, ChartLegend.
 - **Patterns**: filtros, validação e confirmação de ações, formulários de lançamento, revisão de importações.
@@ -24,6 +25,7 @@ Todos os componentes estão em **Beta** até a execução de testes de interaç�
 | Documentação | Stories, props tipadas, restrições de uso e exemplos fictícios |
 
 Ver [documentação de formulários](FORMS.md) e [governança](GOVERNANCE.md).
+O contrato de ícones está em [ICONS.md](ICONS.md).
 
 ## Critérios de estabilização
 
