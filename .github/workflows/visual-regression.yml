@@ -27,13 +27,15 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Initialize first Linux visual baseline (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          VISUAL_REFRESH: ${{ contains(github.event.head_commit.message, '[update visual baselines]') }}
         run: |
-          if [ ! -d apps/web/tests/e2e/__screenshots__ ]; then
+          if [ ! -d apps/web/tests/e2e/__screenshots__ ] || [[ "$VISUAL_REFRESH" == "true" ]]; then
             pnpm test:visual:update
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add apps/web/tests/e2e/__screenshots__
-            git commit -m "test(visual): seed 36 Light Dark template baselines [skip ci]"
+            git commit -m "test(visual): review/update 36 Light Dark baselines [skip ci]"
             git push
           fi
       - name: Verify visual snapshots

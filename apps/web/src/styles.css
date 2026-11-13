@@ -107,3 +107,17 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 /* Theme controls and native elements inherit semantic colors. */
 .app-shell { color-scheme: inherit; }
 ::selection { background: var(--color-action-primary); color: var(--color-text-on-action); }
+
+/* Prevent intrinsic min-content widths from expanding the mobile app beyond its viewport. */
+.app-shell,.main,.template-page,.transactions-demo,.template-chart-grid,.ui-chart { min-width: 0; }
+@media (max-width: 1000px) {
+  .app-shell { grid-template-columns: minmax(0,1fr); width: 100%; }
+  .sidebar,.main { min-width:0; max-width:100%; }
+  .navigation { max-width:100%; overflow-x:auto; }
+  .template-grid,.template-chart-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width: 560px) {
+  .app-toolbar__actions { min-width:0; }
+  .app-toolbar__actions .ui-button { max-width:100%; white-space:normal; text-align:center; }
+  .template-heading,.section-heading { min-width:0; }
+}

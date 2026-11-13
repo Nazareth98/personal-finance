@@ -32,3 +32,9 @@ pnpm test:a11y
 ```
 
 É necessário usar ambiente Linux compatível com o CI para avaliar snapshots de maneira reproduzível. Recomenda-se validar visualmente cada baseline em Light/Dark antes de declarar o Design System Stable.
+
+## Correção responsiva encontrada na primeira captura
+
+O screenshot de Relatórios em 390px mostrou expansão horizontal do grid raiz. A correção define `minmax(0,1fr)` no breakpoint mobile e `min-width:0` nos contêineres dos templates, preservando rolagem local das tabelas.
+
+Atualização **intencional** dos 36 baselines no CI Linux: somente um commit explícito na `main` com `[update visual baselines]` permite refazer e commitar automaticamente os arquivos; os demais commits verificam e falham em diferenças inesperadas.
