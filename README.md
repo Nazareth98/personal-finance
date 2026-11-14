@@ -45,7 +45,7 @@ O plano Starter do Figma não permite usar múltiplos modos na mesma coleção. 
 
 ## Estado da implementação
 
-A fundação, o acesso do único proprietário, o livro financeiro, metas, caixinhas, MeuPluggy, categorização explicável e cartões com faturas e parcelas estão implementados no código. O modo visual de teste usa dados fictícios; em produção, contas e lançamentos vêm do Supabase. A integração exige migrations, secrets e Edge Functions publicados no ambiente hospedado antes do uso real. Não copiar dados privados ou históricos para fixtures.
+A fundação, o acesso do único proprietário, o livro financeiro, metas, caixinhas, MeuPluggy, categorização explicável, cartões e previsão financeira de seis meses estão implementados no código. O modo visual de teste usa dados fictícios; em produção, contas e lançamentos vêm do Supabase. A integração exige migrations, secrets e Edge Functions publicados no ambiente hospedado antes do uso real. Não copiar dados privados ou históricos para fixtures.
 
 ## Documentação do Design System (v0.2)
 

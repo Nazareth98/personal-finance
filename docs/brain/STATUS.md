@@ -12,19 +12,20 @@ Atualizado em: 14/11/2026.
 - MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela exibe fonte, tentativa, sucesso e estado de erro.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
 - Cartões implementados com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. Compras sincronizadas usam a competência do vencimento e ficam no staging quando o calendário é desconhecido.
+- Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 8 — receitas e previsão**, sem restaurar o backend antigo.
+**Etapa 9 — PWA e estabilização**, sem restaurar o backend antigo.
 
 Próximas entregas, nesta ordem:
 
-1. reconhecer salário pela descrição do Itaú;
-2. separar receita recorrente e extraordinária;
-3. calcular média móvel dos seis meses recorrentes;
-4. combinar despesas recorrentes, parcelas, metas e aportes planejados.
+1. adicionar manifesto, instalação e shell estático offline sem dados financeiros;
+2. consolidar responsividade a partir de 320 px e estados de erro/carregamento;
+3. validar fluxos críticos e regressão visual contra o Figma;
+4. preparar deploy do frontend e Supabase sem expor secrets.
 
 ## Última validação
 
@@ -36,6 +37,7 @@ Próximas entregas, nesta ordem:
 - Etapa 5: `pnpm check` aprovado; 3 contratos de normalização/centavos, validações estáticas de isolamento/idempotência, 10 fluxos autenticados e 84 cenários responsivos/acessíveis executados no Chromium (80 aprovados e 4 skips esperados). Os 6 baselines de conexões foram gerados e revisados.
 - Etapa 6: 3 contratos do classificador, validação estática de overlay/RLS/aprendizado, 11 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). Os 6 baselines de revisão foram gerados e revisados.
 - Etapa 7: `pnpm check` aprovado; 3 contratos de competência/fatura/parcelas, validação estática de RLS e separação realizado/projetado, 12 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de cartões não mudou e nenhum baseline foi atualizado.
+- Etapa 8: `pnpm check` aprovado; 3 contratos de recorrência/previsão, validação estática de reconhecimento e imutabilidade, 13 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de relatórios não mudou e nenhum baseline foi atualizado.
 - Migrations de acesso, livro, MeuPluggy, categorização e cartões verificadas estaticamente; execução real no PostgreSQL/RLS permanece pendente para o Supabase hospedado.
 
 ## Bloqueios

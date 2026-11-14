@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
 import { cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
+import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
 import { accountTypeFromPluggy, centsFromPluggy, ledgerSemantics, merchantName, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
 import { safeError } from './http.ts';
@@ -21,6 +22,7 @@ type CardLedgerItem = {
   nature: 'expense' | 'refund' | 'card_payment'; installmentNumber?: number; totalInstallments?: number;
   groupKey?: string; originalTransactionId?: string; providerBillId?: string;
 };
+type IncomeCandidate = { externalKey: string; description: string; institutionName: string };
 
 function dateOnly(value: string): string {
   const date = value.slice(0, 10);
@@ -116,12 +118,14 @@ function transactionRows(
   accountId: string,
   accountType: ReturnType<typeof accountTypeFromPluggy>,
   card: CardConfig | undefined,
+  institutionName: string,
   transactions: PluggyTransaction[]
-): { raw: Record<string, unknown>[]; ledger: Record<string, unknown>[]; cardItems: CardLedgerItem[]; candidates: { externalKey: string; candidate: ClassificationCandidate }[]; skipped: number } {
+): { raw: Record<string, unknown>[]; ledger: Record<string, unknown>[]; cardItems: CardLedgerItem[]; incomeCandidates: IncomeCandidate[]; candidates: { externalKey: string; candidate: ClassificationCandidate }[]; skipped: number } {
   const raw: Record<string, unknown>[] = [];
   const ledger: Record<string, unknown>[] = [];
   const candidates: { externalKey: string; candidate: ClassificationCandidate }[] = [];
   const cardItems: CardLedgerItem[] = [];
+  const incomeCandidates: IncomeCandidate[] = [];
   let skipped = 0;
   for (const transaction of transactions) {
     try {
@@ -187,12 +191,13 @@ function transactionRows(
         candidates.push({ externalKey, candidate: {
           description, ...(merchant ? { merchant } : {}), accountId, nature: semantics.nature
         } });
+        if (semantics.nature === 'income') incomeCandidates.push({ externalKey, description, institutionName });
       }
     } catch {
       skipped += 1;
     }
   }
-  return { raw, ledger, cardItems, candidates, skipped };
+  return { raw, ledger, cardItems, incomeCandidates, candidates, skipped };
 }
 
 async function persistCardArtifacts(database: SupabaseClient, ownerId: string, card: CardConfig, items: CardLedgerItem[]): Promise<void> {
@@ -283,6 +288,31 @@ async function persistClassifications(
   if (stored.error) throw stored.error;
 }
 
+async function persistIncomeRecognition(database: SupabaseClient, ownerId: string, candidates: IncomeCandidate[]): Promise<void> {
+  const recognized = candidates.filter(item => recognizeItauSalary(item.description, item.institutionName));
+  if (!recognized.length) return;
+  const transactions = await database.from('transactions').select('id,external_key')
+    .eq('owner_id', ownerId).in('external_key', recognized.map(item => item.externalKey));
+  if (transactions.error) throw transactions.error;
+  const transactionByKey = new Map((transactions.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+  const transactionIds = [...transactionByKey.values()];
+  if (!transactionIds.length) return;
+  const existing = await database.from('transaction_classifications').select('transaction_id')
+    .eq('owner_id', ownerId).in('transaction_id', transactionIds);
+  if (existing.error) throw existing.error;
+  const classified = new Set((existing.data ?? []).map(row => String(row.transaction_id)));
+  const rows = recognized.flatMap(item => {
+    const transactionId = transactionByKey.get(item.externalKey);
+    if (!transactionId || classified.has(transactionId)) return [];
+    return [{ owner_id: ownerId, transaction_id: transactionId, category_id: 'salary', confidence_basis_points: 9500,
+      status: 'automatic', classifier_version: 'income-v1', explanation: { evidence: [{ kind: 'alias',
+        value: 'itau:salary-description', weightBasisPoints: 9500, label: 'Descrição de salário em conta Itaú' }] } }];
+  });
+  if (!rows.length) return;
+  const stored = await database.from('transaction_classifications').upsert(rows, { onConflict: 'transaction_id', ignoreDuplicates: true });
+  if (stored.error) throw stored.error;
+}
+
 export async function synchronizeConnection(
   database: SupabaseClient,
   pluggy: PluggyClient,
@@ -344,7 +374,7 @@ export async function synchronizeConnection(
         const transactionPageSize = 500;
         while (true) {
           const page = await pluggy.getTransactions(account.id, transactionPage, transactionPageSize, incrementalFrom(connection.last_success_at));
-          const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, page.results);
+          const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, institutionName, page.results);
           skippedTransactions += rows.skipped;
           if (rows.raw.length) {
             const rawInsert = await database.rpc('internal_store_pluggy_transactions', { p_rows: rows.raw });
@@ -357,6 +387,7 @@ export async function synchronizeConnection(
             if (ledgerInsert.error) throw ledgerInsert.error;
           }
           if (mapped.card) await persistCardArtifacts(database, ownerId, mapped.card, rows.cardItems);
+          await persistIncomeRecognition(database, ownerId, rows.incomeCandidates);
           await persistClassifications(database, ownerId, rows.candidates, rules);
           await database.from('sync_runs').update({
             checkpoint: { accountPage, accountId: account.id, transactionPage },

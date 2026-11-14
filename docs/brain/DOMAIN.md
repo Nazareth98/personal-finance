@@ -36,6 +36,8 @@ O saldo é sempre reconstruído pelo saldo inicial, aportes e resgates vinculado
 
 Usar os seis meses anteriores de receitas recorrentes, despesas recorrentes, parcelas futuras, metas e aportes planejados. Receita extraordinária permanece no realizado, mas é excluída da média futura.
 
+Salário e outras receitas recorrentes exigem categoria automática ou confirmada. Despesa só forma base recorrente quando seu grupo aparece em pelo menos duas das seis competências. O gasto planejado usa o maior valor entre essa base e os tetos, evitando somar duas estimativas do mesmo consumo. Parcelas realizadas não voltam à média; somente parcelas projetadas entram como compromisso futuro. O aporte é derivado do saldo atual, meta e prazo da caixinha.
+
 ## Categorização
 
 Normalizar caixa, acentos, pontuação e códigos voláteis; tokenizar a descrição e comparar estabelecimento, aliases, tokens, conta e natureza.

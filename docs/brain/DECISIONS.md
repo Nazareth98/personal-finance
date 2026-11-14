@@ -19,3 +19,4 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-013 | Transações de cartão vindas do MeuPluggy ficam no staging até a Etapa 7 calcular a competência pela fatura; não criar lançamento temporário incorreto. | Vigente |
 | D-014 | Categoria de lançamento importado é um overlay versionado; confirmação cria feedback e alias sem editar o registro MeuPluggy. | Vigente |
 | D-015 | Faturas são identificadas pela competência do vencimento; parcelas futuras ficam separadas do livro realizado e pagamentos são vínculos neutros. | Vigente |
+| D-016 | A previsão não persiste lançamentos futuros: usa média recorrente de seis competências, o maior entre histórico e tetos, parcelas projetadas e aporte necessário para metas. | Vigente |

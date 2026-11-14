@@ -30,6 +30,7 @@ O saldo reconstruível, os movimentos neutros e a associação manual de caixinh
 O fluxo de Connect Token, sincronização, staging, webhook e retomada está em [`../architecture/MEUPLUGGY.md`](../architecture/MEUPLUGGY.md).
 O overlay imutável, regras, pontuação e feedback de categoria estão em [`../architecture/CATEGORIZATION.md`](../architecture/CATEGORIZATION.md).
 O ciclo de crédito, composição de faturas, estornos, pagamentos e projeções de parcelas estão em [`../architecture/CARDS.md`](../architecture/CARDS.md).
+O reconhecimento de receita recorrente e o cálculo determinístico da previsão estão em [`../architecture/FORECASTING.md`](../architecture/FORECASTING.md).
 
 ## MeuPluggy
 

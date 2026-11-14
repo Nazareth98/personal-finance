@@ -19,7 +19,7 @@ Novos objetos em `public` não concedem privilégios automaticamente a `anon` ou
 | planejamento | `category_budgets`, `savings_boxes`, `savings_movements` |
 | integração | `pluggy_connections`, `sync_runs`, `webhook_events` |
 
-As tabelas são criadas na etapa que as utiliza. O grupo `livro` e as categorias foram entregues na Etapa 2; `category_budgets`, na Etapa 3; caixinhas, na Etapa 4; integração, na Etapa 5; categorização, na Etapa 6; faturas, entradas e parcelas, na Etapa 7. Veja [`LEDGER.md`](LEDGER.md), [`BUDGETS.md`](BUDGETS.md), [`SAVINGS.md`](SAVINGS.md), [`MEUPLUGGY.md`](MEUPLUGGY.md), [`CATEGORIZATION.md`](CATEGORIZATION.md) e [`CARDS.md`](CARDS.md).
+As tabelas são criadas na etapa que as utiliza. O grupo `livro` e as categorias foram entregues na Etapa 2; `category_budgets`, na Etapa 3; caixinhas, na Etapa 4; integração, na Etapa 5; categorização, na Etapa 6; faturas, entradas e parcelas, na Etapa 7. A Etapa 8 reutiliza os overlays e entidades existentes para calcular a previsão sem persistir valores futuros como realizados. Veja [`LEDGER.md`](LEDGER.md), [`BUDGETS.md`](BUDGETS.md), [`SAVINGS.md`](SAVINGS.md), [`MEUPLUGGY.md`](MEUPLUGGY.md), [`CATEGORIZATION.md`](CATEGORIZATION.md), [`CARDS.md`](CARDS.md) e [`FORECASTING.md`](FORECASTING.md).
 
 ## Execução das migrations
 

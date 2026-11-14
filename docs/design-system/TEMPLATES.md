@@ -12,7 +12,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 | Caixinhas | Saldo, meta, aportes, resgates e progresso | Movimentos patrimoniais neutros e rastreáveis |
 | Conexões | Instituições MeuPluggy, estado, tentativas, sucesso, erro e sincronização manual | Connect Token efêmero; nenhum secret ou dado bancário no modo demonstrativo |
 | Revisão | Confiança, evidências, versão e confirmação de categoria | Correção explícita aprende alias sem alterar o lançamento importado |
-| Relatórios | Resultado sintético e despesas por categoria | `bigint` para todos os totais; porcentagem é somente visual |
+| Relatórios | Realizado, renda recorrente e previsão de seis meses com metas, parcelas e aportes | Transferências e receitas extraordinárias ficam fora da média futura |
 
 ## Contrato técnico
 

@@ -80,6 +80,12 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         { id: '88888888-2222-4888-8888-888888888888', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'savings', description: 'Aplicação importada', amount_cents: '-25000', nature: 'own_transfer', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'confirmed', external_key: 'pluggy-savings-1' }
         ,{ id: '77777777-3333-4777-8777-777777777777', account_id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', category_id: null, description: 'Notebook 1/2', amount_cents: '-12000', nature: 'expense', reporting: 'expense', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'uncategorized', external_key: 'pluggy-card-1' }
         ,{ id: '66666666-3333-4666-8666-666666666666', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: null, description: 'Pagamento da fatura', amount_cents: '-12000', nature: 'card_payment', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-10', competence: '2026-11', classification_status: 'automatic', external_key: 'pluggy-payment-1' }
+        ,{ id: '10000000-3333-4000-8000-000000000001', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-06-05', competence: '2026-06', classification_status: 'confirmed', external_key: 'pluggy-salary-6' }
+        ,{ id: '10000000-3333-4000-8000-000000000002', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-07-05', competence: '2026-07', classification_status: 'confirmed', external_key: 'pluggy-salary-7' }
+        ,{ id: '10000000-3333-4000-8000-000000000003', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-08-05', competence: '2026-08', classification_status: 'confirmed', external_key: 'pluggy-salary-8' }
+        ,{ id: '10000000-3333-4000-8000-000000000004', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-09-05', competence: '2026-09', classification_status: 'confirmed', external_key: 'pluggy-salary-9' }
+        ,{ id: '10000000-3333-4000-8000-000000000005', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-10-05', competence: '2026-10', classification_status: 'confirmed', external_key: 'pluggy-salary-10' }
+        ,{ id: '20000000-3333-4000-8000-000000000001', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'extraordinary_income', description: 'Bônus extraordinário', amount_cents: '120000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-10-15', competence: '2026-10', classification_status: 'confirmed', external_key: 'pluggy-bonus-10' }
       ]) });
       return;
     }
@@ -353,6 +359,16 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
 
   expect(writes.find(write => write.path.endsWith('/configure_credit_card'))?.body).toContain('500000');
   expect(writes.find(write => write.path.endsWith('/link_card_payment'))?.body).toContain('66666666-3333-4666-8666-666666666666');
+});
+
+test('projeta seis meses sem incluir receita extraordinária na média futura', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#reports');
+  await expect(page.getByRole('table', { name: 'Previsão financeira de seis meses' })).toBeVisible();
+  await expect(page.getByText('R$ 5.000,00', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('R$ 1.200,00', { exact: true })).toBeVisible();
+  await expect(page.getByRole('row', { name: /2026-12/ })).toBeVisible();
 });
 
 test('exibe estado da fonte e solicita sincronização sem enviar credenciais', async ({ page }) => {
