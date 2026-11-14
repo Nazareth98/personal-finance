@@ -27,6 +27,9 @@ O fluxo de login, recuperação e provisionamento do único proprietário está 
 Os sinais monetários, totais, vínculos e procedimentos atômicos do livro estão em [`../architecture/LEDGER.md`](../architecture/LEDGER.md).
 O modelo percentual, cálculo por período e segurança das metas estão em [`../architecture/BUDGETS.md`](../architecture/BUDGETS.md).
 O saldo reconstruível, os movimentos neutros e a associação manual de caixinhas estão em [`../architecture/SAVINGS.md`](../architecture/SAVINGS.md).
+O fluxo de Connect Token, sincronização, staging, webhook e retomada está em [`../architecture/MEUPLUGGY.md`](../architecture/MEUPLUGGY.md).
+O overlay imutável, regras, pontuação e feedback de categoria estão em [`../architecture/CATEGORIZATION.md`](../architecture/CATEGORIZATION.md).
+O ciclo de crédito, composição de faturas, estornos, pagamentos e projeções de parcelas estão em [`../architecture/CARDS.md`](../architecture/CARDS.md).
 
 ## MeuPluggy
 

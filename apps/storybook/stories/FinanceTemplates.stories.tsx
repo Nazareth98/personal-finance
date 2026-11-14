@@ -7,6 +7,8 @@ import { CardsPage } from '../../web/src/pages/CardsPage';
 import { BudgetsPage } from '../../web/src/pages/BudgetsPage';
 import { SavingsPage } from '../../web/src/pages/SavingsPage';
 import { ReportsPage } from '../../web/src/pages/ReportsPage';
+import { ConnectionsPage } from '../../web/src/pages/ConnectionsPage';
+import { ReviewPage } from '../../web/src/pages/ReviewPage';
 import '../../web/src/styles.css';
 
 const meta = {
@@ -27,4 +29,6 @@ export const Accounts: Story = { render: () => frame(<AccountsPage/>) };
 export const CardsAndInvoices: Story = { render: () => frame(<CardsPage/>) };
 export const Budgets: Story = { render: () => frame(<BudgetsPage/>) };
 export const Savings: Story = { render: () => frame(<SavingsPage/>) };
+export const Connections: Story = { render: () => frame(<ConnectionsPage/>) };
+export const Review: Story = { render: () => frame(<ReviewPage/>) };
 export const Reports: Story = { render: () => frame(<ReportsPage/>) };

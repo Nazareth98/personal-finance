@@ -14,12 +14,12 @@ Novos objetos em `public` não concedem privilégios automaticamente a `anon` ou
 | --- | --- |
 | acesso | `profiles` |
 | livro | `financial_accounts`, `transactions`, `transaction_links` |
-| classificação | `categories`, `classification_rules`, `classification_feedback` |
-| cartões | `credit_cards`, `card_statements`, `installments` |
+| classificação | `categories`, `classification_rules`, `transaction_classifications`, `classification_feedback` |
+| cartões | `credit_cards`, `card_statements`, `card_statement_entries`, `card_installments` |
 | planejamento | `category_budgets`, `savings_boxes`, `savings_movements` |
 | integração | `pluggy_connections`, `sync_runs`, `webhook_events` |
 
-As tabelas são criadas na etapa que as utiliza. O grupo `livro`, as categorias e a base de cartões foram entregues na Etapa 2; `category_budgets` foi entregue na Etapa 3; `savings_boxes` e `savings_movements`, na Etapa 4. Veja [`LEDGER.md`](LEDGER.md), [`BUDGETS.md`](BUDGETS.md) e [`SAVINGS.md`](SAVINGS.md). Os demais grupos permanecem planejados.
+As tabelas são criadas na etapa que as utiliza. O grupo `livro` e as categorias foram entregues na Etapa 2; `category_budgets`, na Etapa 3; caixinhas, na Etapa 4; integração, na Etapa 5; categorização, na Etapa 6; faturas, entradas e parcelas, na Etapa 7. Veja [`LEDGER.md`](LEDGER.md), [`BUDGETS.md`](BUDGETS.md), [`SAVINGS.md`](SAVINGS.md), [`MEUPLUGGY.md`](MEUPLUGGY.md), [`CATEGORIZATION.md`](CATEGORIZATION.md) e [`CARDS.md`](CARDS.md).
 
 ## Execução das migrations
 

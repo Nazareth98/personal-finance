@@ -8,6 +8,16 @@ export {
   transactionNatures,
   validateTransaction
 } from './finance.ts';
+export { classificationTokens, classifierVersion, classifyTransaction, normalizeClassificationText } from './classification.ts';
+export type {
+  ClassificationCandidate,
+  ClassificationEvidence,
+  ClassificationEvidenceKind,
+  ClassificationResult,
+  ClassificationRule
+} from './classification.ts';
+export { addCompetenceMonths, cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments } from './cards.ts';
+export type { CardInstallment, CardStatement, CardStatementEntry, CardStatementSummary, CreditCard } from './cards.ts';
 export type {
   Category,
   CategoryBudget,

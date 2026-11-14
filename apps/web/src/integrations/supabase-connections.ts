@@ -1,0 +1,62 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { ConnectionsData, ConnectionsRepository, PluggyConnection, SyncRun } from './contracts';
+
+type ConnectionRow = {
+  id: string; institution_name: string; status: PluggyConnection['status']; last_attempt_at: string | null;
+  last_success_at: string | null; last_error: string | null;
+};
+type RunRow = {
+  id: string; connection_id: string; status: SyncRun['status']; trigger_type: SyncRun['trigger'];
+  imported_accounts: number; imported_transactions: number; skipped_transactions: number; created_at: string;
+};
+
+export class SupabaseConnectionsRepository implements ConnectionsRepository {
+  constructor(private readonly client: SupabaseClient) {}
+
+  async load(): Promise<ConnectionsData> {
+    const [connectionsResult, runsResult] = await Promise.all([
+      this.client.from('pluggy_connections').select('id,institution_name,status,last_attempt_at,last_success_at,last_error').order('updated_at', { ascending: false }),
+      this.client.from('sync_runs').select('id,connection_id,status,trigger_type,imported_accounts,imported_transactions,skipped_transactions,created_at').order('created_at', { ascending: false }).limit(30)
+    ]);
+    const error = connectionsResult.error ?? runsResult.error;
+    if (error) throw error;
+    return {
+      connections: ((connectionsResult.data ?? []) as ConnectionRow[]).map(row => ({
+        id: row.id,
+        institutionName: row.institution_name,
+        status: row.status,
+        ...(row.last_attempt_at ? { lastAttemptAt: row.last_attempt_at } : {}),
+        ...(row.last_success_at ? { lastSuccessAt: row.last_success_at } : {}),
+        ...(row.last_error ? { lastError: row.last_error } : {})
+      })),
+      runs: ((runsResult.data ?? []) as RunRow[]).map(row => ({
+        id: row.id,
+        connectionId: row.connection_id,
+        status: row.status,
+        trigger: row.trigger_type,
+        importedAccounts: row.imported_accounts,
+        importedTransactions: row.imported_transactions,
+        skippedTransactions: row.skipped_transactions,
+        createdAt: row.created_at
+      }))
+    };
+  }
+
+  async createConnectToken(): Promise<string> {
+    const { data, error } = await this.client.functions.invoke('pluggy-connect-token', { body: {} });
+    if (error) throw error;
+    const token = (data as { connectToken?: unknown } | null)?.connectToken;
+    if (typeof token !== 'string' || !token) throw new Error('connect token missing');
+    return token;
+  }
+
+  async syncConnection(connectionId: string): Promise<void> {
+    const { error } = await this.client.functions.invoke('pluggy-sync', { body: { connectionId } });
+    if (error) throw error;
+  }
+
+  async syncItem(itemId: string): Promise<void> {
+    const { error } = await this.client.functions.invoke('pluggy-sync', { body: { itemId } });
+    if (error) throw error;
+  }
+}

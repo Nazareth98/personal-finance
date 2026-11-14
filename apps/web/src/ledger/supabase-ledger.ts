@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { validateTransaction, type CategoryBudget, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CategoryBudgetDraft, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, TransactionLink } from './contracts';
+import { validateTransaction, type CardInstallment, type CardStatement, type CardStatementEntry, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
+import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, TransactionClassification, TransactionLink } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -12,23 +12,55 @@ type LinkRow = { id: string; source_transaction_id: string; target_transaction_i
 type BudgetRow = { id: string; category_id: string; percentage_basis_points: number };
 type SavingsBoxRow = { id: string; name: string; opening_balance_cents: string | number; target_cents: string | number; target_date: string | null };
 type SavingsMovementRow = { id: string; savings_box_id: string; transaction_id: string; movement_type: SavingsMovement['type']; amount_cents: string | number; event_date: string };
+type ClassificationRow = {
+  id: string; transaction_id: string; category_id: string; confidence_basis_points: number;
+  status: TransactionClassification['status']; classifier_version: string; explanation: unknown;
+};
+type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
+type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
+type CardStatementEntryRow = { id: string; statement_id: string; transaction_id: string; entry_type: CardStatementEntry['type'] };
+type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
+
+function classificationEvidence(value: unknown): TransactionClassification['evidence'] {
+  if (!value || typeof value !== 'object') return [];
+  const evidence = (value as { evidence?: unknown }).evidence;
+  if (!Array.isArray(evidence)) return [];
+  return evidence.flatMap(item => {
+    if (!item || typeof item !== 'object') return [];
+    const row = item as Record<string, unknown>;
+    if (typeof row.kind !== 'string' || typeof row.label !== 'string' || typeof row.weightBasisPoints !== 'number') return [];
+    return [{ kind: row.kind, label: row.label, weightBasisPoints: row.weightBasisPoints }];
+  });
+}
 
 export class SupabaseLedgerRepository implements LedgerRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   async load(): Promise<LedgerData> {
-    const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult] = await Promise.all([
+    const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
       this.client.from('categories').select('id,name').order('sort_order'),
       this.client.from('transactions').select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key').order('event_date', { ascending: false }),
       this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
       this.client.from('category_budgets').select('id,category_id,percentage_basis_points').order('created_at'),
       this.client.from('savings_boxes').select('id,name,opening_balance_cents,target_cents,target_date').is('archived_at', null).order('created_at'),
-      this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false })
+      this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false }),
+      this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false }),
+      this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
+      this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false }),
+      this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
+      this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
     const error = accountsResult.error ?? categoriesResult.error ?? transactionsResult.error ?? linksResult.error ?? budgetsResult.error
-      ?? savingsBoxesResult.error ?? savingsMovementsResult.error;
+      ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? creditCardsResult.error
+      ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
+    const classifications = ((classificationsResult.data ?? []) as ClassificationRow[]).map((row): TransactionClassification => ({
+      id: row.id, transactionId: row.transaction_id, categoryId: row.category_id,
+      confidenceBasisPoints: row.confidence_basis_points, status: row.status, classifierVersion: row.classifier_version,
+      evidence: classificationEvidence(row.explanation)
+    }));
+    const classificationByTransaction = new Map(classifications.map(item => [item.transactionId, item]));
     return {
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: (categoriesResult.data ?? []).map(row => ({ id: String(row.id), name: String(row.name) })),
@@ -43,14 +75,32 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         id: row.id, savingsBoxId: row.savings_box_id, transactionId: row.transaction_id,
         type: row.movement_type, amountCents: BigInt(row.amount_cents), eventDate: row.event_date
       })),
-      transactions: ((transactionsResult.data ?? []) as TransactionRow[]).map(row => validateTransaction({
+      transactions: ((transactionsResult.data ?? []) as TransactionRow[]).map(row => {
+        const classification = classificationByTransaction.get(row.id);
+        return validateTransaction({
         id: row.id, accountId: row.account_id, description: row.description, amountCents: BigInt(row.amount_cents),
-        ...(row.category_id ? { categoryId: row.category_id } : {}),
+        ...(classification?.categoryId || row.category_id ? { categoryId: classification?.categoryId ?? row.category_id ?? undefined } : {}),
         nature: row.nature, reporting: row.reporting, source: row.source, eventDate: row.event_date,
-        competence: row.competence, classificationStatus: row.classification_status,
+        competence: row.competence, classificationStatus: classification?.status ?? row.classification_status,
         ...(row.external_key ? { externalKey: row.external_key } : {})
+      }); }),
+      links: ((linksResult.data ?? []) as LinkRow[]).map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type })),
+      classifications,
+      creditCards: ((creditCardsResult.data ?? []) as CreditCardRow[]).map((row): CreditCard => ({
+        id: row.id, accountId: row.account_id, closingDay: row.closing_day, dueDay: row.due_day,
+        ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) })
       })),
-      links: ((linksResult.data ?? []) as LinkRow[]).map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type }))
+      cardStatements: ((cardStatementsResult.data ?? []) as CardStatementRow[]).map((row): CardStatement => ({
+        id: row.id, cardId: row.card_id, competence: row.competence, closingDate: row.closing_date, dueDate: row.due_date
+      })),
+      cardStatementEntries: ((cardStatementEntriesResult.data ?? []) as CardStatementEntryRow[]).map((row): CardStatementEntry => ({
+        id: row.id, statementId: row.statement_id, transactionId: row.transaction_id, type: row.entry_type
+      })),
+      cardInstallments: ((cardInstallmentsResult.data ?? []) as CardInstallmentRow[]).map((row): CardInstallment => ({
+        id: row.id, cardId: row.card_id, statementId: row.statement_id, ...(row.transaction_id ? { transactionId: row.transaction_id } : {}),
+        description: row.description, number: row.installment_number, total: row.total_installments,
+        amountCents: BigInt(row.amount_cents), dueCompetence: row.due_competence, status: row.status
+      }))
     };
   }
 
@@ -117,6 +167,29 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       p_savings_box_id: draft.savingsBoxId,
       p_transaction_id: draft.transactionId,
       p_movement_type: draft.type
+    });
+    if (error) throw error;
+  }
+
+  async confirmClassification(draft: ClassificationConfirmation): Promise<void> {
+    const { error } = await this.client.rpc('confirm_transaction_classification', {
+      p_transaction_id: draft.transactionId,
+      p_category_id: draft.categoryId
+    });
+    if (error) throw error;
+  }
+
+  async configureCreditCard(draft: CreditCardConfiguration): Promise<void> {
+    const { error } = await this.client.rpc('configure_credit_card', {
+      p_account_id: draft.accountId, p_closing_day: draft.closingDay, p_due_day: draft.dueDay,
+      p_credit_limit_cents: draft.creditLimitCents?.toString() ?? null
+    });
+    if (error) throw error;
+  }
+
+  async linkCardPayment(draft: CardPaymentLink): Promise<void> {
+    const { error } = await this.client.rpc('link_card_payment', {
+      p_statement_id: draft.statementId, p_transaction_id: draft.transactionId
     });
     if (error) throw error;
   }

@@ -1,10 +1,20 @@
-import type { Category, CategoryBudget, FinancialAccount, SavingsBox, SavingsMovement, TransactionContract } from '@personal-finance/domain';
+import type { CardInstallment, CardStatement, CardStatementEntry, Category, CategoryBudget, CreditCard, FinancialAccount, SavingsBox, SavingsMovement, TransactionContract } from '@personal-finance/domain';
 
 export type TransactionLink = {
   id: string;
   sourceTransactionId: string;
   targetTransactionId: string;
   type: 'own_transfer' | 'adjustment' | 'refund' | 'card_payment';
+};
+
+export type TransactionClassification = {
+  id: string;
+  transactionId: string;
+  categoryId: string;
+  confidenceBasisPoints: number;
+  status: 'automatic' | 'suggested' | 'confirmed';
+  classifierVersion: string;
+  evidence: { kind: string; label: string; weightBasisPoints: number }[];
 };
 
 export type LedgerData = {
@@ -15,6 +25,11 @@ export type LedgerData = {
   savingsMovements: SavingsMovement[];
   transactions: TransactionContract[];
   links: TransactionLink[];
+  classifications: TransactionClassification[];
+  creditCards: CreditCard[];
+  cardStatements: CardStatement[];
+  cardStatementEntries: CardStatementEntry[];
+  cardInstallments: CardInstallment[];
 };
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;
@@ -30,6 +45,9 @@ export type SavingsMovementDraft = {
   competence: string;
 };
 export type SavingsMovementLinkDraft = Pick<SavingsMovement, 'savingsBoxId' | 'transactionId' | 'type'>;
+export type ClassificationConfirmation = { transactionId: string; categoryId: string };
+export type CreditCardConfiguration = Pick<CreditCard, 'accountId' | 'closingDay' | 'dueDay'> & { creditLimitCents?: bigint };
+export type CardPaymentLink = { statementId: string; transactionId: string };
 
 export type ManualTransactionDraft = {
   accountId: string;
@@ -52,4 +70,7 @@ export interface LedgerRepository {
   createSavingsBox(draft: SavingsBoxDraft): Promise<void>;
   createSavingsMovement(draft: SavingsMovementDraft): Promise<void>;
   linkSavingsMovement(draft: SavingsMovementLinkDraft): Promise<void>;
+  confirmClassification(draft: ClassificationConfirmation): Promise<void>;
+  configureCreditCard(draft: CreditCardConfiguration): Promise<void>;
+  linkCardPayment(draft: CardPaymentLink): Promise<void>;
 }

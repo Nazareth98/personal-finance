@@ -8,10 +8,12 @@ export {
   ChartNoAxesColumnIncreasing as ReportsIcon,
   ChartPie as BudgetsIcon,
   CreditCard as CardsIcon,
+  Link2 as ConnectionsIcon,
   Gem as BrandIcon,
   Landmark as AccountsIcon,
   LayoutDashboard as DashboardIcon,
   PiggyBank as SavingsIcon,
+  Tags as ReviewIcon,
   Plus as PlusIcon
 } from 'lucide-react';
 export { Card } from './components/Card';

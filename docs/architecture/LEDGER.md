@@ -5,8 +5,8 @@
 - `financial_accounts`: contas correntes, reservas, investimentos e a base dos cartões.
 - `categories`: catálogo genérico versionado e somente leitura.
 - `transactions`: livro único de lançamentos manuais ou importados.
-- `transaction_links`: relaciona as duas pontas de transferências e ajustes aos registros originais.
-- `credit_cards`: extensão mínima da conta; fechamento, faturas e parcelas pertencem à Etapa 7.
+- `transaction_links`: relaciona transferências, ajustes e estornos aos registros originais.
+- `credit_cards`, `card_statements`, `card_statement_entries` e `card_installments`: ciclo e composição do crédito; veja [`CARDS.md`](CARDS.md).
 
 `amount_cents` é um `bigint` assinado: valor positivo aumenta o saldo da conta e negativo reduz. `reporting` define se o lançamento compõe receita, despesa ou é patrimonialmente neutro. Totais de resultado usam `reporting`; saldos usam diretamente o valor assinado.
 

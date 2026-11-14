@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, CategoryBudgetDraft, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft } from './contracts';
+import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -12,6 +12,9 @@ export type LedgerState = {
   createSavingsBox: (draft: SavingsBoxDraft) => Promise<void>;
   createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
   linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
+  confirmClassification: (draft: ClassificationConfirmation) => Promise<void>;
+  configureCreditCard: (draft: CreditCardConfiguration) => Promise<void>;
+  linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
 };
 
 export function useLedger(repository?: LedgerRepository): LedgerState {
@@ -70,5 +73,23 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
-  return { data, status, error, reload, createAccount, createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement };
+  async function confirmClassification(draft: ClassificationConfirmation) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.confirmClassification(draft);
+    await reload();
+  }
+
+  async function configureCreditCard(draft: CreditCardConfiguration) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.configureCreditCard(draft);
+    await reload();
+  }
+
+  async function linkCardPayment(draft: CardPaymentLink) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.linkCardPayment(draft);
+    await reload();
+  }
+
+  return { data, status, error, reload, createAccount, createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement, confirmClassification, configureCreditCard, linkCardPayment };
 }

@@ -4,6 +4,7 @@
 
 - **Receita:** aumenta renda disponível.
 - **Despesa:** representa consumo no período.
+- **Estorno:** crédito que reduz uma despesa anterior e exige vínculo com a compra correta.
 - **Transferência própria:** movimenta patrimônio, sem afetar renda ou consumo.
 - **Pagamento de fatura:** liquida dívida, sem criar novo consumo.
 - **Aporte/resgate:** movimenta patrimônio entre conta e caixinha.
@@ -44,6 +45,7 @@ Normalizar caixa, acentos, pontuação e códigos voláteis; tokenizar a descri�
 - abaixo de 70%: manter sem categoria.
 
 Correção confirmada pode criar alias ou regra. Guardar evidências e versão do classificador para reproduzir o resultado.
+Categoria de lançamento importado é aplicada por overlay; o registro MeuPluggy permanece imutável. Empate de pontuação nunca produz sugestão.
 
 ## Categorias iniciais
 
@@ -56,3 +58,4 @@ Moradia; contas domésticas; supermercado; delivery/iFood; restaurantes; transpo
 - Uma origem externa tem chave idempotente única.
 - Pagamento de fatura, transferência e aporte não podem inflar consumo ou renda.
 - Valor desconhecido não é zero.
+- Parcela projetada não compõe o realizado até que o lançamento correspondente seja importado.

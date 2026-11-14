@@ -8,7 +8,7 @@
 | v0.2 Qualidade | Contraste, Storybook, CI, Input | Entregue |
 | v0.3 Forms | Select, Checkbox, Radio, Dialog, Toast e demo | Entregue — Beta |
 | v0.4 Data Display | DataTable, filtros, paginação, EmptyState, Skeleton, MetricCard | Entregue — Beta |
-| v0.5 Templates | Visão geral, contas, transações, cartões/faturas, orçamentos e relatórios | Entregue — Beta |
+| v0.5 Templates | Visão geral, contas, transações, cartões/faturas, orçamentos, caixinhas, conexões, revisão e relatórios | Entregue — Beta |
 | v0.5.1 Cores, gráficos e loading | Tokens positivos/negativos, 3 gráficos reutilizáveis, skeletons estruturais | Entregue — Beta |
 | v0.5.2 Consolidação Light/Dark | Preferência Automático/Light/Dark, tokens e contraste, preview simultânea | Entregue — Beta |
 | v0.6.1 Testes visuais | Playwright 36 snapshots Light/Dark, acessibilidade axe e navegação | Implementação em validação |
@@ -18,7 +18,7 @@
 
 ## Decisões e limites
 
-- Templates utilizam apenas dados inventados e não tocam bancos, autenticação ou Open Finance.
+- O modo visual dos templates utiliza apenas dados inventados. O modo autenticado acessa Supabase e MeuPluggy pelos repositórios e Edge Functions autorizados.
 - A UI é composta de biblioteca de componentes genéricos e templates financeiros em `apps/web`.
 - Testes comprovam contratos de cálculo dos dados de demonstração; não substituem testes de segurança ou integração reais.
 - Os valores de faturas não são automaticamente somados ao consumo; pagamento é liquidação patrimonial.

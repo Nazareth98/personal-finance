@@ -6,7 +6,7 @@ import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 
 const PAGE_SIZE = 10;
 const labels: Record<TransactionContract['nature'], string> = {
-  income: 'Receita', expense: 'Despesa', own_transfer: 'Transferência', card_payment: 'Pagamento de fatura',
+  income: 'Receita', expense: 'Despesa', refund: 'Estorno', own_transfer: 'Transferência', card_payment: 'Pagamento de fatura',
   savings_contribution: 'Aporte', savings_withdrawal: 'Resgate', adjustment: 'Ajuste'
 };
 const tone = (row: TransactionContract) => row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer';

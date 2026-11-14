@@ -1,7 +1,7 @@
 import {expect,test} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const pages=['overview','transactions','accounts','cards','budgets','savings','reports'];
+const pages=['overview','transactions','accounts','cards','budgets','savings','connections','review','reports'];
 for(const slug of pages){
   test(`WCAG A/AA no template ${slug}`,async ({page})=>{
     await page.goto(`/#${slug}`);

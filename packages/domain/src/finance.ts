@@ -1,6 +1,7 @@
 export const transactionNatures = [
   'income',
   'expense',
+  'refund',
   'own_transfer',
   'card_payment',
   'savings_contribution',
@@ -82,11 +83,11 @@ export function validateTransaction(transaction: TransactionContract): Transacti
   if (transaction.reporting === 'income' && transaction.amountCents < 0n) {
     throw new RangeError('Receita deve aumentar o saldo.');
   }
-  if (transaction.reporting === 'expense' && transaction.amountCents > 0n) {
+  if (transaction.reporting === 'expense' && transaction.amountCents > 0n && transaction.nature !== 'refund') {
     throw new RangeError('Despesa deve reduzir o saldo.');
   }
   if (transaction.nature !== 'adjustment') {
-    const expected = transaction.nature === 'income' ? 'income' : transaction.nature === 'expense' ? 'expense' : 'neutral';
+    const expected = transaction.nature === 'income' ? 'income' : transaction.nature === 'expense' || transaction.nature === 'refund' ? 'expense' : 'neutral';
     if (transaction.reporting !== expected) throw new RangeError('Natureza e efeito financeiro incompatíveis.');
   }
   return transaction;

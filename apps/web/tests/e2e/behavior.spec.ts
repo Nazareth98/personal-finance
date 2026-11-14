@@ -13,17 +13,19 @@ test('temas explícitos prevalecem sobre preferência do sistema',async ({page})
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
 
-test('navegação entre sete templates funciona com histórico hash',async ({page})=>{
+test('navegação entre nove templates funciona com histórico hash',async ({page})=>{
   await page.goto('/#overview');
-  for(const [slug,title] of [
-    ['transactions','Transações'],
-    ['accounts','Contas'],
-    ['cards','Cartões e faturas'],
-    ['budgets','Orçamentos'],
-    ['savings','Caixinhas'],
-    ['reports','Relatórios'],
+  for(const {slug,title,navigationTitle=title} of [
+    {slug:'transactions',title:'Transações'},
+    {slug:'accounts',title:'Contas'},
+    {slug:'cards',title:'Cartões e faturas'},
+    {slug:'budgets',title:'Orçamentos'},
+    {slug:'savings',title:'Caixinhas'},
+    {slug:'connections',title:'Conexões bancárias',navigationTitle:'Conexões'},
+    {slug:'review',title:'Revisão de categorias',navigationTitle:'Revisão'},
+    {slug:'reports',title:'Relatórios'},
   ]){
-    await page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(title,'i')}).click();
+    await page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(navigationTitle,'i')}).click();
     await expect(page).toHaveURL(new RegExp(`#${slug}$`));
     await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
   }

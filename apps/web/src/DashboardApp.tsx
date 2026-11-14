@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, SavingsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import type { ThemePreference } from './lib/theme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
@@ -13,8 +13,12 @@ import { SavingsPage } from './pages/SavingsPage';
 import type { LedgerRepository } from './ledger/contracts';
 import { useLedger, type LedgerState } from './ledger/useLedger';
 import { ManualTransactionForm } from './components/ManualTransactionForm';
+import type { ConnectionsRepository } from './integrations/contracts';
+import { useConnections, type ConnectionsState } from './integrations/useConnections';
+import { ConnectionsPage } from './pages/ConnectionsPage';
+import { ReviewPage } from './pages/ReviewPage';
 
-export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'reports';
+export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'connections' | 'review' | 'reports';
 const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
   { id: 'overview', title: 'Visão geral', icon: DashboardIcon },
   { id: 'transactions', title: 'Transações', icon: TransactionsIcon },
@@ -22,6 +26,8 @@ const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
   { id: 'cards', title: 'Cartões e faturas', icon: CardsIcon },
   { id: 'budgets', title: 'Orçamentos', icon: BudgetsIcon },
   { id: 'savings', title: 'Caixinhas', icon: SavingsIcon },
+  { id: 'connections', title: 'Conexões', icon: ConnectionsIcon },
+  { id: 'review', title: 'Revisão', icon: ReviewIcon },
   { id: 'reports', title: 'Relatórios', icon: ReportsIcon }
 ];
 
@@ -30,13 +36,15 @@ function getPage(): PageId {
   return navigation.some(item => item.id === fragment) ? fragment as PageId : 'overview';
 }
 
-const pages: Record<PageId, ComponentType<{ ledger?: LedgerState }>> = {
+const pages: Record<PageId, ComponentType<{ ledger?: LedgerState; connections?: ConnectionsState }>> = {
   overview: OverviewPage,
   transactions: TransactionsPage,
   accounts: AccountsPage,
   cards: CardsPage,
   budgets: BudgetsPage,
   savings: SavingsPage,
+  connections: ConnectionsPage,
+  review: ReviewPage,
   reports: ReportsPage
 };
 
@@ -44,14 +52,16 @@ type DashboardAppProps = {
   userEmail?: string;
   onSignOut?: () => Promise<void>;
   ledgerRepository?: LedgerRepository;
+  connectionsRepository?: ConnectionsRepository;
 };
 
-export function DashboardApp({ userEmail, onSignOut, ledgerRepository }: DashboardAppProps) {
+export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectionsRepository }: DashboardAppProps) {
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { preference, setPreference } = useTheme();
   const ledger = useLedger(ledgerRepository);
+  const connections = useConnections(connectionsRepository);
 
   useEffect(() => {
     const onHashChange = () => setPage(getPage());
@@ -96,7 +106,7 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository }: Dashboa
         Valores e instituições fictícios. Esta demonstração não consulta contas, não envia dados e não salva transações.
       </p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
-      <CurrentPage ledger={ledgerRepository ? ledger : undefined} />
+      <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined} />
     </main>
     {ledgerRepository
       ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />

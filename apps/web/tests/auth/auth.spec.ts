@@ -61,21 +61,25 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       }
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
         { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', name: 'Conta principal', account_type: 'checking', opening_balance_cents: '100000' },
-        { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', name: 'Reserva', account_type: 'savings', opening_balance_cents: '0' }
+        { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', name: 'Reserva', account_type: 'savings', opening_balance_cents: '0' },
+        { id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', name: 'Cartão principal', account_type: 'credit_card', opening_balance_cents: '0' }
       ]) });
       return;
     }
     if (url.pathname === '/rest/v1/categories') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'salary', name: 'Salário' }, { id: 'groceries', name: 'Supermercado' }]) });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'salary', name: 'Salário' }, { id: 'groceries', name: 'Supermercado' }, { id: 'restaurants', name: 'Restaurantes' }]) });
       return;
     }
     if (url.pathname === '/rest/v1/transactions') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
         { id: '11111111-2222-4111-8111-111111111111', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Receita mensal', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'manual', event_date: '2026-11-05', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '22222222-2222-4222-8222-222222222222', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'groceries', description: 'Mercado', amount_cents: '-10000', nature: 'expense', reporting: 'expense', source: 'manual', event_date: '2026-11-06', competence: '2026-11', classification_status: 'confirmed', external_key: null },
+        { id: '99999999-3333-4999-8999-999999999999', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: null, description: 'Café sintético', amount_cents: '-1000', nature: 'expense', reporting: 'expense', source: 'pluggy', event_date: '2026-11-06', competence: '2026-11', classification_status: 'uncategorized', external_key: 'pluggy-transaction-9' },
         { id: '33333333-2222-4333-8333-333333333333', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '-50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '44444444-2222-4444-8444-444444444444', account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '88888888-2222-4888-8888-888888888888', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'savings', description: 'Aplicação importada', amount_cents: '-25000', nature: 'own_transfer', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'confirmed', external_key: 'pluggy-savings-1' }
+        ,{ id: '77777777-3333-4777-8777-777777777777', account_id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', category_id: null, description: 'Notebook 1/2', amount_cents: '-12000', nature: 'expense', reporting: 'expense', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'uncategorized', external_key: 'pluggy-card-1' }
+        ,{ id: '66666666-3333-4666-8666-666666666666', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: null, description: 'Pagamento da fatura', amount_cents: '-12000', nature: 'card_payment', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-10', competence: '2026-11', classification_status: 'automatic', external_key: 'pluggy-payment-1' }
       ]) });
       return;
     }
@@ -97,6 +101,54 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname === '/rest/v1/savings_movements') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+      return;
+    }
+    if (url.pathname === '/rest/v1/transaction_classifications') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: '99999999-2222-4999-8999-999999999999', transaction_id: '99999999-3333-4999-8999-999999999999', category_id: 'groceries', confidence_basis_points: 8000, status: 'suggested', classifier_version: 'rules-v1', explanation: { evidence: [{ kind: 'token', label: 'Token da descrição', weightBasisPoints: 8000 }] } }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/credit_cards') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', account_id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', closing_day: 3, due_day: 10, credit_limit_cents: '500000' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/card_statements') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', competence: '2026-11', closing_date: '2026-11-03', due_date: '2026-11-10' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/card_statement_entries') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'eeeeeeee-2222-4eee-8eee-eeeeeeeeeeee', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '77777777-3333-4777-8777-777777777777', entry_type: 'purchase' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/card_installments') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'ffffffff-2222-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '77777777-3333-4777-8777-777777777777', description: 'Notebook', installment_number: 1, total_installments: 2, amount_cents: '12000', due_competence: '2026-11', status: 'posted' },
+        { id: 'ffffffff-3333-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: null, description: 'Notebook', installment_number: 2, total_installments: 2, amount_cents: '12000', due_competence: '2026-12', status: 'projected' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/pluggy_connections') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_attempt_at: '2026-11-14T12:00:00Z', last_success_at: '2026-11-14T12:00:00Z', last_error: null }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/sync_runs') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', connection_id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', status: 'succeeded', trigger_type: 'initial', imported_accounts: 1, imported_transactions: 2, skipped_transactions: 0, created_at: '2026-11-14T12:00:00Z' }
+      ]) });
+      return;
+    }
+    if (url.pathname === '/functions/v1/pluggy-sync') {
+      rpcCalls.push({ path: url.pathname, body: route.request().postData() });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ importedAccounts: 0, importedTransactions: 0, skippedTransactions: 0 }) });
       return;
     }
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
@@ -157,8 +209,8 @@ test('deriva o resumo do livro sem contar a transferência como receita ou despe
   await login(page);
   const indicators = page.getByLabel('Indicadores do livro financeiro');
   await expect(indicators.getByText('R$ 5.000,00')).toBeVisible();
-  await expect(indicators.getByText('R$ 100,00')).toBeVisible();
-  await expect(indicators.getByText('R$ 4.900,00')).toBeVisible();
+  await expect(indicators.getByText('R$ 230,00')).toBeVisible();
+  await expect(indicators.getByText('R$ 4.770,00')).toBeVisible();
   await page.getByRole('link', { name: /Transações/ }).click();
   await expect(page.getByRole('table', { name: 'Livro financeiro' })).toBeVisible();
   await page.getByLabel('Período', { exact: true }).selectOption('2026');
@@ -270,10 +322,68 @@ test('cadastra caixinha, registra aporte neutro e associa lançamento importado'
 test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  for (const destination of ['overview', 'transactions', 'accounts', 'budgets', 'savings']) {
+  for (const destination of ['overview', 'transactions', 'accounts', 'cards', 'budgets', 'savings', 'connections', 'review']) {
     await page.goto(`/#${destination}`);
     await expect(page.getByRole('main')).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(results.violations).toEqual([]);
   }
+});
+
+test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutro', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#cards');
+  await expect(page.getByRole('table', { name: 'Faturas dos cartões' })).toContainText('R$ 120,00');
+  await expect(page.getByRole('table', { name: 'Parcelas futuras' })).toContainText('2/2');
+
+  await page.getByRole('button', { name: 'Configurar' }).click();
+  const cardDialog = page.getByRole('dialog', { name: 'Configurar cartão' });
+  await cardDialog.getByLabel('Dia de fechamento').fill('4');
+  await cardDialog.getByLabel('Dia de vencimento').fill('12');
+  await cardDialog.getByRole('button', { name: 'Salvar cartão' }).click();
+  await expect(page.getByText('Calendário do cartão salvo.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Vincular pagamento' }).click();
+  const paymentDialog = page.getByRole('dialog', { name: 'Vincular pagamento' });
+  await paymentDialog.getByLabel('Pagamento de fatura').selectOption('66666666-3333-4666-8666-666666666666');
+  await paymentDialog.getByRole('button', { name: 'Vincular pagamento' }).click();
+  await expect(page.getByText('Pagamento vinculado sem duplicar a despesa.')).toBeVisible();
+
+  expect(writes.find(write => write.path.endsWith('/configure_credit_card'))?.body).toContain('500000');
+  expect(writes.find(write => write.path.endsWith('/link_card_payment'))?.body).toContain('66666666-3333-4666-8666-666666666666');
+});
+
+test('exibe estado da fonte e solicita sincronização sem enviar credenciais', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#connections');
+  await expect(page.getByRole('heading', { name: 'Conexões bancárias' })).toBeVisible();
+  await expect(page.getByText('Banco Sintético')).toBeVisible();
+  await expect(page.getByText('Atualizada')).toBeVisible();
+  await page.getByRole('button', { name: 'Sincronizar agora' }).click();
+  await expect.poll(() => writes.some(write => write.path === '/functions/v1/pluggy-sync')).toBe(true);
+  const syncCall = writes.find(write => write.path === '/functions/v1/pluggy-sync');
+  expect(syncCall?.body).toContain('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
+  expect(syncCall?.body).not.toMatch(/client|secret|api.?key/i);
+});
+
+test('explica sugestão e aprende somente após confirmação', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#review');
+  await expect(page.getByRole('heading', { name: 'Revisão de categorias' })).toBeVisible();
+  await expect(page.getByText('80%')).toBeVisible();
+  await expect(page.getByText('Token da descrição')).toBeVisible();
+  await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Confirmar categoria' });
+  await dialog.getByLabel('Categoria confirmada').selectOption('restaurants');
+  await dialog.getByRole('button', { name: 'Confirmar e aprender' }).click();
+  await expect(page.getByText('Categoria confirmada e alias aprendido.')).toBeVisible();
+  const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
+  expect(confirmation?.body).toContain('99999999-3333-4999-8999-999999999999');
+  expect(confirmation?.body).toContain('restaurants');
 });

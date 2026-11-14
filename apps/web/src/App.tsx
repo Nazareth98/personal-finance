@@ -3,11 +3,13 @@ import { AuthGate } from './auth/AuthGate';
 import { createSupabaseClient, SupabaseAuthGateway } from './auth/supabase-auth';
 import { DashboardApp } from './DashboardApp';
 import { SupabaseLedgerRepository } from './ledger/supabase-ledger';
+import { SupabaseConnectionsRepository } from './integrations/supabase-connections';
 
 const demoMode = import.meta.env.MODE === 'test';
 const supabase = demoMode ? null : createSupabaseClient();
 const authGateway = supabase ? new SupabaseAuthGateway(supabase) : null;
 const ledgerRepository = supabase ? new SupabaseLedgerRepository(supabase) : undefined;
+const connectionsRepository = supabase ? new SupabaseConnectionsRepository(supabase) : undefined;
 
 export default function App() {
   if (demoMode) return <DashboardApp />;
@@ -21,6 +23,6 @@ export default function App() {
   </main>;
 
   return <AuthGate gateway={authGateway}>
-    {(user, signOut) => <DashboardApp userEmail={user.email} onSignOut={signOut} ledgerRepository={ledgerRepository} />}
+    {(user, signOut) => <DashboardApp userEmail={user.email} onSignOut={signOut} ledgerRepository={ledgerRepository} connectionsRepository={connectionsRepository} />}
   </AuthGate>;
 }

@@ -23,6 +23,7 @@ export default defineConfig({
   snapshotPathTemplate:'{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   use:{
     baseURL:'http://127.0.0.1:5173',
+    launchOptions:{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH||undefined},
     channel:process.env.PLAYWRIGHT_CHANNEL||undefined,
     trace:'retain-on-failure',
     screenshot:'only-on-failure',

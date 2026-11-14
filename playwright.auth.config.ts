@@ -8,7 +8,8 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     ...devices['Desktop Chrome'],
-    channel: 'chromium',
+    launchOptions: { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH || undefined },
+    channel: process.env.PLAYWRIGHT_EXECUTABLE_PATH ? undefined : 'chromium',
     baseURL: 'http://127.0.0.1:5174',
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',

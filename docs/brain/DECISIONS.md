@@ -16,3 +16,6 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-010 | Caixinha sem identificação exige associação manual. | Vigente |
 | D-011 | Corporate UI atual e Figma são referência visual; implementação antiga não será restaurada. | Vigente |
 | D-012 | Exportação pela interface fica fora do escopo inicial. | Vigente |
+| D-013 | Transações de cartão vindas do MeuPluggy ficam no staging até a Etapa 7 calcular a competência pela fatura; não criar lançamento temporário incorreto. | Vigente |
+| D-014 | Categoria de lançamento importado é um overlay versionado; confirmação cria feedback e alias sem editar o registro MeuPluggy. | Vigente |
+| D-015 | Faturas são identificadas pela competência do vencimento; parcelas futuras ficam separadas do livro realizado e pagamentos são vínculos neutros. | Vigente |
