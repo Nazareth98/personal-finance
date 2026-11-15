@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -17,7 +21,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      # Lockfile ainda será adicionado após instalação determinística.
-      - run: pnpm install --no-frozen-lockfile
+          node-version: '22.12.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm check

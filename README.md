@@ -114,6 +114,8 @@ Leia [VISUAL_REGRESSION.md](docs/quality/VISUAL_REGRESSION.md). A certificação
 
 O build de produção é instalável e oferece somente um shell estático offline; dados financeiros exigem sessão e rede. Valide com `pnpm pwa:check` e `pnpm test:pwa`. Consulte [PWA.md](docs/architecture/PWA.md) e [DEPLOYMENT.md](docs/architecture/DEPLOYMENT.md). Nenhum ambiente remoto é alterado por esses comandos.
 
+Na Vercel, mantenha a raiz do projeto no repositório, configure `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` e deixe `vercel.json` executar `pnpm vercel:build`. A integração Git publica automaticamente a `main` somente quando o build encontra a configuração pública necessária.
+
 ## Testes de gráficos, erros e loading — v0.6.2
 
 `DataState` alterna sucesso, skeleton e erro com retry, sem acoplamento à fonte de dados. O app demonstrativo permite simular erro e loading nos gráficos e nas transações.

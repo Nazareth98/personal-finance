@@ -14,19 +14,20 @@ Atualizado em: 15/11/2026.
 - Cartões implementados com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. Compras sincronizadas usam a competência do vencimento e ficam no staging quando o calendário é desconhecido.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
+- Vercel configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 9 — deploy remoto pendente**, sem restaurar o backend antigo.
+**Etapa 9 — validação do deploy remoto pendente**, sem restaurar o backend antigo.
 
 Próximas entregas, nesta ordem:
 
-1. escolher e conectar o provedor do frontend — Vercel foi discutida, mas ainda não autorizada;
-2. aplicar migrations e publicar Edge Functions no Supabase autorizado;
-3. configurar secrets, URLs de Auth, CORS e webhook MeuPluggy;
-4. executar smoke test no domínio de produção.
+1. confirmar na Vercel `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` e Root Directory na raiz;
+2. observar o deploy automático disparado pela `main` e executar smoke test no domínio;
+3. aplicar migrations e publicar Edge Functions no Supabase autorizado;
+4. configurar secrets, URLs de Auth, CORS e webhook MeuPluggy.
 
 ## Última validação
 

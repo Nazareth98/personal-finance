@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: browser-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -21,8 +25,9 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      - run: pnpm install --no-frozen-lockfile
+          node-version: '22.12.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - name: Initialize first Linux visual baseline (main only)
@@ -36,7 +41,7 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add apps/web/tests/e2e/__screenshots__
             if ! git diff --cached --quiet; then
-              git commit -m "test(visual): review/update 36 Light Dark baselines [skip ci]"
+              git commit -m "test(visual): review/update 78 Light Dark baselines [skip ci]"
               git push
             else
               echo "Visual baselines are already up to date."
@@ -50,6 +55,10 @@ jobs:
         run: pnpm test:a11y
       - name: Async chart, error and loading behavior
         run: pnpm test:states
+      - name: Authenticated financial flows
+        run: pnpm test:auth
+      - name: Production PWA offline boundary
+        run: pnpm test:pwa
       - uses: actions/upload-artifact@v4
         if: always()
         with:

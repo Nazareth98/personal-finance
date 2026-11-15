@@ -23,9 +23,13 @@ pnpm build
 
 Antes do primeiro uso real, aplicar migrations em ordem, publicar as três Edge Functions MeuPluggy e configurar os secrets exclusivamente no backend. Em seguida, validar RLS com o usuário proprietário e atualizar as URLs autorizadas do Auth para o domínio final.
 
-## Automação
+## Vercel e automação
 
-O provedor do frontend ainda será escolhido com o proprietário. Vercel pode conectar a `main` e executar o build acima; o deploy do Supabase deve permanecer em um job separado e protegido. Nenhuma configuração remota foi criada nesta etapa.
+`vercel.json` define instalação congelada, build pela raiz e saída em `apps/web/dist`. No painel da Vercel, **Root Directory deve permanecer na raiz do repositório**, sem selecionar `apps/web`, pois o frontend depende dos pacotes do workspace.
+
+Configure `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` nos ambientes Production e Preview. `pnpm vercel:build` bloqueia o deploy quando elas faltam, a URL não usa HTTPS ou a chave aparenta ser Service Role. O service worker recebe `must-revalidate`; assets com hash recebem cache imutável.
+
+O Git Integration da Vercel publica pushes da `main`. Os workflows do GitHub usam a mesma versão Node/pnpm e instalação congelada; o job de navegador também valida autenticação e PWA. O deploy do Supabase deve permanecer em um fluxo separado e protegido.
 
 ## PWA e privacidade
 
