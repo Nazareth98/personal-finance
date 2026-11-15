@@ -1,6 +1,6 @@
 # Status atual
 
-Atualizado em: 14/11/2026.
+Atualizado em: 15/11/2026.
 
 ## Situação
 
@@ -13,19 +13,20 @@ Atualizado em: 14/11/2026.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
 - Cartões implementados com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. Compras sincronizadas usam a competência do vencimento e ficam no staging quando o calendário é desconhecido.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
+- PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 9 — PWA e estabilização**, sem restaurar o backend antigo.
+**Etapa 9 — deploy remoto pendente**, sem restaurar o backend antigo.
 
 Próximas entregas, nesta ordem:
 
-1. adicionar manifesto, instalação e shell estático offline sem dados financeiros;
-2. consolidar responsividade a partir de 320 px e estados de erro/carregamento;
-3. validar fluxos críticos e regressão visual contra o Figma;
-4. preparar deploy do frontend e Supabase sem expor secrets.
+1. escolher e conectar o provedor do frontend — Vercel foi discutida, mas ainda não autorizada;
+2. aplicar migrations e publicar Edge Functions no Supabase autorizado;
+3. configurar secrets, URLs de Auth, CORS e webhook MeuPluggy;
+4. executar smoke test no domínio de produção.
 
 ## Última validação
 
@@ -38,6 +39,7 @@ Próximas entregas, nesta ordem:
 - Etapa 6: 3 contratos do classificador, validação estática de overlay/RLS/aprendizado, 11 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). Os 6 baselines de revisão foram gerados e revisados.
 - Etapa 7: `pnpm check` aprovado; 3 contratos de competência/fatura/parcelas, validação estática de RLS e separação realizado/projetado, 12 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de cartões não mudou e nenhum baseline foi atualizado.
 - Etapa 8: `pnpm check` aprovado; 3 contratos de recorrência/previsão, validação estática de reconhecimento e imutabilidade, 13 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de relatórios não mudou e nenhum baseline foi atualizado.
+- Etapa 9 local: `pnpm check` aprovado; manifesto, instalação, ícones e service worker validados estaticamente e em build de produção; fallback offline recusou rota financeira sem rede; 13 fluxos autenticados e 108 cenários responsivos/acessíveis/PWA executados no Chromium (89 aprovados e 19 skips esperados), incluindo 320 px. O modo demonstrativo não mudou e nenhum baseline foi atualizado. Deploy remoto foi adiado pelo proprietário e depende de credenciais.
 - Migrations de acesso, livro, MeuPluggy, categorização e cartões verificadas estaticamente; execução real no PostgreSQL/RLS permanece pendente para o Supabase hospedado.
 
 ## Bloqueios

@@ -124,6 +124,14 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .app-toolbar__actions .ui-button { max-width:100%; white-space:normal; text-align:center; }
   .template-heading,.section-heading { min-width:0; }
 }
+@media (max-width: 360px) {
+  h1 { font-size: 28px; }
+  .main { padding: 18px 12px; }
+  .sidebar { padding: 12px; }
+  .app-theme-control,.app-theme-control>.ui-field,.app-toolbar__actions>.ui-button { width:100%; }
+  .app-toolbar__actions { align-items:stretch; }
+  .summary-row { align-items:flex-start; flex-direction:column; gap:var(--spacing-1); }
+}
 
 /* Accessible text accent distinct from action button fill in Dark mode. */
 .navigation a.is-active,.eyebrow,.brand-mark{color:var(--color-text-accent)}

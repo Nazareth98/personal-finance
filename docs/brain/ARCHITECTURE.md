@@ -31,6 +31,7 @@ O fluxo de Connect Token, sincronização, staging, webhook e retomada está em 
 O overlay imutável, regras, pontuação e feedback de categoria estão em [`../architecture/CATEGORIZATION.md`](../architecture/CATEGORIZATION.md).
 O ciclo de crédito, composição de faturas, estornos, pagamentos e projeções de parcelas estão em [`../architecture/CARDS.md`](../architecture/CARDS.md).
 O reconhecimento de receita recorrente e o cálculo determinístico da previsão estão em [`../architecture/FORECASTING.md`](../architecture/FORECASTING.md).
+O manifesto, instalação, fallback offline e fronteiras de cache estão em [`../architecture/PWA.md`](../architecture/PWA.md). A preparação neutra de provedor está em [`../architecture/DEPLOYMENT.md`](../architecture/DEPLOYMENT.md).
 
 ## MeuPluggy
 

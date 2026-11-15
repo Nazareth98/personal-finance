@@ -20,3 +20,4 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-014 | Categoria de lançamento importado é um overlay versionado; confirmação cria feedback e alias sem editar o registro MeuPluggy. | Vigente |
 | D-015 | Faturas são identificadas pela competência do vencimento; parcelas futuras ficam separadas do livro realizado e pagamentos são vínculos neutros. | Vigente |
 | D-016 | A previsão não persiste lançamentos futuros: usa média recorrente de seis competências, o maior entre histórico e tetos, parcelas projetadas e aporte necessário para metas. | Vigente |
+| D-017 | O PWA armazena somente shell e assets estáticos; navegação offline não abre o app autenticado nem persiste dados financeiros ou sessão. | Vigente |

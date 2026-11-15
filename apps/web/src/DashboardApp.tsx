@@ -17,6 +17,7 @@ import type { ConnectionsRepository } from './integrations/contracts';
 import { useConnections, type ConnectionsState } from './integrations/useConnections';
 import { ConnectionsPage } from './pages/ConnectionsPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { usePwa } from './hooks/usePwa';
 
 export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'connections' | 'review' | 'reports';
 const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
@@ -62,6 +63,7 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
   const { preference, setPreference } = useTheme();
   const ledger = useLedger(ledgerRepository);
   const connections = useConnections(connectionsRepository);
+  const { canInstall, install, online } = usePwa();
 
   useEffect(() => {
     const onHashChange = () => setPage(getPage());
@@ -98,10 +100,12 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
         <span><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
         <div className="app-toolbar__actions">
           <div className="app-theme-control"><Select label="Aparência" value={preference} onChange={event => setPreference(event.target.value as ThemePreference)} options={[{ value: 'system', label: 'Automático' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} /></div>
+          {canInstall && <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button>}
           <Button size="sm" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
           {onSignOut && <Button size="sm" variant="ghost" loading={signingOut} onClick={signOut}>Sair</Button>}
         </div>
       </div>
+      {!online && <p className="sample-warning" role="status">Sem conexão. Os dados financeiros não são armazenados offline.</p>}
       {!ledgerRepository && <p className="sample-warning" role="note">
         Valores e instituições fictícios. Esta demonstração não consulta contas, não envia dados e não salva transações.
       </p>}

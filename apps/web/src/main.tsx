@@ -6,6 +6,9 @@ import '@personal-finance/tokens/theme.css';
 import '@personal-finance/ui/styles.css';
 import './styles.css';
 import App from './App';
+import { registerServiceWorker } from './lib/pwa';
+
+if (import.meta.env.PROD) registerServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode><ToastProvider><App /></ToastProvider></StrictMode>
