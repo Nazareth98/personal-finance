@@ -3,6 +3,8 @@ node_modules/
 dist/
 storybook-static/
 playwright-report/
+.playwright-cli/
+output/playwright/
 test-results/
 .vite/
 coverage/

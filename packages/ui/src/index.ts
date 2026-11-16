@@ -17,7 +17,9 @@ export {
   Plus as PlusIcon,
   LogOut as LogOutIcon,
   Moon as MoonIcon,
-  Sun as SunIcon
+  Sun as SunIcon,
+  PanelLeftClose as SidebarCollapseIcon,
+  PanelLeftOpen as SidebarExpandIcon
 } from 'lucide-react';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';

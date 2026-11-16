@@ -1,4 +1,5 @@
 import {expect,test} from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 test('temas explícitos prevalecem sobre preferência do sistema',async ({page})=>{
   await page.goto('/#overview');
@@ -31,6 +32,27 @@ test('navegação entre nove templates funciona com histórico hash',async ({pag
     await expect(page).toHaveURL(new RegExp(`#${slug}$`));
     await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
   }
+});
+
+test('sidebar pode ser recolhida e expandida no desktop',async ({page},testInfo)=>{
+  if(!testInfo.project.name.startsWith('desktop'))test.skip();
+  await page.goto('/#overview');
+  const sidebar=page.locator('.sidebar');
+  const collapse=page.getByRole('button',{name:'Recolher menu'});
+  await collapse.focus();
+  await page.keyboard.press('Enter');
+  await expect(sidebar).toHaveClass(/is-collapsed/);
+  await expect(page.getByRole('button',{name:'Expandir menu'})).toHaveAttribute('aria-expanded','false');
+  const scan=await new AxeBuilder({page}).include('.sidebar').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+  expect(scan.violations).toEqual([]);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link',{name:'Visão geral',exact:true})).toBeFocused();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#transactions$/);
+  await page.getByRole('button',{name:'Expandir menu'}).focus();
+  await page.keyboard.press('Enter');
+  await expect(sidebar).not.toHaveClass(/is-collapsed/);
 });
 
 test('mobile não tem overflow horizontal do documento',async ({page},testInfo)=>{

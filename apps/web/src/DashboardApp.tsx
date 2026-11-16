@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, LogOutIcon, MoonIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, LogOutIcon, MoonIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
@@ -60,6 +60,7 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { theme, setPreference } = useTheme();
   const ledger = useLedger(ledgerRepository);
   const connections = useConnections(connectionsRepository);
@@ -82,20 +83,33 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
   }
 
   const CurrentPage = pages[page];
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <a className="brand" href="#overview" aria-label="Personal Finance — início">
-        <Icon icon={BrandIcon} size="lg" className="brand-mark"/><span>Personal Finance</span>
-      </a>
-      <nav className="navigation" aria-label="Navegação principal">
+  return <div className={`app-shell${sidebarCollapsed ? ' app-shell--sidebar-collapsed' : ''}`}>
+    <aside className={`sidebar${sidebarCollapsed ? ' is-collapsed' : ''}`}>
+      <div className="sidebar-header">
+        <a className="brand" href="#overview" aria-label="Personal Finance Controle pessoal — início">
+          <span className="brand-symbol"><Icon icon={BrandIcon} size="lg" className="brand-mark"/></span>
+          <span className="brand-copy"><strong>Personal Finance</strong>{' '}<small>Controle pessoal</small></span>
+        </a>
+        <Button className="sidebar-collapse" size="sm" variant="ghost" aria-controls="sidebar-navigation"
+          aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+          title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'} onClick={() => setSidebarCollapsed(value => !value)}>
+          <Icon icon={sidebarCollapsed ? SidebarExpandIcon : SidebarCollapseIcon} size="sm" />
+        </Button>
+      </div>
+      <span className="sidebar-section-label">Menu principal</span>
+      <nav id="sidebar-navigation" className="navigation" aria-label="Navegação principal">
         {navigation.map(item => <a key={item.id} href={`#${item.id}`}
-          aria-current={page === item.id ? 'page' : undefined} className={page === item.id ? 'is-active' : undefined}>
-          <Icon icon={item.icon}/>{item.title}
+          aria-current={page === item.id ? 'page' : undefined} className={page === item.id ? 'is-active' : undefined}
+          aria-label={item.title} title={sidebarCollapsed ? item.title : undefined}>
+          <span className="navigation__icon"><Icon icon={item.icon}/></span><span className="navigation__label">{item.title}</span>
         </a>)}
       </nav>
       <div className="sidebar-footer">
-        <p className="sidebar-note">{ledgerRepository ? 'Livro financeiro pessoal.' : 'Corporate UI v0.5 · Todos os dados são fictícios.'}</p>
-        <span className="sidebar-identity"><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
+        <div className="sidebar-account">
+          <span className="sidebar-account__avatar" aria-hidden="true">PF</span>
+          <span className="sidebar-account__copy"><strong>{ledgerRepository ? 'Conta pessoal' : 'Modo demonstração'}</strong>
+            <small>{userEmail ?? 'Dados 100% fictícios'}</small></span>
+        </div>
         <div className="sidebar-theme">
           <span id="appearance-label" className="sidebar-footer__label">Aparência</span>
           <div className="theme-switch" role="group" aria-labelledby="appearance-label">
@@ -109,8 +123,8 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
             </Button>
           </div>
         </div>
-        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="ghost" loading={signingOut} onClick={signOut}>
-          <Icon icon={LogOutIcon} size="sm" />Sair
+        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="ghost" aria-label="Sair" title="Sair" loading={signingOut} onClick={signOut}>
+          <Icon icon={LogOutIcon} size="sm" /><span className="sidebar-sign-out__label">Sair</span>
         </Button>}
       </div>
     </aside>
