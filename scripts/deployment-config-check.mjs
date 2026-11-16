@@ -15,6 +15,7 @@ assert.equal(vercel.buildCommand, 'pnpm vercel:build');
 assert.equal(vercel.outputDirectory, 'apps/web/dist');
 assert.ok(vercel.headers.some(entry => entry.source === '/sw.js' && entry.headers.some(header => header.key === 'Cache-Control' && header.value.includes('must-revalidate'))));
 assert.match(packageJson.scripts['vercel:build'], /validate-deploy-env/);
+assert.equal(packageJson.engines.node, '22.x');
 assert.match(example, /^VITE_SUPABASE_URL=/m);
 assert.match(example, /^VITE_SUPABASE_PUBLISHABLE_KEY=/m);
 for (const workflow of [qualityWorkflow, visualWorkflow]) {

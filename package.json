@@ -39,7 +39,7 @@
     "supabase:test": "supabase test db"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": "22.x"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

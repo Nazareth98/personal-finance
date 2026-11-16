@@ -20,3 +20,4 @@ private-data/
 *.xls
 *.csv
 *.pdf
+.vercel/

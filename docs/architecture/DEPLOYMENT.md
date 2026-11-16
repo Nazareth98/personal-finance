@@ -15,7 +15,7 @@ pnpm build
 
 - diretório raiz do repositório;
 - saída: `apps/web/dist`;
-- Node.js 22.12+ e pnpm 10;
+- Node.js 22.x, com CI em 22.12+, e pnpm 10;
 - roteamento por hash, portanto não depende de rewrite para as páginas internas;
 - HTTPS obrigatório fora de `localhost` para instalação e service worker.
 
