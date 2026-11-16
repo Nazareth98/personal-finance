@@ -1,16 +1,20 @@
 import type { PluggyAccount, PluggyTransaction } from './pluggy-domain.ts';
 
 type Page<T> = { results: T[]; total?: number; totalPages?: number; page?: number };
+type CursorPage<T> = { results: T[]; next: string | null };
 type PluggyItem = { id: string; status?: string; lastUpdatedAt?: string | null; connector?: { id?: number; name?: string } };
 
 export class PluggyClient {
   private apiKey: string | null = null;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly baseUrl: string;
 
-  constructor(
-    private readonly clientId: string,
-    private readonly clientSecret: string,
-    private readonly baseUrl = 'https://api.pluggy.ai'
-  ) {}
+  constructor(clientId: string, clientSecret: string, baseUrl = 'https://api.pluggy.ai') {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.baseUrl = baseUrl;
+  }
 
   private async authenticate(): Promise<string> {
     if (this.apiKey) return this.apiKey;
@@ -37,7 +41,7 @@ export class PluggyClient {
   }
 
   createConnectToken(clientUserId: string): Promise<{ accessToken: string }> {
-    return this.request('/connect_token', { method: 'POST', body: JSON.stringify({ clientUserId }) });
+    return this.request('/connect_token', { method: 'POST', body: JSON.stringify({ options: { clientUserId } }) });
   }
 
   getItem(itemId: string): Promise<PluggyItem> {
@@ -49,9 +53,10 @@ export class PluggyClient {
     return this.request(`/accounts?${query}`);
   }
 
-  getTransactions(accountId: string, page: number, pageSize = 500, from?: string): Promise<Page<PluggyTransaction>> {
-    const query = new URLSearchParams({ accountId, page: String(page), pageSize: String(pageSize) });
-    if (from) query.set('from', from);
-    return this.request(`/transactions?${query}`);
+  getTransactions(accountId: string, dateFrom?: string, next?: string | null): Promise<CursorPage<PluggyTransaction>> {
+    if (next && !next.startsWith('?')) throw new Error('pluggy_transactions_invalid_cursor');
+    const query = new URLSearchParams({ accountId });
+    if (dateFrom) query.set('dateFrom', dateFrom);
+    return this.request(next ? `/v2/transactions${next}` : `/v2/transactions?${query}`);
   }
 }

@@ -26,7 +26,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
   async function connect() {
     setConnecting(true);
     try { await connections?.connect(); }
-    catch { notify({ message: 'Não foi possível iniciar a conexão. Atualize a página e tente novamente.', tone: 'error' }); }
+    catch { notify({ message: 'Não foi possível concluir a conexão. Tente novamente.', tone: 'error' }); }
     finally { setConnecting(false); }
   }
   async function sync(id: string) {

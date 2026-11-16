@@ -372,9 +372,9 @@ export async function synchronizeConnection(
         const mapped = await ensureAccount(database, connection, account, institutionName);
         if (mapped.created) importedAccounts += 1;
         let transactionPage = 1;
-        const transactionPageSize = 500;
-        while (true) {
-          const page = await pluggy.getTransactions(account.id, transactionPage, transactionPageSize, incrementalFrom(connection.last_success_at));
+        let transactionCursor: string | null = null;
+        do {
+          const page = await pluggy.getTransactions(account.id, incrementalFrom(connection.last_success_at), transactionCursor);
           const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, institutionName, page.results);
           skippedTransactions += rows.skipped;
           if (rows.raw.length) {
@@ -391,14 +391,14 @@ export async function synchronizeConnection(
           await persistIncomeRecognition(database, ownerId, rows.incomeCandidates);
           await persistClassifications(database, ownerId, rows.candidates, rules);
           await database.from('sync_runs').update({
-            checkpoint: { accountPage, accountId: account.id, transactionPage },
+            checkpoint: { accountPage, accountId: account.id, transactionPage, transactionCursor: page.next },
             imported_accounts: importedAccounts,
             imported_transactions: importedTransactions,
             skipped_transactions: skippedTransactions
           }).eq('id', runId);
-          if (page.results.length < transactionPageSize || (page.totalPages && transactionPage >= page.totalPages)) break;
+          transactionCursor = page.next;
           transactionPage += 1;
-        }
+        } while (transactionCursor);
       }
       if (response.results.length < accountPageSize || (response.totalPages && accountPage >= response.totalPages)) break;
       accountPage += 1;

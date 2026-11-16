@@ -399,7 +399,36 @@ test('avisa quando não consegue iniciar uma conexão bancária', async ({ page 
 
   await page.getByRole('button', { name: 'Conectar instituição' }).first().click();
 
-  await expect(page.getByRole('alert')).toContainText('Não foi possível iniciar a conexão. Atualize a página e tente novamente.');
+  await expect(page.getByRole('alert')).toContainText('Não foi possível concluir a conexão. Tente novamente.');
+});
+
+test('avisa quando a importação falha após o widget concluir a conexão', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).PluggyConnect = class {
+      constructor(private readonly options: any) {}
+      init() {
+        this.options.onSuccess({ item: { id: 'synthetic-item' } });
+        this.options.onClose();
+      }
+    };
+  });
+  await mockSupabase(page);
+  await page.route('http://127.0.0.1:54321/functions/v1/pluggy-connect-token', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ connectToken: 'synthetic-connect-token' })
+  }));
+  await page.route('http://127.0.0.1:54321/functions/v1/pluggy-sync', route => route.fulfill({
+    status: 502,
+    contentType: 'application/json',
+    body: JSON.stringify({ error: 'pluggy_request_410' })
+  }));
+  await login(page);
+  await page.goto('/#connections');
+
+  await page.getByRole('button', { name: 'Conectar instituição' }).click();
+
+  await expect(page.getByRole('alert')).toContainText('Não foi possível concluir a conexão. Tente novamente.');
 });
 
 test('explica sugestão e aprende somente após confirmação', async ({ page }) => {

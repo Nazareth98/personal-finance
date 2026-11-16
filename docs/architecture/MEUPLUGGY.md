@@ -21,6 +21,8 @@ O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou
 
 Importações repetidas usam `ON CONFLICT DO NOTHING`. Uma falha mantém tudo já confirmado; a próxima execução recebe trigger `resume`, percorre novamente a janela segura e ignora as chaves existentes. Incrementos reabrem três dias antes do último sucesso para capturar atrasos sem duplicar.
 
+Transações usam `GET /v2/transactions`, `dateFrom` nos incrementos e o cursor `next` devolvido pelo Pluggy. O endpoint legado paginado `GET /transactions` não é aceito por aplicações novas.
+
 ## Semântica financeira
 
 Valores do provedor são convertidos imediatamente para `bigint` em centavos. Categoria explícita de transferência ou pagamento de fatura produz efeito neutro; os demais créditos/débitos bancários entram sem categoria para a Etapa 6.

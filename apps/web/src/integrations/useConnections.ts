@@ -68,15 +68,17 @@ export function useConnections(repository?: ConnectionsRepository): ConnectionsS
     setError('');
     const [connectToken, PluggyConnect] = await Promise.all([repository.createConnectToken(), loadSdk()]);
     await new Promise<void>((resolve, reject) => {
+      let connected = false;
       new PluggyConnect({
         connectToken,
         onSuccess: payload => {
+          connected = true;
           const itemId = extractPluggyItemId(payload);
           if (!itemId) { reject(new Error('item missing')); return; }
           void repository.syncItem(itemId).then(reload).then(resolve, reject);
         },
         onError: reject,
-        onClose: resolve
+        onClose: () => { if (!connected) resolve(); }
       }).init();
     });
   }
