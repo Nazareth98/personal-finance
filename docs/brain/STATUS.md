@@ -15,6 +15,7 @@ Atualizado em: 16/11/2026.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
+- O projeto Supabase novo está vinculado: as 8 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas e o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
@@ -24,8 +25,8 @@ Atualizado em: 16/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. criar o projeto Supabase, vincular a CLI e revisar `db push --dry-run --remote`;
-2. aplicar migrations, provisionar o proprietário e publicar as Edge Functions;
+1. criar o usuário Auth proprietário e provisionar `public.profiles`;
+2. cadastrar secrets MeuPluggy rotacionados no Supabase;
 3. configurar a Vercel com URL/chave pública e concluir URLs do Auth;
 4. validar MeuPluggy em sandbox, configurar o webhook e executar smoke test remoto.
 
@@ -42,15 +43,16 @@ Próximas entregas, nesta ordem:
 - Etapa 8: `pnpm check` aprovado; 3 contratos de recorrência/previsão, validação estática de reconhecimento e imutabilidade, 13 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de relatórios não mudou e nenhum baseline foi atualizado.
 - Etapa 9 local: `pnpm check` aprovado; manifesto, instalação, ícones e service worker validados estaticamente e em build de produção; fallback offline recusou rota financeira sem rede; 13 fluxos autenticados e 108 cenários responsivos/acessíveis/PWA executados no Chromium (89 aprovados e 19 skips esperados), incluindo 320 px. O modo demonstrativo não mudou e nenhum baseline foi atualizado. Deploy remoto foi adiado pelo proprietário e depende de credenciais.
 - Pós-pull em 16/11/2026: `pnpm check`, 13 fluxos autenticados e 6 auditorias WCAG da tela de conexões aprovados após formalizar Vercel e persistir `Item.lastUpdatedAt` como atualização da fonte.
-- Migrations de acesso, livro, MeuPluggy, categorização e cartões verificadas estaticamente; execução real no PostgreSQL/RLS permanece pendente para o Supabase hospedado.
+- Supabase remoto em 16/11/2026: 8 migrations aplicadas e reconciliadas com o histórico local; 17 tabelas públicas confirmadas com RLS; coluna `last_source_updated_at` presente; funções `pluggy-connect-token`, `pluggy-sync` e `pluggy-webhook` ativas com fronteiras JWT corretas; Auth com cadastro público desativado e senha mínima de 12 caracteres.
+- OpenDesign em 16/11/2026: aplicativo 0.27.1, plugin Codex 0.5.3 e MCP stdio instalados; `DESIGN.md` criado a partir dos tokens Light/Dark e componentes React existentes, com lint oficial sem erros ou avisos e exportação DTCG aprovada.
 
 ## Bloqueios
 
-- Docker não está disponível nesta máquina; migrations e RLS não serão executadas localmente.
+- Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.
 - A conta/sandbox MeuPluggy ainda precisa confirmar o SDK Connect, paginação e mecanismo real de assinatura do webhook antes do deploy.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
 - Os 6 baselines de conexões precisam ser regenerados e revisados no CI Linux por causa da coluna “Atualização da fonte”.
-- Alterações reais no Supabase exigem autorização explícita.
+- A validação real das policies com proprietário e sessão não autorizada depende da criação do único usuário Auth.
 
 ## Regra de atualização
 
