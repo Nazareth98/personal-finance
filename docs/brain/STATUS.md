@@ -15,7 +15,7 @@ Atualizado em: 16/11/2026.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: as 8 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
+- O projeto Supabase novo está vinculado: as 9 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
@@ -25,9 +25,9 @@ Atualizado em: 16/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. cadastrar secrets MeuPluggy rotacionados no Supabase;
-2. concluir URLs do Auth na Vercel/Supabase;
-3. validar MeuPluggy em sandbox, configurar o webhook e executar smoke test remoto.
+1. repetir a sincronização MeuPluggy autenticada e confirmar a materialização do staging no livro;
+2. configurar o webhook MeuPluggy com o mecanismo de assinatura disponível na conta;
+3. concluir o smoke test remoto de conexão, sincronização e atualização por webhook.
 
 ## Última validação
 
@@ -42,13 +42,14 @@ Próximas entregas, nesta ordem:
 - Etapa 8: `pnpm check` aprovado; 3 contratos de recorrência/previsão, validação estática de reconhecimento e imutabilidade, 13 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de relatórios não mudou e nenhum baseline foi atualizado.
 - Etapa 9 local: `pnpm check` aprovado; manifesto, instalação, ícones e service worker validados estaticamente e em build de produção; fallback offline recusou rota financeira sem rede; 13 fluxos autenticados e 108 cenários responsivos/acessíveis/PWA executados no Chromium (89 aprovados e 19 skips esperados), incluindo 320 px. O modo demonstrativo não mudou e nenhum baseline foi atualizado. Deploy remoto foi adiado pelo proprietário e depende de credenciais.
 - Pós-pull em 16/11/2026: `pnpm check`, 13 fluxos autenticados e 6 auditorias WCAG da tela de conexões aprovados após formalizar Vercel e persistir `Item.lastUpdatedAt` como atualização da fonte.
-- Supabase remoto em 16/11/2026: 8 migrations aplicadas e reconciliadas com o histórico local; 17 tabelas públicas confirmadas com RLS; coluna `last_source_updated_at` presente; funções `pluggy-connect-token`, `pluggy-sync` e `pluggy-webhook` ativas com fronteiras JWT corretas; Auth com cadastro público desativado e senha mínima de 12 caracteres.
+- Supabase remoto em 16/11/2026: 9 migrations aplicadas e reconciliadas com o histórico local; 17 tabelas públicas confirmadas com RLS; coluna `last_source_updated_at` presente; funções `pluggy-connect-token`, `pluggy-sync` e `pluggy-webhook` ativas com fronteiras JWT corretas; Auth com cadastro público desativado e senha mínima de 12 caracteres.
 - Provisionamento remoto em 16/11/2026: o único usuário Auth foi vinculado a `public.profiles` como proprietário; a correspondência entre Auth, perfil e `is_owner = true` foi confirmada por consulta administrativa sem expor dados pessoais.
 - OpenDesign em 16/11/2026: aplicativo 0.27.1, plugin Codex 0.5.3 e MCP stdio instalados; `DESIGN.md` criado a partir dos tokens Light/Dark e componentes React existentes, com lint oficial sem erros ou avisos e exportação DTCG aprovada.
 - Vercel remota em 16/11/2026: checkout vinculado a `patrick-nazareths-projects/personal-finance`; runtime corrigido de Node 26.x para 22.x; `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` configuradas em Production e Preview; variável legada `VITE_SUPABASE_ANON_KEY` removida; `pnpm check` e `vercel build --prod` aprovados com Node 22.12.
 - Shell autenticado em 16/11/2026: direção visual definida com OpenDesign; saída movida para a sidebar, tema convertido em controle Light/Dark por ícones e ações alinhadas aos cabeçalhos dos nove templates. `pnpm check`, 14 cenários de comportamento, 54 auditorias WCAG A/AA e 13 fluxos autenticados aprovados; capturas Light/Dark em desktop e mobile revisadas localmente.
 - Autenticação MeuPluggy em 16/11/2026: o JWT chegava válido à Edge Function, mas a validação interna perdia o cabeçalho por usar capitalização incompatível com o cliente Supabase. `requireOwner` foi corrigido; `pluggy-connect-token` e `pluggy-sync` versão 3 estão ativos em produção com verificação JWT; a tela agora exibe um toast acessível quando não consegue iniciar o fluxo. `pnpm check`, 14 fluxos autenticados e auditoria WCAG isolada aprovados (a execução agrupada da auditoria excedeu 30 s sem apontar violação e passou em 12 s quando repetida isoladamente).
 - Compatibilidade MeuPluggy em 16/11/2026: identificado `410 ENDPOINT_DEPRECATED` na sincronização de uma aplicação nova. O cliente passou a usar `GET /v2/transactions` com cursor, corrigiu `clientUserId` para `options` e aguarda a sincronização terminar antes de fechar o fluxo, permitindo que falhas após o widget também gerem toast. Funções `pluggy-connect-token` e `pluggy-sync` versão 4 ativas em produção; contrato do cliente, dois cenários de toast e `pnpm check` aprovados.
+- Idempotência MeuPluggy em 16/11/2026: o `upsert` do livro falhava porque o índice único parcial de `(owner_id, external_key)` não era inferido pelo `ON CONFLICT`. A migration substituiu-o por uma constraint única compatível, validada remotamente em transação com rollback; `pluggy-sync` versão 5 está ativa, erros estruturados do Supabase preservam a mensagem sanitizada e `pnpm check` foi aprovado.
 
 ## Bloqueios
 

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/202611140001_meupluggy.sql', 'utf8');
+const conflictMigration = await readFile('supabase/migrations/20261116165312_fix_transactions_external_key_conflict.sql', 'utf8');
 const sync = await readFile('supabase/functions/_shared/sync.ts', 'utf8');
 const syncEntry = await readFile('supabase/functions/pluggy-sync/index.ts', 'utf8');
 const webhook = await readFile('supabase/functions/pluggy-webhook/index.ts', 'utf8');
@@ -18,6 +19,8 @@ assert.match(migration, /grant select on table public\.pluggy_connections, publi
 assert.doesNotMatch(migration, /grant (insert|update|delete).*pluggy_connections.*authenticated/i);
 assert.doesNotMatch(migration, /grant .*private\.(webhook_events|pluggy_transactions).*authenticated/i);
 assert.match(migration, /unique \(owner_id, external_transaction_id\)/i);
+assert.match(conflictMigration, /drop index public\.transactions_external_key/i);
+assert.match(conflictMigration, /unique \(owner_id, external_key\)/i);
 assert.match(migration, /sync_runs_one_active/i);
 assert.match(migration, /grant execute on function public\.internal_register_webhook_event[\s\S]*to service_role/i);
 assert.match(sync, /ignoreDuplicates: true/g);

@@ -12,6 +12,10 @@ export function json(body: unknown, status = 200): Response {
 }
 
 export function safeError(error: unknown): string {
-  const message = error instanceof Error ? error.message : 'unexpected_error';
+  const message = error instanceof Error
+    ? error.message
+    : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+      ? error.message
+      : 'unexpected_error';
   return message.replace(/[\r\n]/g, ' ').slice(0, 240);
 }
