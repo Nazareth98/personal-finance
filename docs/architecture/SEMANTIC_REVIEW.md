@@ -19,7 +19,7 @@ O provedor informar “transferência” ou “PIX” nunca basta para `own_tran
 
 ## Etapas de implementação
 
-1. corrigir e testar a semântica inicial do importador;
+1. corrigir e testar a semântica inicial do importador — concluído;
 2. criar migration, RLS e RPC atômica do overlay;
 3. aplicar a semântica efetiva no adapter e nos cálculos;
 4. separar fila pendente de histórico e oferecer ações de vínculo;

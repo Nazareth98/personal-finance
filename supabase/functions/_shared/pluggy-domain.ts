@@ -67,19 +67,23 @@ function normalizedEvidence(value: string | null): string {
 }
 
 export function ledgerSemantics(transaction: PluggyTransaction): {
-  nature: 'income' | 'expense' | 'own_transfer' | 'card_payment';
+  nature: 'income' | 'expense' | 'card_payment' | 'savings_contribution' | 'savings_withdrawal';
   reporting: 'income' | 'expense' | 'neutral';
-  categoryId: 'transfers' | null;
+  categoryId: 'savings' | null;
   classificationStatus: 'automatic' | 'uncategorized';
 } {
   const amount = centsFromPluggy(transaction.amount);
   if (amount === 0n) throw new RangeError('Pluggy transaction cannot be zero');
-  const evidence = normalizedEvidence(rawCategory(transaction));
-  if (evidence.includes('transfer')) {
-    return { nature: 'own_transfer', reporting: 'neutral', categoryId: 'transfers', classificationStatus: 'automatic' };
-  }
-  if (evidence.includes('credit card payment') || evidence.includes('pagamento de fatura')) {
+  const evidence = normalizedEvidence(`${rawCategory(transaction) ?? ''} ${transaction.description ?? ''}`);
+  if (/\b(?:credit card payment|pagamento (?:de )?fatura|pagamento (?:de )?cartao)\b/.test(evidence)) {
     return { nature: 'card_payment', reporting: 'neutral', categoryId: null, classificationStatus: 'automatic' };
+  }
+  const savingsEvidence = /\b(?:cofrinhos?|caixinhas?|reservas?|savings?)\b/.test(evidence);
+  if (amount > 0n && savingsEvidence && /\b(?:resgate|withdrawal)\b/.test(evidence)) {
+    return { nature: 'savings_withdrawal', reporting: 'neutral', categoryId: 'savings', classificationStatus: 'automatic' };
+  }
+  if (amount < 0n && savingsEvidence && /\b(?:aporte|aplicacao|deposito)\b/.test(evidence)) {
+    return { nature: 'savings_contribution', reporting: 'neutral', categoryId: 'savings', classificationStatus: 'automatic' };
   }
   return amount > 0n
     ? { nature: 'income', reporting: 'income', categoryId: null, classificationStatus: 'uncategorized' }

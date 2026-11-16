@@ -108,6 +108,8 @@ Aceite: fluxos críticos funcionam em mobile e desktop, `pnpm check` passa e lim
 
 ### 10.1 — corrigir a origem
 
+Estado: concluída em 16/11/2026.
+
 - tratar PIX/transferência para terceiro como receita ou despesa pelo sinal;
 - neutralizar somente com evidência positiva de conta própria;
 - reconhecer pagamento de fatura, aporte e resgate sem inflar renda ou consumo;

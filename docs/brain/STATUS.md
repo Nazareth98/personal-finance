@@ -25,7 +25,7 @@ Atualizado em: 16/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. corrigir a semântica de PIX/transferências e adicionar revisão de natureza por overlay;
+1. adicionar revisão de natureza por overlay;
 2. ajustar a fila para separar pendências de histórico e integrar vínculos de caixinha/fatura;
 3. executar limpeza seletiva do ambiente de desenvolvimento preservando aliases e reimportar todo o histórico;
 4. configurar o webhook MeuPluggy e concluir o smoke test remoto.
@@ -54,6 +54,7 @@ Próximas entregas, nesta ordem:
 - Sidebar em 16/11/2026: navegação redesenhada com indicador ativo, ícones destacados, recolhimento no desktop e cabeçalho compacto no mobile. Tokens Corporate UI preservados, movimento reduzido respeitado e nomes acessíveis mantidos no modo recolhido. `pnpm check`, 16 cenários de comportamento e 54 auditorias WCAG A/AA aprovados após corrigir os rótulos. Capturas Light/Dark revisadas localmente; baselines Linux ainda precisam de atualização e revisão. OpenDesign Cloud ficou indisponível por falha de transporte; a implementação seguiu o `DESIGN.md` existente.
 - Rolagem da sidebar em 16/11/2026: no desktop, cabeçalho e rodapé ficaram fixos e somente a lista de abas rola quando a altura é insuficiente; estados expandido, recolhido e mobile foram verificados no Chromium em viewport reduzida, e `pnpm check` foi aprovado com Node 24.14.1.
 - Diagnóstico semântico em 16/11/2026: a categoria genérica “transfer” do MeuPluggy neutraliza PIX para terceiros indevidamente; a revisão atual mistura fila e histórico, e correções de categoria não resolvem resgates/pagamentos com natureza incorreta. A Etapa 10 foi priorizada antes de uma reimportação controlada que preserve aliases.
+- Etapa 10.1 em 16/11/2026: PIX/transferência genérica passou a seguir o sinal como receita/despesa; pagamento de fatura, aporte e resgate exigem evidência textual explícita e sinal compatível. Oito contratos sintéticos da integração e `pnpm check` foram aprovados com Node 24.14.1. `pluggy-sync` v7 e `pluggy-webhook` v4 estão ativos no Supabase com as fronteiras JWT preservadas. Transferências realmente próprias permanecem pendentes até o overlay/vínculo da Etapa 10.2.
 
 ## Bloqueios
 
