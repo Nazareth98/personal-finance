@@ -4,6 +4,7 @@ import { demoTransactions,formatCentsBRL } from '../lib/demo-transactions';
 import {demoCashFlow,demoNetTrend,demoExpenseSlices} from '../lib/demo-charts';
 import { addCompetenceMonths, buildSixMonthForecast, ledgerTotals, type ForecastMonth } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
+import type { PageProps } from './PageProps';
 
 function nextCompetence(transactions: NonNullable<LedgerState['data']>['transactions']): string {
   const latest = transactions.reduce((value, row) => row.competence > value ? row.competence : value, '');
@@ -21,7 +22,7 @@ const forecastColumns: DataTableColumn<ForecastMonth>[] = [
   { key: 'net', header: 'Resultado previsto', align: 'end', cell: row => <strong>{formatCentsBRL(row.netCents)}</strong> }
 ];
 
-export function ReportsPage({ ledger }: { ledger?: LedgerState }) {
+export function ReportsPage({ ledger, headerAction }: PageProps) {
   if (ledger) {
     const data = ledger.data;
     const rows = data?.transactions ?? [];
@@ -34,7 +35,7 @@ export function ReportsPage({ ledger }: { ledger?: LedgerState }) {
       .reduce((sum, row) => sum + row.amountCents, 0n);
     const first = forecast[0];
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1><p className="muted">Realizado completo e seis meses futuros baseados somente em receitas recorrentes.</p></div><Badge>{periods.size} período(s)</Badge></div>
+      <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1><p className="muted">Realizado completo e seis meses futuros baseados somente em receitas recorrentes.</p></div><div className="template-heading__actions"><Badge>{periods.size} período(s)</Badge>{headerAction}</div></div>
       <div className="template-metrics"><MetricCard label="Receitas realizadas" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Inclui receitas extraordinárias"/><MetricCard label="Receita recorrente média" value={formatCentsBRL(first?.recurringIncomeCents ?? 0n)} tone="income" supportingText="Média dos seis meses anteriores"/><MetricCard label="Receita extraordinária" value={formatCentsBRL(extraordinaryIncome)} supportingText="Permanece fora da previsão"/><MetricCard label="Próximo resultado previsto" value={formatCentsBRL(first?.netCents ?? 0n)} valueTone={(first?.netCents ?? 0n) < 0n ? 'negative' : 'positive'} supportingText={startCompetence}/></div>
       <Card className="template-table-card"><h2>Previsão de seis meses</h2><p className="muted">Gastos planejados usam o maior valor entre a média recorrente observada e os tetos definidos; parcelas e aportes são somados separadamente.</p><DataTable ariaLabel="Previsão financeira de seis meses" columns={forecastColumns} rows={forecast} getRowKey={row => row.competence}/></Card>
       <Card><h2>Critérios da previsão</h2><p className="muted">Receitas extraordinárias alteram o realizado e os tetos do mês em que ocorreram, mas nunca a média futura. Despesas recorrentes exigem ocorrência em pelo menos duas das seis competências anteriores.</p></Card>
@@ -43,7 +44,7 @@ export function ReportsPage({ ledger }: { ledger?: LedgerState }) {
   const totals=monthlyReport(demoTransactions);
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1>
-      <p className="muted">Composição de despesas e resultado do período com dados de demonstração.</p></div><Badge>Novembro 2026</Badge></div>
+      <p className="muted">Composição de despesas e resultado do período com dados de demonstração.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
     <div className="template-metrics">
       <MetricCard label="Receitas" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Entradas fictícias"/>
       <MetricCard label="Despesas" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText="Consumo fictício"/>

@@ -1,7 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, Select, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, Badge, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, LogOutIcon, MoonIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
-import type { ThemePreference } from './lib/theme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
 import { TransactionsPage } from './pages/TransactionsPage';
@@ -18,6 +17,7 @@ import { useConnections, type ConnectionsState } from './integrations/useConnect
 import { ConnectionsPage } from './pages/ConnectionsPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { usePwa } from './hooks/usePwa';
+import type { PageProps } from './pages/PageProps';
 
 export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'connections' | 'review' | 'reports';
 const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
@@ -37,7 +37,7 @@ function getPage(): PageId {
   return navigation.some(item => item.id === fragment) ? fragment as PageId : 'overview';
 }
 
-const pages: Record<PageId, ComponentType<{ ledger?: LedgerState; connections?: ConnectionsState }>> = {
+const pages: Record<PageId, ComponentType<PageProps>> = {
   overview: OverviewPage,
   transactions: TransactionsPage,
   accounts: AccountsPage,
@@ -60,7 +60,7 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { preference, setPreference } = useTheme();
+  const { theme, setPreference } = useTheme();
   const ledger = useLedger(ledgerRepository);
   const connections = useConnections(connectionsRepository);
   const { canInstall, install, online } = usePwa();
@@ -93,24 +93,38 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
           <Icon icon={item.icon}/>{item.title}
         </a>)}
       </nav>
-      <p className="sidebar-note">{ledgerRepository ? 'Livro financeiro pessoal.' : 'Corporate UI v0.5 · Todos os dados são fictícios.'}</p>
+      <div className="sidebar-footer">
+        <p className="sidebar-note">{ledgerRepository ? 'Livro financeiro pessoal.' : 'Corporate UI v0.5 · Todos os dados são fictícios.'}</p>
+        <span className="sidebar-identity"><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
+        <div className="sidebar-theme">
+          <span id="appearance-label" className="sidebar-footer__label">Aparência</span>
+          <div className="theme-switch" role="group" aria-labelledby="appearance-label">
+            <Button className="theme-switch__option" size="sm" variant="ghost" aria-label="Tema claro" title="Tema claro"
+              aria-pressed={theme === 'light'} onClick={() => setPreference('light')}>
+              <Icon icon={SunIcon} />
+            </Button>
+            <Button className="theme-switch__option" size="sm" variant="ghost" aria-label="Tema escuro" title="Tema escuro"
+              aria-pressed={theme === 'dark'} onClick={() => setPreference('dark')}>
+              <Icon icon={MoonIcon} />
+            </Button>
+          </div>
+        </div>
+        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="ghost" loading={signingOut} onClick={signOut}>
+          <Icon icon={LogOutIcon} size="sm" />Sair
+        </Button>}
+      </div>
     </aside>
     <main id="conteudo" className="main">
-      <div className="app-toolbar">
-        <span><Badge>{userEmail ?? 'Ambiente demonstrativo'}</Badge></span>
-        <div className="app-toolbar__actions">
-          <div className="app-theme-control"><Select label="Aparência" value={preference} onChange={event => setPreference(event.target.value as ThemePreference)} options={[{ value: 'system', label: 'Automático' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} /></div>
-          {canInstall && <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button>}
-          <Button size="sm" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
-          {onSignOut && <Button size="sm" variant="ghost" loading={signingOut} onClick={signOut}>Sair</Button>}
-        </div>
-      </div>
       {!online && <p className="sample-warning" role="status">Sem conexão. Os dados financeiros não são armazenados offline.</p>}
       {!ledgerRepository && <p className="sample-warning" role="note">
         Valores e instituições fictícios. Esta demonstração não consulta contas, não envia dados e não salva transações.
       </p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
-      <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined} />
+      <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined}
+        headerAction={<>
+          {canInstall && <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button>}
+          <Button size="sm" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
+        </>} />
     </main>
     {ledgerRepository
       ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />

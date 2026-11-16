@@ -5,16 +5,17 @@ import type { LedgerState } from '../ledger/useLedger';
 import type { TransactionClassification } from '../ledger/contracts';
 import { formatLocalDate } from '../lib/demo-transactions';
 import { ClassificationReviewForm } from '../components/ClassificationReviewForm';
+import type { PageProps } from './PageProps';
 
 function confidenceLabel(value: number): string {
   return `${(value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
 }
 
-export function ReviewPage({ ledger }: { ledger?: LedgerState }) {
+export function ReviewPage({ ledger, headerAction }: PageProps) {
   const [selected, setSelected] = useState<TransactionContract | null>(null);
   if (!ledger) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">CATEGORIZAÇÃO</p><h1>Revisão de categorias</h1>
-      <p className="muted">Sugestões explicáveis aparecem aqui somente no ambiente autenticado.</p></div><Badge>Modo demonstrativo</Badge></div>
+      <p className="muted">Sugestões explicáveis aparecem aqui somente no ambiente autenticado.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
     <Card><EmptyState title="Nenhuma classificação demonstrativa" description="Descrições e evidências bancárias reais nunca entram nos baselines visuais."/></Card>
   </div>;
 
@@ -43,7 +44,7 @@ export function ReviewPage({ ledger }: { ledger?: LedgerState }) {
   ];
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">CATEGORIZAÇÃO</p><h1>Revisão de categorias</h1>
-      <p className="muted">Cada sugestão mostra confiança e evidências. Correções confirmadas criam aliases reproduzíveis.</p></div><Badge>{pending.length} pendente{pending.length === 1 ? '' : 's'}</Badge></div>
+      <p className="muted">Cada sugestão mostra confiança e evidências. Correções confirmadas criam aliases reproduzíveis.</p></div><div className="template-heading__actions"><Badge>{pending.length} pendente{pending.length === 1 ? '' : 's'}</Badge>{headerAction}</div></div>
     <div className="template-metrics">
       <MetricCard label="Automáticas (90–100%)" value={String(count('automatic'))} supportingText="Aplicadas por evidência forte" />
       <MetricCard label="Para revisão (70–89%)" value={String(count('suggested'))} supportingText="Exigem confirmação" />

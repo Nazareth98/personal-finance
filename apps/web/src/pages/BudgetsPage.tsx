@@ -5,6 +5,7 @@ import { BudgetForm } from '../components/BudgetForm';
 import type { LedgerState } from '../ledger/useLedger';
 import { budgetPercent,budgetRemaining,demoBudgets } from '../lib/demo-finance';
 import { formatCentsBRL } from '../lib/demo-transactions';
+import type { PageProps } from './PageProps';
 
 const currentPeriod = () => {
   const now = new Date();
@@ -24,7 +25,7 @@ function formatBasisPoints(value: number | bigint) {
   return `${basisPoints / 100n}${decimals ? `,${decimals.toString().padStart(2, '0')}` : ''}%`;
 }
 
-function RealBudgets({ ledger }: { ledger: LedgerState }) {
+function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerAction: PageProps['headerAction'] }) {
   const [period, setPeriod] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const data = ledger.data;
@@ -56,7 +57,7 @@ function RealBudgets({ ledger }: { ledger: LedgerState }) {
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
       <p className="muted">Tetos por categoria calculados sobre toda receita confirmada do período.</p></div>
-      <Button onClick={() => setFormOpen(true)}>Definir meta</Button></div>
+      <div className="template-heading__actions"><Button variant="secondary" onClick={() => setFormOpen(true)}>Definir meta</Button>{headerAction}</div></div>
     <div className="budget-toolbar">
       <Select label="Período" value={selectedPeriod} options={periodOptions} onChange={event => setPeriod(event.target.value)} />
       <Badge>{formatPeriod(selectedPeriod)}</Badge>
@@ -84,13 +85,13 @@ function RealBudgets({ ledger }: { ledger: LedgerState }) {
   </div>;
 }
 
-export function BudgetsPage({ ledger }: { ledger?: LedgerState }) {
-  if (ledger) return <RealBudgets ledger={ledger} />;
+export function BudgetsPage({ ledger, headerAction }: PageProps) {
+  if (ledger) return <RealBudgets ledger={ledger} headerAction={headerAction} />;
   const limit=demoBudgets.reduce((sum,item)=>sum+item.limitCents,0n);
   const used=demoBudgets.reduce((sum,item)=>sum+item.usedCents,0n);
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
-      <p className="muted">Acompanhe limites e excedentes por categoria, usando valores fictícios.</p></div><Badge>Novembro 2026</Badge></div>
+      <p className="muted">Acompanhe limites e excedentes por categoria, usando valores fictícios.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
     <div className="template-metrics">
       <MetricCard label="Limite total fictício" value={formatCentsBRL(limit)}/>
       <MetricCard label="Consumo ilustrativo" value={formatCentsBRL(used)} tone="expense"/>

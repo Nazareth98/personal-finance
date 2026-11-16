@@ -5,11 +5,13 @@ test('temas explícitos prevalecem sobre preferência do sistema',async ({page})
   await page.evaluate(()=>localStorage.setItem('pf-theme','dark'));
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-  const select=page.getByRole('combobox',{name:'Aparência'});
-  await select.selectOption('light');
+  const appearance=page.getByRole('group',{name:'Aparência'});
+  const lightTheme=appearance.getByRole('button',{name:'Tema claro'});
+  await expect(appearance.getByRole('button',{name:'Tema escuro'})).toHaveAttribute('aria-pressed','true');
+  await lightTheme.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   await page.reload();
-  await expect(select).toHaveValue('light');
+  await expect(lightTheme).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
 

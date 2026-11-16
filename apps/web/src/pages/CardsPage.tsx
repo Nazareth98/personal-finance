@@ -6,6 +6,7 @@ import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 import type { LedgerState } from '../ledger/useLedger';
 import { CreditCardForm } from '../components/CreditCardForm';
 import { CardPaymentForm } from '../components/CardPaymentForm';
+import type { PageProps } from './PageProps';
 
 const statusLabels = { open: 'Em aberto', partial: 'Parcialmente paga', paid: 'Paga' } as const;
 const demoColumns: DataTableColumn<DemoInvoice>[] = [
@@ -18,7 +19,7 @@ const demoColumns: DataTableColumn<DemoInvoice>[] = [
 
 type StatementView = CardStatement & { cardName: string; openCents: bigint; status: keyof typeof statusLabels };
 
-export function CardsPage({ ledger }: { ledger?: LedgerState }) {
+export function CardsPage({ ledger, headerAction }: PageProps) {
   const [selectedCard, setSelectedCard] = useState<FinancialAccount | null>(null);
   const [selectedStatement, setSelectedStatement] = useState<CardStatement | null>(null);
   if (ledger) {
@@ -55,7 +56,7 @@ export function CardsPage({ ledger }: { ledger?: LedgerState }) {
       { key: 'amount', header: 'Valor', align: 'end', cell: item => formatCentsBRL(item.amountCents) }
     ];
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras entram na competência do vencimento; pagamentos não viram uma nova despesa.</p></div><Badge>Livro financeiro</Badge></div>
+      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras entram na competência do vencimento; pagamentos não viram uma nova despesa.</p></div><div className="template-heading__actions"><Badge>Livro financeiro</Badge>{headerAction}</div></div>
       <div className="template-metrics"><MetricCard label="Total pendente" value={formatCentsBRL(totalOpen)} supportingText="Compras menos estornos e pagamentos"/><MetricCard label="Parcelas futuras" value={formatCentsBRL(totalProjected)} supportingText="Previsão, fora do realizado"/><MetricCard label="Cartões configurados" value={`${data?.creditCards.length ?? 0} de ${accounts.length}`} supportingText="Fechamento e vencimento persistidos"/></div>
       <Card className="template-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={3} columns={4} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {accounts.length ? <DataTable ariaLabel="Cartões cadastrados" columns={cardColumns} rows={accounts} getRowKey={account => account.id}/> : <EmptyState title="Nenhum cartão cadastrado" description="Cadastre uma conta do tipo cartão de crédito para começar."/>}
@@ -68,5 +69,5 @@ export function CardsPage({ ledger }: { ledger?: LedgerState }) {
   }
   const billed = demoInvoices.reduce((sum, item) => sum + item.purchasesCents, 0n);
   const paid = demoInvoices.reduce((sum, item) => sum + item.paymentsCents, 0n);
-  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras, pagamentos e faturas sem contabilizar o pagamento como novo consumo.</p></div><Badge>Dados fictícios</Badge></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
+  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras, pagamentos e faturas sem contabilizar o pagamento como novo consumo.</p></div><div className="template-heading__actions"><Badge>Dados fictícios</Badge>{headerAction}</div></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
 }

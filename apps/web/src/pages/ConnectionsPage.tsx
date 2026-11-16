@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, Icon, PlusIcon, type DataTableColumn } from '@personal-finance/ui';
 import type { PluggyConnection } from '../integrations/contracts';
 import type { ConnectionsState } from '../integrations/useConnections';
+import type { PageProps } from './PageProps';
 
 const statusLabels: Record<PluggyConnection['status'], string> = {
   pending: 'Pendente', updating: 'Atualizando', ready: 'Atualizada', error: 'Com erro', login_required: 'Reconexão necessária'
@@ -11,12 +12,12 @@ function dateTime(value?: string): string {
   return value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : 'Ainda não ocorreu';
 }
 
-export function ConnectionsPage({ connections }: { connections?: ConnectionsState }) {
+export function ConnectionsPage({ connections, headerAction }: PageProps) {
   const [connecting, setConnecting] = useState(false);
   const [syncingId, setSyncingId] = useState('');
   if (!connections) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
-      <p className="muted">Nubank, Caixa e Itaú serão conectados exclusivamente pelo MeuPluggy no ambiente autenticado.</p></div><Badge>Modo demonstrativo</Badge></div>
+      <p className="muted">Nubank, Caixa e Itaú serão conectados exclusivamente pelo MeuPluggy no ambiente autenticado.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
     <Card><EmptyState title="Nenhuma conexão no modo demonstrativo" description="Credenciais e dados bancários nunca são carregados nesta visualização." /></Card>
   </div>;
 
@@ -43,7 +44,7 @@ export function ConnectionsPage({ connections }: { connections?: ConnectionsStat
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
       <p className="muted">O MeuPluggy atualiza a fonte; “Sincronizar agora” busca o dado mais recente já disponível.</p></div>
-      <Button loading={connecting} onClick={() => void connect()}><Icon icon={PlusIcon} size="sm"/>Conectar instituição</Button></div>
+      <div className="template-heading__actions"><Button variant="secondary" loading={connecting} onClick={() => void connect()}><Icon icon={PlusIcon} size="sm"/>Conectar instituição</Button>{headerAction}</div></div>
     {connections.error && <p className="sample-warning" role="alert">{connections.error}</p>}
     <Card className="template-table-card"><DataState status={connections.status === 'idle' ? 'loading' : connections.status} kind="table" rows={3} columns={6} errorDescription={connections.error} onRetry={() => void connections.reload()}>
       {rows.length

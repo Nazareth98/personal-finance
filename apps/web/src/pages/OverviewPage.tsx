@@ -6,8 +6,9 @@ import { accountsBalance, demoAccounts, demoBudgets, demoInvoices, invoiceOpenCe
 import { demoTransactions, formatCentsBRL } from '../lib/demo-transactions';
 import { accountBalance, ledgerTotals } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
+import type { PageProps } from './PageProps';
 
-export function OverviewPage({ ledger }: { ledger?: LedgerState }) {
+export function OverviewPage({ ledger, headerAction }: PageProps) {
   const [chartStatus,setChartStatus]=useState<DataStatus>('success');
   if (ledger) {
     const data = ledger.data;
@@ -17,7 +18,7 @@ export function OverviewPage({ ledger }: { ledger?: LedgerState }) {
     const balance = (data?.accounts ?? []).filter(account => account.type !== 'credit_card').reduce((sum, account) => sum + accountBalance(account, data?.transactions ?? []), 0n);
     const adjustments = periodRows.filter(row => row.nature === 'adjustment').length;
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><Badge>{latestPeriod ? `${latestPeriod.slice(5)}/${latestPeriod.slice(0, 4)}` : 'Sem lançamentos'}</Badge></div>
+      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><div className="template-heading__actions"><Badge>{latestPeriod ? `${latestPeriod.slice(5)}/${latestPeriod.slice(0, 4)}` : 'Sem lançamentos'}</Badge>{headerAction}</div></div>
       <div className="template-metrics" aria-label="Indicadores do livro financeiro">
         <MetricCard label="Patrimônio em contas" value={formatCentsBRL(balance)} supportingText="Saldo inicial mais movimentações" />
         <MetricCard label="Receitas do período" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Transferências excluídas" />
@@ -34,7 +35,7 @@ export function OverviewPage({ ledger }: { ledger?: LedgerState }) {
   return <div className="template-page">
     <div className="template-heading">
       <div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Um resumo ilustrativo de contas, movimentações e compromissos.</p></div>
-      <Badge>Novembro 2026 · Demo</Badge>
+      <div className="template-heading__actions"><Badge>Novembro 2026 · Demo</Badge>{headerAction}</div>
     </div>
     <div className="template-metrics" aria-label="Indicadores financeiros fictícios">
       <MetricCard label="Patrimônio em contas" value={formatCentsBRL(accountsBalance(demoAccounts))} supportingText="Saldos demonstrativos; não é fluxo mensal"/>

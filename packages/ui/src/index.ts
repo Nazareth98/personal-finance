@@ -14,7 +14,10 @@ export {
   LayoutDashboard as DashboardIcon,
   PiggyBank as SavingsIcon,
   Tags as ReviewIcon,
-  Plus as PlusIcon
+  Plus as PlusIcon,
+  LogOut as LogOutIcon,
+  Moon as MoonIcon,
+  Sun as SunIcon
 } from 'lucide-react';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';

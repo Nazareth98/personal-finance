@@ -5,6 +5,7 @@ import { SavingsBoxForm } from '../components/SavingsBoxForm';
 import { SavingsMovementForm } from '../components/SavingsMovementForm';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
+import type { PageProps } from './PageProps';
 
 const demoBoxes: SavingsBox[] = [
   { id: 'demo-box', name: 'Reserva de emergência', openingBalanceCents: 200000n, targetCents: 1200000n, targetDate: '2027-12-31' }
@@ -18,7 +19,7 @@ function formatBasisPoints(value: bigint) {
   return `${value / 100n}${decimals ? `,${decimals.toString().padStart(2, '0')}` : ''}%`;
 }
 
-function SavingsContent({ boxes, movements, ledger }: { boxes: SavingsBox[]; movements: SavingsMovement[]; ledger?: LedgerState }) {
+function SavingsContent({ boxes, movements, ledger, headerAction }: { boxes: SavingsBox[]; movements: SavingsMovement[]; ledger?: LedgerState; headerAction: PageProps['headerAction'] }) {
   const [boxOpen, setBoxOpen] = useState(false);
   const [movementBox, setMovementBox] = useState<SavingsBox | null>(null);
   const [linkBox, setLinkBox] = useState<SavingsBox | null>(null);
@@ -29,7 +30,7 @@ function SavingsContent({ boxes, movements, ledger }: { boxes: SavingsBox[]; mov
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO PATRIMONIAL</p><h1>Caixinhas</h1>
       <p className="muted">Aportes e resgates permanecem neutros em renda e consumo.</p></div>
-      {ledger ? <Button onClick={() => setBoxOpen(true)}>Nova caixinha</Button> : <Badge>Dados fictícios</Badge>}</div>
+      <div className="template-heading__actions">{ledger ? <Button variant="secondary" onClick={() => setBoxOpen(true)}>Nova caixinha</Button> : <Badge>Dados fictícios</Badge>}{headerAction}</div></div>
     <div className="template-metrics" aria-label="Resumo das caixinhas">
       <MetricCard label="Saldo nas caixinhas" value={formatCentsBRL(totalBalance)} supportingText="Saldo inicial mais movimentos" />
       <MetricCard label="Metas cadastradas" value={formatCentsBRL(totalTarget)} supportingText={`${boxes.length} caixinha${boxes.length === 1 ? '' : 's'}`} />
@@ -62,10 +63,11 @@ function SavingsContent({ boxes, movements, ledger }: { boxes: SavingsBox[]; mov
   </div>;
 }
 
-export function SavingsPage({ ledger }: { ledger?: LedgerState }) {
+export function SavingsPage({ ledger, headerAction }: PageProps) {
   return <SavingsContent
     boxes={ledger ? ledger.data?.savingsBoxes ?? [] : demoBoxes}
     movements={ledger ? ledger.data?.savingsMovements ?? [] : demoMovements}
     ledger={ledger}
+    headerAction={headerAction}
   />;
 }

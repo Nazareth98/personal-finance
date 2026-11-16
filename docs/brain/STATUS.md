@@ -4,7 +4,7 @@ Atualizado em: 16/11/2026.
 
 ## Situação
 
-- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. Há 78 baselines versionados; os 6 de conexões precisam ser atualizados no CI Linux após a nova coluna operacional.
+- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines precisam ser atualizados no CI Linux após as mudanças visuais intencionais.
 - No modo autenticado, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
@@ -15,7 +15,7 @@ Atualizado em: 16/11/2026.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: as 8 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas e o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres.
+- O projeto Supabase novo está vinculado: as 8 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
@@ -25,10 +25,9 @@ Atualizado em: 16/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. criar o usuário Auth proprietário e provisionar `public.profiles`;
-2. cadastrar secrets MeuPluggy rotacionados no Supabase;
-3. configurar a Vercel com URL/chave pública e concluir URLs do Auth;
-4. validar MeuPluggy em sandbox, configurar o webhook e executar smoke test remoto.
+1. cadastrar secrets MeuPluggy rotacionados no Supabase;
+2. concluir URLs do Auth na Vercel/Supabase;
+3. validar MeuPluggy em sandbox, configurar o webhook e executar smoke test remoto.
 
 ## Última validação
 
@@ -44,16 +43,17 @@ Próximas entregas, nesta ordem:
 - Etapa 9 local: `pnpm check` aprovado; manifesto, instalação, ícones e service worker validados estaticamente e em build de produção; fallback offline recusou rota financeira sem rede; 13 fluxos autenticados e 108 cenários responsivos/acessíveis/PWA executados no Chromium (89 aprovados e 19 skips esperados), incluindo 320 px. O modo demonstrativo não mudou e nenhum baseline foi atualizado. Deploy remoto foi adiado pelo proprietário e depende de credenciais.
 - Pós-pull em 16/11/2026: `pnpm check`, 13 fluxos autenticados e 6 auditorias WCAG da tela de conexões aprovados após formalizar Vercel e persistir `Item.lastUpdatedAt` como atualização da fonte.
 - Supabase remoto em 16/11/2026: 8 migrations aplicadas e reconciliadas com o histórico local; 17 tabelas públicas confirmadas com RLS; coluna `last_source_updated_at` presente; funções `pluggy-connect-token`, `pluggy-sync` e `pluggy-webhook` ativas com fronteiras JWT corretas; Auth com cadastro público desativado e senha mínima de 12 caracteres.
+- Provisionamento remoto em 16/11/2026: o único usuário Auth foi vinculado a `public.profiles` como proprietário; a correspondência entre Auth, perfil e `is_owner = true` foi confirmada por consulta administrativa sem expor dados pessoais.
 - OpenDesign em 16/11/2026: aplicativo 0.27.1, plugin Codex 0.5.3 e MCP stdio instalados; `DESIGN.md` criado a partir dos tokens Light/Dark e componentes React existentes, com lint oficial sem erros ou avisos e exportação DTCG aprovada.
 - Vercel remota em 16/11/2026: checkout vinculado a `patrick-nazareths-projects/personal-finance`; runtime corrigido de Node 26.x para 22.x; `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` configuradas em Production e Preview; variável legada `VITE_SUPABASE_ANON_KEY` removida; `pnpm check` e `vercel build --prod` aprovados com Node 22.12.
+- Shell autenticado em 16/11/2026: direção visual definida com OpenDesign; saída movida para a sidebar, tema convertido em controle Light/Dark por ícones e ações alinhadas aos cabeçalhos dos nove templates. `pnpm check`, 14 cenários de comportamento, 54 auditorias WCAG A/AA e 13 fluxos autenticados aprovados; capturas Light/Dark em desktop e mobile revisadas localmente.
 
 ## Bloqueios
 
 - Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.
 - A conta/sandbox MeuPluggy ainda precisa confirmar o SDK Connect, paginação e mecanismo real de assinatura do webhook antes do deploy.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
-- Os 6 baselines de conexões precisam ser regenerados e revisados no CI Linux por causa da coluna “Atualização da fonte”.
-- A validação real das policies com proprietário e sessão não autorizada depende da criação do único usuário Auth.
+- Os 78 baselines visuais precisam ser regenerados e revisados no CI Linux por causa da nova composição do shell; conexões também incorpora a coluna “Atualização da fonte”.
 
 ## Regra de atualização
 
