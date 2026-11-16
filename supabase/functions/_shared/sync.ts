@@ -360,6 +360,7 @@ export async function synchronizeConnection(
     await database.from('pluggy_connections').update({
       connector_id: item.connector?.id ?? null,
       institution_name: institutionName.slice(0, 100),
+      last_source_updated_at: item.lastUpdatedAt ?? null,
       updated_at: new Date().toISOString()
     }).eq('id', connectionId).eq('owner_id', ownerId);
 

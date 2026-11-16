@@ -1,33 +1,33 @@
 # Status atual
 
-Atualizado em: 15/11/2026.
+Atualizado em: 16/11/2026.
 
 ## Situação
 
-- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. Há 78 baselines versionados, incluindo caixinhas, conexões e revisão em Light/Dark nos três viewports.
-- Em produção, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
+- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. Há 78 baselines versionados; os 6 de conexões precisam ser atualizados no CI Linux após a nova coluna operacional.
+- No modo autenticado, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
-- MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela exibe fonte, tentativa, sucesso e estado de erro.
+- MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela distingue atualização da fonte, tentativa local, sucesso local e estado de erro.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
 - Cartões implementados com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. Compras sincronizadas usam a competência do vencimento e ficam no staging quando o calendário é desconhecido.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
-- Vercel configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
+- Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 9 — validação do deploy remoto pendente**, sem restaurar o backend antigo.
+**Etapa 9 — ativação do Supabase novo e deploy Vercel**, sem restaurar o backend antigo.
 
 Próximas entregas, nesta ordem:
 
-1. confirmar na Vercel `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` e Root Directory na raiz;
-2. observar o deploy automático disparado pela `main` e executar smoke test no domínio;
-3. aplicar migrations e publicar Edge Functions no Supabase autorizado;
-4. configurar secrets, URLs de Auth, CORS e webhook MeuPluggy.
+1. criar o projeto Supabase, vincular a CLI e revisar `db push --dry-run --remote`;
+2. aplicar migrations, provisionar o proprietário e publicar as Edge Functions;
+3. configurar a Vercel com URL/chave pública e concluir URLs do Auth;
+4. validar MeuPluggy em sandbox, configurar o webhook e executar smoke test remoto.
 
 ## Última validação
 
@@ -41,6 +41,7 @@ Próximas entregas, nesta ordem:
 - Etapa 7: `pnpm check` aprovado; 3 contratos de competência/fatura/parcelas, validação estática de RLS e separação realizado/projetado, 12 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de cartões não mudou e nenhum baseline foi atualizado.
 - Etapa 8: `pnpm check` aprovado; 3 contratos de recorrência/previsão, validação estática de reconhecimento e imutabilidade, 13 fluxos autenticados e 90 cenários responsivos/acessíveis executados no Chromium (86 aprovados e 4 skips esperados). O modo demonstrativo de relatórios não mudou e nenhum baseline foi atualizado.
 - Etapa 9 local: `pnpm check` aprovado; manifesto, instalação, ícones e service worker validados estaticamente e em build de produção; fallback offline recusou rota financeira sem rede; 13 fluxos autenticados e 108 cenários responsivos/acessíveis/PWA executados no Chromium (89 aprovados e 19 skips esperados), incluindo 320 px. O modo demonstrativo não mudou e nenhum baseline foi atualizado. Deploy remoto foi adiado pelo proprietário e depende de credenciais.
+- Pós-pull em 16/11/2026: `pnpm check`, 13 fluxos autenticados e 6 auditorias WCAG da tela de conexões aprovados após formalizar Vercel e persistir `Item.lastUpdatedAt` como atualização da fonte.
 - Migrations de acesso, livro, MeuPluggy, categorização e cartões verificadas estaticamente; execução real no PostgreSQL/RLS permanece pendente para o Supabase hospedado.
 
 ## Bloqueios
@@ -48,6 +49,7 @@ Próximas entregas, nesta ordem:
 - Docker não está disponível nesta máquina; migrations e RLS não serão executadas localmente.
 - A conta/sandbox MeuPluggy ainda precisa confirmar o SDK Connect, paginação e mecanismo real de assinatura do webhook antes do deploy.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
+- Os 6 baselines de conexões precisam ser regenerados e revisados no CI Linux por causa da coluna “Atualização da fonte”.
 - Alterações reais no Supabase exigem autorização explícita.
 
 ## Regra de atualização

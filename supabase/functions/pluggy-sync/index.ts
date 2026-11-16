@@ -29,6 +29,7 @@ Deno.serve(async request => {
         connector_id: item.connector?.id ?? null,
         institution_name: (item.connector?.name?.trim() || 'Instituição conectada').slice(0, 100),
         status: 'pending',
+        last_source_updated_at: item.lastUpdatedAt ?? null,
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id,item_id' }).select('id,last_success_at').single();
       if (connection.error) throw connection.error;

@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectionsData, ConnectionsRepository, PluggyConnection, SyncRun } from './contracts';
 
 type ConnectionRow = {
-  id: string; institution_name: string; status: PluggyConnection['status']; last_attempt_at: string | null;
+  id: string; institution_name: string; status: PluggyConnection['status']; last_source_updated_at: string | null; last_attempt_at: string | null;
   last_success_at: string | null; last_error: string | null;
 };
 type RunRow = {
@@ -15,7 +15,7 @@ export class SupabaseConnectionsRepository implements ConnectionsRepository {
 
   async load(): Promise<ConnectionsData> {
     const [connectionsResult, runsResult] = await Promise.all([
-      this.client.from('pluggy_connections').select('id,institution_name,status,last_attempt_at,last_success_at,last_error').order('updated_at', { ascending: false }),
+      this.client.from('pluggy_connections').select('id,institution_name,status,last_source_updated_at,last_attempt_at,last_success_at,last_error').order('updated_at', { ascending: false }),
       this.client.from('sync_runs').select('id,connection_id,status,trigger_type,imported_accounts,imported_transactions,skipped_transactions,created_at').order('created_at', { ascending: false }).limit(30)
     ]);
     const error = connectionsResult.error ?? runsResult.error;
@@ -25,6 +25,7 @@ export class SupabaseConnectionsRepository implements ConnectionsRepository {
         id: row.id,
         institutionName: row.institution_name,
         status: row.status,
+        ...(row.last_source_updated_at ? { lastSourceUpdatedAt: row.last_source_updated_at } : {}),
         ...(row.last_attempt_at ? { lastAttemptAt: row.last_attempt_at } : {}),
         ...(row.last_success_at ? { lastSuccessAt: row.last_success_at } : {}),
         ...(row.last_error ? { lastError: row.last_error } : {})

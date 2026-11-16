@@ -16,7 +16,7 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 
 ## Decisões vigentes
 
-- Stack: React + TypeScript + Vite, Supabase e Cloudflare Pages.
+- Stack: React + TypeScript + Vite, Supabase e Vercel.
 - Organização: domínio, aplicação, infraestrutura e apresentação; OOP somente quando melhorar o domínio.
 - Usuário único, cadastro público desativado e recuperação de senha por e-mail.
 - MeuPluggy é a única origem bancária; credenciais ficam no backend.

@@ -47,7 +47,7 @@ O plano Starter do Figma não permite usar múltiplos modos na mesma coleção. 
 
 A fundação, o acesso do único proprietário, o livro financeiro, metas, caixinhas, MeuPluggy, categorização explicável, cartões, previsão financeira e PWA seguro estão implementados no código. O modo visual de teste usa dados fictícios; em produção, contas e lançamentos vêm do Supabase. A integração exige migrations, secrets e Edge Functions publicados no ambiente hospedado antes do uso real. Não copiar dados privados ou históricos para fixtures.
 
-## Documentação do Design System (v0.2)
+## Documentação do Design System (v0.6.2)
 
 ```bash
 pnpm tokens:check     # Valida Light/Dark e contraste de pares essenciais
@@ -98,7 +98,7 @@ A story `Foundations/Light & Dark` compara os dois temas simultaneamente. Regras
 
 ## Validação visual e acessibilidade — v0.6
 
-O Playwright captura 36 combinações de telas Light/Dark em mobile, tablet e desktop. A primeira execução em Linux inicia os baselines no GitHub; execuções posteriores comparam diferenças e bloqueiam regressões.
+O Playwright mantém 78 baselines Light/Dark em mobile, tablet e desktop. Os baselines são gerados e comparados no GitHub Actions Linux para evitar diferenças de renderização entre sistemas operacionais.
 
 ```bash
 pnpm build
@@ -125,4 +125,4 @@ pnpm test:states
 pnpm test:states:visual
 ```
 
-60 capturas agora cobrem seis templates e quatro estados adicionais por viewport e tema. Consulte [ASYNC_STATES](docs/quality/ASYNC_STATES.md).
+Os 78 baselines cobrem nove templates e quatro estados adicionais por viewport e tema. Consulte [ASYNC_STATES](docs/quality/ASYNC_STATES.md).

@@ -3,6 +3,7 @@ export type PluggyConnection = {
   id: string;
   institutionName: string;
   status: PluggyConnectionStatus;
+  lastSourceUpdatedAt?: string;
   lastAttemptAt?: string;
   lastSuccessAt?: string;
   lastError?: string;

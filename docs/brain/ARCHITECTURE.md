@@ -4,7 +4,7 @@
 
 - React + TypeScript + Vite para a PWA.
 - Supabase: PostgreSQL, Auth, Row Level Security e Edge Functions TypeScript.
-- Cloudflare Pages para o frontend.
+- Vercel para o frontend estático.
 - MeuPluggy como única integração bancária.
 
 ## Camadas
@@ -31,7 +31,7 @@ O fluxo de Connect Token, sincronização, staging, webhook e retomada está em 
 O overlay imutável, regras, pontuação e feedback de categoria estão em [`../architecture/CATEGORIZATION.md`](../architecture/CATEGORIZATION.md).
 O ciclo de crédito, composição de faturas, estornos, pagamentos e projeções de parcelas estão em [`../architecture/CARDS.md`](../architecture/CARDS.md).
 O reconhecimento de receita recorrente e o cálculo determinístico da previsão estão em [`../architecture/FORECASTING.md`](../architecture/FORECASTING.md).
-O manifesto, instalação, fallback offline e fronteiras de cache estão em [`../architecture/PWA.md`](../architecture/PWA.md). A preparação neutra de provedor está em [`../architecture/DEPLOYMENT.md`](../architecture/DEPLOYMENT.md).
+O manifesto, instalação, fallback offline e fronteiras de cache estão em [`../architecture/PWA.md`](../architecture/PWA.md). O deploy na Vercel e a ativação do Supabase hospedado estão em [`../architecture/DEPLOYMENT.md`](../architecture/DEPLOYMENT.md).
 
 ## MeuPluggy
 
@@ -52,7 +52,7 @@ O manifesto, instalação, fallback offline e fronteiras de cache estão em [`..
 
 ## Hospedagem e limite aceito
 
-Cloudflare Pages e Supabase Free atendem ao uso individual. O Supabase pode pausar por inatividade; retomada manual é aceita. Não gerar tráfego artificial para evitar pausa.
+Vercel e Supabase Free atendem ao uso individual. O Supabase pode pausar por inatividade; retomada manual é aceita. Não gerar tráfego artificial para evitar pausa.
 
 ## Estratégia de testes
 

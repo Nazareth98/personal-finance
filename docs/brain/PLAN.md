@@ -100,7 +100,7 @@ Aceite: receita extraordinária altera o realizado e os tetos do período, mas n
 - responsividade a partir de 320 px;
 - acessibilidade, estados de erro e carregamento;
 - Playwright para fluxos críticos e validação visual contra Figma;
-- deploy no Cloudflare Pages e Supabase Free.
+- deploy na Vercel e Supabase Free.
 
 Aceite: fluxos críticos funcionam em mobile e desktop, `pnpm check` passa e limitações gratuitas estão documentadas.
 

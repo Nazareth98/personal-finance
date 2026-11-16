@@ -12,7 +12,7 @@ O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou
 
 ## Persistência e idempotência
 
-- `public.pluggy_connections`: um registro por `owner_id + item_id`, com estado, tentativa, sucesso e erro sanitizado.
+- `public.pluggy_connections`: um registro por `owner_id + item_id`, com `last_source_updated_at` vindo de `Item.lastUpdatedAt`, tentativa, sucesso e erro sanitizado.
 - `public.sync_runs`: histórico e checkpoint por conta/página; apenas uma execução pode ficar ativa por conexão.
 - `private.webhook_events`: inbox durável com `provider_event_id` único. Evento duplicado recebe `202` sem novo processamento.
 - `private.pluggy_accounts`: vínculo entre Account do provedor e `financial_accounts`.
@@ -39,7 +39,7 @@ PLUGGY_WEBHOOK_SECRET
 
 Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge Functions. O endpoint do webhook é `/functions/v1/pluggy-webhook`; `verify_jwt = false` vale somente para ele, pois sua autenticação é o segredo/HMAC específico.
 
-“Sincronizar agora” busca o dado mais recente disponível no MeuPluggy. Não promete iniciar nova coleta na instituição. Erros persistem sem descrição, valor, token ou identificador bancário em logs apresentados ao usuário.
+“Sincronizar agora” busca o dado mais recente disponível no MeuPluggy. Não promete iniciar nova coleta na instituição. Erros persistem sem descrição, valor, token ou identificador bancário em logs apresentados ao usuário. A tela distingue a última atualização da fonte no MeuPluggy, a tentativa local de importação e o último sucesso local.
 
 ## Validação pendente no ambiente real
 

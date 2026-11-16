@@ -142,7 +142,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname === '/rest/v1/pluggy_connections') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
-        { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_attempt_at: '2026-11-14T12:00:00Z', last_success_at: '2026-11-14T12:00:00Z', last_error: null }
+        { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_source_updated_at: '2026-11-13T12:00:00Z', last_attempt_at: '2026-11-14T12:00:00Z', last_success_at: '2026-11-14T12:00:00Z', last_error: null }
       ]) });
       return;
     }
@@ -379,6 +379,7 @@ test('exibe estado da fonte e solicita sincronização sem enviar credenciais', 
   await expect(page.getByRole('heading', { name: 'Conexões bancárias' })).toBeVisible();
   await expect(page.getByText('Banco Sintético')).toBeVisible();
   await expect(page.getByText('Atualizada')).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Conexões MeuPluggy' })).toContainText('13/11/2026');
   await page.getByRole('button', { name: 'Sincronizar agora' }).click();
   await expect.poll(() => writes.some(write => write.path === '/functions/v1/pluggy-sync')).toBe(true);
   const syncCall = writes.find(write => write.path === '/functions/v1/pluggy-sync');

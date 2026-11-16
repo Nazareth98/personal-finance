@@ -3,10 +3,12 @@ import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/202611140001_meupluggy.sql', 'utf8');
 const sync = await readFile('supabase/functions/_shared/sync.ts', 'utf8');
+const syncEntry = await readFile('supabase/functions/pluggy-sync/index.ts', 'utf8');
 const webhook = await readFile('supabase/functions/pluggy-webhook/index.ts', 'utf8');
 const browser = await readFile('apps/web/src/integrations/supabase-connections.ts', 'utf8');
 
 assert.match(migration, /create table public\.pluggy_connections/i);
+assert.match(migration, /last_source_updated_at timestamptz/i);
 assert.match(migration, /create table public\.sync_runs/i);
 assert.match(migration, /create table private\.webhook_events/i);
 assert.match(migration, /create table private\.pluggy_transactions/i);
@@ -19,11 +21,14 @@ assert.match(migration, /sync_runs_one_active/i);
 assert.match(migration, /grant execute on function public\.internal_register_webhook_event[\s\S]*to service_role/i);
 assert.match(sync, /ignoreDuplicates: true/g);
 assert.match(sync, /accountType === 'credit_card'/);
+assert.match(sync, /last_source_updated_at: item\.lastUpdatedAt/);
+assert.match(syncEntry, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.doesNotMatch(sync, /schema\('private'\)/);
 assert.doesNotMatch(webhook, /schema\('private'\)/);
 assert.match(migration, /internal_register_webhook_event/);
 assert.match(webhook, /internal_register_webhook_event/);
 assert.match(webhook, /waitUntil\(processEvent/);
 assert.doesNotMatch(browser, /PLUGGY_CLIENT_(ID|SECRET)|SERVICE_ROLE/i);
+assert.match(browser, /last_source_updated_at/);
 
 console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de secrets validados estaticamente.');

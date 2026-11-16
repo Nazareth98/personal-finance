@@ -7,6 +7,7 @@ create table public.pluggy_connections (
     check (char_length(trim(institution_name)) between 2 and 100),
   status text not null default 'pending'
     check (status in ('pending', 'updating', 'ready', 'error', 'login_required')),
+  last_source_updated_at timestamptz,
   last_attempt_at timestamptz,
   last_success_at timestamptz,
   last_error text check (last_error is null or char_length(last_error) <= 240),

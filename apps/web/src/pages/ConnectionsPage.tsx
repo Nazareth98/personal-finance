@@ -35,6 +35,7 @@ export function ConnectionsPage({ connections }: { connections?: ConnectionsStat
   const columns: DataTableColumn<PluggyConnection>[] = [
     { key: 'institution', header: 'Instituição', cell: row => <strong>{row.institutionName}</strong> },
     { key: 'status', header: 'Estado', cell: row => <Badge>{statusLabels[row.status]}</Badge> },
+    { key: 'source', header: 'Atualização da fonte', cell: row => dateTime(row.lastSourceUpdatedAt) },
     { key: 'attempt', header: 'Última tentativa', cell: row => dateTime(row.lastAttemptAt) },
     { key: 'success', header: 'Última importação', cell: row => dateTime(row.lastSuccessAt) },
     { key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" loading={syncingId === row.id} onClick={() => void sync(row.id)}>Sincronizar agora</Button> }
@@ -44,7 +45,7 @@ export function ConnectionsPage({ connections }: { connections?: ConnectionsStat
       <p className="muted">O MeuPluggy atualiza a fonte; “Sincronizar agora” busca o dado mais recente já disponível.</p></div>
       <Button loading={connecting} onClick={() => void connect()}><Icon icon={PlusIcon} size="sm"/>Conectar instituição</Button></div>
     {connections.error && <p className="sample-warning" role="alert">{connections.error}</p>}
-    <Card className="template-table-card"><DataState status={connections.status === 'idle' ? 'loading' : connections.status} kind="table" rows={3} columns={5} errorDescription={connections.error} onRetry={() => void connections.reload()}>
+    <Card className="template-table-card"><DataState status={connections.status === 'idle' ? 'loading' : connections.status} kind="table" rows={3} columns={6} errorDescription={connections.error} onRetry={() => void connections.reload()}>
       {rows.length
         ? <DataTable ariaLabel="Conexões MeuPluggy" columns={columns} rows={rows} getRowKey={row => row.id}/>
         : <EmptyState title="Nenhuma instituição conectada" description="Conecte Nubank, Caixa ou Itaú para importar o histórico disponível." action={<Button onClick={() => void connect()}>Conectar instituição</Button>}/>} 

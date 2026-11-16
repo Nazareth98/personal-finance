@@ -1,7 +1,7 @@
 import type { PluggyAccount, PluggyTransaction } from './pluggy-domain.ts';
 
 type Page<T> = { results: T[]; total?: number; totalPages?: number; page?: number };
-type PluggyItem = { id: string; status?: string; connector?: { id?: number; name?: string } };
+type PluggyItem = { id: string; status?: string; lastUpdatedAt?: string | null; connector?: { id?: number; name?: string } };
 
 export class PluggyClient {
   private apiKey: string | null = null;
