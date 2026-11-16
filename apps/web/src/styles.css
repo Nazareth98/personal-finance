@@ -6,7 +6,7 @@ h1 { font-size: 32px; letter-spacing: -.035em; margin-bottom: 6px; }
 h2 { font-size: 18px; margin-bottom: 6px; }
 .app-shell { display: grid; grid-template-columns: 268px minmax(0,1fr); min-height: 100vh; transition: grid-template-columns .2s ease; }
 .app-shell--sidebar-collapsed { grid-template-columns: 88px minmax(0,1fr); }
-.sidebar { position: sticky; top: 0; align-self: start; height: 100dvh; overflow-y: auto; background: var(--color-bg-surface); border-right: 1px solid var(--color-border-default); padding: 20px 14px; display: flex; flex-direction: column; gap: 18px; }
+.sidebar { position: sticky; top: 0; align-self: start; height: 100dvh; overflow: hidden; background: var(--color-bg-surface); border-right: 1px solid var(--color-border-default); padding: 20px 14px; display: flex; flex-direction: column; gap: 18px; }
 .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-2); min-width: 0; }
 .brand { min-width: 0; padding: 0 var(--spacing-1); display: flex; align-items: center; gap: var(--spacing-3); font-weight: 750; }
 .brand-symbol { width: 42px; height: 42px; display: grid; place-items: center; flex: none; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
@@ -64,6 +64,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .activity-value.transfer { color: var(--color-finance-transfer); }
 .footnote { margin-top: 20px; font-size: 12px; }
 @media (min-width: 1001px) {
+  .navigation { flex: 1; min-height: 0; overflow-y: auto; align-content: start; }
   .sidebar.is-collapsed { padding-inline: var(--spacing-3); }
   .sidebar.is-collapsed .sidebar-header { flex-direction: column; }
   .sidebar.is-collapsed .brand { padding: 0; }

@@ -24,7 +24,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 - No modo `test`, dados são **100% fictícios**, não enviados a API e não persistidos. No modo autenticado, os templates consomem os repositórios Supabase autorizados.
 - O formulário de nova movimentação é demonstrativo no modo `test` e persistente no modo autenticado.
 - Storybook contém os nove templates para revisão visual.
-- Sidebar com indicador ativo lateral e ícone destacado; desktop permite recolher o menu para uma faixa de ícones, mantendo nomes acessíveis e navegação por teclado. A preferência de recolhimento vale durante a sessão da tela.
+- Sidebar com indicador ativo lateral e ícone destacado; desktop permite recolher o menu para uma faixa de ícones, mantendo nomes acessíveis e navegação por teclado. Cabeçalho e rodapé permanecem fixos na altura da viewport; quando necessário, somente a lista de abas recebe rolagem vertical. A preferência de recolhimento vale durante a sessão da tela.
 - No mobile, marca, tema e saída formam um cabeçalho compacto fixo durante a rolagem; navegação permanece em faixa horizontal rolável. Microinterações respeitam `prefers-reduced-motion`.
 
 ## Regras financeiras críticas
