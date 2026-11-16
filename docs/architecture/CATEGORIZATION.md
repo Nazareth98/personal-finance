@@ -48,6 +48,12 @@ Pesos da mesma categoria são somados e limitados a 10.000. As evidências vence
 
 Nenhuma regra é aprendida ao apenas visualizar, abrir o diálogo ou receber uma sugestão. Alterar o alias aprendido exige uma nova confirmação explícita, preservada no histórico de feedback.
 
+## Fila de revisão
+
+A fila principal contém somente `suggested`, `uncategorized` e pendências de natureza. `automatic` e `confirmed` ficam em histórico filtrável e continuam corrigíveis. Classificação de categoria não pode converter receita/despesa em transferência, aporte, resgate ou pagamento de fatura; essas decisões pertencem ao overlay semântico.
+
+Em uma limpeza de desenvolvimento, preservar `classification_rules` com `evidence_type = 'alias'` é suficiente para reaplicar o aprendizado na reimportação. Overlays e feedback ligados a transações antigas são descartados junto com o livro.
+
 ## Segurança
 
 - tabelas têm RLS e somente leitura direta pelo proprietário;

@@ -21,13 +21,14 @@ Atualizado em: 16/11/2026.
 
 ## Marco atual
 
-**Etapa 9 — ativação do Supabase novo e deploy Vercel**, sem restaurar o backend antigo.
+**Etapa 10 — semântica, revisão e reimportação controlada**, antes de validar novamente o MeuPluggy com dados reais.
 
 Próximas entregas, nesta ordem:
 
-1. repetir a sincronização MeuPluggy autenticada e confirmar a materialização do staging no livro;
-2. configurar o webhook MeuPluggy com o mecanismo de assinatura disponível na conta;
-3. concluir o smoke test remoto de conexão, sincronização e atualização por webhook.
+1. corrigir a semântica de PIX/transferências e adicionar revisão de natureza por overlay;
+2. ajustar a fila para separar pendências de histórico e integrar vínculos de caixinha/fatura;
+3. executar limpeza seletiva do ambiente de desenvolvimento preservando aliases e reimportar todo o histórico;
+4. configurar o webhook MeuPluggy e concluir o smoke test remoto.
 
 ## Última validação
 
@@ -52,6 +53,7 @@ Próximas entregas, nesta ordem:
 - Idempotência MeuPluggy em 16/11/2026: o `upsert` do livro falhava porque o índice único parcial de `(owner_id, external_key)` não era inferido pelo `ON CONFLICT`. A migration substituiu-o por uma constraint única compatível, validada remotamente em transação com rollback; `pluggy-sync` versão 5 está ativa, erros estruturados do Supabase preservam a mensagem sanitizada e `pnpm check` foi aprovado.
 - Sidebar em 16/11/2026: navegação redesenhada com indicador ativo, ícones destacados, recolhimento no desktop e cabeçalho compacto no mobile. Tokens Corporate UI preservados, movimento reduzido respeitado e nomes acessíveis mantidos no modo recolhido. `pnpm check`, 16 cenários de comportamento e 54 auditorias WCAG A/AA aprovados após corrigir os rótulos. Capturas Light/Dark revisadas localmente; baselines Linux ainda precisam de atualização e revisão. OpenDesign Cloud ficou indisponível por falha de transporte; a implementação seguiu o `DESIGN.md` existente.
 - Rolagem da sidebar em 16/11/2026: no desktop, cabeçalho e rodapé ficaram fixos e somente a lista de abas rola quando a altura é insuficiente; estados expandido, recolhido e mobile foram verificados no Chromium em viewport reduzida, e `pnpm check` foi aprovado com Node 24.14.1.
+- Diagnóstico semântico em 16/11/2026: a categoria genérica “transfer” do MeuPluggy neutraliza PIX para terceiros indevidamente; a revisão atual mistura fila e histórico, e correções de categoria não resolvem resgates/pagamentos com natureza incorreta. A Etapa 10 foi priorizada antes de uma reimportação controlada que preserve aliases.
 
 ## Bloqueios
 

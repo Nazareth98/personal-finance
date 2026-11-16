@@ -21,6 +21,7 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 - Usuário único, cadastro público desativado e recuperação de senha por e-mail.
 - MeuPluggy é a única origem bancária; credenciais ficam no backend.
 - Importação completa, incremental e idempotente; mostrar atualização da fonte, última importação e último erro.
+- Categoria “transferência” do provedor não prova transferência própria: PIX para terceiro é receita/despesa pelo sinal; somente evidência positiva de titularidade ou conciliação entre contas próprias produz efeito neutro.
 - Compra no cartão pertence ao mês de vencimento da fatura. Pagamento de fatura não é nova despesa.
 - Transferências próprias têm os dois lados vinculados e não alteram receita ou consumo.
 - Ajustes manuais são lançamentos separados; o dado importado permanece imutável.

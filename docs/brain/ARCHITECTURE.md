@@ -18,7 +18,7 @@ OOP é usada quando encapsula invariantes ou comportamento. React usa componente
 
 ## Modelo inicial
 
-Entidades previstas: perfil, conta, conexão Pluggy, execução de sincronização, evento webhook, lançamento, vínculo entre lançamentos, categoria, regra e feedback de classificação, cartão, fatura, parcela, meta de categoria, caixinha e movimento de caixinha.
+Entidades previstas: perfil, conta, conexão Pluggy, execução de sincronização, evento webhook, lançamento, overlay semântico, vínculo entre lançamentos, categoria, regra e feedback de classificação, cartão, fatura, parcela, meta de categoria, caixinha e movimento de caixinha.
 
 `transaction_links` representa transferência, estorno, pagamento de fatura, ajuste e movimento de caixinha sem duplicar semântica no livro.
 
@@ -29,6 +29,7 @@ O modelo percentual, cálculo por período e segurança das metas estão em [`..
 O saldo reconstruível, os movimentos neutros e a associação manual de caixinhas estão em [`../architecture/SAVINGS.md`](../architecture/SAVINGS.md).
 O fluxo de Connect Token, sincronização, staging, webhook e retomada está em [`../architecture/MEUPLUGGY.md`](../architecture/MEUPLUGGY.md).
 O overlay imutável, regras, pontuação e feedback de categoria estão em [`../architecture/CATEGORIZATION.md`](../architecture/CATEGORIZATION.md).
+O fluxo de correção de natureza e a reimportação controlada de desenvolvimento estão em [`../architecture/SEMANTIC_REVIEW.md`](../architecture/SEMANTIC_REVIEW.md).
 O ciclo de crédito, composição de faturas, estornos, pagamentos e projeções de parcelas estão em [`../architecture/CARDS.md`](../architecture/CARDS.md).
 O reconhecimento de receita recorrente e o cálculo determinístico da previsão estão em [`../architecture/FORECASTING.md`](../architecture/FORECASTING.md).
 O manifesto, instalação, fallback offline e fronteiras de cache estão em [`../architecture/PWA.md`](../architecture/PWA.md). O deploy na Vercel e a ativação do Supabase hospedado estão em [`../architecture/DEPLOYMENT.md`](../architecture/DEPLOYMENT.md).

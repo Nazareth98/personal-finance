@@ -104,6 +104,43 @@ Aceite: receita extraordinária altera o realizado e os tetos do período, mas n
 
 Aceite: fluxos críticos funcionam em mobile e desktop, `pnpm check` passa e limitações gratuitas estão documentadas.
 
+## Etapa 10 — semântica, revisão e reimportação controlada
+
+### 10.1 — corrigir a origem
+
+- tratar PIX/transferência para terceiro como receita ou despesa pelo sinal;
+- neutralizar somente com evidência positiva de conta própria;
+- reconhecer pagamento de fatura, aporte e resgate sem inflar renda ou consumo;
+- cobrir os contratos com fixtures sintéticas.
+
+Aceite: a categoria genérica do provedor, isoladamente, nunca cria `own_transfer`.
+
+### 10.2 — revisão de natureza
+
+- adicionar overlay auditável sem editar o lançamento importado;
+- separar natureza financeira de categoria;
+- exigir conta contraparte, fatura ou caixinha quando a natureza precisar de vínculo;
+- manter totais e previsões derivados da semântica efetiva.
+
+Aceite: uma correção transforma o efeito contábil e o vínculo de forma atômica, preservando o original.
+
+### 10.3 — fila de revisão
+
+- mostrar por padrão somente sugestões e itens sem categoria/natureza resolvida;
+- retirar confirmados da fila principal;
+- manter automáticos e confirmados em histórico filtrável com ação “Corrigir”.
+
+Aceite: confirmar um item reduz imediatamente a contagem pendente sem perder rastreabilidade.
+
+### 10.4 — limpar e reimportar o ambiente de desenvolvimento
+
+- preservar Auth, perfil proprietário, categorias, migrations, secrets e regras `alias` aprendidas;
+- remover conexões, staging, execuções, livro, overlays por transação, faturas, caixinhas e demais derivados;
+- reconectar o MeuPluggy e executar importação completa com as regras corrigidas;
+- conferir amostras de PIX, cofrinhos e pagamentos de fatura antes de prosseguir.
+
+Aceite: aliases preservados voltam a classificar a nova importação e os totais não contêm neutralizações indevidas. O roteiro técnico está em [`../architecture/SEMANTIC_REVIEW.md`](../architecture/SEMANTIC_REVIEW.md).
+
 ## Fora do escopo inicial
 
 Cadastro público, família/multiusuário, aplicativo nativo, exportação pela interface, IA externa, bancos fora do MeuPluggy, identificação de caixinha sem evidência e Code Connect antes de componentes estáveis.

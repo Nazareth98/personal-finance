@@ -25,7 +25,7 @@ Transações usam `GET /v2/transactions`, `dateFrom` nos incrementos e o cursor 
 
 ## Semântica financeira
 
-Valores do provedor são convertidos imediatamente para `bigint` em centavos. Categoria explícita de transferência ou pagamento de fatura produz efeito neutro; os demais créditos/débitos bancários entram sem categoria para a Etapa 6.
+Valores do provedor são convertidos imediatamente para `bigint` em centavos. Categoria explícita de pagamento de fatura pode produzir efeito neutro quando compatível com conta, sinal e descrição. Categoria “transferência” ou “PIX” não prova transferência própria: débitos/créditos permanecem despesa/receita até existir evidência positiva de titularidade ou conciliação entre contas próprias.
 
 Transações de cartão são preservadas no staging, mas ainda não entram no livro. A competência correta depende da fatura e será materializada na Etapa 7. Isso evita registrar compra no mês errado e mantém o payload disponível sem alterar um lançamento importado depois.
 

@@ -22,3 +22,6 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-016 | A previsão não persiste lançamentos futuros: usa média recorrente de seis competências, o maior entre histórico e tetos, parcelas projetadas e aporte necessário para metas. | Vigente |
 | D-017 | O PWA armazena somente shell e assets estáticos; navegação offline não abre o app autenticado nem persiste dados financeiros ou sessão. | Vigente |
 | D-018 | React/TypeScript/Vite, Supabase e Vercel; o frontend usa o monorepo pela raiz e publica `apps/web/dist`. | Vigente |
+| D-019 | Categoria de transferência/PIX do provedor não neutraliza o lançamento; transferência própria exige evidência positiva de titularidade ou conciliação entre contas próprias. | Vigente |
+| D-020 | Correções de natureza usam overlay auditável sem editar o lançamento MeuPluggy; confirmar aporte, resgate ou pagamento exige vínculo com caixinha ou fatura. | Vigente |
+| D-021 | A limpeza de desenvolvimento será seletiva e executada só após a correção semântica: preserva Auth, perfil, categorias e aliases; recria integração, staging, livro e derivados. | Vigente |

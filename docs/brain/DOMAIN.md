@@ -22,6 +22,8 @@
 
 Vincular os dois lados por valor, proximidade de data, contas e descrição normalizada. Um lado ausente ou diferença por tarifa gera revisão; tarifa é despesa financeira separada.
 
+“Transferência” ou “PIX” informado pelo provedor descreve o meio de pagamento, não a natureza contábil. PIX enviado a terceiro é despesa; PIX recebido de terceiro é receita. O movimento só é `own_transfer` quando houver evidência positiva de titularidade do destino/origem ou conciliação com o outro lado em uma conta própria. Na dúvida, manter receita/despesa pendente de revisão; nunca neutralizar somente pela categoria do provedor.
+
 ## Metas
 
 `teto = receita confirmada do período × percentual da categoria`.
@@ -31,6 +33,8 @@ Toda receita recebida, inclusive extraordinária, entra na base do período. O s
 ## Caixinhas
 
 O saldo é sempre reconstruído pelo saldo inicial, aportes e resgates vinculados. Aporte e resgate são movimentos patrimoniais neutros e não compõem renda ou consumo. Um lançamento importado indistinguível só pode ser associado manualmente; o sistema não cria sugestão sem evidência histórica confirmada.
+
+Um resgate identificado não é receita extraordinária: deve receber natureza `savings_withdrawal`, permanecer neutro e ser vinculado à caixinha escolhida. Um aporte segue a mesma regra com `savings_contribution`. Corrigir somente a categoria não altera a natureza financeira.
 
 ## Previsão
 
@@ -48,6 +52,8 @@ Normalizar caixa, acentos, pontuação e códigos voláteis; tokenizar a descri�
 
 Correção confirmada pode criar alias ou regra. Guardar evidências e versão do classificador para reproduzir o resultado.
 Categoria de lançamento importado é aplicada por overlay; o registro MeuPluggy permanece imutável. Empate de pontuação nunca produz sugestão.
+
+A revisão de categoria e a revisão de natureza são etapas distintas. A primeira escolhe a categoria de uma receita/despesa; a segunda corrige o efeito financeiro por overlay (`income`, `expense`, `own_transfer`, `card_payment`, `savings_contribution` ou `savings_withdrawal`) e, quando necessário, exige o vínculo correspondente.
 
 ## Categorias iniciais
 
