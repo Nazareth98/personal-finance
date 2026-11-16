@@ -16,7 +16,7 @@ export async function requireOwner(request: Request): Promise<{ ownerId: string;
   const authorization = request.headers.get('authorization');
   if (!authorization) throw new Error('authentication_required');
   const client = createClient(required('SUPABASE_URL'), required('SUPABASE_ANON_KEY'), {
-    global: { headers: { authorization } }, auth: { persistSession: false, autoRefreshToken: false }
+    global: { headers: { Authorization: authorization } }, auth: { persistSession: false, autoRefreshToken: false }
   });
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData.user) throw new Error('authentication_required');

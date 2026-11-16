@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, Icon, PlusIcon, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, DataState, DataTable, EmptyState, Icon, PlusIcon, useToast, type DataTableColumn } from '@personal-finance/ui';
 import type { PluggyConnection } from '../integrations/contracts';
 import type { ConnectionsState } from '../integrations/useConnections';
 import type { PageProps } from './PageProps';
@@ -15,6 +15,7 @@ function dateTime(value?: string): string {
 export function ConnectionsPage({ connections, headerAction }: PageProps) {
   const [connecting, setConnecting] = useState(false);
   const [syncingId, setSyncingId] = useState('');
+  const { notify } = useToast();
   if (!connections) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
       <p className="muted">Nubank, Caixa e Itaú serão conectados exclusivamente pelo MeuPluggy no ambiente autenticado.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
@@ -25,6 +26,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
   async function connect() {
     setConnecting(true);
     try { await connections?.connect(); }
+    catch { notify({ message: 'Não foi possível iniciar a conexão. Atualize a página e tente novamente.', tone: 'error' }); }
     finally { setConnecting(false); }
   }
   async function sync(id: string) {

@@ -47,6 +47,7 @@ Próximas entregas, nesta ordem:
 - OpenDesign em 16/11/2026: aplicativo 0.27.1, plugin Codex 0.5.3 e MCP stdio instalados; `DESIGN.md` criado a partir dos tokens Light/Dark e componentes React existentes, com lint oficial sem erros ou avisos e exportação DTCG aprovada.
 - Vercel remota em 16/11/2026: checkout vinculado a `patrick-nazareths-projects/personal-finance`; runtime corrigido de Node 26.x para 22.x; `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` configuradas em Production e Preview; variável legada `VITE_SUPABASE_ANON_KEY` removida; `pnpm check` e `vercel build --prod` aprovados com Node 22.12.
 - Shell autenticado em 16/11/2026: direção visual definida com OpenDesign; saída movida para a sidebar, tema convertido em controle Light/Dark por ícones e ações alinhadas aos cabeçalhos dos nove templates. `pnpm check`, 14 cenários de comportamento, 54 auditorias WCAG A/AA e 13 fluxos autenticados aprovados; capturas Light/Dark em desktop e mobile revisadas localmente.
+- Autenticação MeuPluggy em 16/11/2026: o JWT chegava válido à Edge Function, mas a validação interna perdia o cabeçalho por usar capitalização incompatível com o cliente Supabase. `requireOwner` foi corrigido; `pluggy-connect-token` e `pluggy-sync` versão 3 estão ativos em produção com verificação JWT; a tela agora exibe um toast acessível quando não consegue iniciar o fluxo. `pnpm check`, 14 fluxos autenticados e auditoria WCAG isolada aprovados (a execução agrupada da auditoria excedeu 30 s sem apontar violação e passou em 12 s quando repetida isoladamente).
 
 ## Bloqueios
 

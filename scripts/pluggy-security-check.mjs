@@ -5,6 +5,7 @@ const migration = await readFile('supabase/migrations/202611140001_meupluggy.sql
 const sync = await readFile('supabase/functions/_shared/sync.ts', 'utf8');
 const syncEntry = await readFile('supabase/functions/pluggy-sync/index.ts', 'utf8');
 const webhook = await readFile('supabase/functions/pluggy-webhook/index.ts', 'utf8');
+const auth = await readFile('supabase/functions/_shared/supabase.ts', 'utf8');
 const browser = await readFile('apps/web/src/integrations/supabase-connections.ts', 'utf8');
 
 assert.match(migration, /create table public\.pluggy_connections/i);
@@ -28,6 +29,7 @@ assert.doesNotMatch(webhook, /schema\('private'\)/);
 assert.match(migration, /internal_register_webhook_event/);
 assert.match(webhook, /internal_register_webhook_event/);
 assert.match(webhook, /waitUntil\(processEvent/);
+assert.match(auth, /headers: \{ Authorization: authorization \}/);
 assert.doesNotMatch(browser, /PLUGGY_CLIENT_(ID|SECRET)|SERVICE_ROLE/i);
 assert.match(browser, /last_source_updated_at/);
 

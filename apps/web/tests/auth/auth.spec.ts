@@ -387,6 +387,21 @@ test('exibe estado da fonte e solicita sincronização sem enviar credenciais', 
   expect(syncCall?.body).not.toMatch(/client|secret|api.?key/i);
 });
 
+test('avisa quando não consegue iniciar uma conexão bancária', async ({ page }) => {
+  await mockSupabase(page);
+  await page.route('http://127.0.0.1:54321/functions/v1/pluggy-connect-token', route => route.fulfill({
+    status: 401,
+    contentType: 'application/json',
+    body: JSON.stringify({ error: 'authentication_required' })
+  }));
+  await login(page);
+  await page.goto('/#connections');
+
+  await page.getByRole('button', { name: 'Conectar instituição' }).first().click();
+
+  await expect(page.getByRole('alert')).toContainText('Não foi possível iniciar a conexão. Atualize a página e tente novamente.');
+});
+
 test('explica sugestão e aprende somente após confirmação', async ({ page }) => {
   const writes: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, writes);
