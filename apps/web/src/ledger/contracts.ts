@@ -17,6 +17,19 @@ export type TransactionClassification = {
   evidence: { kind: string; label: string; weightBasisPoints: number }[];
 };
 
+export type TransactionSemanticOverride = {
+  id: string;
+  transactionId: string;
+  nature: Extract<TransactionContract['nature'], 'income' | 'expense' | 'own_transfer' | 'card_payment' | 'savings_contribution' | 'savings_withdrawal'>;
+  reporting: TransactionContract['reporting'];
+  counterpartTransactionId?: string;
+  statementId?: string;
+  savingsBoxId?: string;
+  reason: 'owner_confirmation';
+  semanticVersion: 'semantics-v1';
+  updatedAt: string;
+};
+
 export type LedgerData = {
   accounts: FinancialAccount[];
   categories: Category[];
@@ -26,6 +39,7 @@ export type LedgerData = {
   transactions: TransactionContract[];
   links: TransactionLink[];
   classifications: TransactionClassification[];
+  semanticOverrides: TransactionSemanticOverride[];
   creditCards: CreditCard[];
   cardStatements: CardStatement[];
   cardStatementEntries: CardStatementEntry[];
@@ -48,6 +62,11 @@ export type SavingsMovementLinkDraft = Pick<SavingsMovement, 'savingsBoxId' | 't
 export type ClassificationConfirmation = { transactionId: string; categoryId: string };
 export type CreditCardConfiguration = Pick<CreditCard, 'accountId' | 'closingDay' | 'dueDay'> & { creditLimitCents?: bigint };
 export type CardPaymentLink = { statementId: string; transactionId: string };
+export type SemanticConfirmation = Pick<TransactionSemanticOverride, 'transactionId' | 'nature'> & {
+  counterpartTransactionId?: string;
+  statementId?: string;
+  savingsBoxId?: string;
+};
 
 export type ManualTransactionDraft = {
   accountId: string;
@@ -71,6 +90,7 @@ export interface LedgerRepository {
   createSavingsMovement(draft: SavingsMovementDraft): Promise<void>;
   linkSavingsMovement(draft: SavingsMovementLinkDraft): Promise<void>;
   confirmClassification(draft: ClassificationConfirmation): Promise<void>;
+  confirmTransactionSemantics(draft: SemanticConfirmation): Promise<void>;
   configureCreditCard(draft: CreditCardConfiguration): Promise<void>;
   linkCardPayment(draft: CardPaymentLink): Promise<void>;
 }

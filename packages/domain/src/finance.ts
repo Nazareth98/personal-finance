@@ -78,6 +78,15 @@ export type TransactionContract = {
   externalKey?: string;
 };
 
+export type EffectiveTransactionSemantics = Pick<TransactionContract, 'nature' | 'reporting'>;
+
+export function applyTransactionSemantics(
+  transaction: TransactionContract,
+  semantics?: EffectiveTransactionSemantics
+): TransactionContract {
+  return validateTransaction(semantics ? { ...transaction, ...semantics } : transaction);
+}
+
 export function validateTransaction(transaction: TransactionContract): TransactionContract {
   requireNonZeroCents(transaction.amountCents);
   if (transaction.reporting === 'income' && transaction.amountCents < 0n) {

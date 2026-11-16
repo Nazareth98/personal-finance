@@ -1,4 +1,5 @@
 export {
+  applyTransactionSemantics,
   isConsumption,
   accountBalance,
   categoryBudgetProgress,
@@ -25,6 +26,7 @@ export type {
   CategoryBudget,
   CategoryBudgetProgress,
   ClassificationStatus,
+  EffectiveTransactionSemantics,
   FinancialAccount,
   SavingsBox,
   SavingsBoxProgress,

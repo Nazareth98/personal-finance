@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { validateTransaction, type CardInstallment, type CardStatement, type CardStatementEntry, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, TransactionClassification, TransactionLink } from './contracts';
+import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
+import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -15,6 +15,12 @@ type SavingsMovementRow = { id: string; savings_box_id: string; transaction_id: 
 type ClassificationRow = {
   id: string; transaction_id: string; category_id: string; confidence_basis_points: number;
   status: TransactionClassification['status']; classifier_version: string; explanation: unknown;
+};
+type SemanticOverrideRow = {
+  id: string; transaction_id: string; effective_nature: TransactionSemanticOverride['nature'];
+  effective_reporting: TransactionSemanticOverride['reporting']; counterpart_transaction_id: string | null;
+  statement_id: string | null; savings_box_id: string | null; reason: TransactionSemanticOverride['reason'];
+  semantic_version: TransactionSemanticOverride['semanticVersion']; updated_at: string;
 };
 type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
 type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
@@ -37,7 +43,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   async load(): Promise<LedgerData> {
-    const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
+    const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
       this.client.from('categories').select('id,name').order('sort_order'),
       this.client.from('transactions').select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key').order('event_date', { ascending: false }),
@@ -46,13 +52,14 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('savings_boxes').select('id,name,opening_balance_cents,target_cents,target_date').is('archived_at', null).order('created_at'),
       this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false }),
       this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false }),
+      this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false }),
       this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
       this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false }),
       this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
       this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
     const error = accountsResult.error ?? categoriesResult.error ?? transactionsResult.error ?? linksResult.error ?? budgetsResult.error
-      ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? creditCardsResult.error
+      ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? creditCardsResult.error
       ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
     const classifications = ((classificationsResult.data ?? []) as ClassificationRow[]).map((row): TransactionClassification => ({
@@ -61,6 +68,14 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       evidence: classificationEvidence(row.explanation)
     }));
     const classificationByTransaction = new Map(classifications.map(item => [item.transactionId, item]));
+    const semanticOverrides = ((semanticOverridesResult.data ?? []) as SemanticOverrideRow[]).map((row): TransactionSemanticOverride => ({
+      id: row.id, transactionId: row.transaction_id, nature: row.effective_nature, reporting: row.effective_reporting,
+      ...(row.counterpart_transaction_id ? { counterpartTransactionId: row.counterpart_transaction_id } : {}),
+      ...(row.statement_id ? { statementId: row.statement_id } : {}),
+      ...(row.savings_box_id ? { savingsBoxId: row.savings_box_id } : {}),
+      reason: row.reason, semanticVersion: row.semantic_version, updatedAt: row.updated_at
+    }));
+    const semanticOverrideByTransaction = new Map(semanticOverrides.map(item => [item.transactionId, item]));
     return {
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: (categoriesResult.data ?? []).map(row => ({ id: String(row.id), name: String(row.name) })),
@@ -77,15 +92,24 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       })),
       transactions: ((transactionsResult.data ?? []) as TransactionRow[]).map(row => {
         const classification = classificationByTransaction.get(row.id);
-        return validateTransaction({
+        const semantics = semanticOverrideByTransaction.get(row.id);
+        const neutralCategory = semantics?.nature === 'own_transfer' ? 'transfers'
+          : semantics?.nature === 'savings_contribution' || semantics?.nature === 'savings_withdrawal' ? 'savings'
+            : undefined;
+        const effectiveCategory = semantics?.nature === 'card_payment'
+          ? undefined
+          : neutralCategory ?? classification?.categoryId ?? row.category_id ?? undefined;
+        return applyTransactionSemantics({
         id: row.id, accountId: row.account_id, description: row.description, amountCents: BigInt(row.amount_cents),
-        ...(classification?.categoryId || row.category_id ? { categoryId: classification?.categoryId ?? row.category_id ?? undefined } : {}),
+        ...(effectiveCategory ? { categoryId: effectiveCategory } : {}),
         nature: row.nature, reporting: row.reporting, source: row.source, eventDate: row.event_date,
-        competence: row.competence, classificationStatus: classification?.status ?? row.classification_status,
+        competence: row.competence,
+        classificationStatus: neutralCategory || semantics?.nature === 'card_payment' ? 'confirmed' : classification?.status ?? row.classification_status,
         ...(row.external_key ? { externalKey: row.external_key } : {})
-      }); }),
+      }, semantics ? { nature: semantics.nature, reporting: semantics.reporting } : undefined); }),
       links: ((linksResult.data ?? []) as LinkRow[]).map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type })),
       classifications,
+      semanticOverrides,
       creditCards: ((creditCardsResult.data ?? []) as CreditCardRow[]).map((row): CreditCard => ({
         id: row.id, accountId: row.account_id, closingDay: row.closing_day, dueDay: row.due_day,
         ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) })
@@ -175,6 +199,17 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const { error } = await this.client.rpc('confirm_transaction_classification', {
       p_transaction_id: draft.transactionId,
       p_category_id: draft.categoryId
+    });
+    if (error) throw error;
+  }
+
+  async confirmTransactionSemantics(draft: SemanticConfirmation): Promise<void> {
+    const { error } = await this.client.rpc('confirm_transaction_semantics', {
+      p_transaction_id: draft.transactionId,
+      p_effective_nature: draft.nature,
+      p_counterpart_transaction_id: draft.counterpartTransactionId ?? null,
+      p_statement_id: draft.statementId ?? null,
+      p_savings_box_id: draft.savingsBoxId ?? null
     });
     if (error) throw error;
   }

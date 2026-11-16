@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountBalance, categoryBudgetProgress, isConsumption, ledgerTotals, requireNonZeroCents, savingsBoxProgress, transactionNatures, validateTransaction, type CategoryBudget, type SavingsBox, type SavingsMovement, type TransactionContract } from '../src/index.ts';
+import { accountBalance, applyTransactionSemantics, categoryBudgetProgress, isConsumption, ledgerTotals, requireNonZeroCents, savingsBoxProgress, transactionNatures, validateTransaction, type CategoryBudget, type SavingsBox, type SavingsMovement, type TransactionContract } from '../src/index.ts';
 
 const base: TransactionContract = {
   id: 't1', accountId: 'a1', description: 'Teste', amountCents: -1000n,
@@ -111,4 +111,12 @@ test('rejeita caixinha ou movimento que resulte em saldo inválido', () => {
   assert.throws(() => savingsBoxProgress(box, [
     { id: 'm', savingsBoxId: 'box', transactionId: 't', type: 'withdrawal', amountCents: 1001n, eventDate: '2026-11-01' }
   ]), RangeError);
+});
+
+test('aplica a semântica efetiva sem alterar o lançamento original', () => {
+  const effective = applyTransactionSemantics(base, { nature: 'own_transfer', reporting: 'neutral' });
+
+  assert.equal(base.nature, 'expense');
+  assert.equal(effective.nature, 'own_transfer');
+  assert.deepEqual(ledgerTotals([effective]), { incomeCents: 0n, expenseCents: 0n, netCents: 0n });
 });

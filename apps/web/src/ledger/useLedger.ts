@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft } from './contracts';
+import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -13,6 +13,7 @@ export type LedgerState = {
   createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
   linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
   confirmClassification: (draft: ClassificationConfirmation) => Promise<void>;
+  confirmTransactionSemantics: (draft: SemanticConfirmation) => Promise<void>;
   configureCreditCard: (draft: CreditCardConfiguration) => Promise<void>;
   linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
 };
@@ -79,6 +80,12 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function confirmTransactionSemantics(draft: SemanticConfirmation) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.confirmTransactionSemantics(draft);
+    await reload();
+  }
+
   async function configureCreditCard(draft: CreditCardConfiguration) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.configureCreditCard(draft);
@@ -91,5 +98,5 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
-  return { data, status, error, reload, createAccount, createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement, confirmClassification, configureCreditCard, linkCardPayment };
+  return { data, status, error, reload, createAccount, createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement, confirmClassification, confirmTransactionSemantics, configureCreditCard, linkCardPayment };
 }
