@@ -9,6 +9,8 @@ test('preserva mensagens de Error e de erros estruturados do Supabase', () => {
 
 test('sanitiza a mensagem e usa fallback para valores desconhecidos', () => {
   assert.equal(safeError({ message: 'linha 1\nlinha 2' }), 'linha 1 linha 2');
+  assert.equal(safeError(new TypeError('error sending request for https://example.test/rest/v1/transactions?id=real-id')),
+    'upstream_request_failed');
   assert.equal(safeError({ message: 42 }), 'unexpected_error');
   assert.equal(safeError('erro'), 'unexpected_error');
   assert.equal(safeError(new Error('x'.repeat(300))).length, 240);

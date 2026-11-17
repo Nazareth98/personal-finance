@@ -21,7 +21,7 @@ O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou
 
 Importações repetidas usam `ON CONFLICT DO NOTHING`. Uma falha mantém tudo já confirmado; a próxima execução recebe trigger `resume`, percorre novamente a janela segura e ignora as chaves existentes. Incrementos reabrem três dias antes do último sucesso para capturar atrasos sem duplicar.
 
-Transações usam `GET /v2/transactions`, `dateFrom` nos incrementos e o cursor `next` devolvido pelo Pluggy. O endpoint legado paginado `GET /transactions` não é aceito por aplicações novas.
+Transações usam `GET /v2/transactions`, `createdAtFrom` nos incrementos e o cursor `next` devolvido pelo Pluggy. O endpoint legado paginado `GET /transactions` não é aceito por aplicações novas. Consultas internas com listas de chaves são divididas em lotes para não exceder o tamanho seguro de URL do PostgREST.
 
 ## Semântica financeira
 

@@ -17,5 +17,7 @@ export function safeError(error: unknown): string {
     : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
       ? error.message
       : 'unexpected_error';
-  return message.replace(/[\r\n]/g, ' ').slice(0, 240);
+  const sanitized = message.replace(/[\r\n]/g, ' ');
+  if (/error sending request|https?:\/\//i.test(sanitized)) return 'upstream_request_failed';
+  return sanitized.slice(0, 240);
 }

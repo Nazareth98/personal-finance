@@ -45,6 +45,27 @@ function installmentGroupDescription(description: string): string {
   return description.replace(/\s+\d{1,3}\s*\/\s*\d{1,3}\s*$/u, '').trim().toLocaleLowerCase('pt-BR');
 }
 
+const POSTGREST_IN_CHUNK_SIZE = 100;
+
+async function selectInChunks(
+  database: SupabaseClient,
+  table: string,
+  columns: string,
+  ownerId: string,
+  column: string,
+  values: string[]
+): Promise<Record<string, unknown>[]> {
+  const uniqueValues = [...new Set(values)];
+  const rows: Record<string, unknown>[] = [];
+  for (let offset = 0; offset < uniqueValues.length; offset += POSTGREST_IN_CHUNK_SIZE) {
+    const result = await database.from(table).select(columns).eq('owner_id', ownerId)
+      .in(column, uniqueValues.slice(offset, offset + POSTGREST_IN_CHUNK_SIZE));
+    if (result.error) throw result.error;
+    rows.push(...(result.data ?? []));
+  }
+  return rows;
+}
+
 function providerDay(value: string | number | null | undefined): number | undefined {
   if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 31) return value;
   if (typeof value !== 'string') return undefined;
@@ -201,10 +222,9 @@ function transactionRows(
 
 async function persistCardArtifacts(database: SupabaseClient, ownerId: string, card: CardConfig, items: CardLedgerItem[]): Promise<void> {
   if (!items.length) return;
-  const transactions = await database.from('transactions').select('id,external_key')
-    .eq('owner_id', ownerId).in('external_key', items.map(item => item.externalKey));
-  if (transactions.error) throw transactions.error;
-  const transactionByKey = new Map((transactions.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+  const transactions = await selectInChunks(database, 'transactions', 'id,external_key', ownerId,
+    'external_key', items.map(item => item.externalKey));
+  const transactionByKey = new Map(transactions.map(row => [String(row.external_key), String(row.id)]));
 
   const projectionsByKey = new Map<string, ReturnType<typeof projectInstallments>>();
   const statementRows = new Map<string, Record<string, unknown>>();
@@ -245,10 +265,9 @@ async function persistCardArtifacts(database: SupabaseClient, ownerId: string, c
 
   const refundItems = items.filter(item => item.originalTransactionId && item.nature === 'refund');
   if (refundItems.length) {
-    const originals = await database.from('transactions').select('id,external_key').eq('owner_id', ownerId)
-      .in('external_key', refundItems.map(item => `pluggy:${item.originalTransactionId}`));
-    if (originals.error) throw originals.error;
-    const originalByKey = new Map((originals.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+    const originals = await selectInChunks(database, 'transactions', 'id,external_key', ownerId,
+      'external_key', refundItems.map(item => `pluggy:${item.originalTransactionId}`));
+    const originalByKey = new Map(originals.map(row => [String(row.external_key), String(row.id)]));
     const linkRows = refundItems.flatMap(item => {
       const sourceId = transactionByKey.get(item.externalKey);
       const targetId = originalByKey.get(`pluggy:${item.originalTransactionId}`);
@@ -305,10 +324,9 @@ async function persistClassifications(
   rules: ClassificationRule[]
 ): Promise<void> {
   if (!candidates.length || !rules.length) return;
-  const transactions = await database.from('transactions').select('id,external_key')
-    .eq('owner_id', ownerId).in('external_key', candidates.map(item => item.externalKey));
-  if (transactions.error) throw transactions.error;
-  const transactionByKey = new Map((transactions.data ?? []).map(row => [row.external_key as string, row.id as string]));
+  const transactions = await selectInChunks(database, 'transactions', 'id,external_key', ownerId,
+    'external_key', candidates.map(item => item.externalKey));
+  const transactionByKey = new Map(transactions.map(row => [row.external_key as string, row.id as string]));
   const rows = candidates.flatMap(item => {
     const transactionId = transactionByKey.get(item.externalKey);
     const result = classifyTransaction(item.candidate, rules);
@@ -335,16 +353,14 @@ async function persistClassifications(
 async function persistIncomeRecognition(database: SupabaseClient, ownerId: string, candidates: IncomeCandidate[]): Promise<void> {
   const recognized = candidates.filter(item => recognizeItauSalary(item.description, item.institutionName));
   if (!recognized.length) return;
-  const transactions = await database.from('transactions').select('id,external_key')
-    .eq('owner_id', ownerId).in('external_key', recognized.map(item => item.externalKey));
-  if (transactions.error) throw transactions.error;
-  const transactionByKey = new Map((transactions.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+  const transactions = await selectInChunks(database, 'transactions', 'id,external_key', ownerId,
+    'external_key', recognized.map(item => item.externalKey));
+  const transactionByKey = new Map(transactions.map(row => [String(row.external_key), String(row.id)]));
   const transactionIds = [...transactionByKey.values()];
   if (!transactionIds.length) return;
-  const existing = await database.from('transaction_classifications').select('transaction_id')
-    .eq('owner_id', ownerId).in('transaction_id', transactionIds);
-  if (existing.error) throw existing.error;
-  const classified = new Set((existing.data ?? []).map(row => String(row.transaction_id)));
+  const existing = await selectInChunks(database, 'transaction_classifications', 'transaction_id', ownerId,
+    'transaction_id', transactionIds);
+  const classified = new Set(existing.map(row => String(row.transaction_id)));
   const rows = recognized.flatMap(item => {
     const transactionId = transactionByKey.get(item.externalKey);
     if (!transactionId || classified.has(transactionId)) return [];

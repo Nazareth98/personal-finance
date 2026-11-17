@@ -28,6 +28,8 @@ assert.match(sync, /accountType === 'credit_card'/);
 assert.match(sync, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.match(sync, /transactionCursor: page\.next/);
 assert.match(sync, /mapped\.type === 'credit_card' \? undefined : incrementalFrom/);
+assert.match(sync, /const POSTGREST_IN_CHUNK_SIZE = 100/);
+assert.match(sync, /uniqueValues\.slice\(offset, offset \+ POSTGREST_IN_CHUNK_SIZE\)/);
 assert.match(sync, /upsert\(\[\.\.\.statementRows\.values\(\)\]/);
 assert.match(sync, /card_statement_entries'\)\.upsert\(entryRows/);
 assert.match(sync, /card_installments'\)\.upsert\(\[\.\.\.projectedRows\.values\(\)\]/);
