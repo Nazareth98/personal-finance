@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cardStatementSummary, type CardInstallment, type CardStatement, type FinancialAccount } from '@personal-finance/domain';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, MetricCard, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, CardsIcon, DataState, DataTable, EmptyState, MetricCard, TransactionsIcon, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 import type { LedgerState } from '../ledger/useLedger';
@@ -10,7 +10,7 @@ import type { PageProps } from './PageProps';
 
 const statusLabels = { open: 'Em aberto', partial: 'Parcialmente paga', paid: 'Paga' } as const;
 const demoColumns: DataTableColumn<DemoInvoice>[] = [
-  { key: 'card', header: 'Cartão', cell: item => <strong>{item.cardName}</strong> },
+  { key: 'card', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', cell: item => <strong>{item.cardName}</strong> },
   { key: 'period', header: 'Competência', cell: item => item.period },
   { key: 'due', header: 'Vencimento', cell: item => formatLocalDate(item.dueDate) },
   { key: 'status', header: 'Status', cell: item => <Badge>{statusLabels[item.status]}</Badge> },
@@ -36,13 +36,13 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     const totalOpen = statements.reduce((sum, statement) => sum + statement.openCents, 0n);
     const totalProjected = projected.reduce((sum, installment) => sum + installment.amountCents, 0n);
     const cardColumns: DataTableColumn<FinancialAccount>[] = [
-      { key: 'name', header: 'Cartão', cell: account => <strong>{account.name}</strong> },
+      { key: 'name', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', cell: account => <strong>{account.name}</strong> },
       { key: 'calendar', header: 'Ciclo', cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card ? `Fecha dia ${card.closingDay} · vence dia ${card.dueDay}` : <Badge>Configuração pendente</Badge>; } },
       { key: 'limit', header: 'Limite', align: 'end', cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card?.creditLimitCents === undefined ? 'Não informado' : formatCentsBRL(card.creditLimitCents); } },
       { key: 'action', header: 'Ação', align: 'end', cell: account => <Button variant="secondary" onClick={() => setSelectedCard(account)}>Configurar</Button> }
     ];
     const statementColumns: DataTableColumn<StatementView>[] = [
-      { key: 'card', header: 'Cartão', cell: statement => <strong>{statement.cardName}</strong> },
+      { key: 'card', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', cell: statement => <strong>{statement.cardName}</strong> },
       { key: 'competence', header: 'Competência', cell: statement => statement.competence },
       { key: 'due', header: 'Vencimento', cell: statement => formatLocalDate(statement.dueDate) },
       { key: 'status', header: 'Status', cell: statement => <Badge>{statusLabels[statement.status]}</Badge> },
@@ -50,7 +50,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
       { key: 'action', header: 'Ação', align: 'end', cell: statement => <Button variant="secondary" onClick={() => setSelectedStatement(statement)}>Vincular pagamento</Button> }
     ];
     const installmentColumns: DataTableColumn<CardInstallment>[] = [
-      { key: 'description', header: 'Compra', cell: item => <strong>{item.description}</strong> },
+      { key: 'description', header: 'Compra', headerIcon: TransactionsIcon, iconTone: 'expense', cell: item => <strong>{item.description}</strong> },
       { key: 'number', header: 'Parcela', cell: item => `${item.number}/${item.total}` },
       { key: 'competence', header: 'Fatura prevista', cell: item => item.dueCompetence },
       { key: 'amount', header: 'Valor', align: 'end', cell: item => formatCentsBRL(item.amountCents) }

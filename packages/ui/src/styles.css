@@ -80,6 +80,12 @@
 .ui-table td{background:var(--color-bg-surface)}
 .ui-table .ui-align-end{text-align:right;font-variant-numeric:tabular-nums}
 .ui-table-sort{font:inherit;font-weight:inherit;color:inherit;background:none;border:0;cursor:pointer;display:inline-flex;gap:var(--spacing-2);align-items:center;padding:4px 0}
+.ui-table-heading{display:inline-flex;align-items:center;gap:var(--spacing-2)}
+.ui-table-heading__icon,.ui-metric-card__icon{display:inline-grid;place-items:center;color:var(--color-text-accent)}
+.ui-table-heading__icon--income,.ui-metric-card__icon--income{color:var(--color-finance-income)}
+.ui-table-heading__icon--expense,.ui-metric-card__icon--expense,.ui-table-heading__icon--danger{color:var(--color-finance-expense)}
+.ui-table-heading__icon--transfer,.ui-metric-card__icon--transfer{color:var(--color-finance-transfer)}
+.ui-table-heading__icon--warning{color:var(--color-status-warning)}
 .ui-table-sort:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px;border-radius:var(--radius-sm)}
 .ui-table tbody tr:hover td{background:var(--color-bg-subtle)}
 .ui-empty-state{min-height:220px;padding:var(--spacing-8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--spacing-3);text-align:center;color:var(--color-text-primary)}
@@ -90,6 +96,7 @@
 @media(prefers-reduced-motion:reduce){.ui-skeleton{animation:none}}
 .ui-metric-card{display:grid;gap:var(--spacing-3)}
 .ui-metric-card__top{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2);color:var(--color-text-secondary);font-size:var(--font-size-sm)}
+.ui-metric-card__icon{width:32px;height:32px;flex:none;border-radius:var(--radius-md);background:var(--color-bg-subtle)}
 .ui-metric-card__value{font-size:clamp(var(--font-size-lg),2.2vw,var(--font-size-2xl));font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .ui-metric-card__support{font-size:var(--font-size-xs);color:var(--color-text-secondary)}
 .ui-metric-card__support--income{color:var(--color-finance-income)}

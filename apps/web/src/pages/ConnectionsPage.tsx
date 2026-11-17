@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, Icon, PlusIcon, useToast, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, ConnectionsIcon, DataState, DataTable, EmptyState, Icon, PlusIcon, useToast, type DataTableColumn } from '@personal-finance/ui';
 import type { PluggyConnection } from '../integrations/contracts';
 import type { ConnectionsState } from '../integrations/useConnections';
 import type { PageProps } from './PageProps';
@@ -36,7 +36,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
     finally { setSyncingId(''); }
   }
   const columns: DataTableColumn<PluggyConnection>[] = [
-    { key: 'institution', header: 'Instituição', cell: row => <strong>{row.institutionName}</strong> },
+    { key: 'institution', header: 'Instituição', headerIcon: ConnectionsIcon, iconTone: 'transfer', cell: row => <strong>{row.institutionName}</strong> },
     { key: 'status', header: 'Estado', cell: row => <Badge>{statusLabels[row.status]}</Badge> },
     { key: 'source', header: 'Atualização da fonte', cell: row => dateTime(row.lastSourceUpdatedAt) },
     { key: 'attempt', header: 'Última tentativa', cell: row => dateTime(row.lastAttemptAt) },

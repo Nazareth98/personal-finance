@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, MetricCard, Pagination, Select, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, MetricCard, Pagination, ReviewIcon, Select, type DataTableColumn } from '@personal-finance/ui';
 import type { TransactionClassification } from '../ledger/contracts';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 import { reviewResolution } from '../lib/review-queue';
@@ -50,7 +50,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
 
   const columns: DataTableColumn<TransactionContract>[] = [
     { key: 'date', header: 'Data', cell: row => formatLocalDate(row.eventDate) },
-    { key: 'description', header: 'Lançamento', cell: row => {
+    { key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', cell: row => {
       const classification: TransactionClassification | undefined = classifications.get(row.id);
       return <><strong>{row.description}</strong><br/><span className="muted">{accounts.get(row.accountId) ?? 'Conta'}
         {classification?.evidence.length ? ` · ${classification.evidence.map(item => item.label).join(' · ')} · ${confidenceLabel(classification.confidenceBasisPoints)}` : ''}</span></>;

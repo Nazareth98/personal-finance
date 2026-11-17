@@ -1,11 +1,11 @@
 import {useMemo,useState} from 'react';
-import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,DataState,type DataStatus,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
+import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,DataState,TransactionsIcon,type DataStatus,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
 import {demoTransactions,filterTransactions,formatCentsBRL,formatLocalDate,transactionKindLabel,totalsFromTransactions,type DemoTransaction,type TransactionType} from '../lib/demo-transactions';
 
 const PAGE_SIZE=5;
 const columns:DataTableColumn<DemoTransaction>[]=[
 {key:'date',header:'Data',sortable:true,sortValue:r=>r.date,cell:r=>formatLocalDate(r.date)},
-{key:'description',header:'Descrição',sortable:true,sortValue:r=>r.description,cell:r=><strong>{r.description}</strong>},
+{key:'description',header:'Descrição',headerIcon:TransactionsIcon,iconTone:'transfer',sortable:true,sortValue:r=>r.description,cell:r=><strong>{r.description}</strong>},
 {key:'category',header:'Categoria',sortable:true,sortValue:r=>r.category,cell:r=>r.category},
 {key:'type',header:'Tipo',sortable:true,sortValue:r=>r.kind,cell:r=><Badge tone={r.kind}>{transactionKindLabel(r.kind)}</Badge>},
 {key:'amount',header:'Valor',align:'end',sortable:true,sortValue:r=>r.amountCents,cell:r=>

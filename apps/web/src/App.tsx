@@ -23,6 +23,6 @@ export default function App() {
   </main>;
 
   return <AuthGate gateway={authGateway}>
-    {(user, signOut) => <DashboardApp userEmail={user.email} onSignOut={signOut} ledgerRepository={ledgerRepository} connectionsRepository={connectionsRepository} />}
+    {(_, signOut) => <DashboardApp onSignOut={signOut} ledgerRepository={ledgerRepository} connectionsRepository={connectionsRepository} />}
   </AuthGate>;
 }

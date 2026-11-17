@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ledgerTotals, type TransactionContract } from '@personal-finance/domain';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, Input, MetricCard, Pagination, Select, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
+import { Badge, Button, Card, DataState, DataTable, EmptyState, Input, MetricCard, Pagination, Select, TransactionsIcon, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 
@@ -23,7 +23,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const categories = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
   const columns: DataTableColumn<TransactionContract>[] = [
     { key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
-    { key: 'description', header: 'Descrição', sortable: true, sortValue: row => row.description, cell: row => <><strong>{row.description}</strong><br/><span className="muted">{row.source === 'pluggy' ? 'Importado · imutável' : 'Manual'}</span></> },
+    { key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <><strong>{row.description}</strong><br/><span className="muted">{row.source === 'pluggy' ? 'Importado · imutável' : 'Manual'}</span></> },
     { key: 'account', header: 'Conta', cell: row => accounts.get(row.accountId) ?? 'Conta removida' },
     { key: 'category', header: 'Categoria', cell: row => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : 'Sem categoria' },
     { key: 'nature', header: 'Tipo', cell: row => <Badge tone={tone(row)}>{labels[row.nature]}</Badge> },

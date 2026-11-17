@@ -19,13 +19,13 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 - A navegação funciona por hash `#overview`, `#transactions`, `#accounts`, `#cards`, `#budgets`, `#savings`, `#connections`, `#review`, `#reports`. Há fallback para `overview`.
 - Não depende de React Router nesta fase. O hash mantém navegação básica compartilhável e botão voltar/avançar.
 - Light/Dark usa `data-theme` e tokens semânticos existentes.
-- No shell autenticado, identidade, alternância Light/Dark por ícones e saída ficam no rodapé da sidebar; ações globais e contextuais ficam alinhadas ao cabeçalho do template, com “Nova movimentação” como ação primária.
+- No shell autenticado, o rodapé da sidebar não exibe identidade nem dados do usuário. Um único controle compacto alterna Light/Dark e a saída usa tratamento destrutivo; ações globais e contextuais ficam alinhadas ao cabeçalho do template, com “Nova movimentação” como ação primária.
 - Composição: componentes genéricos em `packages/ui`; dados e regras de domínio demonstrativo em `apps/web/src/lib`; templates em `apps/web/src/pages`.
 - No modo `test`, dados são **100% fictícios**, não enviados a API e não persistidos. No modo autenticado, os templates consomem os repositórios Supabase autorizados.
 - O formulário de nova movimentação é demonstrativo no modo `test` e persistente no modo autenticado.
 - Storybook contém os nove templates para revisão visual.
 - Sidebar com indicador ativo lateral e ícone destacado; desktop permite recolher o menu para uma faixa de ícones, mantendo nomes acessíveis e navegação por teclado. Cabeçalho e rodapé permanecem fixos na altura da viewport; quando necessário, somente a lista de abas recebe rolagem vertical. A preferência de recolhimento vale durante a sessão da tela.
-- No mobile, marca, tema e saída formam um cabeçalho compacto fixo durante a rolagem; navegação permanece em faixa horizontal rolável. Microinterações respeitam `prefers-reduced-motion`.
+- No mobile, marca, tema e saída formam um cabeçalho compacto fixo durante a rolagem; a navegação distribui as abas em grade, sem rolagem horizontal. Microinterações respeitam `prefers-reduced-motion`.
 
 ## Regras financeiras críticas
 

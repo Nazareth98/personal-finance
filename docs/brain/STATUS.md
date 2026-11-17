@@ -21,9 +21,9 @@ Atualizado em: 17/11/2026.
 
 ## Marco atual
 
-**Etapa 10.4 — limpeza e reimportação controlada do ambiente de desenvolvimento**, antes de validar novamente o MeuPluggy com dados reais.
+**Ajustes visuais do shell e das entidades financeiras**, com a Etapa 10.4 pausada em estado seguro após a limpeza remota.
 
-Próximas entregas, nesta ordem:
+Ao retomar a Etapa 10.4, as próximas entregas são, nesta ordem:
 
 1. reconectar as contas no MeuPluggy, reimportar todo o histórico e auditar amostras de PIX, cofrinhos e pagamentos de fatura;
 2. configurar o webhook MeuPluggy e concluir o smoke test remoto.
@@ -56,6 +56,7 @@ Próximas entregas, nesta ordem:
 - Etapa 10.2 em 17/11/2026: overlay semântico auditável, RLS e RPC atômica publicados no Supabase. Transferência própria exige contraparte conciliada; pagamento exige fatura; aporte/resgate exige caixinha. O adapter aplica a natureza efetiva antes da categoria, portanto totais e previsões usam o efeito corrigido sem alterar o registro importado. Smoke test remoto com rollback cobriu criação e substituição de vínculos; `pnpm check` passou com Node 24.14.1.
 - Etapa 10.3 em 17/11/2026: a revisão autenticada passou a mostrar somente categorias ou vínculos pendentes por padrão, com automáticos e confirmados em histórico filtrável e ação “Corrigir”. O formulário unificado corrige natureza e vincula contraparte, fatura ou caixinha; a confirmação atualiza a contagem sem perder rastreabilidade. A migration de classificação pela semântica efetiva foi aplicada remotamente e validada com dados sintéticos em transação com rollback. `pnpm check`, 30 testes unitários, 16 fluxos autenticados, auditoria WCAG e validações visuais desktop/mobile foram aprovados; o viewport móvel não apresentou overflow horizontal.
 - Etapa 10.4 parcial em 17/11/2026: limpeza seletiva remota executada em transação após ensaio com rollback. Foram preservados 1 usuário Auth, 1 perfil proprietário, 23 categorias, 36 aliases, migrations, secrets e funções; conexões, staging, livro, overlays, classificações, cartões, metas e caixinhas ficaram zerados. O trigger de imutabilidade dos lançamentos importados foi restaurado e verificado. A reconexão pelo widget MeuPluggy e a auditoria da reimportação permanecem pendentes.
+- Ajustes visuais em 17/11/2026: a Etapa 10.4 foi pausada sem novas alterações remotas. Cards e cabeçalhos de tabelas passaram a usar ícones semânticos consistentes; o card de previsão recebeu espaçamento do template; a sidebar deixou de exibir dados do usuário, adotou tema compacto, saída destrutiva e navegação mobile sem rolagem horizontal. `pnpm check`, 16 fluxos autenticados, 16 cenários responsivos e 54 auditorias WCAG A/AA passaram com Node 24.14.1; capturas desktop/mobile com dados fictícios foram revisadas localmente.
 
 ## Bloqueios
 

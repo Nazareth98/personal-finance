@@ -6,13 +6,13 @@ test('temas explícitos prevalecem sobre preferência do sistema',async ({page})
   await page.evaluate(()=>localStorage.setItem('pf-theme','dark'));
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-  const appearance=page.getByRole('group',{name:'Aparência'});
-  const lightTheme=appearance.getByRole('button',{name:'Tema claro'});
-  await expect(appearance.getByRole('button',{name:'Tema escuro'})).toHaveAttribute('aria-pressed','true');
-  await lightTheme.click();
+  const themeToggle=page.locator('.theme-toggle');
+  await expect(themeToggle).toHaveAccessibleName('Ativar tema claro');
+  await themeToggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+  await expect(themeToggle).toHaveAccessibleName('Ativar tema escuro');
   await page.reload();
-  await expect(lightTheme).toHaveAttribute('aria-pressed','true');
+  await expect(page.getByRole('button',{name:'Ativar tema escuro'})).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
 
@@ -64,4 +64,9 @@ test('mobile não tem overflow horizontal do documento',async ({page},testInfo)=
     scrollWidth:document.documentElement.scrollWidth,
   }));
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth+1);
+  const navigation=await page.getByRole('navigation',{name:'Navegação principal'}).evaluate(element=>({
+    clientWidth:element.clientWidth,
+    scrollWidth:element.scrollWidth,
+  }));
+  expect(navigation.scrollWidth).toBeLessThanOrEqual(navigation.clientWidth+1);
 });

@@ -50,13 +50,12 @@ const pages: Record<PageId, ComponentType<PageProps>> = {
 };
 
 type DashboardAppProps = {
-  userEmail?: string;
   onSignOut?: () => Promise<void>;
   ledgerRepository?: LedgerRepository;
   connectionsRepository?: ConnectionsRepository;
 };
 
-export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectionsRepository }: DashboardAppProps) {
+export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepository }: DashboardAppProps) {
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -105,25 +104,15 @@ export function DashboardApp({ userEmail, onSignOut, ledgerRepository, connectio
         </a>)}
       </nav>
       <div className="sidebar-footer">
-        <div className="sidebar-account">
-          <span className="sidebar-account__avatar" aria-hidden="true">PF</span>
-          <span className="sidebar-account__copy"><strong>{ledgerRepository ? 'Conta pessoal' : 'Modo demonstração'}</strong>
-            <small>{userEmail ?? 'Dados 100% fictícios'}</small></span>
-        </div>
         <div className="sidebar-theme">
-          <span id="appearance-label" className="sidebar-footer__label">Aparência</span>
-          <div className="theme-switch" role="group" aria-labelledby="appearance-label">
-            <Button className="theme-switch__option" size="sm" variant="ghost" aria-label="Tema claro" title="Tema claro"
-              aria-pressed={theme === 'light'} onClick={() => setPreference('light')}>
-              <Icon icon={SunIcon} />
-            </Button>
-            <Button className="theme-switch__option" size="sm" variant="ghost" aria-label="Tema escuro" title="Tema escuro"
-              aria-pressed={theme === 'dark'} onClick={() => setPreference('dark')}>
-              <Icon icon={MoonIcon} />
-            </Button>
-          </div>
+          <Button className="theme-toggle" size="sm" variant="ghost"
+            aria-label={theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}
+            title={theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}
+            onClick={() => setPreference(theme === 'light' ? 'dark' : 'light')}>
+            <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm" />
+          </Button>
         </div>
-        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="ghost" aria-label="Sair" title="Sair" loading={signingOut} onClick={signOut}>
+        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="danger" aria-label="Sair" title="Sair" loading={signingOut} onClick={signOut}>
           <Icon icon={LogOutIcon} size="sm" /><span className="sidebar-sign-out__label">Sair</span>
         </Button>}
       </div>

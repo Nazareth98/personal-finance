@@ -205,7 +205,7 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
-  await expect(page.getByText('owner@example.test')).toBeVisible();
+  await expect(page.getByText('owner@example.test')).toHaveCount(0);
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
 });
