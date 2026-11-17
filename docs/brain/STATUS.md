@@ -21,12 +21,12 @@ Atualizado em: 17/11/2026.
 
 ## Marco atual
 
-**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** O replay autenticado foi concluído para Caixa e Itaú com paridade entre staging, livro e entradas de fatura. `pluggy-sync` v10 agrupa escritas, divide consultas internas em lotes de 100 e sanitiza erros de rede. O carregamento web agora pagina transações em ordem estável; falta conferir a composição de amostras de faturas e repetir a sincronização para fechar a auditoria de idempotência.
+**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** O replay autenticado foi concluído para Caixa e Itaú com paridade entre staging, livro e entradas de fatura. A auditoria remota não encontrou órfãos, duplicidades, sinais, competências, parcelas ou estornos inconsistentes. Pagamentos permanecem neutros, mas os históricos ainda sem fatura associada exigem confirmação manual porque valor, banco e vencimento não produzem correspondência inequívoca. Falta repetir a sincronização para fechar a idempotência e concluir os vínculos aplicáveis.
 
 Próximas entregas, nesta ordem:
 
-1. conferir a materialização de compras, faturas, estornos e pagamentos sem duplicar despesas;
-2. repetir a sincronização e auditar amostras de faturas;
+1. repetir a sincronização de Caixa e Itaú e confirmar que o replay não cria duplicidades;
+2. associar manualmente os pagamentos aplicáveis às respectivas faturas;
 3. persistir identificador estável e tratar atualizações/exclusões do ciclo da fatura;
 4. publicar o webhook com sua autenticação HMAC preservada e concluir o smoke test remoto;
 5. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): correção/revisão, consistência visual, período/ordenação e gráficos.
@@ -62,6 +62,7 @@ Próximas entregas, nesta ordem:
 - Ajustes visuais em 17/11/2026: a Etapa 10.4 foi pausada sem novas alterações remotas. Cards e cabeçalhos de tabelas passaram a usar ícones semânticos consistentes; o card de previsão recebeu espaçamento do template; a sidebar deixou de exibir dados do usuário, adotou tema compacto, saída destrutiva e navegação mobile sem rolagem horizontal. `pnpm check`, 16 fluxos autenticados, 16 cenários responsivos e 54 auditorias WCAG A/AA passaram com Node 24.14.1; capturas desktop/mobile com dados fictícios foram revisadas localmente.
 - Contrato de cartões em 17/11/2026: documentação oficial e agregados remotos confirmaram que contas `CREDIT` e suas transações já são retornadas por `GET /v2/transactions`; compras e parcelas estavam no staging, mas não no livro. O cliente passou a usar `createdAtFrom` nos incrementos bancários, reler todo o histórico disponível dos cartões e normalizar `DEBIT`, `CREDIT` e `PAGAMENTO_FATURA` para os sinais do domínio. O primeiro replay atingiu o limite remoto de 150 segundos durante a persistência sequencial dos artefatos; faturas, entradas, estornos e parcelas passaram a ser persistidos em lote. A tentativa do Itaú revelou URLs excessivas nas consultas `.in`; todas as leituras por chaves passaram a lotes de 100 e erros de transporte deixaram de persistir URLs ou identificadores. Nove contratos sintéticos, checks estáticos, 57 testes de pacotes, typecheck, builds web/Storybook e a esteira equivalente a `pnpm check` passaram com Node 24.14.1. `pluggy-sync` v10 foi publicada com JWT obrigatório; mensagens remotas antigas foram sanitizadas sem apagar staging ou livro.
 - Leitura de cartões em 17/11/2026: após o replay completo, a tela quebrava porque o Data API limitava a consulta do livro às 1.000 transações mais recentes enquanto entradas de fatura válidas referenciavam lançamentos anteriores. A integridade referencial remota foi confirmada sem órfãos. O adapter passou a buscar todas as páginas de transações com ordenação estável; check de cartões, typecheck web e o fluxo autenticado de faturas passaram no Chromium.
+- Auditoria de cartões em 17/11/2026: staging, livro e entradas ficaram em paridade para Caixa e Itaú. Consultas agregadas não encontraram órfãos, duplicidades, conta ou competência divergente, semântica inválida, parcela inconsistente, data de fatura inválida ou estorno importado sem vínculo. Pagamentos de fatura continuam neutros; os ainda não associados não apresentaram correspondência única por banco, valor e janela de vencimento e, portanto, não foram vinculados automaticamente.
 
 ## Bloqueios
 
