@@ -140,6 +140,8 @@ Aceite: confirmar um item reduz imediatamente a contagem pendente sem perder ras
 
 ### 10.4 — limpar e reimportar o ambiente de desenvolvimento
 
+Estado: em andamento; limpeza seletiva concluída em 17/11/2026, aguardando reconexão e reimportação.
+
 - preservar Auth, perfil proprietário, categorias, migrations, secrets e regras `alias` aprendidas;
 - remover conexões, staging, execuções, livro, overlays por transação, faturas, caixinhas e demais derivados;
 - reconectar o MeuPluggy e executar importação completa com as regras corrigidas;

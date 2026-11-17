@@ -25,7 +25,7 @@ Atualizado em: 17/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. executar limpeza seletiva do ambiente de desenvolvimento preservando aliases e reimportar todo o histórico;
+1. reconectar as contas no MeuPluggy, reimportar todo o histórico e auditar amostras de PIX, cofrinhos e pagamentos de fatura;
 2. configurar o webhook MeuPluggy e concluir o smoke test remoto.
 
 ## Última validação
@@ -55,6 +55,7 @@ Próximas entregas, nesta ordem:
 - Etapa 10.1 em 16/11/2026: PIX/transferência genérica passou a seguir o sinal como receita/despesa; pagamento de fatura, aporte e resgate exigem evidência textual explícita e sinal compatível. Oito contratos sintéticos da integração e `pnpm check` foram aprovados com Node 24.14.1. `pluggy-sync` v7 e `pluggy-webhook` v4 estão ativos no Supabase com as fronteiras JWT preservadas. Transferências realmente próprias permanecem pendentes até o overlay/vínculo da Etapa 10.2.
 - Etapa 10.2 em 17/11/2026: overlay semântico auditável, RLS e RPC atômica publicados no Supabase. Transferência própria exige contraparte conciliada; pagamento exige fatura; aporte/resgate exige caixinha. O adapter aplica a natureza efetiva antes da categoria, portanto totais e previsões usam o efeito corrigido sem alterar o registro importado. Smoke test remoto com rollback cobriu criação e substituição de vínculos; `pnpm check` passou com Node 24.14.1.
 - Etapa 10.3 em 17/11/2026: a revisão autenticada passou a mostrar somente categorias ou vínculos pendentes por padrão, com automáticos e confirmados em histórico filtrável e ação “Corrigir”. O formulário unificado corrige natureza e vincula contraparte, fatura ou caixinha; a confirmação atualiza a contagem sem perder rastreabilidade. A migration de classificação pela semântica efetiva foi aplicada remotamente e validada com dados sintéticos em transação com rollback. `pnpm check`, 30 testes unitários, 16 fluxos autenticados, auditoria WCAG e validações visuais desktop/mobile foram aprovados; o viewport móvel não apresentou overflow horizontal.
+- Etapa 10.4 parcial em 17/11/2026: limpeza seletiva remota executada em transação após ensaio com rollback. Foram preservados 1 usuário Auth, 1 perfil proprietário, 23 categorias, 36 aliases, migrations, secrets e funções; conexões, staging, livro, overlays, classificações, cartões, metas e caixinhas ficaram zerados. O trigger de imutabilidade dos lançamentos importados foi restaurado e verificado. A reconexão pelo widget MeuPluggy e a auditoria da reimportação permanecem pendentes.
 
 ## Bloqueios
 

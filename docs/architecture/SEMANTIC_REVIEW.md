@@ -24,7 +24,7 @@ O provedor informar “transferência” ou “PIX” nunca basta para `own_tran
 3. aplicar a semântica efetiva no adapter e nos cálculos — concluído;
 4. separar fila pendente de histórico e oferecer ações de vínculo — concluído;
 5. publicar migrations/funções e validar com dados sintéticos — concluído;
-6. somente então limpar o ambiente de desenvolvimento e reimportar.
+6. limpar o ambiente de desenvolvimento e reimportar — limpeza concluída; reconexão e auditoria da reimportação pendentes.
 
 ## Limpeza seletiva
 
@@ -43,4 +43,6 @@ Remover e reconstruir:
 - contas financeiras, lançamentos, vínculos e overlays por transação;
 - faturas, parcelas, metas, caixinhas e movimentos derivados.
 
-Antes da exclusão, registrar somente contagens e exportar os aliases sem descrições bancárias adicionais. Executar tudo em transação, conferir que Auth/perfil/aliases permanecem, reconectar o MeuPluggy e forçar importação completa. A limpeza não acontece antes de os testes da nova semântica passarem, pois reimportar com o código atual apenas reproduziria os erros.
+Antes da exclusão, registrar somente contagens. Os aliases permanecem na própria tabela; seu conteúdo não é exportado para evitar copiar descrições privadas. Executar tudo em transação, conferir que Auth/perfil/aliases permanecem, reconectar o MeuPluggy e forçar importação completa. A limpeza não acontece antes de os testes da nova semântica passarem, pois reimportar com o código atual apenas reproduziria os erros.
+
+O roteiro administrativo versionado está em [`../../supabase/admin/reset_development_data.sql`](../../supabase/admin/reset_development_data.sql). Ele exige exatamente um proprietário, bloqueia a tabela de lançamentos, suspende somente o trigger de imutabilidade durante a transação e restaura o trigger antes do commit. Em 17/11/2026, a execução hospedada preservou 1 usuário Auth, 1 perfil, 23 categorias e 36 aliases; todos os dados derivados foram zerados. Não executar novamente após a reconexão sem uma nova decisão explícita de limpeza.
