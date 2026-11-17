@@ -1,6 +1,6 @@
 # Status atual
 
-Atualizado em: 16/11/2026.
+Atualizado em: 17/11/2026.
 
 ## Situação
 
@@ -15,7 +15,7 @@ Atualizado em: 16/11/2026.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: as 9 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
+- O projeto Supabase novo está vinculado: 11 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
@@ -25,10 +25,9 @@ Atualizado em: 16/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. adicionar revisão de natureza por overlay;
-2. ajustar a fila para separar pendências de histórico e integrar vínculos de caixinha/fatura;
-3. executar limpeza seletiva do ambiente de desenvolvimento preservando aliases e reimportar todo o histórico;
-4. configurar o webhook MeuPluggy e concluir o smoke test remoto.
+1. ajustar a fila para separar pendências de histórico e integrar vínculos de caixinha/fatura;
+2. executar limpeza seletiva do ambiente de desenvolvimento preservando aliases e reimportar todo o histórico;
+3. configurar o webhook MeuPluggy e concluir o smoke test remoto.
 
 ## Última validação
 
@@ -55,6 +54,7 @@ Próximas entregas, nesta ordem:
 - Rolagem da sidebar em 16/11/2026: no desktop, cabeçalho e rodapé ficaram fixos e somente a lista de abas rola quando a altura é insuficiente; estados expandido, recolhido e mobile foram verificados no Chromium em viewport reduzida, e `pnpm check` foi aprovado com Node 24.14.1.
 - Diagnóstico semântico em 16/11/2026: a categoria genérica “transfer” do MeuPluggy neutraliza PIX para terceiros indevidamente; a revisão atual mistura fila e histórico, e correções de categoria não resolvem resgates/pagamentos com natureza incorreta. A Etapa 10 foi priorizada antes de uma reimportação controlada que preserve aliases.
 - Etapa 10.1 em 16/11/2026: PIX/transferência genérica passou a seguir o sinal como receita/despesa; pagamento de fatura, aporte e resgate exigem evidência textual explícita e sinal compatível. Oito contratos sintéticos da integração e `pnpm check` foram aprovados com Node 24.14.1. `pluggy-sync` v7 e `pluggy-webhook` v4 estão ativos no Supabase com as fronteiras JWT preservadas. Transferências realmente próprias permanecem pendentes até o overlay/vínculo da Etapa 10.2.
+- Etapa 10.2 em 17/11/2026: overlay semântico auditável, RLS e RPC atômica publicados no Supabase. Transferência própria exige contraparte conciliada; pagamento exige fatura; aporte/resgate exige caixinha. O adapter aplica a natureza efetiva antes da categoria, portanto totais e previsões usam o efeito corrigido sem alterar o registro importado. Smoke test remoto com rollback cobriu criação e substituição de vínculos; `pnpm check` passou com Node 24.14.1.
 
 ## Bloqueios
 

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/20261116185031_transaction_semantic_overrides.sql', 'utf8');
+const indexes = await readFile('supabase/migrations/20261117104611_index_transaction_semantic_overrides.sql', 'utf8');
 const repository = await readFile('apps/web/src/ledger/supabase-ledger.ts', 'utf8');
 
 assert.match(migration, /create table public\.transaction_semantic_overrides/i);
@@ -17,5 +18,8 @@ assert.match(migration, /grant execute on function public\.confirm_transaction_s
 assert.doesNotMatch(migration, /update public\.transactions/i);
 assert.match(repository, /applyTransactionSemantics/);
 assert.match(repository, /from\('transaction_semantic_overrides'\)/);
+for (const relation of ['transaction', 'counterpart', 'statement', 'savings_box']) {
+  assert.match(indexes, new RegExp(`create index semantic_overrides_${relation}_owner`, 'i'));
+}
 
 console.log('✓ Overlay semântico, vínculos atômicos, imutabilidade, grants e RLS validados estaticamente.');

@@ -119,6 +119,8 @@ Aceite: a categoria genérica do provedor, isoladamente, nunca cria `own_transfe
 
 ### 10.2 — revisão de natureza
 
+Estado: concluída em 17/11/2026.
+
 - adicionar overlay auditável sem editar o lançamento importado;
 - separar natureza financeira de categoria;
 - exigir conta contraparte, fatura ou caixinha quando a natureza precisar de vínculo;

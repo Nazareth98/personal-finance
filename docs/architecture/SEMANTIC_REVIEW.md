@@ -6,7 +6,7 @@ Categoria é o destino analítico de uma receita/despesa; natureza define seu ef
 
 ## Overlay semântico
 
-`transaction_semantic_overrides` terá no máximo uma decisão vigente por lançamento importado, com proprietário, natureza efetiva, motivo, data e versão. O registro MeuPluggy permanece imutável. A leitura aplica primeiro a natureza efetiva e depois a classificação de categoria.
+`transaction_semantic_overrides` mantém no máximo uma decisão vigente por lançamento importado, com proprietário, natureza efetiva, motivo, data, versão e o vínculo exigido. O registro MeuPluggy permanece imutável. A leitura aplica primeiro a natureza efetiva e depois a classificação de categoria.
 
 Confirmações com vínculo são atômicas:
 
@@ -20,10 +20,10 @@ O provedor informar “transferência” ou “PIX” nunca basta para `own_tran
 ## Etapas de implementação
 
 1. corrigir e testar a semântica inicial do importador — concluído;
-2. criar migration, RLS e RPC atômica do overlay;
-3. aplicar a semântica efetiva no adapter e nos cálculos;
+2. criar migration, RLS e RPC atômica do overlay — concluído;
+3. aplicar a semântica efetiva no adapter e nos cálculos — concluído;
 4. separar fila pendente de histórico e oferecer ações de vínculo;
-5. publicar migrations/funções e validar com dados sintéticos;
+5. publicar migrations/funções e validar com dados sintéticos — concluído;
 6. somente então limpar o ambiente de desenvolvimento e reimportar.
 
 ## Limpeza seletiva
