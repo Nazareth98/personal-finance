@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountTypeFromPluggy, centsFromPluggy, ledgerSemantics, sanitizedDescription } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, sanitizedDescription } from './pluggy-domain.ts';
 
 test('converte valores Pluggy em centavos exatos', () => {
   assert.equal(centsFromPluggy(-42.9), -4290n);
@@ -40,4 +40,16 @@ test('reconhece somente pagamentos e movimentos de reserva com evidência explí
 
 test('normaliza descrições sem persistir ruído de espaços', () => {
   assert.equal(sanitizedDescription('  COMPRA   TESTE  '), 'COMPRA TESTE');
+});
+
+test('normaliza compras, estornos e pagamentos de cartão para o domínio', () => {
+  assert.deepEqual(cardLedgerSemantics({ id: '1', accountId: 'card', amount: '123.45', date: '2026-11-01', type: 'DEBIT' }), {
+    amountCents: -12345n, nature: 'expense', reporting: 'expense'
+  });
+  assert.deepEqual(cardLedgerSemantics({ id: '2', accountId: 'card', amount: '-23.45', date: '2026-11-02', type: 'CREDIT', operationType: 'ESTORNO' }), {
+    amountCents: 2345n, nature: 'refund', reporting: 'expense'
+  });
+  assert.deepEqual(cardLedgerSemantics({ id: '3', accountId: 'card', amount: '-100.00', date: '2026-11-03', type: 'CREDIT', operationType: 'PAGAMENTO_FATURA' }), {
+    amountCents: -10000n, nature: 'card_payment', reporting: 'neutral'
+  });
 });

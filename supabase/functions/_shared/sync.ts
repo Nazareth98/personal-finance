@@ -2,7 +2,7 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
 import { cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
 import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
-import { accountTypeFromPluggy, centsFromPluggy, ledgerSemantics, merchantName, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, merchantName, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
 import { safeError } from './http.ts';
 
@@ -34,7 +34,7 @@ function incrementalFrom(lastSuccess: string | null): string | undefined {
   if (!lastSuccess) return undefined;
   const date = new Date(lastSuccess);
   date.setUTCDate(date.getUTCDate() - 3);
-  return date.toISOString().slice(0, 10);
+  return date.toISOString();
 }
 
 function accountProviderType(account: PluggyAccount): string {
@@ -156,14 +156,13 @@ function transactionRows(
       const externalKey = `pluggy:${transaction.id}`;
       if (accountType === 'credit_card') {
         if (!card) continue;
-        const base = ledgerSemantics(transaction);
-        const nature = base.nature === 'card_payment' ? 'card_payment' : amount > 0n ? 'refund' : 'expense';
-        const reporting = nature === 'card_payment' ? 'neutral' : 'expense';
+        const semantics = cardLedgerSemantics(transaction);
+        const { nature, reporting } = semantics;
         const competence = cardCompetence(eventDate, card);
         ledger.push({ owner_id: connection.owner_id, account_id: accountId, category_id: null, description,
-          amount_cents: amount.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence,
+          amount_cents: semantics.amountCents.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence,
           classification_status: nature === 'card_payment' ? 'automatic' : 'uncategorized', external_key: externalKey });
-        cardItems.push({ externalKey, externalTransactionId: transaction.id, description, amountCents: amount, competence, nature,
+        cardItems.push({ externalKey, externalTransactionId: transaction.id, description, amountCents: semantics.amountCents, competence, nature,
           ...(metadata?.installmentNumber ? { installmentNumber: metadata.installmentNumber } : {}),
           ...(metadata?.totalInstallments ? { totalInstallments: metadata.totalInstallments } : {}),
           ...(metadata?.installmentId ? { groupKey: metadata.installmentId } : {}),
@@ -374,7 +373,8 @@ export async function synchronizeConnection(
         let transactionPage = 1;
         let transactionCursor: string | null = null;
         do {
-          const page = await pluggy.getTransactions(account.id, incrementalFrom(connection.last_success_at), transactionCursor);
+          const createdAtFrom = mapped.type === 'credit_card' ? undefined : incrementalFrom(connection.last_success_at);
+          const page = await pluggy.getTransactions(account.id, createdAtFrom, transactionCursor);
           const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, institutionName, page.results);
           skippedTransactions += rows.skipped;
           if (rows.raw.length) {

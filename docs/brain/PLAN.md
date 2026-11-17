@@ -140,14 +140,57 @@ Aceite: confirmar um item reduz imediatamente a contagem pendente sem perder ras
 
 ### 10.4 — limpar e reimportar o ambiente de desenvolvimento
 
-Estado: em andamento; limpeza seletiva concluída em 17/11/2026, aguardando reconexão e reimportação.
+Estado: em andamento; o contrato foi validado e os gastos foram encontrados no staging, mas ainda precisam ser materializados e conciliados no livro.
 
 - preservar Auth, perfil proprietário, categorias, migrations, secrets e regras `alias` aprendidas;
 - remover conexões, staging, execuções, livro, overlays por transação, faturas, caixinhas e demais derivados;
 - reconectar o MeuPluggy e executar importação completa com as regras corrigidas;
+- reler idempotentemente o histórico das contas de crédito já presente no MeuPluggy;
+- materializar os lançamentos preservados no staging antes de conciliar as faturas;
 - conferir amostras de PIX, cofrinhos e pagamentos de fatura antes de prosseguir.
 
-Aceite: aliases preservados voltam a classificar a nova importação e os totais não contêm neutralizações indevidas. O roteiro técnico está em [`../architecture/SEMANTIC_REVIEW.md`](../architecture/SEMANTIC_REVIEW.md).
+Aceite: aliases preservados voltam a classificar a nova importação, os totais não contêm neutralizações indevidas e cada fatura auditada pode ser explicada por suas compras, parcelas, estornos e pagamentos. O roteiro técnico está em [`../architecture/SEMANTIC_REVIEW.md`](../architecture/SEMANTIC_REVIEW.md); a lacuna de cartões está em [`../architecture/CARDS.md`](../architecture/CARDS.md).
+
+## Etapa 11 — correções operacionais e acompanhamento
+
+Executar somente após fechar a importação de compras de cartão da Etapa 10.4. Cada subetapa deve terminar utilizável e validada antes da próxima.
+
+### 11.1 — correção e movimentação
+
+- permitir “Revisar novamente” no histórico, criando nova versão do overlay sem alterar o lançamento importado;
+- permitir corrigir categoria e natureza, exigindo contraparte, fatura ou caixinha quando aplicável;
+- não remover alias aprendido automaticamente; sua manutenção será uma ação explícita separada;
+- permitir registrar e vincular os dois lados de uma transferência própria, com saída na origem e entrada no destino;
+- manter transferência própria neutra em receita e despesa, embora altere os saldos das duas contas.
+
+Aceite: uma correção preserva o histórico anterior e uma transferência própria movimenta as duas contas sem inflar o resultado do período.
+
+### 11.2 — consistência visual
+
+- eliminar o overflow horizontal da sidebar inclusive durante hover, foco e transições;
+- colorir valores negativos da previsão com o token financeiro negativo, preservando também o sinal textual;
+- padronizar datas bancárias como `dd/MM/yyyy`, competências como mês/ano e data/hora operacional sem conversão que altere o dia.
+
+Aceite: não há rolagem lateral da sidebar nos viewports suportados, valores negativos permanecem distinguíveis sem depender apenas de cor e datas equivalentes têm a mesma apresentação em todo o sistema.
+
+### 11.3 — exploração por período e ordenação
+
+- tornar ordenáveis todas as colunas de dados aplicáveis; colunas de ações permanecem sem ordenação;
+- ordenar datas cronologicamente, dinheiro por `bigint`, percentuais por pontos-base e texto com comparação pt-BR;
+- adicionar seleção de mês/ano na visão geral, com anterior, próximo e período atual;
+- refletir o período na URL e aplicá-lo conjuntamente a KPIs, faturas, metas, transações e gráficos.
+
+Aceite: toda tabela indica a ordenação com `aria-sort`, e todos os elementos da visão geral representam exatamente o período selecionado.
+
+### 11.4 — gráficos de acompanhamento
+
+- receitas versus despesas por mês;
+- evolução do resultado acumulado;
+- orçado versus realizado por categoria;
+- após validar cartões, evolução das faturas e compromissos parcelados futuros;
+- manter tabela ou resumo textual equivalente para acessibilidade.
+
+Aceite: os gráficos seguem o período selecionado, usam os mesmos totais do livro e não dependem somente de cor para comunicar valores.
 
 ## Fora do escopo inicial
 

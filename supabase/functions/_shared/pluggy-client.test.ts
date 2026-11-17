@@ -21,7 +21,7 @@ test('usa o contrato atual de Connect Token e pagina transações por cursor', a
     await client.getTransactions('account-1', undefined, first.next);
 
     assert.deepEqual(JSON.parse(calls[1].body ?? ''), { options: { clientUserId: 'owner-1' } });
-    assert.equal(calls[2].url, 'https://pluggy.example.test/v2/transactions?accountId=account-1&dateFrom=2026-11-01');
+    assert.equal(calls[2].url, 'https://pluggy.example.test/v2/transactions?accountId=account-1&createdAtFrom=2026-11-01');
     assert.equal(calls[3].url, 'https://pluggy.example.test/v2/transactions?accountId=account-1&after=cursor-2');
   } finally {
     globalThis.fetch = originalFetch;

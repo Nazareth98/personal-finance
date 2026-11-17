@@ -53,10 +53,10 @@ export class PluggyClient {
     return this.request(`/accounts?${query}`);
   }
 
-  getTransactions(accountId: string, dateFrom?: string, next?: string | null): Promise<CursorPage<PluggyTransaction>> {
+  getTransactions(accountId: string, createdAtFrom?: string, next?: string | null): Promise<CursorPage<PluggyTransaction>> {
     if (next && !next.startsWith('?')) throw new Error('pluggy_transactions_invalid_cursor');
     const query = new URLSearchParams({ accountId });
-    if (dateFrom) query.set('dateFrom', dateFrom);
+    if (createdAtFrom) query.set('createdAtFrom', createdAtFrom);
     return this.request(next ? `/v2/transactions${next}` : `/v2/transactions?${query}`);
   }
 }

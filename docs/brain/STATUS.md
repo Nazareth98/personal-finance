@@ -11,7 +11,7 @@ Atualizado em: 17/11/2026.
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
 - MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela distingue atualização da fonte, tentativa local, sucesso local e estado de erro.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
-- Cartões implementados com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. Compras sincronizadas usam a competência do vencimento e ficam no staging quando o calendário é desconhecido.
+- Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. As compras chegaram ao staging, mas o replay/materialização no livro ainda precisa ser executado.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
@@ -21,12 +21,16 @@ Atualizado em: 17/11/2026.
 
 ## Marco atual
 
-**Ajustes visuais do shell e das entidades financeiras**, com a Etapa 10.4 pausada em estado seguro após a limpeza remota.
+**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** A revisão manual avançou sobre quase todos os lançamentos. O contrato oficial foi validado, as compras foram localizadas no staging e `pluggy-sync` v8 está em produção; falta executar o replay autenticado e conferir as faturas.
 
-Ao retomar a Etapa 10.4, as próximas entregas são, nesta ordem:
+Próximas entregas, nesta ordem:
 
-1. reconectar as contas no MeuPluggy, reimportar todo o histórico e auditar amostras de PIX, cofrinhos e pagamentos de fatura;
-2. configurar o webhook MeuPluggy e concluir o smoke test remoto.
+1. executar pelo proprietário o replay autenticado do histórico das contas de crédito;
+2. conferir a materialização de compras, faturas, estornos e pagamentos sem duplicar despesas;
+3. repetir a sincronização e auditar amostras de faturas;
+4. persistir identificador estável e tratar atualizações/exclusões do ciclo da fatura;
+5. publicar o webhook com sua autenticação HMAC preservada e concluir o smoke test remoto;
+6. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): correção/revisão, consistência visual, período/ordenação e gráficos.
 
 ## Última validação
 
@@ -55,8 +59,9 @@ Ao retomar a Etapa 10.4, as próximas entregas são, nesta ordem:
 - Etapa 10.1 em 16/11/2026: PIX/transferência genérica passou a seguir o sinal como receita/despesa; pagamento de fatura, aporte e resgate exigem evidência textual explícita e sinal compatível. Oito contratos sintéticos da integração e `pnpm check` foram aprovados com Node 24.14.1. `pluggy-sync` v7 e `pluggy-webhook` v4 estão ativos no Supabase com as fronteiras JWT preservadas. Transferências realmente próprias permanecem pendentes até o overlay/vínculo da Etapa 10.2.
 - Etapa 10.2 em 17/11/2026: overlay semântico auditável, RLS e RPC atômica publicados no Supabase. Transferência própria exige contraparte conciliada; pagamento exige fatura; aporte/resgate exige caixinha. O adapter aplica a natureza efetiva antes da categoria, portanto totais e previsões usam o efeito corrigido sem alterar o registro importado. Smoke test remoto com rollback cobriu criação e substituição de vínculos; `pnpm check` passou com Node 24.14.1.
 - Etapa 10.3 em 17/11/2026: a revisão autenticada passou a mostrar somente categorias ou vínculos pendentes por padrão, com automáticos e confirmados em histórico filtrável e ação “Corrigir”. O formulário unificado corrige natureza e vincula contraparte, fatura ou caixinha; a confirmação atualiza a contagem sem perder rastreabilidade. A migration de classificação pela semântica efetiva foi aplicada remotamente e validada com dados sintéticos em transação com rollback. `pnpm check`, 30 testes unitários, 16 fluxos autenticados, auditoria WCAG e validações visuais desktop/mobile foram aprovados; o viewport móvel não apresentou overflow horizontal.
-- Etapa 10.4 parcial em 17/11/2026: limpeza seletiva remota executada em transação após ensaio com rollback. Foram preservados 1 usuário Auth, 1 perfil proprietário, 23 categorias, 36 aliases, migrations, secrets e funções; conexões, staging, livro, overlays, classificações, cartões, metas e caixinhas ficaram zerados. O trigger de imutabilidade dos lançamentos importados foi restaurado e verificado. A reconexão pelo widget MeuPluggy e a auditoria da reimportação permanecem pendentes.
+- Etapa 10.4 parcial em 17/11/2026: limpeza seletiva remota executada em transação após ensaio com rollback. Foram preservados 1 usuário Auth, 1 perfil proprietário, 23 categorias, 36 aliases, migrations, secrets e funções; conexões, staging, livro, overlays, classificações, cartões, metas e caixinhas ficaram zerados. O trigger de imutabilidade dos lançamentos importados foi restaurado e verificado. Após a nova sincronização e revisão manual, quase todos os lançamentos recebidos foram revisados; a auditoria revelou que pagamentos de fatura chegaram, mas suas compras, parcelas e estornos não foram importados.
 - Ajustes visuais em 17/11/2026: a Etapa 10.4 foi pausada sem novas alterações remotas. Cards e cabeçalhos de tabelas passaram a usar ícones semânticos consistentes; o card de previsão recebeu espaçamento do template; a sidebar deixou de exibir dados do usuário, adotou tema compacto, saída destrutiva e navegação mobile sem rolagem horizontal. `pnpm check`, 16 fluxos autenticados, 16 cenários responsivos e 54 auditorias WCAG A/AA passaram com Node 24.14.1; capturas desktop/mobile com dados fictícios foram revisadas localmente.
+- Contrato de cartões em 17/11/2026: documentação oficial e agregados remotos confirmaram que contas `CREDIT` e suas transações já são retornadas por `GET /v2/transactions`; compras e parcelas estavam no staging, mas não no livro. O cliente passou a usar `createdAtFrom` nos incrementos bancários, reler todo o histórico disponível dos cartões e normalizar `DEBIT`, `CREDIT` e `PAGAMENTO_FATURA` para os sinais do domínio. Nove contratos sintéticos do MeuPluggy e `pnpm check` passaram com Node 24.14.1. `pluggy-sync` v8 foi publicada com JWT obrigatório; o banco não foi alterado e o replay aguarda uma sessão do proprietário.
 
 ## Bloqueios
 
@@ -64,6 +69,7 @@ Ao retomar a Etapa 10.4, as próximas entregas são, nesta ordem:
 - A conta/sandbox MeuPluggy ainda precisa confirmar o SDK Connect, paginação e mecanismo real de assinatura do webhook antes do deploy.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
 - Os 78 baselines visuais precisam ser regenerados e revisados no CI Linux por causa da nova composição do shell; conexões também incorpora a coluna “Atualização da fonte”.
+- A Etapa 10.4 não pode ser encerrada enquanto uma fatura importada não puder ser explicada por suas compras, parcelas, estornos e pagamento sem dupla contagem.
 
 ## Regra de atualização
 

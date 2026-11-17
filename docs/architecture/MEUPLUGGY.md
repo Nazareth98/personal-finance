@@ -29,7 +29,7 @@ Valores do provedor são convertidos imediatamente para `bigint` em centavos. Ca
 
 Descrições explícitas de resgate/aporte associadas a cofrinho, caixinha ou reserva produzem `savings_withdrawal`/`savings_contribution` somente quando o sinal é compatível. Sinal ou evidência ambígua permanece receita/despesa para revisão.
 
-Transações de cartão são preservadas no staging, mas ainda não entram no livro. A competência correta depende da fatura e será materializada na Etapa 7. Isso evita registrar compra no mês errado e mantém o payload disponível sem alterar um lançamento importado depois.
+No ambiente real observado, `GET /v2/transactions` entregou também as compras que compõem as faturas e elas foram preservadas no staging privado. O defeito estava na materialização: a primeira passagem podia não ter calendário completo, e os incrementos seguintes filtravam pela data da movimentação sem reler o histórico do cartão. Contas bancárias passam a usar `createdAtFrom`; contas de crédito relêem o histórico disponível para promover o staging idempotentemente após a configuração do calendário. O fluxo detalhado está em [`CARDS.md`](CARDS.md).
 
 ## Operação
 
@@ -51,4 +51,5 @@ Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge F
 - validar o contrato do SDK Connect e o formato do callback de sucesso;
 - aplicar migration e testar RLS no Supabase hospedado;
 - confirmar paginação e limites com Items sintéticos/sandbox;
+- validar o replay idempotente de compras, parcelas e estornos e persistir `providerId` quando disponível;
 - registrar os webhooks habilitados e o comportamento de retentativa do provedor.

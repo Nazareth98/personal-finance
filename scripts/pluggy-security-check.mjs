@@ -27,6 +27,7 @@ assert.match(sync, /ignoreDuplicates: true/g);
 assert.match(sync, /accountType === 'credit_card'/);
 assert.match(sync, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.match(sync, /transactionCursor: page\.next/);
+assert.match(sync, /mapped\.type === 'credit_card' \? undefined : incrementalFrom/);
 assert.match(syncEntry, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.doesNotMatch(sync, /schema\('private'\)/);
 assert.doesNotMatch(webhook, /schema\('private'\)/);
@@ -36,6 +37,9 @@ assert.match(webhook, /waitUntil\(processEvent/);
 assert.match(auth, /headers: \{ Authorization: authorization \}/);
 assert.doesNotMatch(browser, /PLUGGY_CLIENT_(ID|SECRET)|SERVICE_ROLE/i);
 assert.match(browser, /last_source_updated_at/);
-assert.match(await readFile('supabase/functions/_shared/pluggy-client.ts', 'utf8'), /\/v2\/transactions/);
+const client = await readFile('supabase/functions/_shared/pluggy-client.ts', 'utf8');
+assert.match(client, /\/v2\/transactions/);
+assert.match(client, /createdAtFrom/);
+assert.doesNotMatch(client, /query\.set\('dateFrom'/);
 
 console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de secrets validados estaticamente.');

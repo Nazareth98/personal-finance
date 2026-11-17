@@ -19,6 +19,9 @@ export type PluggyTransaction = {
   amount: number | string;
   date: string;
   type?: string | null;
+  status?: string | null;
+  operationType?: string | null;
+  providerId?: string | null;
   category?: string | { name?: string | null } | null;
   merchant?: string | { name?: string | null } | null;
   creditCardMetadata?: {
@@ -63,7 +66,7 @@ export function merchantName(transaction: PluggyTransaction): string | null {
 }
 
 function normalizedEvidence(value: string | null): string {
-  return (value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return (value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 export function ledgerSemantics(transaction: PluggyTransaction): {
@@ -74,7 +77,7 @@ export function ledgerSemantics(transaction: PluggyTransaction): {
 } {
   const amount = centsFromPluggy(transaction.amount);
   if (amount === 0n) throw new RangeError('Pluggy transaction cannot be zero');
-  const evidence = normalizedEvidence(`${rawCategory(transaction) ?? ''} ${transaction.description ?? ''}`);
+  const evidence = normalizedEvidence(`${rawCategory(transaction) ?? ''} ${transaction.operationType ?? ''} ${transaction.description ?? ''}`);
   if (/\b(?:credit card payment|pagamento (?:de )?fatura|pagamento (?:de )?cartao)\b/.test(evidence)) {
     return { nature: 'card_payment', reporting: 'neutral', categoryId: null, classificationStatus: 'automatic' };
   }
@@ -88,4 +91,21 @@ export function ledgerSemantics(transaction: PluggyTransaction): {
   return amount > 0n
     ? { nature: 'income', reporting: 'income', categoryId: null, classificationStatus: 'uncategorized' }
     : { nature: 'expense', reporting: 'expense', categoryId: null, classificationStatus: 'uncategorized' };
+}
+
+export function cardLedgerSemantics(transaction: PluggyTransaction): {
+  amountCents: bigint;
+  nature: 'expense' | 'refund' | 'card_payment';
+  reporting: 'expense' | 'neutral';
+} {
+  const amount = centsFromPluggy(transaction.amount);
+  if (amount === 0n) throw new RangeError('Pluggy transaction cannot be zero');
+  if (ledgerSemantics(transaction).nature === 'card_payment') {
+    return { amountCents: amount < 0n ? amount : -amount, nature: 'card_payment', reporting: 'neutral' };
+  }
+  const magnitude = amount < 0n ? -amount : amount;
+  const credit = transaction.type?.toUpperCase() === 'CREDIT' || (!transaction.type && amount < 0n);
+  return credit
+    ? { amountCents: magnitude, nature: 'refund', reporting: 'expense' }
+    : { amountCents: -magnitude, nature: 'expense', reporting: 'expense' };
 }
