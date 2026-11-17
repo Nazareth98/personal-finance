@@ -13,7 +13,10 @@ assert.match(migration, /nature = 'refund' and reporting = 'expense' and amount_
 assert.match(migration, /nature = 'card_payment' and reporting = 'neutral'/);
 assert.match(migration, /status in \('posted', 'projected', 'refunded'\)/);
 assert.match(sync, /cardCompetence\(eventDate, card\)/, 'compra de cartão precisa usar competência da fatura');
-assert.match(sync, /ignoreDuplicates: projection\.status === 'projected'/, 'projeção não pode sobrescrever parcela já realizada');
+assert.match(sync, /upsert\(\[\.\.\.projectedRows\.values\(\)\],[\s\S]*ignoreDuplicates: true/,
+  'projeção não pode sobrescrever parcela já realizada');
+assert.match(sync, /upsert\(\[\.\.\.postedRows\.values\(\)\],[\s\S]*onConflict: 'owner_id,purchase_group_key,installment_number'/,
+  'parcela realizada precisa substituir sua projeção');
 assert.match(sync, /if \(!card\) continue/, 'não deve inventar competência sem calendário do cartão');
 assert.doesNotMatch(migration, /grant (insert|update|delete|all).*card_statements.*authenticated/i, 'tabelas derivadas não devem aceitar escrita direta do cliente');
 

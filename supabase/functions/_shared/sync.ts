@@ -205,46 +205,91 @@ async function persistCardArtifacts(database: SupabaseClient, ownerId: string, c
     .eq('owner_id', ownerId).in('external_key', items.map(item => item.externalKey));
   if (transactions.error) throw transactions.error;
   const transactionByKey = new Map((transactions.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+
+  const projectionsByKey = new Map<string, ReturnType<typeof projectInstallments>>();
+  const statementRows = new Map<string, Record<string, unknown>>();
+  const addStatement = (competence: string, providerBillId?: string): void => {
+    const current = statementRows.get(competence);
+    if (current && (!providerBillId || current.provider_bill_id)) return;
+    const dates = cardStatementDates(competence, card);
+    statementRows.set(competence, { owner_id: ownerId, card_id: card.id, competence,
+      closing_date: dates.closingDate, due_date: dates.dueDate, provider_bill_id: providerBillId ?? null });
+  };
+
   for (const item of items) {
-    const transactionId = transactionByKey.get(item.externalKey);
-    if (!transactionId) continue;
-    const dates = cardStatementDates(item.competence, card);
-    const storedStatement = await database.from('card_statements').upsert({ owner_id: ownerId, card_id: card.id,
-      competence: item.competence, closing_date: dates.closingDate, due_date: dates.dueDate,
-      provider_bill_id: item.providerBillId ?? null }, { onConflict: 'owner_id,card_id,competence' }).select('id').single();
-    if (storedStatement.error) throw storedStatement.error;
-    const entryType = item.nature === 'refund' ? 'refund' : item.nature === 'card_payment' ? 'payment' : 'purchase';
-    const entry = await database.from('card_statement_entries').upsert({ owner_id: ownerId, statement_id: storedStatement.data.id,
-      transaction_id: transactionId, entry_type: entryType }, { onConflict: 'transaction_id' });
-    if (entry.error) throw entry.error;
-    if (item.originalTransactionId && item.nature === 'refund') {
-      const original = await database.from('transactions').select('id').eq('owner_id', ownerId)
-        .eq('external_key', `pluggy:${item.originalTransactionId}`).maybeSingle();
-      if (original.error) throw original.error;
-      if (original.data) {
-        const link = await database.from('transaction_links').upsert({ owner_id: ownerId, source_transaction_id: transactionId,
-          target_transaction_id: original.data.id, link_type: 'refund' },
-          { onConflict: 'source_transaction_id,target_transaction_id,link_type', ignoreDuplicates: true });
-        if (link.error) throw link.error;
-      }
-    }
+    addStatement(item.competence, item.providerBillId);
     if (item.nature !== 'expense' || !item.installmentNumber || !item.totalInstallments) continue;
     const magnitude = item.amountCents < 0n ? -item.amountCents : item.amountCents;
+    const projections = projectInstallments(item.competence, item.installmentNumber, item.totalInstallments, magnitude);
+    projectionsByKey.set(item.externalKey, projections);
+    for (const projection of projections) addStatement(projection.dueCompetence);
+  }
+
+  const storedStatements = await database.from('card_statements').upsert([...statementRows.values()],
+    { onConflict: 'owner_id,card_id,competence' }).select('id,competence');
+  if (storedStatements.error) throw storedStatements.error;
+  const statementByCompetence = new Map((storedStatements.data ?? [])
+    .map(row => [String(row.competence), String(row.id)]));
+
+  const entryRows = items.flatMap(item => {
+    const transactionId = transactionByKey.get(item.externalKey);
+    const statementId = statementByCompetence.get(item.competence);
+    if (!transactionId || !statementId) return [];
+    const entryType = item.nature === 'refund' ? 'refund' : item.nature === 'card_payment' ? 'payment' : 'purchase';
+    return [{ owner_id: ownerId, statement_id: statementId, transaction_id: transactionId, entry_type: entryType }];
+  });
+  if (entryRows.length) {
+    const entries = await database.from('card_statement_entries').upsert(entryRows, { onConflict: 'transaction_id' });
+    if (entries.error) throw entries.error;
+  }
+
+  const refundItems = items.filter(item => item.originalTransactionId && item.nature === 'refund');
+  if (refundItems.length) {
+    const originals = await database.from('transactions').select('id,external_key').eq('owner_id', ownerId)
+      .in('external_key', refundItems.map(item => `pluggy:${item.originalTransactionId}`));
+    if (originals.error) throw originals.error;
+    const originalByKey = new Map((originals.data ?? []).map(row => [String(row.external_key), String(row.id)]));
+    const linkRows = refundItems.flatMap(item => {
+      const sourceId = transactionByKey.get(item.externalKey);
+      const targetId = originalByKey.get(`pluggy:${item.originalTransactionId}`);
+      return sourceId && targetId ? [{ owner_id: ownerId, source_transaction_id: sourceId,
+        target_transaction_id: targetId, link_type: 'refund' }] : [];
+    });
+    if (linkRows.length) {
+      const links = await database.from('transaction_links').upsert(linkRows,
+        { onConflict: 'source_transaction_id,target_transaction_id,link_type', ignoreDuplicates: true });
+      if (links.error) throw links.error;
+    }
+  }
+
+  const projectedRows = new Map<string, Record<string, unknown>>();
+  const postedRows = new Map<string, Record<string, unknown>>();
+  for (const item of items) {
+    const transactionId = transactionByKey.get(item.externalKey);
+    const projections = projectionsByKey.get(item.externalKey);
+    if (!transactionId || !projections || !item.totalInstallments) continue;
     const groupKey = item.groupKey ?? `${card.id}:${installmentGroupDescription(item.description)}:${item.totalInstallments}`;
-    for (const projection of projectInstallments(item.competence, item.installmentNumber, item.totalInstallments, magnitude)) {
-      const projectionDates = cardStatementDates(projection.dueCompetence, card);
-      const projectionStatement = await database.from('card_statements').upsert({ owner_id: ownerId, card_id: card.id,
-        competence: projection.dueCompetence, closing_date: projectionDates.closingDate, due_date: projectionDates.dueDate },
-        { onConflict: 'owner_id,card_id,competence' }).select('id').single();
-      if (projectionStatement.error) throw projectionStatement.error;
-      const installment = await database.from('card_installments').upsert({ owner_id: ownerId, card_id: card.id,
-        statement_id: projectionStatement.data.id, transaction_id: projection.status === 'posted' ? transactionId : null,
+    for (const projection of projections) {
+      const statementId = statementByCompetence.get(projection.dueCompetence);
+      if (!statementId) continue;
+      const row = { owner_id: ownerId, card_id: card.id, statement_id: statementId,
+        transaction_id: projection.status === 'posted' ? transactionId : null,
         purchase_group_key: groupKey, description: item.description, installment_number: projection.number,
         total_installments: item.totalInstallments, amount_cents: projection.amountCents.toString(),
-        due_competence: projection.dueCompetence, status: projection.status },
-        { onConflict: 'owner_id,purchase_group_key,installment_number', ignoreDuplicates: projection.status === 'projected' });
-      if (installment.error) throw installment.error;
+        due_competence: projection.dueCompetence, status: projection.status };
+      const key = `${groupKey}:${projection.number}`;
+      (projection.status === 'posted' ? postedRows : projectedRows).set(key, row);
     }
+  }
+  if (projectedRows.size) {
+    const projected = await database.from('card_installments').upsert([...projectedRows.values()],
+      { onConflict: 'owner_id,purchase_group_key,installment_number', ignoreDuplicates: true });
+    if (projected.error) throw projected.error;
+  }
+  if (postedRows.size) {
+    const posted = await database.from('card_installments').upsert([...postedRows.values()],
+      { onConflict: 'owner_id,purchase_group_key,installment_number' });
+    if (posted.error) throw posted.error;
   }
 }
 
