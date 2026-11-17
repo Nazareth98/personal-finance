@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/202611140001_meupluggy.sql', 'utf8');
 const conflictMigration = await readFile('supabase/migrations/20261116165312_fix_transactions_external_key_conflict.sql', 'utf8');
+const providerIdMigration = await readFile('supabase/migrations/20261117150000_pluggy_provider_id.sql', 'utf8');
 const sync = await readFile('supabase/functions/_shared/sync.ts', 'utf8');
 const syncEntry = await readFile('supabase/functions/pluggy-sync/index.ts', 'utf8');
 const webhook = await readFile('supabase/functions/pluggy-webhook/index.ts', 'utf8');
@@ -21,6 +22,9 @@ assert.doesNotMatch(migration, /grant .*private\.(webhook_events|pluggy_transact
 assert.match(migration, /unique \(owner_id, external_transaction_id\)/i);
 assert.match(conflictMigration, /drop index public\.transactions_external_key/i);
 assert.match(conflictMigration, /unique \(owner_id, external_key\)/i);
+assert.match(providerIdMigration, /add column provider_id text/i);
+assert.match(providerIdMigration, /provider_id = coalesce\(excluded\.provider_id, private\.pluggy_transactions\.provider_id\)/i);
+assert.match(providerIdMigration, /grant execute on function public\.internal_store_pluggy_transactions\(jsonb\) to service_role/i);
 assert.match(migration, /sync_runs_one_active/i);
 assert.match(migration, /grant execute on function public\.internal_register_webhook_event[\s\S]*to service_role/i);
 assert.match(sync, /ignoreDuplicates: true/g);
@@ -28,6 +32,7 @@ assert.match(sync, /accountType === 'credit_card'/);
 assert.match(sync, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.match(sync, /transactionCursor: page\.next/);
 assert.match(sync, /mapped\.type === 'credit_card' \? undefined : incrementalFrom/);
+assert.match(sync, /provider_id: transaction\.providerId\?\.slice\(0, 200\) \?\? null/);
 assert.match(sync, /const POSTGREST_IN_CHUNK_SIZE = 100/);
 assert.match(sync, /uniqueValues\.slice\(offset, offset \+ POSTGREST_IN_CHUNK_SIZE\)/);
 assert.match(sync, /upsert\(\[\.\.\.statementRows\.values\(\)\]/);

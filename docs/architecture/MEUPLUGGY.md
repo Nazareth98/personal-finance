@@ -18,8 +18,11 @@ O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou
 - `private.pluggy_accounts`: vínculo entre Account do provedor e `financial_accounts`.
 - `private.pluggy_transactions`: staging imutável com chave externa única.
 - `public.transactions.external_key`: `pluggy:<transactionId>`, também único por proprietário.
+- `private.pluggy_transactions.provider_id`: identificador opcional da instituição em conexões reguladas; complementa, mas nunca substitui, o `id` do MeuPluggy.
 
-Importações repetidas usam `ON CONFLICT DO NOTHING`. Uma falha mantém tudo já confirmado; a próxima execução recebe trigger `resume`, percorre novamente a janela segura e ignora as chaves existentes. Incrementos reabrem três dias antes do último sucesso para capturar atrasos sem duplicar.
+Importações repetidas preservam as chaves existentes sem duplicar o livro. Uma falha mantém tudo já confirmado; a próxima execução recebe trigger `resume`, percorre novamente a janela segura e ignora as chaves existentes. Incrementos reabrem três dias antes do último sucesso para capturar atrasos sem duplicar.
+
+No staging, um replay pode preencher `providerId` que antes estava ausente sem alterar descrição, valor ou data. O contador de importados continua medindo somente novas linhas. Atualizações e exclusões do provedor exigem os eventos `transactions/updated` e `transactions/deleted`; releitura por data não substitui esses eventos.
 
 Transações usam `GET /v2/transactions`, `createdAtFrom` nos incrementos e o cursor `next` devolvido pelo Pluggy. O endpoint legado paginado `GET /transactions` não é aceito por aplicações novas. Consultas internas com listas de chaves são divididas em lotes para não exceder o tamanho seguro de URL do PostgREST.
 

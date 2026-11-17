@@ -162,6 +162,7 @@ function transactionRows(
         connection_id: connection.id,
         pluggy_account_id: mappingId,
         external_transaction_id: transaction.id,
+        provider_id: transaction.providerId?.slice(0, 200) ?? null,
         description,
         amount_cents: amount.toString(),
         event_date: eventDate,

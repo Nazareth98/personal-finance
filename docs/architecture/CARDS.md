@@ -34,7 +34,9 @@ Próximos incrementos:
 1. **Replay idempotente:** publicar o sincronizador corrigido e reler o histórico disponível das contas de crédito, reutilizando o staging e as chaves externas existentes.
 2. **Materialização:** vincular o cartão, determinar fechamento/vencimento, criar a fatura e suas entradas; manter em staging com motivo explícito quando o calendário estiver incompleto.
 3. **Conciliação:** comparar soma de compras, estornos e pagamentos com o valor da fatura, repetir a sincronização sem duplicar e auditar amostras antes de encerrar a Etapa 10.4.
-4. **Estabilidade entre ciclos:** persistir `providerId` quando disponível e tratar eventos de atualização/exclusão, pois o `id` do MeuPluggy pode mudar quando a fatura fecha.
+4. **Estabilidade entre ciclos:** persistir `providerId` quando disponível e tratar eventos de atualização/exclusão. O `id` do MeuPluggy continua sendo a chave idempotente; `providerId` é apenas o identificador adicional da instituição em conexões reguladas/Open Finance.
+
+O contrato oficial atual informa que o MeuPluggy preserva seu `id` quando a instituição altera o identificador da transação. Alterações de status, categoria ou `billId` chegam em `transactions/updated`; exclusões chegam em `transactions/deleted` e podem ser temporárias. A primeira entrega de estabilidade persiste `providerId` sem substituir a chave existente nem editar os dados financeiros importados. O processamento dirigido desses dois eventos fica no incremento seguinte.
 
 Aceite operacional: para uma fatura selecionada, o sistema explica seu valor por entradas importadas e mantém o pagamento separado e neutro. Nova sincronização não duplica nenhuma entrada.
 
