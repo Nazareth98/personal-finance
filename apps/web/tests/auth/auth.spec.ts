@@ -35,6 +35,8 @@ function session(email: string) {
 }
 
 async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; body: string | null }[] = []) {
+  const confirmedCategories = new Map<string, string>();
+  const semanticOverrides = new Map<string, Record<string, unknown>>();
   await page.route('http://127.0.0.1:54321/**', async (route: Route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/token') {
@@ -110,9 +112,20 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       return;
     }
     if (url.pathname === '/rest/v1/transaction_classifications') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+      const confirmed = [...confirmedCategories].map(([transactionId, categoryId], index) => ({
+        id: `90000000-2222-4000-8000-${String(index + 1).padStart(12, '0')}`,
+        transaction_id: transactionId, category_id: categoryId, confidence_basis_points: 10000,
+        status: 'confirmed', classifier_version: 'rules-v1',
+        explanation: { evidence: [{ kind: 'alias', label: 'Correção confirmada', weightBasisPoints: 10000 }] }
+      }));
+      const suggested = [
         { id: '99999999-2222-4999-8999-999999999999', transaction_id: '99999999-3333-4999-8999-999999999999', category_id: 'groceries', confidence_basis_points: 8000, status: 'suggested', classifier_version: 'rules-v1', explanation: { evidence: [{ kind: 'token', label: 'Token da descrição', weightBasisPoints: 8000 }] } }
-      ]) });
+      ].filter(item => !confirmedCategories.has(item.transaction_id));
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([...suggested, ...confirmed]) });
+      return;
+    }
+    if (url.pathname === '/rest/v1/transaction_semantic_overrides') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([...semanticOverrides.values()]) });
       return;
     }
     if (url.pathname === '/rest/v1/credit_cards') {
@@ -159,6 +172,20 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
       rpcCalls.push({ path: url.pathname, body: route.request().postData() });
+      const body = JSON.parse(route.request().postData() ?? '{}') as Record<string, string | null>;
+      if (url.pathname.endsWith('/confirm_transaction_classification') && body.p_transaction_id && body.p_category_id) {
+        confirmedCategories.set(body.p_transaction_id, body.p_category_id);
+      }
+      if (url.pathname.endsWith('/confirm_transaction_semantics') && body.p_transaction_id && body.p_effective_nature) {
+        semanticOverrides.set(body.p_transaction_id, {
+          id: '91000000-2222-4000-8000-000000000001', transaction_id: body.p_transaction_id,
+          effective_nature: body.p_effective_nature,
+          effective_reporting: body.p_effective_nature === 'income' ? 'income' : body.p_effective_nature === 'expense' ? 'expense' : 'neutral',
+          counterpart_transaction_id: body.p_counterpart_transaction_id,
+          statement_id: body.p_statement_id, savings_box_id: body.p_savings_box_id,
+          reason: 'owner_confirmation', semantic_version: 'semantics-v1', updated_at: '2026-11-17T12:00:00Z'
+        });
+      }
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify('66666666-2222-4666-8666-666666666666') });
       return;
     }
@@ -437,14 +464,43 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await login(page);
   await page.goto('/#review');
   await expect(page.getByRole('heading', { name: 'Revisão de categorias' })).toBeVisible();
+  await expect(page.getByText('4 pendentes', { exact: true })).toBeVisible();
   await expect(page.getByText('80%')).toBeVisible();
   await expect(page.getByText('Token da descrição')).toBeVisible();
   await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Confirmar categoria' });
+  const dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Categoria confirmada').selectOption('restaurants');
-  await dialog.getByRole('button', { name: 'Confirmar e aprender' }).click();
-  await expect(page.getByText('Categoria confirmada e alias aprendido.')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
+  await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
+  await expect(page.getByText('3 pendentes', { exact: true })).toBeVisible();
+  await page.getByRole('tab', { name: /Histórico/ }).click();
+  await expect(page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Corrigir' })).toBeVisible();
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
   expect(confirmation?.body).toContain('99999999-3333-4999-8999-999999999999');
   expect(confirmation?.body).toContain('restaurants');
+});
+
+test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#review');
+
+  await page.getByRole('row', { name: /Pagamento da fatura/ }).getByRole('button', { name: 'Vincular' }).click();
+  let dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
+  await expect(dialog.getByLabel('Fatura paga')).toBeVisible();
+  await dialog.getByLabel('Fatura paga').selectOption('dddddddd-2222-4ddd-8ddd-dddddddddddd');
+  await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
+  await expect(page.getByText('Natureza e vínculo confirmados.')).toBeVisible();
+
+  await page.getByRole('row', { name: /Aplicação importada/ }).getByRole('button', { name: 'Vincular' }).click();
+  dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
+  await dialog.getByLabel('Natureza financeira').selectOption('savings_contribution');
+  await dialog.getByLabel('Caixinha').selectOption('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+  await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
+
+  const semanticWrites = writes.filter(write => write.path === '/rest/v1/rpc/confirm_transaction_semantics');
+  expect(semanticWrites).toHaveLength(2);
+  expect(semanticWrites[0].body).toContain('dddddddd-2222-4ddd-8ddd-dddddddddddd');
+  expect(semanticWrites[1].body).toContain('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
 });

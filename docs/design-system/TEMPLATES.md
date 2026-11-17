@@ -11,7 +11,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 | Orçamentos | Limites, consumo, excedentes por categoria, progresso | Progresso visual limitado a 100%; excedente permanece textual |
 | Caixinhas | Saldo, meta, aportes, resgates e progresso | Movimentos patrimoniais neutros e rastreáveis |
 | Conexões | Instituições MeuPluggy, estado, tentativas, sucesso, erro e sincronização manual | Connect Token efêmero; nenhum secret ou dado bancário no modo demonstrativo |
-| Revisão | Confiança, evidências, versão e confirmação de categoria | Correção explícita aprende alias sem alterar o lançamento importado |
+| Revisão | Pendências de categoria/natureza, vínculos e histórico filtrável | Correção explícita aprende alias ou vincula contraparte, fatura ou caixinha sem alterar o lançamento importado |
 | Relatórios | Realizado, renda recorrente e previsão de seis meses com metas, parcelas e aportes | Transferências e receitas extraordinárias ficam fora da média futura |
 
 ## Contrato técnico

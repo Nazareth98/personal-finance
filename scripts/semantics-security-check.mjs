@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/20261116185031_transaction_semantic_overrides.sql', 'utf8');
 const indexes = await readFile('supabase/migrations/20261117104611_index_transaction_semantic_overrides.sql', 'utf8');
+const effectiveClassification = await readFile('supabase/migrations/20261117110113_classification_uses_effective_semantics.sql', 'utf8');
 const repository = await readFile('apps/web/src/ledger/supabase-ledger.ts', 'utf8');
 
 assert.match(migration, /create table public\.transaction_semantic_overrides/i);
@@ -21,5 +22,8 @@ assert.match(repository, /from\('transaction_semantic_overrides'\)/);
 for (const relation of ['transaction', 'counterpart', 'statement', 'savings_box']) {
   assert.match(indexes, new RegExp(`create index semantic_overrides_${relation}_owner`, 'i'));
 }
+assert.match(effectiveClassification, /coalesce\(semantic\.effective_nature, transaction_row\.nature\)/i);
+assert.match(effectiveClassification, /Effective transaction nature cannot be categorized/i);
+assert.match(effectiveClassification, /coalesce\(candidate_semantic\.effective_nature, candidate\.nature\) in \('income', 'expense'\)/i);
 
 console.log('✓ Overlay semântico, vínculos atômicos, imutabilidade, grants e RLS validados estaticamente.');

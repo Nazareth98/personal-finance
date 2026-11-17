@@ -22,7 +22,7 @@ O provedor informar “transferência” ou “PIX” nunca basta para `own_tran
 1. corrigir e testar a semântica inicial do importador — concluído;
 2. criar migration, RLS e RPC atômica do overlay — concluído;
 3. aplicar a semântica efetiva no adapter e nos cálculos — concluído;
-4. separar fila pendente de histórico e oferecer ações de vínculo;
+4. separar fila pendente de histórico e oferecer ações de vínculo — concluído;
 5. publicar migrations/funções e validar com dados sintéticos — concluído;
 6. somente então limpar o ambiente de desenvolvimento e reimportar.
 

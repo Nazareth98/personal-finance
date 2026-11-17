@@ -130,6 +130,8 @@ Aceite: uma correção transforma o efeito contábil e o vínculo de forma atôm
 
 ### 10.3 — fila de revisão
 
+Estado: concluída em 17/11/2026.
+
 - mostrar por padrão somente sugestões e itens sem categoria/natureza resolvida;
 - retirar confirmados da fila principal;
 - manter automáticos e confirmados em histórico filtrável com ação “Corrigir”.
