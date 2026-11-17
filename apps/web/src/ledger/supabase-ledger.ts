@@ -26,6 +26,7 @@ type CreditCardRow = { id: string; account_id: string; closing_day: number; due_
 type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
 type CardStatementEntryRow = { id: string; statement_id: string; transaction_id: string; entry_type: CardStatementEntry['type'] };
 type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
+const SUPABASE_PAGE_SIZE = 1000;
 
 function classificationEvidence(value: unknown): TransactionClassification['evidence'] {
   if (!value || typeof value !== 'object') return [];
@@ -42,11 +43,24 @@ function classificationEvidence(value: unknown): TransactionClassification['evid
 export class SupabaseLedgerRepository implements LedgerRepository {
   constructor(private readonly client: SupabaseClient) {}
 
+  private async loadTransactions(): Promise<TransactionRow[]> {
+    const rows: TransactionRow[] = [];
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const result = await this.client.from('transactions')
+        .select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key')
+        .order('event_date', { ascending: false }).order('id')
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+      if (result.error) throw result.error;
+      rows.push(...((result.data ?? []) as TransactionRow[]));
+      if ((result.data?.length ?? 0) < SUPABASE_PAGE_SIZE) return rows;
+    }
+  }
+
   async load(): Promise<LedgerData> {
     const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
       this.client.from('categories').select('id,name').order('sort_order'),
-      this.client.from('transactions').select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key').order('event_date', { ascending: false }),
+      this.loadTransactions(),
       this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
       this.client.from('category_budgets').select('id,category_id,percentage_basis_points').order('created_at'),
       this.client.from('savings_boxes').select('id,name,opening_balance_cents,target_cents,target_date').is('archived_at', null).order('created_at'),
@@ -58,7 +72,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
       this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
-    const error = accountsResult.error ?? categoriesResult.error ?? transactionsResult.error ?? linksResult.error ?? budgetsResult.error
+    const error = accountsResult.error ?? categoriesResult.error ?? linksResult.error ?? budgetsResult.error
       ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? creditCardsResult.error
       ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
@@ -90,7 +104,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         id: row.id, savingsBoxId: row.savings_box_id, transactionId: row.transaction_id,
         type: row.movement_type, amountCents: BigInt(row.amount_cents), eventDate: row.event_date
       })),
-      transactions: ((transactionsResult.data ?? []) as TransactionRow[]).map(row => {
+      transactions: transactionsResult.map(row => {
         const classification = classificationByTransaction.get(row.id);
         const semantics = semanticOverrideByTransaction.get(row.id);
         const neutralCategory = semantics?.nature === 'own_transfer' ? 'transfers'

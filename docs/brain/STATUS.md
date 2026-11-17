@@ -11,7 +11,7 @@ Atualizado em: 17/11/2026.
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
 - MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela distingue atualização da fonte, tentativa local, sucesso local e estado de erro.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
-- Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. O primeiro replay materializou parte das compras, mas atingiu o limite de duração da Edge Function; a persistência em lote está publicada para concluir o restante de forma idempotente.
+- Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. O replay foi concluído nas conexões Caixa e Itaú; o frontend passou a paginar o livro completo para não separar entradas de fatura de seus lançamentos após o limite de 1.000 linhas do Data API.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
@@ -21,16 +21,15 @@ Atualizado em: 17/11/2026.
 
 ## Marco atual
 
-**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** A revisão manual avançou sobre quase todos os lançamentos. O primeiro replay autenticado confirmou a materialização, mas foi encerrado pelo limite de 150 segundos do runtime; a tentativa seguinte do Itaú excedeu o tamanho seguro de URL do PostgREST ao consultar muitas chaves. `pluggy-sync` v10 agrupa as escritas e divide consultas internas em lotes de 100, com erros de rede sanitizados; falta repetir o replay e conferir as faturas.
+**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** O replay autenticado foi concluído para Caixa e Itaú com paridade entre staging, livro e entradas de fatura. `pluggy-sync` v10 agrupa escritas, divide consultas internas em lotes de 100 e sanitiza erros de rede. O carregamento web agora pagina transações em ordem estável; falta conferir a composição de amostras de faturas e repetir a sincronização para fechar a auditoria de idempotência.
 
 Próximas entregas, nesta ordem:
 
-1. executar pelo proprietário o replay autenticado do histórico das contas de crédito;
-2. conferir a materialização de compras, faturas, estornos e pagamentos sem duplicar despesas;
-3. repetir a sincronização e auditar amostras de faturas;
-4. persistir identificador estável e tratar atualizações/exclusões do ciclo da fatura;
-5. publicar o webhook com sua autenticação HMAC preservada e concluir o smoke test remoto;
-6. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): correção/revisão, consistência visual, período/ordenação e gráficos.
+1. conferir a materialização de compras, faturas, estornos e pagamentos sem duplicar despesas;
+2. repetir a sincronização e auditar amostras de faturas;
+3. persistir identificador estável e tratar atualizações/exclusões do ciclo da fatura;
+4. publicar o webhook com sua autenticação HMAC preservada e concluir o smoke test remoto;
+5. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): correção/revisão, consistência visual, período/ordenação e gráficos.
 
 ## Última validação
 
@@ -62,6 +61,7 @@ Próximas entregas, nesta ordem:
 - Etapa 10.4 parcial em 17/11/2026: limpeza seletiva remota executada em transação após ensaio com rollback. Foram preservados 1 usuário Auth, 1 perfil proprietário, 23 categorias, 36 aliases, migrations, secrets e funções; conexões, staging, livro, overlays, classificações, cartões, metas e caixinhas ficaram zerados. O trigger de imutabilidade dos lançamentos importados foi restaurado e verificado. Após a nova sincronização e revisão manual, quase todos os lançamentos recebidos foram revisados; a auditoria revelou que pagamentos de fatura chegaram, mas suas compras, parcelas e estornos não foram importados.
 - Ajustes visuais em 17/11/2026: a Etapa 10.4 foi pausada sem novas alterações remotas. Cards e cabeçalhos de tabelas passaram a usar ícones semânticos consistentes; o card de previsão recebeu espaçamento do template; a sidebar deixou de exibir dados do usuário, adotou tema compacto, saída destrutiva e navegação mobile sem rolagem horizontal. `pnpm check`, 16 fluxos autenticados, 16 cenários responsivos e 54 auditorias WCAG A/AA passaram com Node 24.14.1; capturas desktop/mobile com dados fictícios foram revisadas localmente.
 - Contrato de cartões em 17/11/2026: documentação oficial e agregados remotos confirmaram que contas `CREDIT` e suas transações já são retornadas por `GET /v2/transactions`; compras e parcelas estavam no staging, mas não no livro. O cliente passou a usar `createdAtFrom` nos incrementos bancários, reler todo o histórico disponível dos cartões e normalizar `DEBIT`, `CREDIT` e `PAGAMENTO_FATURA` para os sinais do domínio. O primeiro replay atingiu o limite remoto de 150 segundos durante a persistência sequencial dos artefatos; faturas, entradas, estornos e parcelas passaram a ser persistidos em lote. A tentativa do Itaú revelou URLs excessivas nas consultas `.in`; todas as leituras por chaves passaram a lotes de 100 e erros de transporte deixaram de persistir URLs ou identificadores. Nove contratos sintéticos, checks estáticos, 57 testes de pacotes, typecheck, builds web/Storybook e a esteira equivalente a `pnpm check` passaram com Node 24.14.1. `pluggy-sync` v10 foi publicada com JWT obrigatório; mensagens remotas antigas foram sanitizadas sem apagar staging ou livro.
+- Leitura de cartões em 17/11/2026: após o replay completo, a tela quebrava porque o Data API limitava a consulta do livro às 1.000 transações mais recentes enquanto entradas de fatura válidas referenciavam lançamentos anteriores. A integridade referencial remota foi confirmada sem órfãos. O adapter passou a buscar todas as páginas de transações com ordenação estável; check de cartões, typecheck web e o fluxo autenticado de faturas passaram no Chromium.
 
 ## Bloqueios
 
