@@ -28,7 +28,7 @@ Próximas entregas, nesta ordem:
 
 1. próxima tela do ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md); sem candidata definida — revisar o inventário com o proprietário.
 
-Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) e [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
+Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034) e [Revisão](https://claude.ai/artifact/54jdzfr3GMPkSGTzBTkWnw) (D-035). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
 
 ## Última validação
 
@@ -77,6 +77,7 @@ Canvas do Claude Design são privados da conta que os criou; ao trocar de conta,
 - Visão geral em 18/11/2026: proposta do canvas implementada (D-033) com `ColumnChart`, `CashFlowChart` vertical, `collapsibleDetails`, `supportingTone` no `MetricCard` e cálculos puros de atenção/comparação com 4 testes. Desvio consciente: no mobile os indicadores seguem em uma coluna (2×2 exigiria reduzir a fonte). `pnpm check`, 43 testes unitários, 24 fluxos autenticados e 94 cenários de comportamento/acessibilidade/estados passaram com Node 22.13; capturas Light/Dark revisadas.
 - Cartões e faturas em 18/11/2026: proposta do canvas implementada (D-034) com `lib/card-panels.ts` (painéis, aba inicial e percentual do limite em bigint, 3 testes) e abas acessíveis por setas/Home/End. `pnpm check`, 46 testes unitários e 24 fluxos autenticados (cartões: aba selecionada, teclado, botão condicional) passaram com Node 22.13; capturas Light/Dark revisadas. A suíte visual local diverge em todas as telas por ser Windows (baselines são Linux); a demo não mudou.
 - Ajustes pós-cartões em 18/11/2026: abas extraídas para `Tabs` em `packages/ui` (story `Navigation/Tabs`); no mobile as abas ficam em uma linha sem quebrar o valor; o tema saiu da folha “Mais” e fica só no cabeçalho. `pnpm check`, 24 fluxos autenticados e os testes de tema passaram com Node 22.13; capturas revisadas.
+- Revisão em 18/11/2026: proposta do canvas implementada (D-035) com fila agrupada, filtro por motivo, “Confirmar” direto da sugestão e `TransactionFilterFields` recolhível (Transações mantém os filtros abertos). `reviewReason` e `suggestedCategoryId` ganharam teste. `pnpm check`, 47 testes unitários e 25 fluxos autenticados (novo: confirmar direto e filtrar por motivo; axe na fila mobile) passaram com Node 22.13; capturas Light/Dark revisadas.
 
 ## Bloqueios
 

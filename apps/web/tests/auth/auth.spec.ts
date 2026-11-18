@@ -555,20 +555,41 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await login(page);
   await page.goto('/#review');
   await expect(page.getByRole('heading', { name: 'Revisão de categorias' })).toBeVisible();
-  await expect(page.locator('.template-heading').getByText('4 pendentes', { exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Pendências · 4' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText('80%')).toBeVisible();
   await expect(page.getByText('Token da descrição')).toBeVisible();
-  await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
   const dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Categoria confirmada').selectOption('restaurants');
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
-  await expect(page.locator('.template-heading').getByText('3 pendentes', { exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Pendências · 3' })).toBeVisible();
   await page.getByRole('tab', { name: /Histórico/ }).click();
   await expect(page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar novamente' })).toBeVisible();
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
   expect(confirmation?.body).toContain('99999999-3333-4999-8999-999999999999');
   expect(confirmation?.body).toContain('restaurants');
+});
+
+test('confirma a sugestão direto da fila e filtra pendências por motivo', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#review');
+  const reasons = page.getByRole('group', { name: 'Motivo' });
+  await reasons.getByRole('button', { name: 'Vínculos 2' }).click();
+  await expect(page).toHaveURL(/reason=links/);
+  await expect(page.getByRole('region', { name: /Categorizar/ })).toHaveCount(0);
+  await reasons.getByRole('button', { name: 'Categorias 2' }).click();
+  await expect(page.getByRole('region', { name: /Vincular/ })).toHaveCount(0);
+  const item = page.getByRole('listitem').filter({ hasText: 'Café sintético' });
+  await expect(item).toContainText('Sugestão: Supermercado');
+  await item.getByRole('button', { name: 'Confirmar Supermercado para Café sintético' }).click();
+  await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
+  const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
+  expect(confirmation?.body).toContain('groceries');
+  await expect(page.getByRole('button', { name: 'Filtros' })).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByLabel('Conta', { exact: true })).toBeHidden();
 });
 
 test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', async ({ page }) => {
@@ -577,14 +598,14 @@ test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', a
   await login(page);
   await page.goto('/#review');
 
-  await page.getByRole('row', { name: /Pagamento da fatura/ }).getByRole('button', { name: 'Vincular' }).click();
+  await page.getByRole('region', { name: /Vincular/ }).getByRole('listitem').filter({ hasText: 'Pagamento da fatura' }).getByRole('button', { name: 'Vincular' }).click();
   let dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await expect(dialog.getByLabel('Fatura paga')).toBeVisible();
   await dialog.getByLabel('Fatura paga').selectOption('dddddddd-2222-4ddd-8ddd-dddddddddddd');
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Natureza e vínculo confirmados.')).toBeVisible();
 
-  await page.getByRole('row', { name: /Aplicação importada/ }).getByRole('button', { name: 'Vincular' }).click();
+  await page.getByRole('region', { name: /Vincular/ }).getByRole('listitem').filter({ hasText: 'Aplicação importada' }).getByRole('button', { name: 'Vincular' }).click();
   dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Natureza financeira').selectOption('savings_contribution');
   await dialog.getByLabel('Caixinha').selectOption('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
@@ -609,7 +630,7 @@ test('revisa novamente preservando versões e registra o outro lado da transfer�
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
 
   await page.getByRole('tab', { name: /Pendências/ }).click();
-  await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
   dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Natureza financeira').selectOption('own_transfer');
   const counterpart = dialog.getByLabel('Outro lado da transferência');
@@ -721,7 +742,7 @@ test('inventário de telas para redesign', async ({ page }) => {
         await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-${screen.replace('?view=', '-')}.png`, fullPage: true });
       }
       await page.goto('/#review');
-      await page.getByRole(viewport === 'mobile' ? 'listitem' : 'row').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Revisar' }).click();
+      await page.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
       await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-dialog-review.png` });
       await page.keyboard.press('Escape');
       if (viewport === 'mobile') {
@@ -759,10 +780,10 @@ test('tabelas viram lista compacta no mobile com ordenação e ações', async (
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
 
   await page.goto('/#review');
-  const pending = page.getByRole('region', { name: 'Pendências de revisão' });
-  await pending.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Revisar' }).click();
+  const pending = page.getByRole('region', { name: 'Categorizar · 2' });
+  await pending.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
   await expect(page.getByRole('dialog', { name: 'Revisar lançamento' })).toBeVisible();
   await page.keyboard.press('Escape');
-  const scan = await new AxeBuilder({ page }).include('.ui-table-list').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  const scan = await new AxeBuilder({ page }).include('.review-panel').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(scan.violations).toEqual([]);
 });

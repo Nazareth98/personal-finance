@@ -39,3 +39,15 @@ export function reviewableTransactions(transactions: readonly TransactionContrac
 export function pendingReviewCount(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1]): number {
   return reviewableTransactions(transactions).filter(row => reviewResolution(row, relations).pending).length;
 }
+
+export type ReviewReason = 'links' | 'categories';
+
+/** Motivo que a fila mostra: sem o outro lado o valor contaria duas vezes, então vínculo vem antes da categoria. */
+export function reviewReason(resolution: ReviewResolution): ReviewReason {
+  return resolution.semanticResolved ? 'categories' : 'links';
+}
+
+/** Categoria que o “Confirmar” rápido aceitaria; só existe para sugestão ainda não confirmada. */
+export function suggestedCategoryId(transaction: TransactionContract, classificationCategoryId?: string): string | undefined {
+  return transaction.classificationStatus === 'suggested' ? classificationCategoryId ?? transaction.categoryId : undefined;
+}

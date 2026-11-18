@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { TransactionContract } from '@personal-finance/domain';
-import { pendingReviewCount, reviewResolution } from './review-queue.ts';
+import { pendingReviewCount, reviewReason, reviewResolution, suggestedCategoryId } from './review-queue.ts';
 
 const base: TransactionContract = {
   id: 'transaction', accountId: 'account', description: 'Synthetic transaction', amountCents: -1000n,
@@ -44,4 +44,12 @@ test('conta pendências somente entre importados revisáveis', () => {
     { ...base, id: 'ok', classificationStatus: 'confirmed' as const }
   ];
   assert.equal(pendingReviewCount(rows, empty), 1);
+});
+
+test('motivo põe vínculo antes de categoria e sugestão só existe quando sugerida', () => {
+  assert.equal(reviewReason({ semanticResolved: false, categoryResolved: false, pending: true }), 'links');
+  assert.equal(reviewReason({ semanticResolved: true, categoryResolved: false, pending: true }), 'categories');
+  assert.equal(suggestedCategoryId({ ...base, classificationStatus: 'suggested', categoryId: 'row' }, 'model'), 'model');
+  assert.equal(suggestedCategoryId({ ...base, classificationStatus: 'suggested', categoryId: 'row' }), 'row');
+  assert.equal(suggestedCategoryId({ ...base, classificationStatus: 'uncategorized', categoryId: 'row' }, 'model'), undefined);
 });
