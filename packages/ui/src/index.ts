@@ -41,7 +41,8 @@ export {
   Mail as MailIcon,
   Lock as LockIcon,
   Eye as ShowIcon,
-  EyeOff as HideIcon
+  EyeOff as HideIcon,
+  ChevronDown as ChevronDownIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,

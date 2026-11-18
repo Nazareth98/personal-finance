@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { CardStatement, FinancialAccount } from '@personal-finance/domain';
-import { Badge, Button, Card, CardsIcon, DataState, DataTable, EmptyState, MetricCard, Tabs, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import { buildCardPanels, defaultTab, limitShare, type CardPanel, type StatementTab } from '../lib/card-panels';
@@ -17,17 +17,22 @@ const demoColumns: DataTableColumn<DemoInvoice>[] = [
   { key: 'open', header: 'Valor pendente', align: 'end', cell: item => formatCentsBRL(invoiceOpenCents(item)) }
 ];
 
+/** Quantos lançamentos a fatura mostra ao abrir; o restante fica em Transações. */
+const PREVIEW_LINES = 6;
 const tabStatusLabels = { ...statusLabels, projected: 'Prevista' } as const;
 const tabValue = (tab: StatementTab) => !tab.statement ? tab.projectedCents : tab.status === 'paid' ? tab.purchasesCents - tab.refundsCents : tab.openCents;
 
 function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel; onConfigure: () => void; onLinkPayment: (statement: CardStatement) => void }) {
   const [selected, setSelected] = useState<string>();
+  const [linesOpen, setLinesOpen] = useState(false);
+  const linesId = useId();
   const active = panel.tabs.find(tab => tab.competence === selected) ?? defaultTab(panel.tabs);
   const { account, card } = panel;
   const titleId = `card-${account.id}`;
   const limit = card?.creditLimitCents;
   const share = limit === undefined ? undefined : limitShare(panel.committedCents, limit);
   const openCents = panel.tabs.reduce((sum, tab) => sum + tab.openCents, 0n);
+  const visibleLines = active ? [...active.lines].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')).slice(0, PREVIEW_LINES) : [];
   return <Card className="card-panel" aria-labelledby={titleId}>
     <div className="card-panel__top">
       <div><h2 id={titleId}>{account.name}</h2>{card ? <p className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</p> : <Badge>Configuração pendente</Badge>}</div>
@@ -39,29 +44,38 @@ function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel
       <p className="muted card-panel__note">Faturas em aberto {formatCentsBRL(openCents)} + parcelas futuras {formatCentsBRL(panel.committedCents - openCents)}{share && limit !== undefined ? ` · disponível ${formatCentsBRL(limit - panel.committedCents)}` : ''}</p>
     </div>}
     {card && !active && <EmptyState title="Nenhuma fatura ainda" description="Faturas surgem quando compras deste cartão são sincronizadas." />}
-    {active && <Tabs label={`Faturas do ${account.name}`} className="card-tabs" panelClassName="card-statement" selectedId={active.competence} onSelect={setSelected}
+    {active && <Tabs label={`Faturas do ${account.name}`} className="card-tabs" panelClassName="card-statement" selectedId={active.competence} onSelect={id => { setSelected(id); setLinesOpen(false); }}
       items={panel.tabs.map(tab => ({ id: tab.competence, className: `card-tab--${tab.status}`,
         label: <><strong>{formatCompetence(tab.competence)}</strong><span>{tabStatusLabels[tab.status]} · <span className="card-tab__value">{formatCentsBRL(tabValue(tab))}</span></span></> }))}>
-        <div className="card-statement__lines">
-          <p className="card-statement__head"><span>Lançamentos da fatura</span><span>Valor</span></p>
-          <ul>{active.lines.map(line => <li key={line.id}>
-            <span><strong>{line.description}</strong><span className="muted">{line.date ? `${formatLocalDate(line.date)} · ` : ''}{line.detail}</span></span>
-            <strong>{line.credit ? '− ' : ''}{formatCentsBRL(line.amountCents)}</strong>
-          </li>)}</ul>
-          {active.statement && !active.lines.some(line => line.credit) && <p className="muted card-statement__empty">Nenhum estorno ou pagamento vinculado a esta fatura.</p>}
-        </div>
         <div className="card-statement__summary">
+          {active.statement && <div className="card-statement__pending">
+            <div><span className="muted">Pendente · vence {formatLocalDate(active.statement.dueDate)}</span><strong>{formatCentsBRL(active.openCents)}</strong></div>
+            {active.openCents > 0n && <Button variant="secondary" onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>}
+          </div>}
           <dl>
             {active.statement && <>
               <div><dt>Compras</dt><dd>{formatCentsBRL(active.purchasesCents)}</dd></div>
               <div><dt>Estornos</dt><dd>− {formatCentsBRL(active.refundsCents)}</dd></div>
               <div><dt>Pagamentos</dt><dd>− {formatCentsBRL(active.paymentsCents)}</dd></div>
-              <div className="card-statement__total"><dt>Pendente</dt><dd>{formatCentsBRL(active.openCents)}</dd></div>
             </>}
             {active.projectedCents > 0n && <div className={active.statement ? '' : 'card-statement__total'}><dt>Parcelas previstas</dt><dd>{formatCentsBRL(active.projectedCents)}</dd></div>}
           </dl>
-          <p className="muted">{active.statement ? `Vence em ${formatLocalDate(active.statement.dueDate)} · fecha em ${formatLocalDate(active.statement.closingDate)}` : 'Previsão; entra no realizado quando a fatura fechar.'}</p>
-          {active.statement && active.openCents > 0n && <Button onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>}
+          <p className="muted">{active.statement ? `Fecha em ${formatLocalDate(active.statement.closingDate)}.` : 'Previsão; entra no realizado quando a fatura fechar.'}</p>
+        </div>
+        {/* D-042: os lançamentos começam recolhidos; abrir mostra os mais recentes e leva ao restante em Transações. */}
+        <div className="card-statement__lines">
+          <button type="button" className="card-statement__toggle" aria-expanded={linesOpen} aria-controls={linesId} onClick={() => setLinesOpen(value => !value)}>
+            <span>Lançamentos <span className="card-statement__count">{active.lines.length}</span></span>
+            <span className="card-statement__toggle-label">{linesOpen ? 'Ocultar' : 'Ver lançamentos'}<Icon icon={ChevronDownIcon} size="sm" /></span>
+          </button>
+          <div id={linesId} hidden={!linesOpen} className="card-statement__list">
+            <ul>{visibleLines.map(line => <li key={line.id}>
+              <span><strong>{line.description}</strong><span className="muted">{line.date ? `${formatLocalDate(line.date)} · ` : ''}{line.detail}</span></span>
+              <strong>{line.credit ? '− ' : ''}{formatCentsBRL(line.amountCents)}</strong>
+            </li>)}</ul>
+            {active.statement && !active.lines.some(line => line.credit) && <p className="muted card-statement__empty">Nenhum estorno ou pagamento vinculado a esta fatura.</p>}
+            {active.lines.length > PREVIEW_LINES && <a className="card-statement__more" href={`#transactions?period=${active.competence}&account=${account.id}`}>Ver os {active.lines.length} em Transações</a>}
+          </div>
         </div>
     </Tabs>}
   </Card>;

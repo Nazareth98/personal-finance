@@ -298,7 +298,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .ui-tab.card-tab--projected:not([aria-selected="true"]){border-style:dashed;border-color:var(--color-text-secondary)}
 .ui-tab.card-tab--open>span{color:var(--color-status-warning)}
 .card-tab__value{white-space:nowrap}
-.card-statement{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--spacing-4);align-items:start}
+.card-statement{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--spacing-4);align-items:start}
 .card-statement__lines,.card-statement__summary{border:1px solid var(--color-border-default);border-radius:var(--radius-md)}
 .card-statement__head{display:flex;justify-content:space-between;padding:var(--spacing-2) var(--spacing-3);background:var(--color-bg-subtle);color:var(--color-text-secondary);font-size:var(--font-size-xs);font-weight:700}
 .card-statement__lines ul{margin:0;padding:0;list-style:none}
@@ -314,7 +314,6 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .card-statement__summary .card-statement__total{padding-top:var(--spacing-2);border-top:1px solid var(--color-border-default);font-weight:700}
 .card-statement__summary .card-statement__total dt{color:var(--color-text-primary)}
 .card-statement__summary>.muted{font-size:var(--font-size-xs)}
-@media (max-width: 860px) { .card-statement { grid-template-columns:minmax(0,1fr); } }
 @media (max-width: 680px) { .card-statement__summary .ui-button { min-height:44px; } }
 
 /* Review queue: grouped by reason, search always visible, other filters collapsible. */
@@ -532,3 +531,20 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .main{padding-top:var(--spacing-4)}
 }
 .template-page>.ledger-transactions{margin-top:0}
+
+/* Fatura (D-042): pendente com a ação centrada na mesma linha e lançamentos recolhidos por padrão. */
+.card-statement__pending{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-3);flex-wrap:wrap}
+.card-statement__pending>div{display:grid;gap:2px}
+.card-statement__pending .muted{font-size:var(--font-size-xs)}
+.card-statement__pending strong{font-size:var(--font-size-xl);font-variant-numeric:tabular-nums}
+.card-statement__toggle{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-3);width:100%;min-height:48px;padding:0 var(--spacing-3);border:0;border-radius:var(--radius-md);background:transparent;color:var(--color-text-primary);font:600 var(--font-size-sm)/1.2 var(--font-family-sans);cursor:pointer}
+.card-statement__toggle:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:-3px}
+.card-statement__toggle>span:first-child{display:flex;align-items:center;gap:var(--spacing-2)}
+.card-statement__count{min-width:24px;height:22px;padding:0 7px;box-sizing:border-box;border-radius:11px;background:var(--color-bg-subtle);color:var(--color-text-secondary);font-size:var(--font-size-xs);line-height:22px;text-align:center}
+.card-statement__toggle-label{display:flex;align-items:center;gap:var(--spacing-1);color:var(--color-text-accent)}
+.card-statement__toggle-label svg{transition:transform var(--motion-base) var(--ease-standard)}
+.card-statement__toggle[aria-expanded="true"] .card-statement__toggle-label svg{transform:rotate(180deg)}
+.card-statement__list:not([hidden]){animation:pf-rise-in var(--motion-base) var(--ease-enter)}
+.card-statement__more{display:block;padding:var(--spacing-3);border-top:1px solid var(--color-border-default);font-size:var(--font-size-sm);font-weight:600;color:var(--color-text-accent)}
+@media (prefers-reduced-motion: reduce) { .card-statement__list:not([hidden]){animation:pf-fade-in var(--motion-instant) linear} .card-statement__toggle-label svg{transition:none} }
+@media (max-width: 680px) { .card-statement__pending{flex-direction:column;align-items:stretch} .card-statement__pending>.ui-button{width:100%;justify-content:center} }

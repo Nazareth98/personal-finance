@@ -552,10 +552,18 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
   await expect(statements.getByRole('tab', { name: /nov\/2026/ })).toHaveAttribute('aria-selected', 'true');
   await expect(statements).toContainText('Em aberto · R$ 120,00');
   await expect(page.getByText('R$ 240,00 de R$ 5.000,00 · 4,8%')).toBeVisible();
-  await expect(page.getByRole('tabpanel')).toContainText('Notebook 1/2');
+  // D-042: a fatura abre com os lançamentos recolhidos.
+  const toggle = page.getByRole('tabpanel').getByRole('button', { name: /^Lançamentos/ });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('tabpanel').getByText('Notebook 1/2')).toBeHidden();
+  await toggle.click();
+  await expect(page.getByRole('tabpanel').getByText('Notebook 1/2')).toBeVisible();
   await statements.getByRole('tab', { name: /nov\/2026/ }).press('ArrowRight');
   await expect(statements.getByRole('tab', { name: /dez\/2026/ })).toBeFocused();
-  await expect(page.getByRole('tabpanel')).toContainText('Notebook 2/2');
+  // Trocar de aba recolhe de novo.
+  await expect(page.getByRole('tabpanel').getByRole('button', { name: /^Lançamentos/ })).toHaveAttribute('aria-expanded', 'false');
+  await page.getByRole('tabpanel').getByRole('button', { name: /^Lançamentos/ }).click();
+  await expect(page.getByRole('tabpanel').getByText('Notebook 2/2')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Vincular pagamento' })).toHaveCount(0);
   await statements.getByRole('tab', { name: /nov\/2026/ }).click();
 
