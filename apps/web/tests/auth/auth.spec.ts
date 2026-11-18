@@ -446,8 +446,16 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
   await mockSupabase(page, true, writes);
   await login(page);
   await page.goto('/#cards');
-  await expect(page.getByRole('table', { name: 'Faturas dos cartões' })).toContainText('R$ 120,00');
-  await expect(page.getByRole('table', { name: 'Parcelas futuras' })).toContainText('2/2');
+  const statements = page.getByRole('tablist', { name: 'Faturas do Cartão principal' });
+  await expect(statements.getByRole('tab', { name: /nov\/2026/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(statements).toContainText('Em aberto · R$ 120,00');
+  await expect(page.getByText('R$ 240,00 de R$ 5.000,00 · 4,8%')).toBeVisible();
+  await expect(page.getByRole('tabpanel')).toContainText('Notebook 1/2');
+  await statements.getByRole('tab', { name: /nov\/2026/ }).press('ArrowRight');
+  await expect(statements.getByRole('tab', { name: /dez\/2026/ })).toBeFocused();
+  await expect(page.getByRole('tabpanel')).toContainText('Notebook 2/2');
+  await expect(page.getByRole('button', { name: 'Vincular pagamento' })).toHaveCount(0);
+  await statements.getByRole('tab', { name: /nov\/2026/ }).click();
 
   await expect(page.getByText('Compra removida')).toHaveCount(0);
   await expect(page.getByText('R$ 90,00')).toHaveCount(0);
