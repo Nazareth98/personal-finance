@@ -256,6 +256,11 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     if (error) throw error;
   }
 
+  async deleteCategoryBudget(categoryId: string): Promise<void> {
+    const { error } = await this.client.rpc('delete_category_budget', { p_category_id: categoryId });
+    if (error) throw error;
+  }
+
   async createSavingsBox(draft: SavingsBoxDraft): Promise<void> {
     const { error } = await this.client.rpc('create_savings_box', {
       p_name: draft.name,

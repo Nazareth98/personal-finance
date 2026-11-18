@@ -107,6 +107,7 @@ export interface LedgerRepository {
   deleteCategory(categoryId: string): Promise<void>;
   createManualTransaction(draft: ManualTransactionDraft): Promise<void>;
   saveCategoryBudget(draft: CategoryBudgetDraft): Promise<void>;
+  deleteCategoryBudget(categoryId: string): Promise<void>;
   createSavingsBox(draft: SavingsBoxDraft): Promise<void>;
   createSavingsMovement(draft: SavingsMovementDraft): Promise<void>;
   linkSavingsMovement(draft: SavingsMovementLinkDraft): Promise<void>;
