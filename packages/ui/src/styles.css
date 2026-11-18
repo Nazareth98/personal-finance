@@ -226,3 +226,15 @@
 .ui-tab:hover{background:var(--color-bg-subtle)}
 .ui-tab:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
 @media (max-width: 680px) { .ui-tabs { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); } .ui-tab { min-width:0;padding:var(--spacing-2); } }
+/* DivergingColumnChart: positivo acima, negativo abaixo e hachurado; escala por lado. */
+.ui-diverging{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--spacing-2)}
+.ui-diverging__group{display:grid;grid-template-rows:var(--ui-diverging-up) var(--ui-diverging-down) auto;gap:0;min-width:0}
+.ui-diverging__up{display:flex;justify-content:center;align-items:flex-end;border-bottom:1px solid var(--color-text-secondary)}
+.ui-diverging__down{display:flex;justify-content:center;align-items:flex-start}
+.ui-diverging__group>.ui-chart__column-label{padding-top:var(--spacing-2)}
+.ui-diverging__bar{width:min(28px,55%);box-sizing:border-box}
+.ui-diverging__bar--positive,.ui-chart__swatch--positive{background:var(--color-finance-positive)}
+.ui-diverging__bar--positive{border-radius:4px 4px 0 0}
+.ui-diverging__bar--negative,.ui-chart__swatch--negative{background:repeating-linear-gradient(45deg,var(--color-finance-negative) 0 3px,transparent 3px 6px);border:1px solid var(--color-finance-negative)}
+.ui-diverging__bar--negative{border-radius:0 0 4px 4px}
+

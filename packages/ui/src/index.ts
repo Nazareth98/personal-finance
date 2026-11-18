@@ -34,7 +34,8 @@ export {
   CircleCheck as StatusOkIcon,
   TrendingUp as StatusTrendIcon,
   CalendarDays as CalendarIcon,
-  ExternalLink as OpenIcon
+  ExternalLink as OpenIcon,
+  RefreshCw as SyncIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,
@@ -96,6 +97,8 @@ export { CashFlowChart } from './components/CashFlowChart';
 export type { CashFlowChartProps,CashFlowPoint } from './components/CashFlowChart';
 export { TrendLineChart } from './components/TrendLineChart';
 export { ColumnChart } from './components/ColumnChart';
+export { DivergingColumnChart } from './components/DivergingColumnChart';
+export type { DivergingColumnChartProps, DivergingPoint } from './components/DivergingColumnChart';
 export type { ColumnChartProps,ColumnPoint } from './components/ColumnChart';
 export type { TrendLineChartProps,TrendPoint } from './components/TrendLineChart';
 export { CategoryDonutChart } from './components/CategoryDonutChart';

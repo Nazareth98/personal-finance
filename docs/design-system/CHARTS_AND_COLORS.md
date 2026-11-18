@@ -32,6 +32,7 @@ As cores categóricas indicam apenas categorias distintas e não têm significad
 | `CashFlowChart` | `data: { label, axisLabel?, incomeCents, expenseCents, current? }[]`, `formatValue`, `layout?: 'horizontal' | 'vertical'`, `collapsibleDetails?` | comparação de receitas e despesas por período; a Visão geral usa colunas verticais |
 | `TrendLineChart` | `data: { label, valueCents }[]`, `formatValue`, `valueTone?: 'signed' | 'neutral'` | tendência temporal de saldos/resultado; use `neutral` para magnitudes sem ganho/perda, como compromissos de cartão |
 | `ColumnChart` | `data: { label, axisLabel?, valueCents, projected?, current? }[]`, `formatValue`, `title`, `valueLabel?`, `projectedLabel?`, `collapsibleDetails?` | uma série de magnitudes por período; previsto usa textura listrada, não só cor |
+| `DivergingColumnChart` | `data: { label, axisLabel?, valueCents }[]`, `formatValue`, `title`, `positiveLabel?`, `negativeLabel?`, `collapsibleDetails?` | valores com sinal por período; positivo acima e negativo abaixo da linha de zero, hachurado, cada lado na própria escala |
 | `CategoryDonutChart` | `data: { label, valueCents }[]`, `formatValue` | composição de despesas por categoria |
 
 O layout é responsivo, usa CSS/SVG sem biblioteca externa e fornece valores textuais. Os gráficos recebem `bigint`; a função de escala converte **apenas razões limitadas para coordenadas ou porcentagens**, nunca o montante integral em ponto flutuante.

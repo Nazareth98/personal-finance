@@ -292,6 +292,37 @@ test('registra transferência manual nas duas pontas pelo procedimento atômico'
   expect(rpcCalls[0].body).toContain('25000');
 });
 
+test('contas: grupos por tipo, edição e arquivamento sem perder lançamentos', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.getByRole('link', { name: /Contas/ }).click();
+
+  const checking = page.getByRole('region', { name: /Contas correntes/ });
+  await expect(checking.getByRole('heading', { name: 'Conta principal' })).toBeVisible();
+  await expect(page.getByRole('region', { name: /Reservas e investimentos/ }).getByRole('heading', { name: 'Reserva' })).toBeVisible();
+  await expect(page.getByRole('region', { name: /Cartões de crédito/ }).getByRole('heading', { name: 'Cartão principal' })).toBeVisible();
+  await expect(checking.getByRole('link', { name: 'Ver lançamentos' })).toHaveAttribute('href', /account=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/);
+
+  await page.getByRole('button', { name: 'Editar conta Conta principal' }).click();
+  const edit = page.getByRole('dialog', { name: 'Editar Conta principal' });
+  await expect(edit.getByLabel('Tipo')).toBeDisabled();
+  await expect(edit.getByLabel('Saldo inicial (R$)')).toHaveValue('1.000,00');
+  await edit.getByLabel('Nome da conta').fill('Conta do dia a dia');
+  await edit.getByRole('button', { name: 'Salvar conta' }).click();
+  await expect(page.getByText('Conta atualizada.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Editar conta Conta principal' }).click();
+  await page.getByRole('dialog', { name: 'Editar Conta principal' }).getByRole('button', { name: 'Arquivar conta' }).click();
+  await page.getByRole('dialog', { name: 'Arquivar Conta principal?' }).getByRole('button', { name: 'Arquivar conta' }).click();
+  await expect(page.getByText('Conta arquivada; os lançamentos continuam no livro.')).toBeVisible();
+
+  expect(writes.map(write => write.path)).toEqual(['/rest/v1/rpc/update_financial_account', '/rest/v1/rpc/archive_financial_account']);
+  expect(writes[0].body).toContain('Conta do dia a dia');
+  expect(writes[0].body).toContain('100000');
+  expect(writes[1].body).toContain('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+});
+
 test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({ page }) => {
   const writes: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, writes);
@@ -451,8 +482,13 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await login(page);
   await page.goto('/#categories');
 
-  await expect(page.getByRole('row', { name: /Salário/ })).toContainText('Estrutural');
-  await expect(page.getByRole('row', { name: /Salário/ })).toContainText('Protegida');
+  const structural = page.getByRole('region', { name: /Estruturais/ });
+  await expect(structural.getByRole('row', { name: /Salário/ })).toContainText('Protegida');
+  await expect(page.getByRole('region', { name: /Personalizadas/ }).getByRole('row', { name: /Hobbies/ })).toBeVisible();
+  await page.getByRole('group', { name: 'Aplicação' }).getByRole('button', { name: 'Receitas' }).click();
+  await expect(structural.getByRole('row', { name: /Supermercado/ })).toHaveCount(0);
+  await expect(structural.getByRole('row', { name: /Salário/ })).toBeVisible();
+  await page.getByRole('group', { name: 'Aplicação' }).getByRole('button', { name: 'Todas' }).click();
   await page.getByRole('button', { name: 'Nova categoria' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Nova categoria' });
   await createDialog.getByLabel('Nome').fill('Pets');
@@ -552,9 +588,11 @@ test('exibe estado da fonte e solicita sincronização sem enviar credenciais', 
   await login(page);
   await page.goto('/#connections');
   await expect(page.getByRole('heading', { name: 'Conexões bancárias' })).toBeVisible();
-  await expect(page.getByText('Banco Sintético')).toBeVisible();
-  await expect(page.getByText('Atualizada')).toBeVisible();
-  await expect(page.getByRole('table', { name: 'Conexões MeuPluggy' })).toContainText('13/11/2026');
+  const ready = page.getByRole('region', { name: /Atualizadas/ });
+  await expect(ready.getByRole('heading', { name: 'Banco Sintético' })).toBeVisible();
+  await expect(ready.getByText('Atualizada', { exact: true })).toBeVisible();
+  await expect(ready).toContainText('13/11/2026');
+  await expect(page.getByLabel('Resumo das conexões')).toContainText('Tudo certo');
   await page.getByRole('button', { name: 'Sincronizar agora' }).click();
   await expect.poll(() => writes.some(write => write.path === '/functions/v1/pluggy-sync')).toBe(true);
   const syncCall = writes.find(write => write.path === '/functions/v1/pluggy-sync');

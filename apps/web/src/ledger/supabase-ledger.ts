@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -194,6 +194,18 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const { error } = await this.client.from('financial_accounts').insert({
       name: draft.name.trim(), account_type: draft.type, opening_balance_cents: draft.openingBalanceCents.toString()
     });
+    if (error) throw error;
+  }
+
+  async updateAccount(accountId: string, update: AccountUpdate): Promise<void> {
+    const { error } = await this.client.rpc('update_financial_account', {
+      p_account_id: accountId, p_name: update.name, p_opening_balance_cents: update.openingBalanceCents.toString()
+    });
+    if (error) throw error;
+  }
+
+  async archiveAccount(accountId: string): Promise<void> {
+    const { error } = await this.client.rpc('archive_financial_account', { p_account_id: accountId });
     if (error) throw error;
   }
 

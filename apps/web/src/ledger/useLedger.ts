@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -7,6 +7,8 @@ export type LedgerState = {
   error: string;
   reload: () => Promise<void>;
   createAccount: (draft: AccountDraft) => Promise<void>;
+  updateAccount: (accountId: string, update: AccountUpdate) => Promise<void>;
+  archiveAccount: (accountId: string) => Promise<void>;
   createCategory: (draft: CategoryDraft) => Promise<void>;
   updateCategory: (categoryId: string, update: CategoryUpdate) => Promise<void>;
   moveCategory: (categoryId: string, direction: -1 | 1) => Promise<void>;
@@ -45,6 +47,18 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   }, [repository]);
 
   useEffect(() => { void reload(); }, [reload]);
+
+  async function updateAccount(accountId: string, update: AccountUpdate) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.updateAccount(accountId, update);
+    await reload();
+  }
+
+  async function archiveAccount(accountId: string) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.archiveAccount(accountId);
+    await reload();
+  }
 
   async function createAccount(draft: AccountDraft) {
     if (!repository) throw new Error('ledger repository missing');
@@ -132,7 +146,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   }
 
   return {
-    data, status, error, reload, createAccount,
+    data, status, error, reload, createAccount, updateAccount, archiveAccount,
     createCategory: draft => mutateCategory(() => repository!.createCategory(draft)),
     updateCategory: (categoryId, update) => mutateCategory(() => repository!.updateCategory(categoryId, update)),
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),

@@ -91,7 +91,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .brand{text-decoration:none}
 .navigation a:focus-visible,.brand:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
 .navigation a:focus-visible{outline-offset:-3px}/* a lista corta o eixo X; anel interno evita foco recortado */
-.template-page{display:grid;gap:var(--spacing-6)}
+.template-page{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--spacing-6)}
 .template-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--spacing-4);flex-wrap:wrap}
 .template-heading h1{margin-bottom:var(--spacing-2)}
 .template-heading__actions{display:flex;align-items:center;justify-content:flex-end;gap:var(--spacing-2);flex-wrap:wrap}
@@ -346,7 +346,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .summary-strip>div+div{border-left:1px solid var(--color-border-default)}
 .summary-strip span{font-size:var(--font-size-xs)}
 .summary-strip>div>span:first-child{font-size:var(--font-size-sm)}
-.summary-strip strong{font-size:clamp(14px,9cqi,24px);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+.summary-strip>div>strong{font-size:clamp(14px,9cqi,24px);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
 .status-group{display:grid;gap:var(--spacing-3);min-width:0}
 .status-group__title{display:flex;align-items:center;gap:var(--spacing-2);margin:0;font-size:var(--font-size-base)}
 .status-group__title .muted{font-weight:500}
@@ -423,3 +423,31 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 @media (max-width: 1000px) {
   .drawer.ui-dialog{margin:auto 0 0;width:100%;height:auto;max-height:85vh;border:1px solid var(--color-border-default);border-bottom:0;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding-bottom:env(safe-area-inset-bottom)}
 }
+.goal-card__actions--links>.ui-button:last-child{grid-column:auto}
+.goal-card__actions--links>.ui-button:only-child{grid-column:1/-1}
+.goal-card__actions>a.ui-button{text-decoration:none}
+.category-filters{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--spacing-3)}
+.category-filters>.ui-field{flex:1 1 260px;max-width:360px}
+.category-more{display:flex;justify-content:center;padding:var(--spacing-2);border-top:1px solid var(--color-border-default)}
+@media(max-width:680px){.category-filters>.ui-field{max-width:none}.category-filters>.budget-period-kind{box-sizing:border-box;width:100%;min-width:0;overflow-x:auto}.category-filters>.budget-period-kind>.ui-button{flex:1 0 auto}}
+.goal-card--warning{border-color:var(--color-status-warning)}
+.connection-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-2);margin:0;font-size:var(--font-size-xs)}
+.connection-times dt{color:var(--color-text-secondary)}
+.connection-times dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.connection-alert{margin:0;padding:var(--spacing-3);border-radius:var(--radius-md);background:var(--color-bg-subtle);font-size:var(--font-size-sm)}
+.connection-note{margin:0;font-size:var(--font-size-xs)}
+/* Relatórios (D-040): gráfico divergente e composição do mês lado a lado. */
+.report-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--spacing-4);align-items:start}
+.report-composition{display:grid;gap:var(--spacing-2)}
+.report-composition__heading{display:flex;justify-content:space-between;align-items:center;gap:var(--spacing-2)}
+.report-composition__heading h2{margin:0;font-size:var(--font-size-base)}
+.report-composition__rows{display:grid;margin:0}
+.report-composition__rows>div{display:flex;justify-content:space-between;gap:var(--spacing-2);padding:var(--spacing-2) 0;border-top:1px solid var(--color-border-default);font-size:var(--font-size-sm)}
+.report-composition__rows dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.report-composition__total{border-top:2px solid var(--color-text-primary)!important;font-size:var(--font-size-base)!important}
+.report-composition__total dt{font-weight:700}
+.report-composition__note{margin:0;font-size:var(--font-size-sm)}
+.report-criteria{padding:var(--spacing-4) var(--spacing-6)}
+.report-criteria summary{font-weight:600;cursor:pointer}
+.report-criteria p{margin:var(--spacing-2) 0 0}
+@media(max-width:1000px){.report-grid{grid-template-columns:minmax(0,1fr)}}

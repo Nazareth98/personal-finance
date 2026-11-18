@@ -58,6 +58,7 @@ export type LedgerData = {
 };
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;
+export type AccountUpdate = Pick<FinancialAccount, 'name' | 'openingBalanceCents'>;
 export type CategoryBudgetDraft = Pick<CategoryBudget, 'categoryId' | 'percentageBasisPoints'>;
 export type CategoryDraft = Pick<Category, 'name' | 'applicability' | 'iconKey' | 'colorKey'>;
 export type CategoryUpdate = Pick<Category, 'name' | 'iconKey' | 'colorKey'>;
@@ -100,6 +101,9 @@ export type ManualTransactionDraft = {
 export interface LedgerRepository {
   load(): Promise<LedgerData>;
   createAccount(draft: AccountDraft): Promise<void>;
+  updateAccount(accountId: string, update: AccountUpdate): Promise<void>;
+  /** Arquiva a conta; os lançamentos continuam no livro. */
+  archiveAccount(accountId: string): Promise<void>;
   createCategory(draft: CategoryDraft): Promise<void>;
   updateCategory(categoryId: string, update: CategoryUpdate): Promise<void>;
   moveCategory(categoryId: string, direction: -1 | 1): Promise<void>;
