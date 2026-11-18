@@ -4,7 +4,7 @@ Atualizado em: 18/11/2026.
 
 ## Situação
 
-- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines foram regenerados no CI Linux em 18/11/2026.
+- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines foram regenerados no CI Linux em 18/11/2026, inclusive após a nova navegação mobile.
 - No modo autenticado, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
@@ -26,8 +26,10 @@ Atualizado em: 18/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. atualizar os baselines mobile/tablet no CI com `[update visual baselines]` após revisar as diferenças da nova navegação;
-2. próxima tela do ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md): Visão geral, ou tabelas em cartões no mobile.
+1. **Decisão pendente do proprietário — tabelas no mobile (abaixo de 680 px):** canvas [“Tabelas no mobile”](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) com A genérica (cartão de pares rótulo: valor, automático para toda tabela) e B compacta (lista com principal, detalhe, valor e ação; cada tabela declara o papel das colunas, A como fallback). Recomendação: B. Em ambas, a ordenação vira um seletor “Ordenar por” e a tabela acima de 680 px não muda. Após a escolha, implementar em `DataTable` e seguir o ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md).
+2. depois: Visão geral no ciclo do redesign.
+
+Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Navegação mobile (concluída, D-031): [canvas](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
 
 ## Última validação
 
