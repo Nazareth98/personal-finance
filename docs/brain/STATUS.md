@@ -88,6 +88,8 @@ Canvas do Claude Design são privados da conta que os criou; ao trocar de conta,
 
 - Contas, Categorias, Conexões e Relatórios em 18/11/2026 (D-040): `account-panels`, `category-panels` e `connection-panels` (4 testes), `DivergingColumnChart` com story, edição e arquivamento de conta. Migration `account_management` aplicada no Supabase hospedado; teste como proprietário em transação revertida aprovou 6 cenários (editar, nome inválido, arquivar mantendo os 359 lançamentos, editar arquivada recusado, conta inexistente, `anon` recusado), sem resíduo. Checks estáticos e 53 testes unitários passaram aqui; `pnpm check` e E2E ficam para o CI. Bundle local com ícones simulados: sem overflow de 320 a 1280 px nas 10 telas autenticadas.
 
+- Cabeçalho mobile, logout, filtros, login e movimento em 18/11/2026 (D-041): tokens de movimento com validação e teste (9 testes de tokens), `design:check` cobrindo a tabela de movimento, `DataState` com skeleton mínimo, `Input` com ícone e controle à direita (stories novas), confirmação de saída, filtro por ícone com etiquetas e novo login. Bundle local com ícones simulados: sem overflow de 320 a 412 px nas telas alteradas, foco inicial em Cancelar e conteúdo começando logo abaixo do cabeçalho. Baselines visuais mudam de propósito (cabeçalho mobile em todas as telas). E2E novos: título e ação no cabeçalho mobile (com axe), confirmação de saída, mostrar senha e contador/etiqueta de filtro.
+
 ## Bloqueios
 
 - Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.

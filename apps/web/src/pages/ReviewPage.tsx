@@ -114,6 +114,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
       onSelect={id => change('view', id === 'history' ? 'history' : '')}
       items={[{ id: 'pending', label: <strong>Pendências · {pending.length}</strong> }, { id: 'history', label: <strong>Histórico · {history.length}</strong> }]}>
       <TransactionFilterFields collapsible toolbar={reasonChips} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
+        extraActiveCount={view === 'history' && historyFilter !== 'all' ? 1 : 0}
         accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={reviewNatures}>
         {view === 'history' && <Select label="Filtrar histórico" value={historyFilter === 'all' ? '' : historyFilter} options={[
           { value: '', label: 'Todos' }, { value: 'automatic', label: 'Automáticos' }, { value: 'confirmed', label: 'Confirmados' }

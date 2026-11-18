@@ -140,5 +140,18 @@
     "sticky": 20,
     "dropdown": 30,
     "toast": 50
+  },
+  "motion": {
+    "duration": {
+      "instant": 80,
+      "fast": 150,
+      "base": 220,
+      "slow": 320
+    },
+    "easing": {
+      "standard": "cubic-bezier(.2, 0, 0, 1)",
+      "enter": "cubic-bezier(0, 0, 0, 1)",
+      "exit": "cubic-bezier(.3, 0, 1, 1)"
+    }
   }
 }

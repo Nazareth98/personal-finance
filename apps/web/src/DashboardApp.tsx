@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
@@ -18,6 +18,7 @@ import { ConnectionsPage } from './pages/ConnectionsPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { usePwa } from './hooks/usePwa';
+import { PageActionSlotContext } from './components/PageAction';
 import { pendingReviewCount } from './lib/review-queue';
 import type { PageProps } from './pages/PageProps';
 
@@ -65,6 +66,15 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   const [page, setPage] = useState<PageId>(getPage);
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [actionSlot, setActionSlot] = useState<HTMLDivElement | null>(null);
+  const cancelSignOut = useRef<HTMLButtonElement>(null);
+  // Confirmação de saída começa no Cancelar (D-041); o diálogo nativo focaria o botão de fechar.
+  useEffect(() => {
+    if (!confirmingSignOut) return;
+    const frame = requestAnimationFrame(() => cancelSignOut.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [confirmingSignOut]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const { theme, setPreference } = useTheme();
@@ -91,18 +101,22 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       await onSignOut();
     } finally {
       setSigningOut(false);
+      setConfirmingSignOut(false);
     }
   }
 
   const CurrentPage = pages[page];
   const newEntryLabel = `Nova movimentação${ledgerRepository ? '' : ' (demo)'}`;
-  return <div className={`app-shell${sidebarCollapsed ? ' app-shell--sidebar-collapsed' : ''}`}>
+  const pageTitle = navigation.find(item => item.id === page)?.title ?? '';
+  return <PageActionSlotContext.Provider value={actionSlot}><div className={`app-shell${sidebarCollapsed ? ' app-shell--sidebar-collapsed' : ''}`}>
     <aside className={`sidebar${sidebarCollapsed ? ' is-collapsed' : ''}`}>
       <div className="sidebar-header">
         <a className="brand" href="#overview" aria-label="Personal Finance Controle pessoal — início">
           <span className="brand-symbol"><Icon icon={BrandIcon} size="lg" className="brand-mark"/></span>
           <span className="brand-copy"><strong>Personal Finance</strong>{' '}<small>Controle pessoal</small></span>
         </a>
+        {/* Até 1000 px o título da aba ocupa o lugar da marca; o h1 continua na página para leitores de tela. */}
+        <p className="app-bar__title" aria-hidden="true">{pageTitle}</p>
         <Button className="sidebar-collapse" size="sm" variant="ghost" aria-controls="sidebar-navigation"
           aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
           title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'} onClick={() => setSidebarCollapsed(value => !value)}>
@@ -121,6 +135,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
         </a>)}
       </nav>
       <div className="sidebar-footer">
+        <div className="app-bar__action" ref={setActionSlot} />
         <div className="sidebar-theme">
           <Button className="theme-toggle" size="sm" variant="ghost"
             aria-label={themeLabel} title={themeLabel}
@@ -128,7 +143,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
             <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm" />
           </Button>
         </div>
-        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="danger" aria-label="Sair" title="Sair" loading={signingOut} onClick={signOut}>
+        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="danger" aria-label="Sair" title="Sair" onClick={() => setConfirmingSignOut(true)}>
           <Icon icon={LogOutIcon} size="sm" /><span className="sidebar-sign-out__label">Sair</span>
         </Button>}
       </div>
@@ -157,6 +172,9 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </button>
     </nav>
     <Dialog open={moreOpen} onClose={() => setMoreOpen(false)} title="Mais telas" className="more-sheet">
+      {/* Sair fica no topo da folha, longe da zona do polegar, e sempre pede confirmação (D-041). */}
+      {onSignOut && <Button variant="ghost" size="sm" className="more-sheet__sign-out" onClick={() => { setMoreOpen(false); setConfirmingSignOut(true); }}>
+        <Icon icon={LogOutIcon} size="sm"/>Sair</Button>}
       <div className="more-sheet__grid">
         {navigation.filter(item => !primaryMobile.includes(item.id)).map(item => <a key={item.id} href={`#${item.id}`}
           aria-current={page === item.id ? 'page' : undefined} className={page === item.id ? 'is-active' : undefined}
@@ -164,12 +182,16 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
           <Icon icon={item.icon}/><span>{item.title}</span>
         </a>)}
       </div>
-      {onSignOut && <div className="more-sheet__actions">
-        <Button variant="danger" loading={signingOut} onClick={signOut}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>
-      </div>}
+    </Dialog>
+    <Dialog open={confirmingSignOut} onClose={() => setConfirmingSignOut(false)} title="Sair do Personal Finance?"
+      description="Para voltar, você entra de novo com e-mail e senha. Nada é apagado." className="sign-out-dialog">
+      <div className="transaction-form__actions sign-out-dialog__actions">
+        <Button ref={cancelSignOut} variant="secondary" onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>
+        <Button variant="danger" loading={signingOut} onClick={() => void signOut()}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>
+      </div>
     </Dialog>
     {ledgerRepository
       ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />
       : <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />}
-  </div>;
+  </div></PageActionSlotContext.Provider>;
 }

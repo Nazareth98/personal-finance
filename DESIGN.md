@@ -125,6 +125,22 @@ Crie hierarquia principalmente com superfícies, bordas e espaçamento. Sombras 
 
 Camadas (`--z-*`): `sticky` 20 (cabeçalho móvel), `dropdown` 30 (menus), `toast` 50. Diálogos usam a top layer nativa de `<dialog>` e não precisam de z-index.
 
+## Motion
+
+Movimento orienta, não decora (D-041). Anime só `transform` e `opacity`; entrar usa `enter` e é mais lento que sair (`exit`, cerca de 70% da duração). Nada passa de `slow`, exceto o skeleton e a entrada do login.
+
+| Token | Valor | Uso |
+| --- | --- | --- |
+| `motion-instant` | `80ms` | hover, pressionar, foco; fade único com movimento reduzido |
+| `motion-fast` | `150ms` | fade, troca de cor, conteúdo após skeleton, fundo de gaveta |
+| `motion-base` | `220ms` | diálogo, troca de tela, toast, painel de filtros |
+| `motion-slow` | `320ms` | gaveta inferior e lateral |
+| `ease-standard` | `cubic-bezier(.2, 0, 0, 1)` | mudança no lugar (expandir, mover) |
+| `ease-enter` | `cubic-bezier(0, 0, 0, 1)` | tudo que entra |
+| `ease-exit` | `cubic-bezier(.3, 0, 1, 1)` | tudo que sai |
+
+Skeleton fica pelo menos 300 ms na tela para não piscar. Com `prefers-reduced-motion: reduce`, deslocamentos viram fade de `motion-instant` e o shimmer para. Ao abrir gaveta ou diálogo o foco entra nele e volta para quem abriu ao fechar.
+
 ## Shapes
 
 Use os raios de 4, 8, 12 e 16 px conforme o componente existente. Não derive uma segunda escala de cantos.

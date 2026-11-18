@@ -152,7 +152,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lançamentos, metas, regras ou histórico.</p></div>
-      <div className="template-heading__actions"><PageAction label="Nova categoria" onClick={() => { setSelected(null); setEditorOpen(true); }} />{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Nova categoria" shortLabel="Categoria" onClick={() => { setSelected(null); setEditorOpen(true); }} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das categorias">
       <div><span className="muted">Ativas</span><strong>{panels.activeCount}</strong><span className="muted">{panels.activeCount - panels.customCount} estruturais · {panels.customCount} personalizadas</span></div>
       <div><span className="muted">Com meta</span><strong>{panels.budgetedCount}</strong><span className="muted">Tetos em Orçamentos</span></div>

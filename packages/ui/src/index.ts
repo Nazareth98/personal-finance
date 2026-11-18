@@ -35,7 +35,13 @@ export {
   TrendingUp as StatusTrendIcon,
   CalendarDays as CalendarIcon,
   ExternalLink as OpenIcon,
-  RefreshCw as SyncIcon
+  RefreshCw as SyncIcon,
+  Funnel as FilterIcon,
+  X as CloseIcon,
+  Mail as MailIcon,
+  Lock as LockIcon,
+  Eye as ShowIcon,
+  EyeOff as HideIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,

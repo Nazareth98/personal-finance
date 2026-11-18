@@ -56,7 +56,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
       <p className="muted">O MeuPluggy atualiza a fonte; “Sincronizar agora” busca o dado mais recente já disponível.</p></div>
-      <div className="template-heading__actions"><PageAction label="Conectar instituição" loading={connecting} onClick={() => void connect()} />{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Conectar instituição" shortLabel="Conectar" loading={connecting} onClick={() => void connect()} />{headerAction}</div></div>
     {connections.error && connections.status !== 'error' && <p className="sample-warning" role="alert">{connections.error}</p>}
     <section className="summary-strip" aria-label="Resumo das conexões">
       <div><span className="muted">Instituições</span><strong>{panels.total}</strong><span className="muted">Pelo MeuPluggy</span></div>

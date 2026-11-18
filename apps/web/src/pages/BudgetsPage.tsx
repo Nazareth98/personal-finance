@@ -88,7 +88,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
       <p className="muted">Tetos por categoria calculados sobre toda receita confirmada do período.</p></div>
-      <div className="template-heading__actions"><PageAction label="Definir meta" onClick={() => setForm({})} />{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Definir meta" shortLabel="Meta" onClick={() => setForm({})} />{headerAction}</div></div>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Base de todos os tetos</span></div>

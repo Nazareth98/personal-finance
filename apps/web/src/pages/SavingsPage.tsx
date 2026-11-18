@@ -137,7 +137,7 @@ function RealSavings({ ledger, headerAction }: { ledger: LedgerState; headerActi
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO PATRIMONIAL</p><h1>Caixinhas</h1>
       <p className="muted">Aportes e resgates permanecem neutros em renda e consumo.</p></div>
-      <div className="template-heading__actions"><PageAction label="Nova caixinha" onClick={() => setDialog({ kind: 'box' })} />{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Nova caixinha" shortLabel="Caixinha" onClick={() => setDialog({ kind: 'box' })} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das caixinhas">
       <div><span className="muted">Saldo nas caixinhas</span><strong>{formatCentsBRL(panels.totalBalanceCents)}</strong>
         <span className="muted">{boxCount === 1 ? '1 caixinha' : `${boxCount} caixinhas`}</span></div>

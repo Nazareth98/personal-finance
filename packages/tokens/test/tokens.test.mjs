@@ -66,3 +66,13 @@ test('elevação diverge entre temas e camadas fora de ordem são rejeitadas', a
   assert.match(problems, /Elevação Light e Dark/);
   assert.match(problems, /sticky < dropdown < toast/);
 });
+
+test('movimento: durações em ordem, teto de 320 ms e curvas obrigatórias', async () => {
+  const tokens = await readTokens();
+  assert.deepEqual(validateTokens(tokens), []);
+  tokens.motion.duration.slow = 500;
+  delete tokens.motion.easing.exit;
+  const problems = validateTokens(tokens).join(' ');
+  assert.match(problems, /slow ≤ 320 ms/);
+  assert.match(problems, /standard, enter e exit/);
+});

@@ -75,6 +75,18 @@ export function validateTokens(tokens) {
   // Toast precisa ficar acima de menus, que ficam acima do cabeçalho fixo.
   if (!(layers.sticky < layers.dropdown && layers.dropdown < layers.toast)) problems.push('Camadas devem respeitar sticky < dropdown < toast.');
 
+  // Movimento (D-041): entrar nunca passa de 320 ms; durações crescem de instant a slow.
+  const durations = tokens?.motion?.duration || {};
+  const order = ['instant', 'fast', 'base', 'slow'];
+  if (!order.every(name => Number.isInteger(durations[name]) && durations[name] > 0)) problems.push('Durações de movimento devem ser inteiros positivos em ms.');
+  else if (!order.every((name, index) => index === 0 || durations[order[index - 1]] < durations[name]) || durations.slow > 320) {
+    problems.push('Durações devem respeitar instant < fast < base < slow ≤ 320 ms.');
+  }
+  for (const [name, value] of Object.entries(tokens?.motion?.easing || {})) {
+    if (typeof value !== 'string' || !/^cubic-bezier\([0-9.,\s-]+\)$/.test(value)) problems.push(`Curva de movimento inválida: ${name}`);
+  }
+  if (!['standard', 'enter', 'exit'].every(name => tokens?.motion?.easing?.[name])) problems.push('Curvas standard, enter e exit são obrigatórias.');
+
   for (const category of ['spacing', 'radius', 'controlHeight']) {
     for (const [name, value] of Object.entries(tokens?.[category] || {})) {
       if (!Number.isFinite(value) || value < 0) problems.push(`Valor geométrico inválido: ${category}/${name}`);

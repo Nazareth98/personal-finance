@@ -71,7 +71,7 @@ function RealAccounts({ ledger, headerAction }: { ledger: LedgerState; headerAct
   const cards = (data?.accounts ?? []).length - nonCards;
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1><p className="muted">Saldos reconstruídos pelo saldo inicial e pelos lançamentos.</p></div>
-      <div className="template-heading__actions"><PageAction label="Nova conta" onClick={() => setForm({})} />{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Nova conta" shortLabel="Conta" onClick={() => setForm({})} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das contas">
       <div><span className="muted">Disponível em contas</span><strong>{signedBRL(panels.availableCents)}</strong><span className="muted">{nonCards === 1 ? '1 conta' : `${nonCards} contas`}, sem cartões</span></div>
       <div><span className="muted">Faturas em aberto</span><strong>{panels.openBillsCents > 0n ? `− ${formatCentsBRL(panels.openBillsCents)}` : formatCentsBRL(0n)}</strong><span className="muted">{cards === 1 ? '1 cartão' : `${cards} cartões`}</span></div>

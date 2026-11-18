@@ -24,6 +24,8 @@ const geometry = [
   ...Object.entries(tokens.controlHeight).map(([k, value]) => `  --control-height-${k}: ${value}px;`),
   ...Object.entries(tokens.typography.scale).map(([k, value]) => `  --font-size-${k}: ${value}px;`),
   ...Object.entries(tokens.zIndex).map(([k, value]) => `  --z-${k}: ${value};`),
+  ...Object.entries(tokens.motion.duration).map(([k, value]) => `  --motion-${k}: ${value}ms;`),
+  ...Object.entries(tokens.motion.easing).map(([k, value]) => `  --ease-${k}: ${value};`),
   `  --font-family-sans: ${tokens.typography.family};`
 ].join('\n');
 const css = [

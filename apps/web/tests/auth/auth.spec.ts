@@ -230,7 +230,16 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
   await expect(page.getByText('owner@example.test')).toHaveCount(0);
   await page.getByRole('button', { name: 'Sair' }).click();
+  // Saída sempre pede confirmação e começa no Cancelar (D-041).
+  const confirm = page.getByRole('dialog', { name: 'Sair do Personal Finance?' });
+  await expect(confirm.getByRole('button', { name: 'Cancelar' })).toBeFocused();
+  await confirm.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
+  await page.getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+  await page.getByRole('button', { name: 'Mostrar senha' }).click();
+  await expect(page.getByLabel('Senha', { exact: true })).toHaveAttribute('type', 'text');
 });
 
 async function login(page: Page) {
@@ -773,6 +782,9 @@ test('busca e filtra transações com estado na URL', async ({ page }) => {
   await expect(page.getByLabel('Conta', { exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Filtros', exact: true }).click();
   await page.getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  // Botão de ícone com contador e etiqueta removível do filtro ativo (D-041).
+  await expect(page.getByRole('button', { name: 'Filtros, 1 ativo' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByRole('list', { name: 'Filtros ativos' }).getByRole('button', { name: 'Remover filtro Conta: Conta principal' })).toBeVisible();
   await page.getByLabel('Período', { exact: true }).selectOption('2026-10');
   await expect(page.getByText('1 lançamento encontrado')).toBeVisible();
   await expect(page).toHaveURL(/q=SALARIO/);
@@ -862,7 +874,28 @@ test('barra inferior mostra pendências da revisão e a folha Mais permite sair'
   await expect(navigation.getByRole('link', { name: 'Revisão 4 pendentes' })).toBeVisible();
   await navigation.getByRole('button', { name: 'Mais' }).click();
   await page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+});
+
+test('no mobile o título e a ação principal sobem para o cabeçalho do app', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#budgets');
+  const bar = page.locator('.sidebar');
+  await expect(bar.locator('.app-bar__title')).toHaveText('Orçamentos');
+  await expect(page.getByRole('heading', { level: 1, name: 'Orçamentos' })).toBeAttached();
+  // Uma só ação acessível: a do cabeçalho; a do título fica oculta.
+  await expect(page.getByRole('button', { name: 'Definir meta' })).toHaveCount(1);
+  await bar.getByRole('button', { name: 'Definir meta' }).click();
+  await expect(page.getByRole('dialog', { name: 'Definir meta' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.goto('/#transactions');
+  await expect(bar.locator('.app-bar__title')).toHaveText('Transações');
+  await expect(bar.getByRole('button', { name: 'Definir meta' })).toHaveCount(0);
+  const scan = await new AxeBuilder({ page }).include('.sidebar').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  expect(scan.violations).toEqual([]);
 });
 
 test('tabelas viram lista compacta no mobile com ordenação e ações', async ({ page }) => {

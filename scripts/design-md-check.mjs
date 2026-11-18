@@ -26,4 +26,7 @@ for (const [name, value] of Object.entries(tokens.elevation.light)) {
 }
 for (const [name, value] of Object.entries(tokens.zIndex)) assert.ok(design.includes(`\`${name}\` ${value}`), `DESIGN.md camada: ${name}`);
 
+for (const [name, value] of Object.entries(tokens.motion.duration)) assert.ok(design.includes(`| \`motion-${name}\` | \`${value}ms\` |`), `DESIGN.md movimento: ${name}`);
+for (const [name, value] of Object.entries(tokens.motion.easing)) assert.ok(design.includes(`| \`ease-${name}\` | \`${value}\` |`), `DESIGN.md curva: ${name}`);
+
 console.log('✓ DESIGN.md sincronizado com themes.json.');
