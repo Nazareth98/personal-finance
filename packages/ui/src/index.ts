@@ -17,6 +17,8 @@ export {
   FolderTree as CategoriesIcon,
   ArrowUp as MoveUpIcon,
   ArrowDown as MoveDownIcon,
+  ChevronLeft as PreviousIcon,
+  ChevronRight as NextIcon,
   Pencil as EditIcon,
   Archive as ArchiveIcon,
   Trash2 as DeleteIcon,

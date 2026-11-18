@@ -107,6 +107,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .review-tabs{display:flex;gap:var(--spacing-2);flex-wrap:wrap}
 .review-toolbar>.ui-field{width:min(100%,220px)}
 .review-card>.ui-pagination{padding:var(--spacing-4)}
+.review-filters{padding:var(--spacing-4);border-bottom:1px solid var(--color-border-default)}
 .review-versions{display:grid;gap:var(--spacing-1);padding:var(--spacing-3);border-radius:var(--radius-md);background:var(--color-bg-subtle);font-size:var(--font-size-sm)}
 .review-versions p,.review-versions ul{margin:0}
 .review-versions ul{padding-left:var(--spacing-4);color:var(--color-text-primary)}
@@ -151,6 +152,11 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 /* Data table template layout */
 .transactions-demo{margin-top:var(--spacing-8);display:grid;gap:var(--spacing-4)}
 .transactions-filters{display:grid;grid-template-columns:minmax(200px,2fr) repeat(2,minmax(150px,1fr));gap:var(--spacing-3)}
+.transaction-filters{display:grid;gap:var(--spacing-2)}
+.period-navigator{display:inline-flex;align-items:center;gap:var(--spacing-1)}
+.period-navigator__label{min-width:76px;text-align:center;font-size:var(--font-size-sm)}
+.transaction-filters .transactions-filters{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.transaction-filters__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-3);min-height:32px}
 .transactions-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--spacing-3)}
 .transactions-table-card{padding:0;overflow:hidden}
 .transactions-table-card>.ui-pagination{padding:var(--spacing-4)}

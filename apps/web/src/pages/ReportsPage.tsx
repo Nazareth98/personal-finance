@@ -14,12 +14,12 @@ function nextCompetence(transactions: NonNullable<LedgerState['data']>['transact
 }
 
 const forecastColumns: DataTableColumn<ForecastMonth>[] = [
-  { key: 'competence', header: 'Competência', headerIcon: ReportsIcon, iconTone: 'transfer', cell: row => formatCompetence(row.competence) },
-  { key: 'income', header: 'Receita recorrente', align: 'end', cell: row => formatCentsBRL(row.recurringIncomeCents) },
-  { key: 'spending', header: 'Gastos planejados', align: 'end', cell: row => formatCentsBRL(row.plannedSpendingCents) },
-  { key: 'installments', header: 'Parcelas', align: 'end', cell: row => formatCentsBRL(row.installmentCents) },
-  { key: 'savings', header: 'Aportes', align: 'end', cell: row => formatCentsBRL(row.plannedSavingsCents) },
-  { key: 'net', header: 'Resultado previsto', align: 'end', cell: row => <strong><FinancialValue value={formatCentsBRL(row.netCents)}
+  { key: 'competence', header: 'Competência', headerIcon: ReportsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.competence, cell: row => formatCompetence(row.competence) },
+  { key: 'income', header: 'Receita recorrente', align: 'end', sortable: true, sortValue: row => row.recurringIncomeCents, cell: row => formatCentsBRL(row.recurringIncomeCents) },
+  { key: 'spending', header: 'Gastos planejados', align: 'end', sortable: true, sortValue: row => row.plannedSpendingCents, cell: row => formatCentsBRL(row.plannedSpendingCents) },
+  { key: 'installments', header: 'Parcelas', align: 'end', sortable: true, sortValue: row => row.installmentCents, cell: row => formatCentsBRL(row.installmentCents) },
+  { key: 'savings', header: 'Aportes', align: 'end', sortable: true, sortValue: row => row.plannedSavingsCents, cell: row => formatCentsBRL(row.plannedSavingsCents) },
+  { key: 'net', header: 'Resultado previsto', align: 'end', sortable: true, sortValue: row => row.netCents, cell: row => <strong><FinancialValue value={formatCentsBRL(row.netCents)}
     tone={row.netCents < 0n ? 'negative' : row.netCents > 0n ? 'positive' : 'neutral'} /></strong> }
 ];
 

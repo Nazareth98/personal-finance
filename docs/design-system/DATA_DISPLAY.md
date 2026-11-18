@@ -30,3 +30,10 @@ Use os formatadores de `apps/web/src/lib/demo-transactions.ts`; não formate dat
 | data bancária (`yyyy-MM-dd`) | `05/11/2026` | `formatLocalDate`, sem `Date`, para não deslocar o dia |
 | competência (`yyyy-MM`) | `nov/2026` | `formatCompetence` |
 | instante operacional (timestamp) | `18/11/2026, 10:30` | `formatDateTime`, no fuso do navegador |
+
+## Ordenação, busca e filtros
+
+- Toda coluna de dados declara `sortable` e `sortValue` (data ISO, dinheiro em `bigint`, percentual em pontos-base, texto comparado em pt-BR); colunas de ação não ordenam.
+- Sem `onSortChange`, o `DataTable` ordena sozinho. Tabelas paginadas controlam `sort` e ordenam antes de paginar.
+- Filtros de tela vivem na URL (`#pagina?chave=valor`) via `useHashParams`, que usa `replaceState` e não polui o histórico.
+- Transações e Revisão compartilham `TransactionFilterFields`: busca por descrição sem acentos e maiúsculas, conta, categoria, natureza, contagem e “Limpar filtros”.

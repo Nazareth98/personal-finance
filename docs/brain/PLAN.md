@@ -194,6 +194,8 @@ Aceite: não há rolagem lateral da sidebar nos viewports suportados, valores ne
 
 ### 11.4 — exploração por período e ordenação
 
+Estado: concluída em 18/11/2026. Faturas, metas e gráficos na visão geral entram com a 11.5, já seguindo o período selecionado.
+
 - tornar ordenáveis todas as colunas de dados aplicáveis; colunas de ações permanecem sem ordenação;
 - ordenar datas cronologicamente, dinheiro por `bigint`, percentuais por pontos-base e texto com comparação pt-BR;
 - adicionar seleção de mês/ano na visão geral, com anterior, próximo e período atual;

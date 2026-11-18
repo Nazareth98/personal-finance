@@ -615,3 +615,62 @@ test('revisa novamente preservando versões e registra o outro lado da transfer�
     p_counterpart_transaction_id: null, p_counterpart_account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
   });
 });
+
+test('navega por período na visão geral e mantém o mês na URL', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  const indicators = page.getByLabel('Indicadores do livro financeiro');
+  const navigator = page.getByRole('group', { name: 'Período da visão geral' });
+  await expect(navigator).toContainText('nov/2026');
+  await expect(indicators.getByText('R$ 5.000,00')).toBeVisible();
+  await navigator.getByRole('button', { name: 'Mês anterior' }).click();
+  await expect(navigator).toContainText('out/2026');
+  await expect(page).toHaveURL(/#overview\?period=2026-10$/);
+  await expect(indicators.getByText('R$ 6.200,00')).toHaveCount(2);
+  await navigator.getByRole('button', { name: 'Próximo mês' }).click();
+  await expect(navigator).toContainText('nov/2026');
+  await page.getByRole('link', { name: 'Lançamentos no período' }).click();
+  await expect(page.getByLabel('Período', { exact: true })).toHaveValue('2026-11');
+});
+
+test('busca e filtra transações com estado na URL', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#transactions');
+  const table = page.getByRole('table', { name: 'Livro financeiro' });
+  await page.getByRole('searchbox', { name: 'Pesquisar descrição' }).fill('SALARIO');
+  await expect(page.getByText('5 lançamentos encontrados')).toBeVisible();
+  await page.getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  await page.getByLabel('Período', { exact: true }).selectOption('2026-10');
+  await expect(page.getByText('1 lançamento encontrado')).toBeVisible();
+  await expect(page).toHaveURL(/q=SALARIO/);
+  await expect(page).toHaveURL(/period=2026-10/);
+  // O mock não restaura sessão em reload; sair e voltar pela mesma URL remonta a tela a partir dela.
+  const filteredUrl = page.url();
+  await page.goto('/#overview');
+  await page.goto(filteredUrl);
+  await expect(page.getByRole('searchbox', { name: 'Pesquisar descrição' })).toHaveValue('SALARIO');
+  await expect(page.getByText('1 lançamento encontrado')).toBeVisible();
+
+  const amount = table.getByRole('columnheader', { name: /Valor/ });
+  await amount.getByRole('button').click();
+  await expect(amount).toHaveAttribute('aria-sort', 'ascending');
+
+  await page.getByRole('button', { name: 'Limpar filtros' }).first().click();
+  await expect(page.getByRole('searchbox', { name: 'Pesquisar descrição' })).toHaveValue('');
+  await expect(page).toHaveURL(/#transactions$/);
+});
+
+test('busca no histórico de revisão e ordena colunas sem ordenar ações', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#review?view=history&q=bonus');
+  const table = page.getByRole('table', { name: 'Histórico de revisões' });
+  await expect(table.getByRole('row', { name: /Bônus extraordinário/ })).toBeVisible();
+  await expect(page.getByText('1 lançamento encontrado')).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Pesquisar descrição' }).fill('inexistente');
+  await expect(page.getByText('Nenhum lançamento corresponde aos filtros')).toBeVisible();
+  await page.getByRole('button', { name: 'Limpar filtros' }).click();
+  await expect(table.getByRole('columnheader', { name: 'Data' })).toHaveAttribute('aria-sort', 'descending');
+  await expect(table.getByRole('columnheader', { name: 'Ação', exact: true })).not.toHaveAttribute('aria-sort');
+});

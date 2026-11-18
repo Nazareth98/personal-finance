@@ -35,7 +35,7 @@ const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
 ];
 
 function getPage(): PageId {
-  const fragment = window.location.hash.replace(/^#/, '');
+  const fragment = window.location.hash.replace(/^#/, '').split('?')[0];
   return navigation.some(item => item.id === fragment) ? fragment as PageId : 'overview';
 }
 

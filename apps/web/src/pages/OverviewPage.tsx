@@ -1,31 +1,52 @@
-import { Badge, Card, MetricCard, CashFlowChart, DataState, type DataStatus } from '@personal-finance/ui';
+import { Badge, Button, Card, MetricCard, CashFlowChart, DataState, Icon, NextIcon, PreviousIcon, type DataStatus } from '@personal-finance/ui';
+import { useHashParams } from '../hooks/useHashParams';
 import { useState } from 'react';
 import { demoCashFlow } from '../lib/demo-charts';
 import { TransactionsDemo } from '../components/TransactionsDemo';
 import { accountsBalance, demoAccounts, demoBudgets, demoInvoices, invoiceOpenCents, monthlyReport } from '../lib/demo-finance';
 import { demoTransactions, formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
-import { accountBalance, ledgerTotals } from '@personal-finance/domain';
+import { accountBalance, addCompetenceMonths, ledgerTotals } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
 
+const currentCompetence = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+};
+
+function PeriodNavigator({ period, onChange }: { period: string; onChange: (period: string) => void }) {
+  const current = currentCompetence();
+  return <div className="period-navigator" role="group" aria-label="Período da visão geral">
+    <Button variant="ghost" size="sm" aria-label="Mês anterior" onClick={() => onChange(addCompetenceMonths(period, -1))}><Icon icon={PreviousIcon} size="sm" /></Button>
+    <strong className="period-navigator__label" aria-live="polite">{formatCompetence(period)}</strong>
+    <Button variant="ghost" size="sm" aria-label="Próximo mês" onClick={() => onChange(addCompetenceMonths(period, 1))}><Icon icon={NextIcon} size="sm" /></Button>
+    <Button variant="secondary" size="sm" disabled={period === current} onClick={() => onChange(current)}>Mês atual</Button>
+  </div>;
+}
+
 export function OverviewPage({ ledger, headerAction }: PageProps) {
   const [chartStatus,setChartStatus]=useState<DataStatus>('success');
+  const [params, setParams] = useHashParams();
   if (ledger) {
     const data = ledger.data;
     const latestPeriod = data?.transactions.reduce((latest, row) => row.competence > latest ? row.competence : latest, '') ?? '';
-    const periodRows = data?.transactions.filter(row => !latestPeriod || row.competence === latestPeriod) ?? [];
+    const requested = params.get('period') ?? '';
+    const period = /^\d{4}-(0[1-9]|1[0-2])$/.test(requested) ? requested : latestPeriod || currentCompetence();
+    const periodRows = data?.transactions.filter(row => row.competence === period) ?? [];
     const totals = ledgerTotals(periodRows);
-    const balance = (data?.accounts ?? []).filter(account => account.type !== 'credit_card').reduce((sum, account) => sum + accountBalance(account, data?.transactions ?? []), 0n);
+    // Patrimônio ao fim do período: lançamentos de competências futuras ainda não aconteceram.
+    const rowsUntilPeriod = data?.transactions.filter(row => row.competence <= period) ?? [];
+    const balance = (data?.accounts ?? []).filter(account => account.type !== 'credit_card').reduce((sum, account) => sum + accountBalance(account, rowsUntilPeriod), 0n);
     const adjustments = periodRows.filter(row => row.nature === 'adjustment').length;
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><div className="template-heading__actions"><Badge>{latestPeriod ? formatCompetence(latestPeriod) : 'Sem lançamentos'}</Badge>{headerAction}</div></div>
+      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><div className="template-heading__actions"><PeriodNavigator period={period} onChange={next => setParams({ period: next })} />{headerAction}</div></div>
       <div className="template-metrics" aria-label="Indicadores do livro financeiro">
-        <MetricCard label="Patrimônio em contas" value={formatCentsBRL(balance)} supportingText="Saldo inicial mais movimentações" />
+        <MetricCard label="Patrimônio em contas" value={formatCentsBRL(balance)} supportingText={`Saldo ao fim de ${formatCompetence(period)}`} />
         <MetricCard label="Receitas do período" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Transferências excluídas" />
         <MetricCard label="Despesas do período" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText="Consumo e ajustes" />
         <MetricCard label="Resultado do período" value={formatCentsBRL(totals.netCents)} supportingText="Receitas menos despesas" />
       </div>
-      <div className="template-grid"><Card><h2>Livro financeiro</h2><div className="summary-row"><span>Contas cadastradas</span><strong>{data?.accounts.length ?? 0}</strong></div><div className="summary-row"><span>Lançamentos no período</span><strong>{periodRows.length}</strong></div><div className="summary-row"><span>Ajustes vinculados</span><strong>{adjustments}</strong></div></Card>
+      <div className="template-grid"><Card><h2>Livro financeiro</h2><div className="summary-row"><span>Contas cadastradas</span><strong>{data?.accounts.length ?? 0}</strong></div><div className="summary-row"><a href={`#transactions?period=${period}`}>Lançamentos no período</a><strong>{periodRows.length}</strong></div><div className="summary-row"><span>Ajustes vinculados</span><strong>{adjustments}</strong></div></Card>
       <Card><h2>Resultado</h2><strong className="template-highlight">{formatCentsBRL(totals.netCents)}</strong><p className="muted">Movimentos patrimoniais permanecem neutros no resultado.</p></Card></div>
     </div>;
   }
