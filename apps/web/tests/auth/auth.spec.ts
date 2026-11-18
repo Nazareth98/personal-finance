@@ -264,9 +264,11 @@ test('deriva o resumo do livro sem contar a transferência como receita ou despe
   await mockSupabase(page);
   await login(page);
   const indicators = page.getByLabel('Indicadores do livro financeiro');
-  await expect(indicators.getByText('R$ 5.000,00')).toBeVisible();
-  await expect(indicators.getByText('R$ 230,00')).toBeVisible();
-  await expect(indicators.getByText('R$ 4.770,00')).toBeVisible();
+  await expect(indicators.getByText('R$ 5.000,00', { exact: true })).toBeVisible();
+  await expect(indicators.getByText('R$ 230,00', { exact: true })).toBeVisible();
+  await expect(indicators.getByText('+ R$ 230,00 vs. out/2026')).toBeVisible();
+  await expect(indicators.getByText('+ R$ 4.770,00', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Precisa de atenção' })).toContainText('4 lançamentos para revisar');
   await page.getByRole('link', { name: /Transações/ }).click();
   await expect(page.getByRole('table', { name: 'Livro financeiro' })).toBeVisible();
   await page.getByLabel('Período', { exact: true }).selectOption('2026');
@@ -622,14 +624,15 @@ test('navega por período na visão geral e mantém o mês na URL', async ({ pag
   const indicators = page.getByLabel('Indicadores do livro financeiro');
   const navigator = page.getByRole('group', { name: 'Período da visão geral' });
   await expect(navigator).toContainText('nov/2026');
-  await expect(indicators.getByText('R$ 5.000,00')).toBeVisible();
+  await expect(indicators.getByText('R$ 5.000,00', { exact: true })).toBeVisible();
   await navigator.getByRole('button', { name: 'Mês anterior' }).click();
   await expect(navigator).toContainText('out/2026');
   await expect(page).toHaveURL(/#overview\?period=2026-10$/);
-  await expect(indicators.getByText('R$ 6.200,00')).toHaveCount(2);
+  await expect(indicators.getByText('R$ 6.200,00', { exact: true })).toBeVisible();
+  await expect(indicators.getByText('+ R$ 6.200,00', { exact: true })).toBeVisible();
   await navigator.getByRole('button', { name: 'Próximo mês' }).click();
   await expect(navigator).toContainText('nov/2026');
-  await page.getByRole('link', { name: 'Lançamentos no período' }).click();
+  await page.getByRole('link', { name: 'Ver lançamentos de nov/2026' }).click();
   await expect(page.getByLabel('Período', { exact: true })).toHaveValue('2026-11');
 });
 
@@ -684,7 +687,7 @@ test('gráficos da visão geral seguem o período e os totais do livro', async (
   const budgets = page.getByRole('list', { name: 'Orçado versus realizado por categoria' });
   await expect(budgets).toContainText('R$ 100,00 realizados de R$ 500,00 orçados');
   await expect(budgets).toContainText('Dentro do teto');
-  await expect(page.getByRole('figure', { name: 'Compromissos de cartão por mês' })).toContainText('dez/2026 (previsto)');
+  await expect(page.getByRole('figure', { name: 'Compromissos de cartão por mês' }).getByRole('row', { name: /dez\/2026/ })).toContainText('Previsto');
 
   await page.getByRole('button', { name: 'Mês anterior' }).click();
   await expect(budgets).toContainText('R$ 0,00 realizados de R$ 620,00 orçados');

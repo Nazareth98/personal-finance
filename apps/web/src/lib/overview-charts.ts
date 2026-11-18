@@ -1,6 +1,6 @@
 import { addCompetenceMonths, cardStatementSummary, ledgerTotals, type CardInstallment, type CardStatement, type CardStatementEntry, type TransactionContract } from '@personal-finance/domain';
-import type { CashFlowPoint, TrendPoint } from '@personal-finance/ui';
-import { formatCompetence } from './demo-transactions.ts';
+import type { CashFlowPoint, ColumnPoint, TrendPoint } from '@personal-finance/ui';
+import { formatCompetence, formatCompetenceAxis } from './demo-transactions.ts';
 
 /** Competências em ordem cronológica terminando em `end` (inclusive). */
 export function competenceWindow(end: string, count: number): string[] {
@@ -11,7 +11,7 @@ export function competenceWindow(end: string, count: number): string[] {
 export function cashFlowSeries(transactions: readonly TransactionContract[], months: readonly string[]): CashFlowPoint[] {
   return months.map(month => {
     const totals = ledgerTotals(transactions.filter(row => row.competence === month));
-    return { label: formatCompetence(month), incomeCents: totals.incomeCents, expenseCents: totals.expenseCents };
+    return { label: formatCompetence(month), axisLabel: formatCompetenceAxis(month), incomeCents: totals.incomeCents, expenseCents: totals.expenseCents };
   });
 }
 
@@ -26,7 +26,7 @@ export function cumulativeResultSeries(flow: readonly CashFlowPoint[]): TrendPoi
 
 /**
  * Compromissos de cartão por competência de vencimento: compras menos estornos das faturas
- * já registradas mais parcelas futuras projetadas. Meses após `period` levam “(previsto)”.
+ * já registradas mais parcelas futuras projetadas. Meses após `period` são marcados como previstos.
  */
 export function cardCommitmentSeries(input: {
   statements: readonly CardStatement[];
@@ -35,7 +35,7 @@ export function cardCommitmentSeries(input: {
   installments: readonly CardInstallment[];
   months: readonly string[];
   period: string;
-}): TrendPoint[] {
+}): (ColumnPoint & { competence: string })[] {
   return input.months.map(month => {
     const statementCents = input.statements.filter(statement => statement.competence === month).reduce((sum, statement) => {
       const summary = cardStatementSummary(statement, input.entries, input.transactions);
@@ -44,6 +44,7 @@ export function cardCommitmentSeries(input: {
     const projectedCents = input.installments
       .filter(installment => installment.status === 'projected' && installment.dueCompetence === month)
       .reduce((sum, installment) => sum + installment.amountCents, 0n);
-    return { label: `${formatCompetence(month)}${month > input.period ? ' (previsto)' : ''}`, valueCents: statementCents + projectedCents };
+    return { competence: month, label: formatCompetence(month), axisLabel: formatCompetenceAxis(month), valueCents: statementCents + projectedCents,
+      projected: month > input.period, current: month === input.period };
   });
 }

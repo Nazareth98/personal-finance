@@ -23,6 +23,8 @@ export function formatLocalDate(date:string):string{const [year,month,day]=date.
 const competenceMonths=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 /** Competência `yyyy-MM` → `nov/2026`. */
 export function formatCompetence(competence:string):string{const [year,month]=competence.split('-');return `${competenceMonths[Number(month)-1]}/${year}`;}
+/** Rótulo curto de eixo: `nov`; janeiro leva o ano (`jan/27`) para marcar a virada. */
+export function formatCompetenceAxis(competence:string):string{const [year,month]=competence.split('-');const name=competenceMonths[Number(month)-1];return month==='01'?`${name}/${year.slice(2)}`:name;}
 /** Instante operacional (timestamp) → `dd/MM/yyyy, HH:mm` no fuso do navegador. */
 export function formatDateTime(value:string):string{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
 export function transactionKindLabel(kind:TransactionType){return {income:'Receita',expense:'Despesa',transfer:'Transferência'}[kind];}

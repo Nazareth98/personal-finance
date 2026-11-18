@@ -29,8 +29,9 @@ As cores categóricas indicam apenas categorias distintas e não têm significad
 
 | Componente | Props | Aplicação |
 | --- | --- | --- |
-| `CashFlowChart` | `data: { label, incomeCents, expenseCents }[]`, `formatValue` | comparação de receitas e despesas por período |
+| `CashFlowChart` | `data: { label, axisLabel?, incomeCents, expenseCents, current? }[]`, `formatValue`, `layout?: 'horizontal' | 'vertical'`, `collapsibleDetails?` | comparação de receitas e despesas por período; a Visão geral usa colunas verticais |
 | `TrendLineChart` | `data: { label, valueCents }[]`, `formatValue`, `valueTone?: 'signed' | 'neutral'` | tendência temporal de saldos/resultado; use `neutral` para magnitudes sem ganho/perda, como compromissos de cartão |
+| `ColumnChart` | `data: { label, axisLabel?, valueCents, projected?, current? }[]`, `formatValue`, `title`, `valueLabel?`, `projectedLabel?`, `collapsibleDetails?` | uma série de magnitudes por período; previsto usa textura listrada, não só cor |
 | `CategoryDonutChart` | `data: { label, valueCents }[]`, `formatValue` | composição de despesas por categoria |
 
 O layout é responsivo, usa CSS/SVG sem biblioteca externa e fornece valores textuais. Os gráficos recebem `bigint`; a função de escala converte **apenas razões limitadas para coordenadas ou porcentagens**, nunca o montante integral em ponto flutuante.
@@ -48,3 +49,5 @@ O layout é responsivo, usa CSS/SVG sem biblioteca externa e fornece valores tex
 ## Critérios da próxima etapa
 
 Playwright/Vitest para interações, análise axe, verificação dos pares de contraste em componentes reais e comparação visual Light/Dark. Não declarar componentes Stable somente por existirem histórias Storybook.
+
+`collapsibleDetails` recolhe os valores textuais em “Ver valores” (`<details>` nativo); a tabela para leitor de tela de cada gráfico continua sempre disponível. `axisLabel` encurta o rótulo do eixo e mantém o `label` completo na tabela e nos valores.

@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {demoTransactions,filterTransactions,formatCentsBRL,formatCompetence,formatLocalDate,totalsFromTransactions} from './demo-transactions.ts';
+import {demoTransactions,filterTransactions,formatCentsBRL,formatCompetence,formatCompetenceAxis,formatLocalDate,totalsFromTransactions} from './demo-transactions.ts';
 test('datas bancárias e competências têm formato único sem deslocar o dia',()=>{
   assert.equal(formatLocalDate('2026-01-01'),'01/01/2026');
   assert.equal(formatCompetence('2026-01'),'jan/2026');
   assert.equal(formatCompetence('2026-12'),'dez/2026');
+  assert.equal(formatCompetenceAxis('2026-12'),'dez');
+  assert.equal(formatCompetenceAxis('2027-01'),'jan/27');
 });
 import {sortRows,paginateRows} from '../../../../packages/ui/src/lib/table-data.ts';
 test('formata BRL em bigint com precisão inteira',()=>{assert.equal(formatCentsBRL(123456n),'R$ 1.234,56');assert.equal(formatCentsBRL(-1n),'-R$ 0,01');});

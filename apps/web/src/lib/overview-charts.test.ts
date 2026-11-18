@@ -19,8 +19,8 @@ test('fluxo e resultado acumulado usam os totais do livro sem contar transferên
   ];
   const flow = cashFlowSeries(rows, ['2026-10', '2026-11']);
   assert.deepEqual(flow, [
-    { label: 'out/2026', incomeCents: 500000n, expenseCents: 100000n },
-    { label: 'nov/2026', incomeCents: 0n, expenseCents: 700000n }
+    { label: 'out/2026', axisLabel: 'out', incomeCents: 500000n, expenseCents: 100000n },
+    { label: 'nov/2026', axisLabel: 'nov', incomeCents: 0n, expenseCents: 700000n }
   ]);
   assert.deepEqual(cumulativeResultSeries(flow).map(point => point.valueCents), [400000n, -300000n]);
 });
@@ -38,5 +38,8 @@ test('compromissos de cartão somam fatura líquida e parcelas projetadas', () =
     ],
     months: ['2026-11', '2026-12'], period: '2026-11'
   });
-  assert.deepEqual(series, [{ label: 'nov/2026', valueCents: 25000n }, { label: 'dez/2026 (previsto)', valueCents: 12000n }]);
+  assert.deepEqual(series, [
+    { competence: '2026-11', label: 'nov/2026', axisLabel: 'nov', valueCents: 25000n, projected: false, current: true },
+    { competence: '2026-12', label: 'dez/2026', axisLabel: 'dez', valueCents: 12000n, projected: true, current: false }
+  ]);
 });

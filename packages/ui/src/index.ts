@@ -89,6 +89,8 @@ export { sortRows,paginateRows } from './lib/table-data';
 export { CashFlowChart } from './components/CashFlowChart';
 export type { CashFlowChartProps,CashFlowPoint } from './components/CashFlowChart';
 export { TrendLineChart } from './components/TrendLineChart';
+export { ColumnChart } from './components/ColumnChart';
+export type { ColumnChartProps,ColumnPoint } from './components/ColumnChart';
 export type { TrendLineChartProps,TrendPoint } from './components/TrendLineChart';
 export { CategoryDonutChart } from './components/CategoryDonutChart';
 export type { CategoryDonutChartProps,CategorySlice } from './components/CategoryDonutChart';

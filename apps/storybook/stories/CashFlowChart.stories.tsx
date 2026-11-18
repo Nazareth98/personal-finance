@@ -6,3 +6,4 @@ const meta={title:'Charts/CashFlowChart',component:CashFlowChart,tags:['autodocs
 export default meta;type Story=StoryObj<typeof meta>;
 export const Default:Story={};
 export const Empty:Story={args:{data:[]}};
+export const VerticalCollapsed:Story={args:{layout:'vertical',collapsibleDetails:true,data:values.map((point,index)=>({...point,current:index===values.length-1}))}};

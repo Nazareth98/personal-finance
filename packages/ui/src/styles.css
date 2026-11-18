@@ -150,6 +150,19 @@
 .ui-chart__positive{color:var(--color-finance-positive);font-variant-numeric:tabular-nums}
 .ui-chart__negative{color:var(--color-finance-negative);font-variant-numeric:tabular-nums}
 .ui-chart__neutral{color:var(--color-finance-neutral);font-variant-numeric:tabular-nums}
+.ui-chart__columns{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--spacing-2)}
+.ui-chart__column-group{display:grid;gap:var(--spacing-2);min-width:0}
+.ui-chart__column-bars{display:flex;justify-content:center;align-items:flex-end;gap:3px;height:160px;border-bottom:1px solid var(--color-chart-grid)}
+.ui-chart__column{width:min(18px,40%);border-radius:4px 4px 0 0;box-sizing:border-box}
+.ui-chart__column--neutral,.ui-chart__swatch--neutral{background:var(--color-finance-neutral)}
+.ui-chart__column--projected,.ui-chart__swatch--projected{background:repeating-linear-gradient(45deg,var(--color-finance-neutral) 0 2px,transparent 2px 5px);border:1px solid var(--color-finance-neutral)}
+.ui-chart__column-label{text-align:center;font-size:var(--font-size-xs);color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui-chart__column-group.is-current .ui-chart__column-label{color:var(--color-text-primary);font-weight:700}
+.ui-chart__more>summary{width:max-content;padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-md);color:var(--color-text-primary);font:600 var(--font-size-xs)/1.6 var(--font-family-sans);cursor:pointer}
+.ui-chart__more>summary:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+.ui-chart__more[open]>summary{margin-bottom:var(--spacing-3)}
+.ui-metric-card__support--positive{color:var(--color-finance-positive)}
+.ui-metric-card__support--negative{color:var(--color-finance-negative)}
 .ui-trend-chart{display:block;width:100%;height:auto;max-height:265px}
 .ui-trend-chart__grid{stroke:var(--color-chart-grid);stroke-width:1;stroke-dasharray:4 5}
 .ui-trend-chart__zero{stroke:var(--color-text-secondary);stroke-width:1.5;stroke-dasharray:8 4}
