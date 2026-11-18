@@ -195,9 +195,12 @@ Aceite: não há rolagem lateral da sidebar nos viewports suportados, valores ne
 - tornar ordenáveis todas as colunas de dados aplicáveis; colunas de ações permanecem sem ordenação;
 - ordenar datas cronologicamente, dinheiro por `bigint`, percentuais por pontos-base e texto com comparação pt-BR;
 - adicionar seleção de mês/ano na visão geral, com anterior, próximo e período atual;
-- refletir o período na URL e aplicá-lo conjuntamente a KPIs, faturas, metas, transações e gráficos.
+- refletir o período na URL e aplicá-lo conjuntamente a KPIs, faturas, metas, transações e gráficos;
+- buscar por descrição em Transações e no histórico/pendências da Revisão, sem diferenciar maiúsculas e acentos;
+- filtrar por conta, categoria e natureza nessas mesmas telas, combinando com período, situação e ordenação;
+- refletir busca e filtros na URL, mostrar a contagem de resultados e oferecer “Limpar filtros”.
 
-Aceite: toda tabela indica a ordenação com `aria-sort`, e todos os elementos da visão geral representam exatamente o período selecionado.
+Aceite: toda tabela indica a ordenação com `aria-sort`, todos os elementos da visão geral representam exatamente o período selecionado, e busca e filtros combinados retornam somente os lançamentos correspondentes, mantidos ao recarregar a página.
 
 ### 11.5 — gráficos de acompanhamento
 
