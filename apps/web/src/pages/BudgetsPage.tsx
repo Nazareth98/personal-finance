@@ -56,7 +56,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
   const { progress, budget, category, name, pace } = item;
   const exceeded = progress.status === 'exceeded';
   const visualPercent = Number(progress.usageBasisPoints > 10000n ? 10000n : progress.usageBasisPoints) / 100;
-  return <Card className={`budget-card budget-card--${progress.status}`}>
+  return <Card className={`budget-card budget-goal budget-goal--${progress.status}`}>
     <div className="budget-card__top">
       {category ? <CategoryIdentityIcon iconKey={category.iconKey} colorKey={category.colorKey} /> : null}
       <div className="budget-card__title"><h3>{name}</h3>
@@ -67,7 +67,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
       <strong className={exceeded ? 'transaction-amount--expense' : undefined}>{formatCentsBRL(exceeded ? -progress.remainingCents : progress.remainingCents)}</strong></div>
     <progress className={`budget-progress budget-progress--${progress.status}`} max={100} value={visualPercent}
       aria-label={`Uso da meta de ${name}: ${formatBasisPoints(progress.usageBasisPoints)}`} />
-    <div className="budget-card__usage"><span className="muted">{formatCentsBRL(progress.usedCents)} utilizados de {formatCentsBRL(progress.limitCents)}</span>
+    <div className="budget-card__usage"><span className="muted">{formatCentsBRL(progress.usedCents)} de {formatCentsBRL(progress.limitCents)}</span>
       <strong className={`budget-status--${progress.status}`}>{formatBasisPoints(progress.usageBasisPoints)}</strong></div>
     {pace ? <p className="budget-card__pace muted">{paceText(pace)}</p> : null}
   </Card>;

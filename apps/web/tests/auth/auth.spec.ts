@@ -329,7 +329,7 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   await expect(summary.getByText('10%', { exact: true })).toBeVisible();
   const within = page.getByRole('region', { name: /Dentro do teto/ });
   await expect(within.getByRole('heading', { name: 'Supermercado' })).toBeVisible();
-  await expect(within.getByText('R$ 100,00 utilizados de R$ 500,00')).toBeVisible();
+  await expect(within.getByText('R$ 100,00 de R$ 500,00')).toBeVisible();
   await expect(within.getByText('R$ 400,00')).toBeVisible();
   await expect(page.getByRole('region', { name: /Acima do teto/ })).toHaveCount(0);
   await expect(page.getByText('Nenhum gasto categorizado fora das metas neste período.')).toBeVisible();
