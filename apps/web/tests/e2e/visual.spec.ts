@@ -5,7 +5,7 @@ const templates:{slug:PageName;title:string;navigationTitle?:string}[]=[
   {slug:'overview',title:'Visão geral'},
   {slug:'transactions',title:'Transações'},
   {slug:'accounts',title:'Contas'},
-  {slug:'cards',title:'Cartões e faturas'},
+  {slug:'cards',title:'Cartões e faturas',navigationTitle:'Cartões'},
   {slug:'budgets',title:'Orçamentos'},
   {slug:'savings',title:'Caixinhas'},
   {slug:'categories',title:'Categorias'},
@@ -26,7 +26,11 @@ for(const {slug,title,navigationTitle=title} of templates){
     await page.goto(`/#${slug}`);
     await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
     await expect(page.getByRole('heading',{name:title,level:1,exact:true})).toBeVisible();
-    await expect(page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(navigationTitle,'i')})).toHaveAttribute('aria-current','page');
+    // No mobile, telas secundárias ficam em “Mais”, que passa a indicar a tela atual.
+    const navigation=page.getByRole('navigation',{name:'Navegação principal'});
+    const link=navigation.getByRole('link',{name:new RegExp(navigationTitle,'i')});
+    if(await link.count())await expect(link).toHaveAttribute('aria-current','page');
+    else await expect(navigation.getByRole('button',{name:'Mais'})).toHaveClass(/is-active/);
     await page.evaluate(()=>document.fonts.ready);
     await page.mouse.move(0,0);
     await expect(page).toHaveScreenshot(`${slug}.png`,{

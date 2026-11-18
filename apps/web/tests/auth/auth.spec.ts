@@ -545,7 +545,7 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await login(page);
   await page.goto('/#review');
   await expect(page.getByRole('heading', { name: 'Revisão de categorias' })).toBeVisible();
-  await expect(page.getByText('4 pendentes', { exact: true })).toBeVisible();
+  await expect(page.locator('.template-heading').getByText('4 pendentes', { exact: true })).toBeVisible();
   await expect(page.getByText('80%')).toBeVisible();
   await expect(page.getByText('Token da descrição')).toBeVisible();
   await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
@@ -553,7 +553,7 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await dialog.getByLabel('Categoria confirmada').selectOption('restaurants');
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
-  await expect(page.getByText('3 pendentes', { exact: true })).toBeVisible();
+  await expect(page.locator('.template-heading').getByText('3 pendentes', { exact: true })).toBeVisible();
   await page.getByRole('tab', { name: /Histórico/ }).click();
   await expect(page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar novamente' })).toBeVisible();
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
@@ -713,6 +713,22 @@ test('inventário de telas para redesign', async ({ page }) => {
       await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
       await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-dialog-review.png` });
       await page.keyboard.press('Escape');
+      if (viewport === 'mobile') {
+        await page.getByRole('button', { name: 'Mais' }).click();
+        await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-sheet-more.png` });
+        await page.keyboard.press('Escape');
+      }
     }
   }
+});
+
+test('barra inferior mostra pendências da revisão e a folha Mais permite sair', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockSupabase(page);
+  await login(page);
+  const navigation = page.getByRole('navigation', { name: 'Navegação principal' });
+  await expect(navigation.getByRole('link', { name: 'Revisão 4 pendentes' })).toBeVisible();
+  await navigation.getByRole('button', { name: 'Mais' }).click();
+  await page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' }).click();
+  await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
 });

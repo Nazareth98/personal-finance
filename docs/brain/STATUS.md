@@ -26,7 +26,8 @@ Atualizado em: 18/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. escolher a primeira tela e seguir o ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md); candidatas: navegação mobile e Visão geral.
+1. atualizar os baselines mobile/tablet no CI com `[update visual baselines]` após revisar as diferenças da nova navegação;
+2. próxima tela do ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md): Visão geral, ou tabelas em cartões no mobile.
 
 ## Última validação
 
@@ -70,6 +71,7 @@ Próximas entregas, nesta ordem:
 - Etapa 11.4 em 18/11/2026: `pnpm check`, 35 testes unitários (4 novos de filtro), 21 fluxos autenticados (3 novos: período, filtros com URL e histórico da revisão) e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13. Tabelas demonstrativas não ganharam ordenação para preservar os 78 baselines. Capturas desktop/mobile revisadas localmente com dados fictícios.
 - Etapa 11.5 em 18/11/2026: séries puras com 3 testes (janela na virada do ano, totais do livro sem transferências, fatura líquida mais parcelas projetadas). `TrendLineChart` ganhou `valueTone="neutral"` para compromissos não parecerem ganho. `pnpm check`, 38 testes unitários, 22 fluxos autenticados e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13; capturas Light/Dark e mobile revisadas com dados fictícios.
 - Preparação do redesign em 18/11/2026: sombras, fundo de diálogo e z-index viraram tokens; Light manteve os valores anteriores e Dark ganhou sombras mais fortes. `design:check` detectou divergência injetada de propósito. A tabela duplicada de FOUNDATIONS estava desatualizada em três cores e foi trocada por link. `pnpm redesign:inventory` gerou 48 capturas. `pnpm check`, 8 testes de tokens, 22 fluxos autenticados e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13.
+- Navegação mobile em 18/11/2026: opção A do canvas aprovada e implementada (D-031). A auditoria WCAG apontou `label-content-name-mismatch` no primeiro desenho do contador; os nomes passaram a vir do conteúdo visível e a sidebar recolhida esconde rótulos só visualmente. `pnpm check`, 39 testes unitários, 23 fluxos autenticados e 94 cenários de comportamento/acessibilidade/estados passaram com Node 22.13; o inventário ganhou a captura da folha “Mais”. Os baselines mobile/tablet mudam de propósito.
 
 ## Bloqueios
 

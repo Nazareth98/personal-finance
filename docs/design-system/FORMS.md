@@ -12,7 +12,7 @@
 | `Field` | label/htmlFor, hint, error e children | Wrapper low-level; consumidores devem vincular descrições com IDs se necessário |
 | `FormMessage` | hint, error, success | Erro com `role=alert` |
 | `Button` | variantes/tamanhos + loading | loading desabilita o botão; `aria-busy` |
-| `Dialog` | open/onClose/title/description/footer | HTML dialog modal nativo: foco, Escape e bloqueio de fundo |
+| `Dialog` | open/onClose/title/description/footer/className | HTML dialog modal nativo: foco, Escape e bloqueio de fundo |
 | `ToastProvider` / `useToast` | notify/dismiss, tone, durationMs | success/info são `status`; error é `alert`; dispensável |
 
 **Todos estão em Beta.** Storybook: `pnpm storybook`, com alternância Light/Dark.

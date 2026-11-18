@@ -8,7 +8,7 @@ Briefing para cada rodada de redesign. Leia junto com [`DESIGN.md`](../../DESIGN
 | --- | --- | --- |
 | Sistema visual | `DESIGN.md` | `pnpm design:check` falha se divergir de `packages/tokens/src/themes.json` |
 | Tokens | `packages/tokens/src/themes.json` | cores Light/Dark, espaçamento, raios, tipografia, elevação e camadas |
-| Telas atuais | `pnpm redesign:inventory` | 48 capturas em `output/redesign-inventory/` (fora do Git): 11 telas + diálogo × Light/Dark × desktop/mobile, com dados fictícios |
+| Telas atuais | `pnpm redesign:inventory` | 52 capturas em `output/redesign-inventory/` (fora do Git): 11 telas + diálogo × Light/Dark × desktop/mobile, mais a folha “Mais” no mobile, com dados fictícios |
 | Componentes | Storybook (`pnpm storybook`) | catálogo de `@personal-finance/ui` |
 
 Nunca envie ao Claude Design capturas com dados reais. As do inventário vêm do mock dos testes.
@@ -30,7 +30,7 @@ Nunca envie ao Claude Design capturas com dados reais. As do inventário vêm do
 
 ## Pontos já observados no inventário
 
-- No mobile, a navegação em grade ocupa cerca de 360 px antes do conteúdo; candidata a barra inferior ou menu recolhido.
+- ~~No mobile, a navegação em grade ocupa cerca de 360 px antes do conteúdo.~~ Resolvido com a barra inferior (opção A do canvas “Navegação mobile”, D-031).
 - Tabelas largas rolam lateralmente no mobile (Categorias, Revisão, Transações); avaliar lista em cartões abaixo de 680 px.
 - Detalhes textuais dos gráficos ficam longos com rótulos “(previsto)”.
 

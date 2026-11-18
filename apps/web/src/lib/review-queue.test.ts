@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { TransactionContract } from '@personal-finance/domain';
-import { reviewResolution } from './review-queue.ts';
+import { pendingReviewCount, reviewResolution } from './review-queue.ts';
 
 const base: TransactionContract = {
   id: 'transaction', accountId: 'account', description: 'Synthetic transaction', amountCents: -1000n,
@@ -35,4 +35,13 @@ test('move confirmação semântica para o histórico', () => {
       statementId: 'statement', reason: 'owner_confirmation', semanticVersion: 'semantics-v1', updatedAt: '2026-11-17T12:00:00Z'
     }]
   }).pending, false);
+});
+
+test('conta pendências somente entre importados revisáveis', () => {
+  const rows = [
+    { ...base, id: 'p', classificationStatus: 'suggested' as const },
+    { ...base, id: 'm', source: 'manual' as const, classificationStatus: 'uncategorized' as const },
+    { ...base, id: 'ok', classificationStatus: 'confirmed' as const }
+  ];
+  assert.equal(pendingReviewCount(rows, empty), 1);
 });

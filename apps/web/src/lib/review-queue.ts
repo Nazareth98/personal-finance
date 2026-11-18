@@ -30,3 +30,12 @@ export function reviewResolution(transaction: TransactionContract, relations: {
     : true;
   return { categoryResolved, semanticResolved, pending: !categoryResolved || !semanticResolved };
 }
+
+/** Lançamentos que passam pela revisão: importados, exceto estornos e ajustes. */
+export function reviewableTransactions(transactions: readonly TransactionContract[]): TransactionContract[] {
+  return transactions.filter(row => row.source === 'pluggy' && row.nature !== 'refund' && row.nature !== 'adjustment');
+}
+
+export function pendingReviewCount(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1]): number {
+  return reviewableTransactions(transactions).filter(row => reviewResolution(row, relations).pending).length;
+}

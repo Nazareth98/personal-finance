@@ -21,7 +21,7 @@ test('navegação entre dez templates funciona com histórico hash',async ({page
   for(const {slug,title,navigationTitle=title} of [
     {slug:'transactions',title:'Transações'},
     {slug:'accounts',title:'Contas'},
-    {slug:'cards',title:'Cartões e faturas'},
+    {slug:'cards',title:'Cartões e faturas',navigationTitle:'Cartões'},
     {slug:'budgets',title:'Orçamentos'},
     {slug:'savings',title:'Caixinhas'},
     {slug:'categories',title:'Categorias'},
@@ -29,7 +29,13 @@ test('navegação entre dez templates funciona com histórico hash',async ({page
     {slug:'review',title:'Revisão de categorias',navigationTitle:'Revisão'},
     {slug:'reports',title:'Relatórios'},
   ]){
-    await page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(navigationTitle,'i')}).click();
+    const link=page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(navigationTitle,'i')});
+    if(await link.count())await link.click();
+    else{
+      await page.getByRole('button',{name:'Mais'}).click();
+      await page.getByRole('dialog',{name:'Mais telas'}).getByRole('link',{name:new RegExp(navigationTitle,'i')}).click();
+      await expect(page.getByRole('dialog',{name:'Mais telas'})).toBeHidden();
+    }
     await expect(page).toHaveURL(new RegExp(`#${slug}$`));
     await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
   }
@@ -91,4 +97,35 @@ test('mobile não tem overflow horizontal do documento',async ({page},testInfo)=
     scrollWidth:element.scrollWidth,
   }));
   expect(navigation.scrollWidth).toBeLessThanOrEqual(navigation.clientWidth+1);
+});
+
+test('barra inferior e folha “Mais” no mobile funcionam por teclado',async ({page},testInfo)=>{
+  if(!testInfo.project.name.startsWith('mobile'))test.skip();
+  await page.goto('/#overview');
+  const navigation=page.getByRole('navigation',{name:'Navegação principal'});
+  await expect(navigation.getByRole('link')).toHaveCount(4);
+  const box=await navigation.boundingBox();
+  expect(box!.y+box!.height).toBeGreaterThan(page.viewportSize()!.height-2);
+  const more=navigation.getByRole('button',{name:'Mais'});
+  await more.focus();
+  await page.keyboard.press('Enter');
+  const sheet=page.getByRole('dialog',{name:'Mais telas'});
+  await expect(sheet).toBeVisible();
+  await expect(more).toHaveAttribute('aria-expanded','true');
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+  await expect(more).toBeFocused();
+  const scan=await new AxeBuilder({page}).include('.bottom-nav').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+  expect(scan.violations).toEqual([]);
+  await more.click();
+  await sheet.getByRole('link',{name:'Contas'}).click();
+  await expect(page).toHaveURL(/#accounts$/);
+  await expect(sheet).toBeHidden();
+  await expect(more).toHaveClass(/is-active/);
+});
+
+test('barra inferior segue a ordem de uso diário',async ({page},testInfo)=>{
+  if(!testInfo.project.name.startsWith('mobile'))test.skip();
+  await page.goto('/#overview');
+  await expect(page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link')).toHaveText(['Visão geral','Transações','Revisão','Cartões']);
 });

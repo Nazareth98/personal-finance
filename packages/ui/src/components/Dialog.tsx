@@ -2,14 +2,14 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Button } from './Button';
 import { X } from 'lucide-react';
 import { Icon } from './Icon';
-export type DialogProps={open:boolean;onClose:()=>void;title:string;description?:string;children:ReactNode;footer?:ReactNode};
-export function Dialog({open,onClose,title,description,children,footer}:DialogProps){
+export type DialogProps={open:boolean;onClose:()=>void;title:string;description?:string;children:ReactNode;footer?:ReactNode;className?:string};
+export function Dialog({open,onClose,title,description,children,footer,className}:DialogProps){
   const ref=useRef<HTMLDialogElement>(null),titleId=useId(),descriptionId=useId();
   useEffect(()=>{const dialog=ref.current;if(!dialog)return;
     if(open&&!dialog.open)dialog.showModal();
     else if(!open&&dialog.open)dialog.close();
   },[open]);
-  return <dialog ref={ref} className="ui-dialog" aria-labelledby={titleId}
+  return <dialog ref={ref} className={['ui-dialog',className].filter(Boolean).join(' ')} aria-labelledby={titleId}
     aria-describedby={description?descriptionId:undefined}
     onClose={()=>{if(open)onClose()}}>
     <div className="ui-dialog__header"><div><h2 className="ui-dialog__title" id={titleId}>{title}</h2>

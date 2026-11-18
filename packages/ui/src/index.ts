@@ -19,6 +19,7 @@ export {
   ArrowDown as MoveDownIcon,
   ChevronLeft as PreviousIcon,
   ChevronRight as NextIcon,
+  Ellipsis as MoreIcon,
   Pencil as EditIcon,
   Archive as ArchiveIcon,
   Trash2 as DeleteIcon,

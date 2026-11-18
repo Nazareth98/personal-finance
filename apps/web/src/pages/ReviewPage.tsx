@@ -3,7 +3,7 @@ import type { TransactionContract } from '@personal-finance/domain';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, MetricCard, Pagination, ReviewIcon, Select, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { TransactionClassification } from '../ledger/contracts';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
-import { reviewResolution } from '../lib/review-queue';
+import { reviewResolution, reviewableTransactions } from '../lib/review-queue';
 import { matchesTransactionFilters, readTransactionFilters, type TransactionFilters } from '../lib/transaction-filters';
 import { useHashParams } from '../hooks/useHashParams';
 import { ClassificationReviewForm } from '../components/ClassificationReviewForm';
@@ -40,8 +40,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     semanticOverrides: data?.semanticOverrides ?? [], links: data?.links ?? [],
     savingsMovements: data?.savingsMovements ?? [], cardStatementEntries: data?.cardStatementEntries ?? []
   };
-  const imported = (data?.transactions ?? []).filter(row => row.source === 'pluggy'
-    && row.nature !== 'refund' && row.nature !== 'adjustment');
+  const imported = reviewableTransactions(data?.transactions ?? []);
   const resolutions = new Map(imported.map(row => [row.id, reviewResolution(row, relations)]));
   const pending = imported.filter(row => resolutions.get(row.id)?.pending);
   const history = imported.filter(row => !resolutions.get(row.id)?.pending);
