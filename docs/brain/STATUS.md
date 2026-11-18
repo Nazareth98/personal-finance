@@ -9,24 +9,24 @@ Atualizado em: 18/11/2026.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
-- MeuPluggy implementado em código com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado, webhook durável e retomada após falha. A tela distingue atualização da fonte, tentativa local, sucesso local e estado de erro.
+- MeuPluggy implementado com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado e retomada após falha. O suporte ao webhook está implementado, mas sua integração operacional foi adiada; por enquanto, a sincronização é iniciada manualmente pela aplicação.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
 - Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. O replay foi concluído nas conexões Caixa e Itaú; o frontend passou a paginar o livro completo para não separar entradas de fatura de seus lançamentos após o limite de 1.000 linhas do Data API.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: 13 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
+- O projeto Supabase novo está vinculado: 15 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 10.4 — fechamento operacional.** Replay, materialização, conciliação e idempotência foram validados para Caixa e Itaú. `transactions/updated` agora relê somente os IDs informados; `transactions/deleted` faz exclusão lógica reversível, preserva o histórico imutável e deixa de alimentar totais, faturas e parcelas. Pagamentos históricos sem correspondência inequívoca permanecem neutros e explicitamente não vinculados; não se inventa uma fatura. A migration e as Edge Functions estão publicadas e o smoke remoto de exclusão/reaparecimento passou com rollback. Falta apenas configurar o segredo do webhook nos dois lados e executar uma chamada autenticada válida.
+**Etapa 11.1 — gestão de categorias.** A Etapa 10.4 foi encerrada com replay, materialização, conciliação e idempotência validados para Caixa e Itaú. O ciclo dirigido de atualização/exclusão está implementado e publicado, mas sua ativação por webhook foi deliberadamente adiada. O próximo marco é criar o CRUD autenticado de categorias sem romper lançamentos, metas, regras, aliases ou histórico.
 
 Próximas entregas, nesta ordem:
 
-1. definir `PLUGGY_WEBHOOK_SECRET` no Supabase e como cabeçalho `X-Pluggy-Webhook-Secret` no webhook MeuPluggy criado pela API, habilitar `transactions/created`, `transactions/updated` e `transactions/deleted` e concluir o smoke autenticado;
-2. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): CRUD seguro de categorias, correção/revisão, consistência visual, período/ordenação e gráficos.
+1. implementar a Etapa 11.1 documentada em [`PLAN.md`](PLAN.md): listar, buscar, criar, renomear, ordenar, arquivar e excluir categorias quando seguro;
+2. seguir para correção/revisão, consistência visual, período/ordenação e gráficos nas subetapas seguintes.
 
 ## Última validação
 
@@ -67,10 +67,12 @@ Próximas entregas, nesta ordem:
 ## Bloqueios
 
 - Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.
-- `PLUGGY_WEBHOOK_SECRET` ainda precisa ser definido no Supabase e no cadastro do webhook MeuPluggy; até lá, a função responde `503 webhook_not_configured` e nenhum evento entra na inbox.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
 - Os 78 baselines visuais precisam ser regenerados e revisados no CI Linux por causa da nova composição do shell; conexões também incorpora a coluna “Atualização da fonte”.
-- A Etapa 10.4 está tecnicamente implementada, mas não será encerrada até existir `PLUGGY_WEBHOOK_SECRET` configurado nos dois lados e um evento autenticado persistido na inbox.
+
+## Implementações futuras
+
+- integrar operacionalmente o webhook MeuPluggy: definir `PLUGGY_WEBHOOK_SECRET`, registrar pela API os eventos `transactions/created`, `transactions/updated` e `transactions/deleted` e executar o smoke autenticado. O código permanece preparado, mas isso não bloqueia a Etapa 11.
 
 ## Regra de atualização
 

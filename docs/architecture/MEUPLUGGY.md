@@ -48,8 +48,6 @@ Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge F
 
 “Sincronizar agora” busca o dado mais recente disponível no MeuPluggy. Não promete iniciar nova coleta na instituição. Erros persistem sem descrição, valor, token ou identificador bancário em logs apresentados ao usuário. A tela distingue a última atualização da fonte no MeuPluggy, a tentativa local de importação e o último sucesso local.
 
-## Validação pendente no ambiente real
+## Implementação futura
 
-- configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy; sem o secret, a função responde `503 webhook_not_configured`;
-- validar o contrato do SDK Connect e o formato do callback de sucesso;
-- registrar os webhooks `transactions/created`, `transactions/updated` e `transactions/deleted` e confirmar o comportamento de retentativa do provedor.
+A sincronização manual permanece como operação vigente. Em incremento futuro, configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy, registrar `transactions/created`, `transactions/updated` e `transactions/deleted` e validar entrega, autenticação e retentativas. O código e a inbox durável já estão preparados; sem o secret, a função responde `503 webhook_not_configured`.

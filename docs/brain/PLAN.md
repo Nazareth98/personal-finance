@@ -140,7 +140,7 @@ Aceite: confirmar um item reduz imediatamente a contagem pendente sem perder ras
 
 ### 10.4 — limpar e reimportar o ambiente de desenvolvimento
 
-Estado: validação final; replay, materialização, conciliação, idempotência e ciclo dirigido de atualização/exclusão estão publicados. Falta configurar `PLUGGY_WEBHOOK_SECRET` no Supabase e como cabeçalho secreto do webhook MeuPluggy e executar um evento autenticado válido.
+Estado: concluída em 18/11/2026. Replay, materialização, conciliação, idempotência e ciclo dirigido de atualização/exclusão foram publicados e validados. A integração operacional do webhook foi retirada do aceite e registrada como implementação futura; até lá, a atualização é iniciada manualmente pela aplicação.
 
 - preservar Auth, perfil proprietário, categorias, migrations, secrets e regras `alias` aprendidas;
 - remover conexões, staging, execuções, livro, overlays por transação, faturas, caixinhas e demais derivados;
@@ -203,6 +203,17 @@ Aceite: toda tabela indica a ordenação com `aria-sort`, e todos os elementos d
 - manter tabela ou resumo textual equivalente para acessibilidade.
 
 Aceite: os gráficos seguem o período selecionado, usam os mesmos totais do livro e não dependem somente de cor para comunicar valores.
+
+## Implementações futuras
+
+### Webhook operacional do MeuPluggy
+
+- definir `PLUGGY_WEBHOOK_SECRET` nos dois lados;
+- registrar pela API do MeuPluggy os eventos `transactions/created`, `transactions/updated` e `transactions/deleted`;
+- validar autenticação, persistência na inbox, processamento dirigido e retentativas;
+- manter a sincronização manual como fallback operacional.
+
+Aceite: um evento autenticado é persistido e processado uma única vez, enquanto chamadas sem o segredo continuam rejeitadas.
 
 ## Fora do escopo inicial
 
