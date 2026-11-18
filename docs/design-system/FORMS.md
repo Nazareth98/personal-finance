@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | `Input` | label obrigatório; hint, error e props HTML nativas | `label/htmlFor`, `aria-invalid`, `aria-describedby` |
 | `Select` | options tipadas, placeholder, hint, error, controlled/uncontrolled | Usa `select` HTML nativo e keyboard behavior do navegador |
+| `VisualSelect` | options com `visual` (ícone/cor), hint, error, disabled por opção; somente controlado | Combobox + listbox ARIA; setas, Home/End, Enter/Espaço, Esc devolve o foco; use apenas quando a opção precisa ser vista, senão prefira `Select` |
 | `Checkbox` | label, hint, error, estados checked/disabled | `input type=checkbox`, label clicável |
 | `RadioGroup` | legend, name, options, value/defaultValue, onChange | fieldset/legend, agrupamento e navegação nativa |
 | `Field` | label/htmlFor, hint, error e children | Wrapper low-level; consumidores devem vincular descrições com IDs se necessário |

@@ -390,8 +390,11 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await page.getByRole('button', { name: 'Nova categoria' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Nova categoria' });
   await createDialog.getByLabel('Nome').fill('Pets');
-  await createDialog.getByLabel('Ícone').selectOption('heart-pulse');
-  await createDialog.getByLabel('Cor').selectOption('chart-category-4');
+  await createDialog.getByRole('combobox', { name: /^Ícone/ }).click();
+  await createDialog.getByRole('option', { name: 'Saúde' }).click();
+  await expect(createDialog.getByRole('combobox', { name: /^Ícone/ })).toHaveText('Saúde');
+  await createDialog.getByRole('combobox', { name: /^Cor/ }).click();
+  await createDialog.getByRole('option', { name: 'Âmbar' }).click();
   await createDialog.getByLabel('Despesa').check();
   await createDialog.getByRole('button', { name: 'Salvar categoria' }).click();
   await expect(page.getByText('Categoria criada.')).toBeVisible();
@@ -400,8 +403,19 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await hobbies.getByRole('button', { name: 'Editar Hobbies' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar categoria' });
   await editDialog.getByLabel('Nome').fill('Lazer pessoal');
-  await editDialog.getByLabel('Ícone').selectOption('gift');
-  await editDialog.getByLabel('Cor').selectOption('chart-category-1');
+  const iconPicker = editDialog.getByRole('combobox', { name: /^Ícone/ });
+  await iconPicker.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(editDialog.getByRole('option', { name: 'Lazer' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(iconPicker).toBeFocused();
+  await expect(editDialog.getByRole('listbox')).toHaveCount(0);
+  await page.keyboard.press('ArrowDown');
+  await editDialog.getByRole('option', { name: 'Presente' }).press('Enter');
+  await expect(iconPicker).toHaveText('Presente');
+  await expect(iconPicker).toBeFocused();
+  await editDialog.getByRole('combobox', { name: /^Cor/ }).click();
+  await editDialog.getByRole('option', { name: 'Azul' }).click();
   await editDialog.getByRole('button', { name: 'Salvar categoria' }).click();
   await expect(page.getByText('Categoria atualizada.')).toBeVisible();
 

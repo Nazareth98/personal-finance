@@ -5,7 +5,7 @@
 - **Foundations**: cores, tipografia, espaçamento, raios, alturas e contraste.
 - **Primitives**: Button, Card, Badge.
 - **Icons**: `Icon` + catálogo semântico curado de `lucide-react`.
-- **Forms**: Input, Select, Checkbox, RadioGroup, Field, FormMessage, Dialog, ToastProvider/useToast.
+- **Forms**: Input, Select, VisualSelect, Checkbox, RadioGroup, Field, FormMessage, Dialog, ToastProvider/useToast.
 - **Data display (próxima etapa)**: DataTable, EmptyState, Skeleton, MetricCard, Progress, ChartLegend.
 - **Patterns**: filtros, validação e confirmação de ações, formulários de lançamento, revisão de importações.
 - **Templates financeiros**: visão geral, transações, contas, cartões/faturas, orçamentos e relatórios.

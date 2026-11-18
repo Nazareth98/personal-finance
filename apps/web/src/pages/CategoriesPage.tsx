@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import type { Category, CategoryColorKey, CategoryIconKey } from '@personal-finance/domain';
 import {
   ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon,
-  EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, PlusIcon, RadioGroup, Select, useToast,
+  EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, PlusIcon, RadioGroup, Select, useToast, VisualSelect,
   CategoryBriefcaseIcon, CategoryBusIcon, CategoryCarIcon, CategoryEducationIcon, CategoryFuelIcon,
   CategoryGameIcon, CategoryGiftIcon, CategoryHealthIcon, CategoryHomeIcon, CategoryLandmarkIcon,
   CategoryPiggyBankIcon, CategoryReceiptIcon, CategoryRepeatIcon, CategoryShoppingCartIcon,
@@ -34,9 +34,12 @@ const categoryColors: Record<CategoryColorKey, string> = {
   'chart-category-4': 'Âmbar', 'chart-category-5': 'Cinza'
 };
 
+function CategoryIdentityIcon({ iconKey, colorKey }: Pick<Category, 'iconKey' | 'colorKey'>) {
+  return <span className={`category-identity__icon category-identity__icon--${colorKey}`} aria-hidden="true"><Icon icon={categoryIcons[iconKey].icon} size="sm" /></span>;
+}
+
 function CategoryIdentity({ category, name = category.name }: { category: Pick<Category, 'iconKey' | 'colorKey' | 'name'>; name?: string }) {
-  const CategoryIcon = categoryIcons[category.iconKey].icon;
-  return <span className="category-identity"><span className={`category-identity__icon category-identity__icon--${category.colorKey}`} aria-hidden="true"><Icon icon={CategoryIcon} size="sm" /></span><strong>{name}</strong></span>;
+  return <span className="category-identity"><CategoryIdentityIcon iconKey={category.iconKey} colorKey={category.colorKey} /><strong>{name}</strong></span>;
 }
 
 function CategoryEditor({ category, open, onClose, ledger }: {
@@ -61,7 +64,7 @@ function CategoryEditor({ category, open, onClose, ledger }: {
       else await ledger.createCategory({ name: nextName, applicability, iconKey, colorKey });
       notify({ message: category ? 'Categoria atualizada.' : 'Categoria criada.', tone: 'success' });
       close();
-    } catch { setError('NÃ£o foi possÃ­vel salvar a categoria. Verifique se o nome jÃ¡ existe.'); }
+    } catch { setError('Não foi possível salvar a categoria. Verifique se o nome já existe.'); }
     finally { setLoading(false); }
   }
 
@@ -70,8 +73,10 @@ function CategoryEditor({ category, open, onClose, ledger }: {
     <form className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome" value={name} maxLength={60} required onChange={event => setName(event.target.value)} />
       <div className="category-visual-fields">
-        <Select label="Ícone" value={iconKey} options={Object.entries(categoryIcons).map(([value, option]) => ({ value, label: option.label }))} onChange={event => setIconKey(event.target.value as CategoryIconKey)} />
-        <Select label="Cor" value={colorKey} options={Object.entries(categoryColors).map(([value, label]) => ({ value, label }))} onChange={event => setColorKey(event.target.value as CategoryColorKey)} />
+        <VisualSelect label="Ícone" value={iconKey} onChange={value => setIconKey(value as CategoryIconKey)}
+          options={Object.entries(categoryIcons).map(([value, option]) => ({ value, label: option.label, visual: <CategoryIdentityIcon iconKey={value as CategoryIconKey} colorKey={colorKey} /> }))} />
+        <VisualSelect label="Cor" value={colorKey} onChange={value => setColorKey(value as CategoryColorKey)}
+          options={Object.entries(categoryColors).map(([value, label]) => ({ value, label, visual: <CategoryIdentityIcon iconKey={iconKey} colorKey={value as CategoryColorKey} /> }))} />
       </div>
       <div className="category-preview" aria-label="Prévia da categoria"><span className="muted">Prévia</span><CategoryIdentity category={{ name: name.trim() || 'Nome da categoria', iconKey, colorKey }} /></div>
       {!category && <RadioGroup legend="Aplica-se a" name="category-applicability" value={applicability} required
@@ -96,25 +101,25 @@ function CategoryRemoval({ category, onClose, ledger }: { category: Category | n
     setLoading(true); setError('');
     try {
       await ledger.archiveCategory({ categoryId: category.id, ...(replacement ? { replacementCategoryId: replacement } : {}) });
-      notify({ message: replacement ? 'Categoria reatribuÃ­da e arquivada.' : 'Categoria arquivada sem alterar o histÃ³rico.', tone: 'success' });
+      notify({ message: replacement ? 'Categoria reatribuída e arquivada.' : 'Categoria arquivada sem alterar o histórico.', tone: 'success' });
       onClose();
-    } catch { setError('NÃ£o foi possÃ­vel arquivar a categoria.'); }
+    } catch { setError('Não foi possível arquivar a categoria.'); }
     finally { setLoading(false); }
   }
   async function remove() {
     if (!category) return;
     setLoading(true); setError('');
-    try { await ledger.deleteCategory(category.id); notify({ message: 'Categoria excluÃ­da.', tone: 'success' }); onClose(); }
-    catch { setError('A categoria possui dependÃªncias e nÃ£o pode ser excluÃ­da. Arquive-a para preservar o histÃ³rico.'); }
+    try { await ledger.deleteCategory(category.id); notify({ message: 'Categoria excluída.', tone: 'success' }); onClose(); }
+    catch { setError('A categoria possui dependências e não pode ser excluída. Arquive-a para preservar o histórico.'); }
     finally { setLoading(false); }
   }
 
   return <Dialog open={Boolean(category)} onClose={onClose} title="Arquivar ou excluir categoria"
-    description={category ? `“${category.name}” deixarÃ¡ de aparecer em novos formulÃ¡rios.` : undefined}>
+    description={category ? `“${category.name}” deixará de aparecer em novos formulários.` : undefined}>
     <div className="transaction-form">
-      {category?.dependencyCount ? <><FormMessage tone="hint">HÃ¡ {category.dependencyCount.toLocaleString('pt-BR')} referÃªncia(s). VocÃª pode preservÃ¡-las ou reatribuir os usos atuais antes de arquivar.</FormMessage>
-        <Select label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histÃ³rico" options={replacements} onChange={event => setReplacement(event.target.value)} /></>
-        : <FormMessage tone="hint">Esta categoria nunca foi utilizada e tambÃ©m pode ser excluÃ­da definitivamente.</FormMessage>}
+      {category?.dependencyCount ? <><FormMessage tone="hint">Há {category.dependencyCount.toLocaleString('pt-BR')} referência(s). Você pode preservá-las ou reatribuir os usos atuais antes de arquivar.</FormMessage>
+        <Select label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histórico" options={replacements} onChange={event => setReplacement(event.target.value)} /></>
+        : <FormMessage tone="hint">Esta categoria nunca foi utilizada e também pode ser excluída definitivamente.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button>
         {!category?.dependencyCount && <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm"/>Excluir definitivamente</Button>}
@@ -135,16 +140,16 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
     return normalized ? categories.filter(category => category.name.toLocaleLowerCase('pt-BR').includes(normalized)) : categories;
   }, [categories, query]);
 
-  if (!ledger) return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">ORGANIZAÃ‡ÃƒO</p><h1>Categorias</h1><p className="muted">A gestÃ£o de categorias fica disponÃ­vel no modo autenticado.</p></div><div className="template-heading__actions">{headerAction}</div></div></div>;
+  if (!ledger) return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">A gestão de categorias fica disponível no modo autenticado.</p></div><div className="template-heading__actions">{headerAction}</div></div></div>;
 
   const custom = categories.filter(category => category.type === 'custom' && !category.archivedAt);
   const columns: DataTableColumn<Category>[] = [
     { key: 'name', header: 'Categoria', headerIcon: CategoriesIcon, cell: category => <CategoryIdentity category={category} /> },
-    { key: 'applicability', header: 'AplicaÃ§Ã£o', cell: category => <Badge>{applicabilityLabels[category.applicability]}</Badge> },
+    { key: 'applicability', header: 'Aplicação', cell: category => <Badge>{applicabilityLabels[category.applicability]}</Badge> },
     { key: 'type', header: 'Origem', cell: category => <Badge tone={category.type === 'system' ? 'neutral' : 'income'}>{category.type === 'system' ? 'Estrutural' : 'Personalizada'}</Badge> },
     { key: 'status', header: 'Estado', cell: category => <Badge tone={category.archivedAt ? 'expense' : 'neutral'}>{category.archivedAt ? 'Arquivada' : 'Ativa'}</Badge> },
-    { key: 'dependencies', header: 'ReferÃªncias', align: 'end', cell: category => category.dependencyCount.toLocaleString('pt-BR') },
-    { key: 'actions', header: 'AÃ§Ãµes', cell: category => category.type === 'system' ? <span className="muted">Protegida</span> : category.archivedAt ? <span className="muted">Somente histÃ³rico</span> : <div className="category-actions">
+    { key: 'dependencies', header: 'Referências', align: 'end', cell: category => category.dependencyCount.toLocaleString('pt-BR') },
+    { key: 'actions', header: 'Ações', cell: category => category.type === 'system' ? <span className="muted">Protegida</span> : category.archivedAt ? <span className="muted">Somente histórico</span> : <div className="category-actions">
       <Button size="sm" variant="ghost" aria-label={`Mover ${category.name} para cima`} disabled={custom.findIndex(item => item.id === category.id) <= 0} onClick={() => void ledger.moveCategory(category.id, -1)}><Icon icon={MoveUpIcon} size="sm"/></Button>
       <Button size="sm" variant="ghost" aria-label={`Mover ${category.name} para baixo`} disabled={custom.findIndex(item => item.id === category.id) === custom.length - 1} onClick={() => void ledger.moveCategory(category.id, 1)}><Icon icon={MoveDownIcon} size="sm"/></Button>
       <Button size="sm" variant="ghost" aria-label={`Editar ${category.name}`} onClick={() => { setSelected(category); setEditorOpen(true); }}><Icon icon={EditIcon} size="sm"/></Button>
@@ -153,7 +158,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
   ];
 
   return <div className="template-page">
-    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÃ‡ÃƒO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lanÃ§amentos, metas, regras ou histÃ³rico.</p></div><div className="template-heading__actions"><Button variant="secondary" onClick={() => { setSelected(null); setEditorOpen(true); }}><Icon icon={PlusIcon} size="sm"/>Nova categoria</Button>{headerAction}</div></div>
+    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lançamentos, metas, regras ou histórico.</p></div><div className="template-heading__actions"><Button variant="secondary" onClick={() => { setSelected(null); setEditorOpen(true); }}><Icon icon={PlusIcon} size="sm"/>Nova categoria</Button>{headerAction}</div></div>
     <Card className="template-table-card"><div className="category-toolbar"><Input label="Buscar categorias" value={query} placeholder="Nome da categoria" onChange={event => setQuery(event.target.value)} /></div>
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={6} columns={6} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {rows.length ? <DataTable ariaLabel="Categorias financeiras" columns={columns} rows={rows} getRowKey={category => category.id} /> : <EmptyState title="Nenhuma categoria encontrada" description="Altere a busca e tente novamente." />}
