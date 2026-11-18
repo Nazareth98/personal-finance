@@ -67,7 +67,7 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 }
 @media (max-width: 1000px) {
   .app-shell,.app-shell--sidebar-collapsed { grid-template-columns: minmax(0,1fr); }
-  .sidebar { position: sticky; z-index: 20; height: auto; overflow: visible; padding: var(--spacing-3) var(--spacing-4); display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--spacing-3); align-items: center; }
+  .sidebar { position: sticky; z-index: var(--z-sticky); height: auto; overflow: visible; padding: var(--spacing-3) var(--spacing-4); display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--spacing-3); align-items: center; }
   .sidebar-header { grid-column: 1; grid-row: 1; }
   .sidebar-collapse { display: none; }
   .sidebar-section-label { display: none; }

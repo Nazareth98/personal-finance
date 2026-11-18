@@ -691,3 +691,28 @@ test('gráficos da visão geral seguem o período e os totais do livro', async (
   await expect(flow.getByRole('row', { name: /out\/2026/ })).toContainText('R$ 6.200,00');
   await expect(flow.getByRole('row', { name: /nov\/2026/ })).toHaveCount(0);
 });
+
+// Inventário para o redesign: `pnpm redesign:inventory`. Dados do mock são fictícios.
+test('inventário de telas para redesign', async ({ page }) => {
+  test.skip(!process.env.REDESIGN_INVENTORY, 'Executado somente por pnpm redesign:inventory.');
+  test.setTimeout(180_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await mockSupabase(page);
+  await login(page);
+  const screens = ['overview', 'transactions', 'accounts', 'cards', 'budgets', 'savings', 'categories', 'connections', 'review', 'review?view=history', 'reports'];
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    for (const [viewport, width] of [['desktop', 1440], ['mobile', 390]] as const) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const screen of screens) {
+        await page.goto(`/#${screen}`);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-${screen.replace('?view=', '-')}.png`, fullPage: true });
+      }
+      await page.goto('/#review');
+      await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+      await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-dialog-review.png` });
+      await page.keyboard.press('Escape');
+    }
+  }
+});

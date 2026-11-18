@@ -49,6 +49,7 @@ Ao terminar uma mudança relevante:
 | decisão histórica | `docs/brain/DECISIONS.md` |
 | tokens ou fundamentos visuais | `docs/design-system/FOUNDATIONS.md`, `docs/design-system/THEMING.md` |
 | componente de UI | `docs/design-system/COMPONENTS.md`, `docs/design-system/GOVERNANCE.md` |
+| redesign com Claude Design | `docs/design-system/REDESIGN.md`, `DESIGN.md` |
 | formulário | `docs/design-system/FORMS.md` |
 | tabela, KPI ou resultado | `docs/design-system/DATA_DISPLAY.md` |
 | gráfico ou cor financeira | `docs/design-system/CHARTS_AND_COLORS.md` |

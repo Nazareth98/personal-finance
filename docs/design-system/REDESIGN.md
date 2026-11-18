@@ -1,0 +1,50 @@
+# Redesign com Claude Design
+
+Briefing para cada rodada de redesign. Leia junto com [`DESIGN.md`](../../DESIGN.md), que é o contexto visual entregue ao Claude Design.
+
+## Fontes
+
+| Material | Origem | Observação |
+| --- | --- | --- |
+| Sistema visual | `DESIGN.md` | `pnpm design:check` falha se divergir de `packages/tokens/src/themes.json` |
+| Tokens | `packages/tokens/src/themes.json` | cores Light/Dark, espaçamento, raios, tipografia, elevação e camadas |
+| Telas atuais | `pnpm redesign:inventory` | 48 capturas em `output/redesign-inventory/` (fora do Git): 11 telas + diálogo × Light/Dark × desktop/mobile, com dados fictícios |
+| Componentes | Storybook (`pnpm storybook`) | catálogo de `@personal-finance/ui` |
+
+Nunca envie ao Claude Design capturas com dados reais. As do inventário vêm do mock dos testes.
+
+## Telas
+
+| Tela | Função principal |
+| --- | --- |
+| Visão geral | período navegável, KPIs, fluxo, resultado acumulado, metas e compromissos de cartão |
+| Transações | livro completo com busca, filtros e ordenação |
+| Contas | saldos reconstruídos pelo livro |
+| Cartões e faturas | ciclo, faturas, pagamentos e parcelas futuras |
+| Orçamentos | tetos percentuais por categoria |
+| Caixinhas | saldo, aportes e resgates |
+| Categorias | identidade visual, arquivamento e reatribuição |
+| Conexões | estado e sincronização do MeuPluggy |
+| Revisão | pendências e histórico com versões anteriores |
+| Relatórios | previsão de seis meses |
+
+## Pontos já observados no inventário
+
+- No mobile, a navegação em grade ocupa cerca de 360 px antes do conteúdo; candidata a barra inferior ou menu recolhido.
+- Tabelas largas rolam lateralmente no mobile (Categorias, Revisão, Transações); avaliar lista em cartões abaixo de 680 px.
+- Detalhes textuais dos gráficos ficam longos com rótulos “(previsto)”.
+
+## Restrições que o redesign não muda
+
+- Português do Brasil, BRL, `bigint` em centavos e sinais `+`/`−` além da cor.
+- Receita, despesa, transferência própria, pagamento de fatura, aporte e resgate continuam visualmente distintos.
+- Cores novas entram primeiro em `themes.json`, nos dois temas, e passam por `pnpm tokens:check`; nada de hex inline.
+- Teclado, foco visível, labels, contraste AA e alternativa textual para gráficos.
+- Componentes genéricos em `packages/ui`; composições financeiras em `apps/web`.
+
+## Ciclo por tela
+
+1. Gerar o inventário e levar `DESIGN.md` e as capturas da tela ao Claude Design.
+2. Aprovar a proposta; mudanças de token entram antes dos componentes.
+3. Implementar, atualizar stories e testes e rodar `pnpm check` e as suítes E2E.
+4. Gerar o inventário de novo para comparar antes e depois; atualizar os baselines no CI com `[update visual baselines]` somente após revisar.

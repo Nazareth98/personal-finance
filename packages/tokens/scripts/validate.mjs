@@ -61,6 +61,20 @@ export function validateTokens(tokens) {
     }
   }
 
+  const elevationLight = Object.keys(tokens?.elevation?.light || {}).sort().join('|');
+  if (!elevationLight || elevationLight !== Object.keys(tokens?.elevation?.dark || {}).sort().join('|')) {
+    problems.push('Elevação Light e Dark devem ter as mesmas chaves.');
+  }
+  for (const [theme, values] of Object.entries(tokens?.elevation || {})) {
+    for (const [name, value] of Object.entries(values)) {
+      if (typeof value !== 'string' || !/^[0-9a-z.,()\s-]+$/i.test(value)) problems.push(`Elevação inválida em ${theme}/${name}`);
+    }
+  }
+  const layers = tokens?.zIndex || {};
+  if (!Object.values(layers).every(Number.isInteger)) problems.push('z-index deve ser inteiro.');
+  // Toast precisa ficar acima de menus, que ficam acima do cabeçalho fixo.
+  if (!(layers.sticky < layers.dropdown && layers.dropdown < layers.toast)) problems.push('Camadas devem respeitar sticky < dropdown < toast.');
+
   for (const category of ['spacing', 'radius', 'controlHeight']) {
     for (const [name, value] of Object.entries(tokens?.[category] || {})) {
       if (!Number.isFinite(value) || value < 0) problems.push(`Valor geométrico inválido: ${category}/${name}`);

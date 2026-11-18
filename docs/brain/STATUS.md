@@ -22,11 +22,11 @@ Atualizado em: 18/11/2026.
 
 ## Marco atual
 
-**Preparação do redesign com Claude Design.** A Etapa 11 foi concluída: a 11.5 levou à visão geral fluxo de caixa, resultado acumulado, metas e compromissos de cartão, todos no período selecionado (D-029).
+**Redesign com Claude Design.** Preparação concluída (D-030): tokens de elevação e camadas, `DESIGN.md` verificado no `pnpm check`, inventário reproduzível e briefing em [`REDESIGN.md`](../design-system/REDESIGN.md).
 
 Próximas entregas, nesta ordem:
 
-1. preparar o redesign com Claude Design: tokens de elevação e z-index, `DESIGN.md` sincronizado com `themes.json` e inventário de telas com dados fictícios.
+1. escolher a primeira tela e seguir o ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md); candidatas: navegação mobile e Visão geral.
 
 ## Última validação
 
@@ -69,6 +69,7 @@ Próximas entregas, nesta ordem:
 - Etapa 11.3 em 18/11/2026: o hover deslocava os links da sidebar e a lista com `overflow-y` rolava lateralmente; removido o deslocamento, eixo X cortado e foco desenhado por dentro. Novo teste mede a largura rolável em hover, foco e durante a transição de recolher (falhou antes da correção). `pnpm check`, 18 fluxos autenticados e 72 cenários de comportamento/acessibilidade passaram com Node 22.13.
 - Etapa 11.4 em 18/11/2026: `pnpm check`, 35 testes unitários (4 novos de filtro), 21 fluxos autenticados (3 novos: período, filtros com URL e histórico da revisão) e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13. Tabelas demonstrativas não ganharam ordenação para preservar os 78 baselines. Capturas desktop/mobile revisadas localmente com dados fictícios.
 - Etapa 11.5 em 18/11/2026: séries puras com 3 testes (janela na virada do ano, totais do livro sem transferências, fatura líquida mais parcelas projetadas). `TrendLineChart` ganhou `valueTone="neutral"` para compromissos não parecerem ganho. `pnpm check`, 38 testes unitários, 22 fluxos autenticados e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13; capturas Light/Dark e mobile revisadas com dados fictícios.
+- Preparação do redesign em 18/11/2026: sombras, fundo de diálogo e z-index viraram tokens; Light manteve os valores anteriores e Dark ganhou sombras mais fortes. `design:check` detectou divergência injetada de propósito. A tabela duplicada de FOUNDATIONS estava desatualizada em três cores e foi trocada por link. `pnpm redesign:inventory` gerou 48 capturas. `pnpm check`, 8 testes de tokens, 22 fluxos autenticados e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13.
 
 ## Bloqueios
 

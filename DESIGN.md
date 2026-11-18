@@ -114,7 +114,16 @@ Use a escala de 4 px do frontmatter. Páginas seguem os templates documentados p
 
 ## Elevation & Depth
 
-Crie hierarquia principalmente com superfícies, bordas e espaçamento. Não introduza sombras decorativas ou novos níveis de elevação sem aprovação.
+Crie hierarquia principalmente com superfícies, bordas e espaçamento. Sombras existem só para camadas flutuantes; não as use em cards nem introduza níveis novos sem aprovação.
+
+| Token | Uso | Light | Dark |
+| --- | --- | --- | --- |
+| `shadow-sm` | toast | `0 8px 22px rgba(0,0,0,.16)` | `0 8px 22px rgba(0,0,0,.40)` |
+| `shadow-md` | menus e listas suspensas | `0 12px 28px rgba(0,0,0,.18)` | `0 12px 28px rgba(0,0,0,.45)` |
+| `shadow-lg` | diálogo | `0 22px 60px rgba(0,0,0,.22)` | `0 22px 60px rgba(0,0,0,.55)` |
+| `overlay-backdrop` | fundo atrás de diálogo | `rgba(0,0,0,.58)` | `rgba(0,0,0,.72)` |
+
+Camadas (`--z-*`): `sticky` 20 (cabeçalho móvel), `dropdown` 30 (menus), `toast` 50. Diálogos usam a top layer nativa de `<dialog>` e não precisam de z-index.
 
 ## Shapes
 

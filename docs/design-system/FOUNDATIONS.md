@@ -10,21 +10,9 @@ Figma: https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr
 
 Fonte de verdade técnica: `packages/tokens/src/themes.json`. Gerador: `packages/tokens/scripts/build.mjs`. Artefato: `packages/tokens/dist/theme.css` (gerado).
 
-| Token CSS | Light | Dark |
-| --- | --- | --- |
-| `--color-bg-canvas` | #F8FAFC | #0B1220 |
-| `--color-bg-surface` | #FFFFFF | #172235 |
-| `--color-bg-subtle` | #F1F5F9 | #1E293B |
-| `--color-text-primary` | #0F172A | #F8FAFC |
-| `--color-text-secondary` | #64748B | #94A3B8 |
-| `--color-border-default` | #E2E8F0 | #334155 |
-| `--color-action-primary` | #2563EB | #3B82F6 |
-| `--color-action-hover` | #1D4ED8 | #60A5FA |
-| `--color-finance-income` | #15803D | #4ADE80 |
-| `--color-finance-expense` | #B91C1C | #F87171 |
-| `--color-finance-transfer` | #2563EB | #60A5FA |
+Os valores Light/Dark de cada token, a elevação e as camadas estão em [`DESIGN.md`](../../DESIGN.md), verificado contra o JSON por `pnpm design:check`. Cada token vira `--color-*`, `--shadow-*`, `--overlay-backdrop` ou `--z-*`.
 
-Outros tokens (`status-*`) estão no JSON. Valores financeiros positivos e negativos devem ser identificados por **texto/sinal/ícone**, nunca exclusivamente por cor. Transferência própria é movimentação patrimonial, não receita nem despesa.
+Valores financeiros positivos e negativos devem ser identificados por **texto/sinal/ícone**, nunca exclusivamente por cor. Transferência própria é movimentação patrimonial, não receita nem despesa.
 
 ## Escalas
 

@@ -57,3 +57,12 @@ test('o CSS gerado permite temas explícitos em containers isolados', async () =
     assert.equal((css.match(new RegExp('--color-'+key+':','g'))||[]).length,2,`Token CSS em Light e Dark: ${key}`);
   }
 });
+
+test('elevação diverge entre temas e camadas fora de ordem são rejeitadas', async () => {
+  const tokens = await readTokens();
+  delete tokens.elevation.dark.lg;
+  tokens.zIndex.toast = 10;
+  const problems = validateTokens(tokens).join(' ');
+  assert.match(problems, /Elevação Light e Dark/);
+  assert.match(problems, /sticky < dropdown < toast/);
+});

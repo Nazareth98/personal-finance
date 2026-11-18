@@ -15,18 +15,21 @@ const keys = Object.keys(light).sort();
 if (keys.join('|') !== Object.keys(dark).sort().join('|')) {
   throw new Error('Light e Dark precisam expor exatamente os mesmos tokens.');
 }
-const declarations = (values) => keys.map((key) => `  --color-${key}: ${values[key]};`).join('\n');
+const elevation = (values) => Object.entries(values).map(([key, value]) => key === 'backdrop'
+  ? `  --overlay-backdrop: ${value};` : `  --shadow-${key}: ${value};`);
+const declarations = (values, theme) => [...keys.map((key) => `  --color-${key}: ${values[key]};`), ...elevation(tokens.elevation[theme])].join('\n');
 const geometry = [
   ...Object.entries(tokens.spacing).map(([k, value]) => `  --spacing-${k}: ${value}px;`),
   ...Object.entries(tokens.radius).map(([k, value]) => `  --radius-${k}: ${value}px;`),
   ...Object.entries(tokens.controlHeight).map(([k, value]) => `  --control-height-${k}: ${value}px;`),
   ...Object.entries(tokens.typography.scale).map(([k, value]) => `  --font-size-${k}: ${value}px;`),
+  ...Object.entries(tokens.zIndex).map(([k, value]) => `  --z-${k}: ${value};`),
   `  --font-family-sans: ${tokens.typography.family};`
 ].join('\n');
 const css = [
   '/* Gerado por packages/tokens/scripts/build.mjs. Não edite manualmente. */',
-  ':root, [data-theme="light"] {', declarations(light), geometry, '  color-scheme: light;', '}',
-  '[data-theme="dark"] {', declarations(dark), '  color-scheme: dark;', '}',
+  ':root, [data-theme="light"] {', declarations(light, 'light'), geometry, '  color-scheme: light;', '}',
+  '[data-theme="dark"] {', declarations(dark, 'dark'), '  color-scheme: dark;', '}',
   ''
 ].join('\n');
 await mkdir(resolve(root, 'dist'), { recursive: true });
