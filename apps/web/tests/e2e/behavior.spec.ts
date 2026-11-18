@@ -52,6 +52,9 @@ test('sidebar pode ser recolhida e expandida no desktop',async ({page},testInfo)
   await expect(page.getByRole('button',{name:'Expandir menu'})).toHaveAttribute('aria-expanded','false');
   const scan=await new AxeBuilder({page}).include('.sidebar').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
   expect(scan.violations).toEqual([]);
+  // D-038: a ação principal fica logo abaixo do cabeçalho da sidebar, antes da navegação.
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button',{name:/^Nova movimentação/})).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link',{name:'Visão geral',exact:true})).toBeFocused();
   await page.keyboard.press('Tab');
