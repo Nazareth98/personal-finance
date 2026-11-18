@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
-import { isBudgetCategory, parsePercentageBasisPoints } from '../lib/budget-validation';
+import { parsePercentageBasisPoints } from '../lib/budget-validation';
 
 export function BudgetForm({ open, onClose, ledger }: { open: boolean; onClose: () => void; ledger: LedgerState }) {
   const [categoryId, setCategoryId] = useState('');
@@ -10,7 +10,7 @@ export function BudgetForm({ open, onClose, ledger }: { open: boolean; onClose: 
   const [loading, setLoading] = useState(false);
   const { notify } = useToast();
   const options = (ledger.data?.categories ?? [])
-    .filter(category => isBudgetCategory(category.id))
+    .filter(category => !category.archivedAt && category.applicability === 'expense')
     .map(category => ({ value: category.id, label: category.name }));
 
   async function submit(event: FormEvent) {

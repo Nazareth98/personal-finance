@@ -55,7 +55,10 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
   }
 
   const accountOptions = (data?.accounts ?? []).map(account => ({ value: account.id, label: account.name }));
-  const categoryOptions = (data?.categories ?? []).map(category => ({ value: category.id, label: category.name }));
+  const categoryApplicability = draft.kind.includes('income') ? 'income' : 'expense';
+  const categoryOptions = (data?.categories ?? [])
+    .filter(category => !category.archivedAt && category.applicability === categoryApplicability)
+    .map(category => ({ value: category.id, label: category.name }));
   const transactionOptions = (data?.transactions ?? []).map(transaction => ({
     value: transaction.id, label: `${formatLocalDate(transaction.eventDate)} · ${transaction.description} · ${formatCentsBRL(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents)}`
   }));
@@ -67,7 +70,7 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
       <Select label="Tipo" value={draft.kind} options={[
         { value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'transfer', label: 'Transferência própria' },
         { value: 'adjustment_expense', label: 'Ajuste de despesa' }, { value: 'adjustment_income', label: 'Ajuste de receita' }
-      ]} onChange={event => patch('kind', event.target.value as Kind)} />
+      ]} onChange={event => { patch('kind', event.target.value as Kind); patch('categoryId', ''); }} />
       <Select label={transfer ? 'Conta de origem' : 'Conta'} value={draft.accountId} placeholder="Selecione" options={accountOptions} required onChange={event => patch('accountId', event.target.value)} />
       {transfer && <Select label="Conta de destino" value={draft.targetAccountId} placeholder="Selecione" options={accountOptions.filter(option => option.value !== draft.accountId)} required onChange={event => patch('targetAccountId', event.target.value)} />}
       {!transfer && <Select label="Categoria" value={draft.categoryId} placeholder="Selecione" options={categoryOptions} required onChange={event => patch('categoryId', event.target.value)} />}

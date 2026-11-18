@@ -69,7 +69,12 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       return;
     }
     if (url.pathname === '/rest/v1/categories') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'salary', name: 'Salário' }, { id: 'groceries', name: 'Supermercado' }, { id: 'restaurants', name: 'Restaurantes' }]) });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 'salary', name: 'Salário', category_type: 'system', applicability: 'income', sort_order: 10, archived_at: null },
+        { id: 'groceries', name: 'Supermercado', category_type: 'system', applicability: 'expense', sort_order: 20, archived_at: null },
+        { id: 'restaurants', name: 'Restaurantes', category_type: 'system', applicability: 'expense', sort_order: 30, archived_at: null },
+        { id: 'custom_hobbies', name: 'Hobbies', category_type: 'custom', applicability: 'expense', sort_order: 40, archived_at: null }
+      ]) });
       return;
     }
     if (url.pathname === '/rest/v1/transactions') {
@@ -175,6 +180,13 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       return;
     }
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
+      if (url.pathname.endsWith('/get_category_usage')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+          { category_id: 'salary', dependency_count: 6 }, { category_id: 'groceries', dependency_count: 3 },
+          { category_id: 'restaurants', dependency_count: 0 }, { category_id: 'custom_hobbies', dependency_count: 0 }
+        ]) });
+        return;
+      }
       rpcCalls.push({ path: url.pathname, body: route.request().postData() });
       const body = JSON.parse(route.request().postData() ?? '{}') as Record<string, string | null>;
       if (url.pathname.endsWith('/confirm_transaction_classification') && body.p_transaction_id && body.p_category_id) {
@@ -359,12 +371,45 @@ test('cadastra caixinha, registra aporte neutro e associa lançamento importado'
 test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  for (const destination of ['overview', 'transactions', 'accounts', 'cards', 'budgets', 'savings', 'connections', 'review']) {
+  for (const destination of ['overview', 'transactions', 'accounts', 'cards', 'budgets', 'savings', 'categories', 'connections', 'review']) {
     await page.goto(`/#${destination}`);
     await expect(page.getByRole('main')).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(results.violations).toEqual([]);
   }
+});
+
+test('cria, renomeia e arquiva categoria personalizada com segurança', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#categories');
+
+  await expect(page.getByRole('row', { name: /Salário/ })).toContainText('Estrutural');
+  await expect(page.getByRole('row', { name: /Salário/ })).toContainText('Protegida');
+  await page.getByRole('button', { name: 'Nova categoria' }).click();
+  const createDialog = page.getByRole('dialog', { name: 'Nova categoria' });
+  await createDialog.getByLabel('Nome').fill('Pets');
+  await createDialog.getByLabel('Despesa').check();
+  await createDialog.getByRole('button', { name: 'Salvar categoria' }).click();
+  await expect(page.getByText('Categoria criada.')).toBeVisible();
+
+  const hobbies = page.getByRole('row', { name: /Hobbies/ });
+  await hobbies.getByRole('button', { name: 'Renomear Hobbies' }).click();
+  const renameDialog = page.getByRole('dialog', { name: 'Renomear categoria' });
+  await renameDialog.getByLabel('Nome').fill('Lazer pessoal');
+  await renameDialog.getByRole('button', { name: 'Salvar categoria' }).click();
+  await expect(page.getByText('Categoria renomeada.')).toBeVisible();
+
+  await hobbies.getByRole('button', { name: 'Arquivar Hobbies' }).click();
+  const removalDialog = page.getByRole('dialog', { name: 'Arquivar ou excluir categoria' });
+  await expect(removalDialog.getByRole('button', { name: /Excluir definitivamente/ })).toBeVisible();
+  await removalDialog.getByRole('button', { name: /Arquivar$/ }).click();
+  await expect.poll(() => writes.some(write => write.path.endsWith('/archive_category'))).toBe(true);
+
+  expect(writes.map(write => write.path)).toEqual([
+    '/rest/v1/rpc/create_category', '/rest/v1/rpc/rename_category', '/rest/v1/rpc/archive_category'
+  ]);
 });
 
 test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutro', async ({ page }) => {

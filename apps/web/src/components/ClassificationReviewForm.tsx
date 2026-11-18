@@ -5,8 +5,6 @@ import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatLocalDate } from '../lib/demo-transactions';
 
-const incomeCategories = new Set(['salary', 'other_recurring_income', 'extraordinary_income']);
-const excludedExpenseCategories = new Set([...incomeCategories, 'transfers', 'savings']);
 type ReviewNature = SemanticConfirmation['nature'];
 
 const natureLabels: Record<ReviewNature, string> = {
@@ -56,10 +54,9 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       : ['income', 'own_transfer', 'savings_withdrawal'])
       .map(value => ({ value, label: natureLabels[value as ReviewNature] }))
     : [];
-  const categoryOptions = (data?.categories ?? []).filter(category => nature === 'income'
-    ? incomeCategories.has(category.id)
-    : !excludedExpenseCategories.has(category.id)
-  ).map(category => ({ value: category.id, label: category.name }));
+  const categoryOptions = (data?.categories ?? [])
+    .filter(category => !category.archivedAt && category.applicability === nature)
+    .map(category => ({ value: category.id, label: category.name }));
   const counterpartOptions = transaction ? (data?.transactions ?? []).filter(candidate =>
     candidate.id !== transaction.id && candidate.source === 'pluggy' && candidate.accountId !== transaction.accountId
     && candidate.amountCents + transaction.amountCents === 0n && daysApart(candidate.eventDate, transaction.eventDate) <= 3

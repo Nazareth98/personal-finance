@@ -21,7 +21,15 @@ export type FinancialAccount = {
   openingBalanceCents: bigint;
 };
 
-export type Category = { id: string; name: string };
+export type Category = {
+  id: string;
+  name: string;
+  type: 'system' | 'custom';
+  applicability: 'income' | 'expense' | 'neutral';
+  sortOrder: number;
+  archivedAt?: string;
+  dependencyCount: number;
+};
 
 export type CategoryBudget = {
   id: string;

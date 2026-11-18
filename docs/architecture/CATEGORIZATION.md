@@ -61,3 +61,5 @@ Em uma limpeza de desenvolvimento, preservar `classification_rules` com `evidenc
 - sincronização escreve overlays com `service_role` no backend;
 - descrições reais não entram em fixtures, logs, screenshots ou mensagens de erro;
 - o modo demonstrativo exibe estado vazio, sem exemplos que imitem dados privados.
+
+Categorias arquivadas permanecem legíveis para explicar o histórico, mas deixam de ser aceitas em novos formulários e por novas classificações. Ao arquivar, regras são reatribuídas ou desativadas sem apagar feedback anterior.

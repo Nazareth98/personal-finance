@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CardPaymentLink, CategoryBudgetDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -11,6 +11,8 @@ type TransactionRow = {
 };
 type LinkRow = { id: string; source_transaction_id: string; target_transaction_id: string; link_type: TransactionLink['type'] };
 type BudgetRow = { id: string; category_id: string; percentage_basis_points: number };
+type CategoryRow = { id: string; name: string; category_type: 'system' | 'custom'; applicability: 'income' | 'expense' | 'neutral'; sort_order: number; archived_at: string | null };
+type CategoryUsageRow = { category_id: string; dependency_count: number | string };
 type SavingsBoxRow = { id: string; name: string; opening_balance_cents: string | number; target_cents: string | number; target_date: string | null };
 type SavingsMovementRow = { id: string; savings_box_id: string; transaction_id: string; movement_type: SavingsMovement['type']; amount_cents: string | number; event_date: string };
 type ClassificationRow = {
@@ -58,9 +60,10 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   }
 
   async load(): Promise<LedgerData> {
-    const [accountsResult, categoriesResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
+    const [accountsResult, categoriesResult, categoryUsageResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
-      this.client.from('categories').select('id,name').order('sort_order'),
+      this.client.from('categories').select('id,name,category_type,applicability,sort_order,archived_at').order('sort_order'),
+      this.client.rpc('get_category_usage'),
       this.loadTransactions(),
       this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
       this.client.from('category_budgets').select('id,category_id,percentage_basis_points').order('created_at'),
@@ -73,7 +76,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
       this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
-    const error = accountsResult.error ?? categoriesResult.error ?? linksResult.error ?? budgetsResult.error
+    const error = accountsResult.error ?? categoriesResult.error ?? categoryUsageResult.error ?? linksResult.error ?? budgetsResult.error
       ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? creditCardsResult.error
       ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
@@ -107,9 +110,15 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       reason: row.reason, semanticVersion: row.semantic_version, updatedAt: row.updated_at
     }));
     const semanticOverrideByTransaction = new Map(semanticOverrides.map(item => [item.transactionId, item]));
+    const categoryUsage = new Map(((categoryUsageResult.data ?? []) as CategoryUsageRow[])
+      .map(row => [row.category_id, Number(row.dependency_count)]));
     return {
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
-      categories: (categoriesResult.data ?? []).map(row => ({ id: String(row.id), name: String(row.name) })),
+      categories: ((categoriesResult.data ?? []) as CategoryRow[]).map(row => ({
+        id: row.id, name: row.name, type: row.category_type, applicability: row.applicability,
+        sortOrder: row.sort_order, ...(row.archived_at ? { archivedAt: row.archived_at } : {}),
+        dependencyCount: categoryUsage.get(row.id) ?? 0
+      })),
       budgets: ((budgetsResult.data ?? []) as BudgetRow[]).map((row): CategoryBudget => ({
         id: row.id, categoryId: row.category_id, percentageBasisPoints: row.percentage_basis_points
       })),
@@ -166,6 +175,33 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const { error } = await this.client.from('financial_accounts').insert({
       name: draft.name.trim(), account_type: draft.type, opening_balance_cents: draft.openingBalanceCents.toString()
     });
+    if (error) throw error;
+  }
+
+  async createCategory(draft: CategoryDraft): Promise<void> {
+    const { error } = await this.client.rpc('create_category', { p_name: draft.name, p_applicability: draft.applicability });
+    if (error) throw error;
+  }
+
+  async renameCategory(categoryId: string, name: string): Promise<void> {
+    const { error } = await this.client.rpc('rename_category', { p_category_id: categoryId, p_name: name });
+    if (error) throw error;
+  }
+
+  async moveCategory(categoryId: string, direction: -1 | 1): Promise<void> {
+    const { error } = await this.client.rpc('move_category', { p_category_id: categoryId, p_direction: direction });
+    if (error) throw error;
+  }
+
+  async archiveCategory(draft: CategoryArchiveDraft): Promise<void> {
+    const { error } = await this.client.rpc('archive_category', {
+      p_category_id: draft.categoryId, p_replacement_category_id: draft.replacementCategoryId ?? null
+    });
+    if (error) throw error;
+  }
+
+  async deleteCategory(categoryId: string): Promise<void> {
+    const { error } = await this.client.rpc('delete_category', { p_category_id: categoryId });
     if (error) throw error;
   }
 

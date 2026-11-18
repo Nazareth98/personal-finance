@@ -16,7 +16,7 @@ test('temas explícitos prevalecem sobre preferência do sistema',async ({page})
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
 
-test('navegação entre nove templates funciona com histórico hash',async ({page})=>{
+test('navegação entre dez templates funciona com histórico hash',async ({page})=>{
   await page.goto('/#overview');
   for(const {slug,title,navigationTitle=title} of [
     {slug:'transactions',title:'Transações'},
@@ -24,6 +24,7 @@ test('navegação entre nove templates funciona com histórico hash',async ({pag
     {slug:'cards',title:'Cartões e faturas'},
     {slug:'budgets',title:'Orçamentos'},
     {slug:'savings',title:'Caixinhas'},
+    {slug:'categories',title:'Categorias'},
     {slug:'connections',title:'Conexões bancárias',navigationTitle:'Conexões'},
     {slug:'review',title:'Revisão de categorias',navigationTitle:'Revisão'},
     {slug:'reports',title:'Relatórios'},

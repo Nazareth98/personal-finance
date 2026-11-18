@@ -11,22 +11,23 @@ Atualizado em: 18/11/2026.
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
 - MeuPluggy implementado com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado e retomada após falha. O suporte ao webhook está implementado, mas sua integração operacional foi adiada; por enquanto, a sincronização é iniciada manualmente pela aplicação.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
+- Gestão de categorias da Etapa 11.1 publicada: categorias estruturais protegidas, personalizadas com aplicabilidade, busca, criação, renomeação, ordenação, arquivamento, reatribuição e exclusão somente sem dependências.
 - Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. O replay foi concluído nas conexões Caixa e Itaú; o frontend passou a paginar o livro completo para não separar entradas de fatura de seus lançamentos após o limite de 1.000 linhas do Data API.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
 - PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: 15 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
+- O projeto Supabase novo está vinculado: 16 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
 ## Marco atual
 
-**Etapa 11.1 — gestão de categorias.** A Etapa 10.4 foi encerrada com replay, materialização, conciliação e idempotência validados para Caixa e Itaú. O ciclo dirigido de atualização/exclusão está implementado e publicado, mas sua ativação por webhook foi deliberadamente adiada. O próximo marco é criar o CRUD autenticado de categorias sem romper lançamentos, metas, regras, aliases ou histórico.
+**Etapa 11.2 — correção e movimentação.** A gestão de categorias foi publicada e validada sem alterar as 23 categorias estruturais existentes. O próximo marco é permitir nova versão do overlay, correção explícita e registro/vínculo dos dois lados de transferências próprias.
 
 Próximas entregas, nesta ordem:
 
-1. implementar a Etapa 11.1 documentada em [`PLAN.md`](PLAN.md): listar, buscar, criar, renomear, ordenar, arquivar e excluir categorias quando seguro;
-2. seguir para correção/revisão, consistência visual, período/ordenação e gráficos nas subetapas seguintes.
+1. implementar a Etapa 11.2 documentada em [`PLAN.md`](PLAN.md), preservando versões anteriores do overlay e aliases aprendidos;
+2. seguir para consistência visual, período/ordenação e gráficos nas subetapas seguintes.
 
 ## Última validação
 
@@ -63,6 +64,7 @@ Próximas entregas, nesta ordem:
 - Estabilidade MeuPluggy em 17/11/2026: o contrato oficial atual confirmou que `transactionId` permanece a chave do MeuPluggy e `providerId` é metadado opcional de conexões reguladas. A migration remota adicionou o campo ao staging privado e manteve a RPC restrita ao `service_role`; replays podem preencher o metadado sem alterar o conteúdo financeiro nem inflar o contador de importados. `pluggy-sync` v11 e `pluggy-webhook` v5 estão ativas com JWT obrigatório e HMAC próprio, respectivamente. Os componentes da esteira equivalente a `pnpm check` passaram com Node 24.14.1; o agregador não encontra o shim `pnpm` apenas nas chamadas aninhadas deste sandbox. O tratamento dirigido de `transactions/updated` e `transactions/deleted` continua como próximo incremento.
 - Idempotência remota em 18/11/2026: Caixa e Itaú repetiram a sincronização sem novas importações. A auditoria agregada permaneceu sem duplicidades, órfãos ou divergência entre staging, livro e entradas de fatura. Houve avanço manual nos vínculos de pagamento, mas os restantes continuam sem correspondência inequívoca e não serão associados automaticamente.
 - Ciclo de transações em 18/11/2026: `transactions/updated` passou a reler os IDs indicados pelo MeuPluggy e `transactions/deleted` ganhou exclusão lógica reversível no staging e no livro. A interface ignora lançamentos removidos e seus vínculos, entradas e grupos de parcelas, evitando totais fantasmas e faturas sem lançamento. Duas migrations foram aplicadas; o primeiro smoke encontrou e abortou uma precedência incorreta na chave externa, a correção incremental foi publicada e o smoke de exclusão/reaparecimento passou com rollback. `pluggy-sync` v12 e `pluggy-webhook` v7 estão ativas com ACL interna restrita ao `service_role`; 12 contratos MeuPluggy, 30 testes web, typecheck e o fluxo autenticado de cartões passaram com Node 24.14.1. A chamada remota sem assinatura confirmou o bloqueio operacional `503 webhook_not_configured`.
+- Etapa 11.1 em 18/11/2026: migration `category_management` aplicada no Supabase hospedado após ensaio com rollback. O smoke CRUD transacional passou e foi revertido; permaneceram 23 categorias estruturais, nenhuma personalizada ou aplicabilidade ausente, cinco novas colunas e seis RPCs autenticadas. `pnpm check`, fluxo CRUD e auditoria WCAG A/AA da nova tela passaram com Node 22.12.
 
 ## Bloqueios
 

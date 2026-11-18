@@ -1,6 +1,6 @@
 import {expect,test} from '@playwright/test';
 
-type PageName='overview'|'transactions'|'accounts'|'cards'|'budgets'|'savings'|'connections'|'review'|'reports';
+type PageName='overview'|'transactions'|'accounts'|'cards'|'budgets'|'savings'|'categories'|'connections'|'review'|'reports';
 const templates:{slug:PageName;title:string;navigationTitle?:string}[]=[
   {slug:'overview',title:'Visão geral'},
   {slug:'transactions',title:'Transações'},
@@ -8,6 +8,7 @@ const templates:{slug:PageName;title:string;navigationTitle?:string}[]=[
   {slug:'cards',title:'Cartões e faturas'},
   {slug:'budgets',title:'Orçamentos'},
   {slug:'savings',title:'Caixinhas'},
+  {slug:'categories',title:'Categorias'},
   {slug:'connections',title:'Conexões bancárias',navigationTitle:'Conexões'},
   {slug:'review',title:'Revisão de categorias',navigationTitle:'Revisão'},
   {slug:'reports',title:'Relatórios'},

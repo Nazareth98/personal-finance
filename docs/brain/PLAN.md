@@ -157,6 +157,8 @@ Executar somente após fechar a importação de compras de cartão da Etapa 10.4
 
 ### 11.1 — gestão de categorias
 
+Estado: concluída em 18/11/2026; migration aplicada e CRUD autenticado validado local e remotamente.
+
 - criar uma tela autenticada para listar, buscar, criar, renomear e ordenar categorias;
 - distinguir categorias estruturais do sistema de categorias personalizadas pelo proprietário;
 - informar se a categoria se aplica a receita, despesa ou movimento neutro e restringir seleções incompatíveis;

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, ConnectionsIcon, DashboardIcon, Icon, LogOutIcon, MoonIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Icon, LogOutIcon, MoonIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
@@ -16,10 +16,11 @@ import type { ConnectionsRepository } from './integrations/contracts';
 import { useConnections, type ConnectionsState } from './integrations/useConnections';
 import { ConnectionsPage } from './pages/ConnectionsPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { CategoriesPage } from './pages/CategoriesPage';
 import { usePwa } from './hooks/usePwa';
 import type { PageProps } from './pages/PageProps';
 
-export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'connections' | 'review' | 'reports';
+export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'categories' | 'connections' | 'review' | 'reports';
 const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
   { id: 'overview', title: 'Visão geral', icon: DashboardIcon },
   { id: 'transactions', title: 'Transações', icon: TransactionsIcon },
@@ -27,6 +28,7 @@ const navigation: { id: PageId; title: string; icon: LucideIcon }[] = [
   { id: 'cards', title: 'Cartões e faturas', icon: CardsIcon },
   { id: 'budgets', title: 'Orçamentos', icon: BudgetsIcon },
   { id: 'savings', title: 'Caixinhas', icon: SavingsIcon },
+  { id: 'categories', title: 'Categorias', icon: CategoriesIcon },
   { id: 'connections', title: 'Conexões', icon: ConnectionsIcon },
   { id: 'review', title: 'Revisão', icon: ReviewIcon },
   { id: 'reports', title: 'Relatórios', icon: ReportsIcon }
@@ -44,6 +46,7 @@ const pages: Record<PageId, ComponentType<PageProps>> = {
   cards: CardsPage,
   budgets: BudgetsPage,
   savings: SavingsPage,
+  categories: CategoriesPage,
   connections: ConnectionsPage,
   review: ReviewPage,
   reports: ReportsPage

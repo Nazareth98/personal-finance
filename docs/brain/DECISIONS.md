@@ -27,3 +27,4 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-021 | A limpeza de desenvolvimento será seletiva e executada só após a correção semântica: preserva Auth, perfil, categorias e aliases; recria integração, staging, livro e derivados. | Vigente |
 | D-022 | A chave idempotente bancária permanece `pluggy:<transactionId>`; `providerId` é metadado opcional de conexões reguladas e não substitui o identificador do MeuPluggy. | Vigente |
 | D-023 | A Etapa 10.4 encerra com sincronização manual; a configuração operacional do webhook MeuPluggy fica como implementação futura e não bloqueia a Etapa 11. | Vigente |
+| D-024 | Categorias estruturais permanecem globais e protegidas; categorias personalizadas pertencem ao proprietário, declaram aplicabilidade e, quando referenciadas, são arquivadas em vez de excluídas. | Vigente |
