@@ -59,4 +59,11 @@ export class PluggyClient {
     if (createdAtFrom) query.set('createdAtFrom', createdAtFrom);
     return this.request(next ? `/v2/transactions${next}` : `/v2/transactions?${query}`);
   }
+
+  getTransactionsByIds(accountId: string, ids: string[], next?: string | null): Promise<CursorPage<PluggyTransaction>> {
+    if (ids.length === 0 || ids.length > 500) throw new Error('pluggy_transactions_invalid_ids');
+    if (next && !next.startsWith('?')) throw new Error('pluggy_transactions_invalid_cursor');
+    const query = new URLSearchParams({ accountId, ids: ids.join(',') });
+    return this.request(next ? `/v2/transactions${next}` : `/v2/transactions?${query}`);
+  }
 }

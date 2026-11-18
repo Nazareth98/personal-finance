@@ -140,7 +140,7 @@ Aceite: confirmar um item reduz imediatamente a contagem pendente sem perder ras
 
 ### 10.4 — limpar e reimportar o ambiente de desenvolvimento
 
-Estado: em andamento; o contrato foi validado e os gastos foram encontrados no staging, mas ainda precisam ser materializados e conciliados no livro.
+Estado: validação final; replay, materialização, conciliação, idempotência e ciclo dirigido de atualização/exclusão estão publicados. Falta configurar `PLUGGY_WEBHOOK_SECRET` no Supabase e como cabeçalho secreto do webhook MeuPluggy e executar um evento autenticado válido.
 
 - preservar Auth, perfil proprietário, categorias, migrations, secrets e regras `alias` aprendidas;
 - remover conexões, staging, execuções, livro, overlays por transação, faturas, caixinhas e demais derivados;
@@ -155,7 +155,19 @@ Aceite: aliases preservados voltam a classificar a nova importação, os totais 
 
 Executar somente após fechar a importação de compras de cartão da Etapa 10.4. Cada subetapa deve terminar utilizável e validada antes da próxima.
 
-### 11.1 — correção e movimentação
+### 11.1 — gestão de categorias
+
+- criar uma tela autenticada para listar, buscar, criar, renomear e ordenar categorias;
+- distinguir categorias estruturais do sistema de categorias personalizadas pelo proprietário;
+- informar se a categoria se aplica a receita, despesa ou movimento neutro e restringir seleções incompatíveis;
+- impedir a exclusão de categorias estruturais e o rompimento de lançamentos, metas, regras, aliases ou classificações existentes;
+- arquivar categorias em uso, mantendo o histórico, e permitir exclusão definitiva somente de categoria personalizada nunca utilizada;
+- oferecer reatribuição para outra categoria antes do arquivamento quando houver dependências;
+- remover categorias arquivadas de novos formulários, preservando sua exibição nos registros históricos.
+
+Aceite: o proprietário gerencia categorias sem criar referências órfãs; categorias arquivadas deixam de aparecer em novas seleções, mas lançamentos e relatórios históricos continuam explicáveis.
+
+### 11.2 — correção e movimentação
 
 - permitir “Revisar novamente” no histórico, criando nova versão do overlay sem alterar o lançamento importado;
 - permitir corrigir categoria e natureza, exigindo contraparte, fatura ou caixinha quando aplicável;
@@ -165,7 +177,7 @@ Executar somente após fechar a importação de compras de cartão da Etapa 10.4
 
 Aceite: uma correção preserva o histórico anterior e uma transferência própria movimenta as duas contas sem inflar o resultado do período.
 
-### 11.2 — consistência visual
+### 11.3 — consistência visual
 
 - eliminar o overflow horizontal da sidebar inclusive durante hover, foco e transições;
 - colorir valores negativos da previsão com o token financeiro negativo, preservando também o sinal textual;
@@ -173,7 +185,7 @@ Aceite: uma correção preserva o histórico anterior e uma transferência próp
 
 Aceite: não há rolagem lateral da sidebar nos viewports suportados, valores negativos permanecem distinguíveis sem depender apenas de cor e datas equivalentes têm a mesma apresentação em todo o sistema.
 
-### 11.3 — exploração por período e ordenação
+### 11.4 — exploração por período e ordenação
 
 - tornar ordenáveis todas as colunas de dados aplicáveis; colunas de ações permanecem sem ordenação;
 - ordenar datas cronologicamente, dinheiro por `bigint`, percentuais por pontos-base e texto com comparação pt-BR;
@@ -182,7 +194,7 @@ Aceite: não há rolagem lateral da sidebar nos viewports suportados, valores ne
 
 Aceite: toda tabela indica a ordenação com `aria-sort`, e todos os elementos da visão geral representam exatamente o período selecionado.
 
-### 11.4 — gráficos de acompanhamento
+### 11.5 — gráficos de acompanhamento
 
 - receitas versus despesas por mês;
 - evolução do resultado acumulado;

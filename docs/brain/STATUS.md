@@ -1,6 +1,6 @@
 # Status atual
 
-Atualizado em: 17/11/2026.
+Atualizado em: 18/11/2026.
 
 ## Situação
 
@@ -21,15 +21,12 @@ Atualizado em: 17/11/2026.
 
 ## Marco atual
 
-**Etapa 10.4 — materializar e conciliar os cartões já recebidos.** O replay autenticado foi concluído para Caixa e Itaú com paridade entre staging, livro e entradas de fatura. A auditoria remota não encontrou órfãos, duplicidades, sinais, competências, parcelas ou estornos inconsistentes. Pagamentos permanecem neutros, mas os históricos ainda sem fatura associada exigem confirmação manual porque valor, banco e vencimento não produzem correspondência inequívoca. `providerId` já é preservado quando fornecido, sem substituir a chave do MeuPluggy. Falta repetir a sincronização para fechar a idempotência, concluir os vínculos aplicáveis e implementar o ciclo dirigido de atualização/exclusão.
+**Etapa 10.4 — fechamento operacional.** Replay, materialização, conciliação e idempotência foram validados para Caixa e Itaú. `transactions/updated` agora relê somente os IDs informados; `transactions/deleted` faz exclusão lógica reversível, preserva o histórico imutável e deixa de alimentar totais, faturas e parcelas. Pagamentos históricos sem correspondência inequívoca permanecem neutros e explicitamente não vinculados; não se inventa uma fatura. A migration e as Edge Functions estão publicadas e o smoke remoto de exclusão/reaparecimento passou com rollback. Falta apenas configurar o segredo do webhook nos dois lados e executar uma chamada autenticada válida.
 
 Próximas entregas, nesta ordem:
 
-1. repetir a sincronização de Caixa e Itaú e confirmar que o replay não cria duplicidades;
-2. associar manualmente os pagamentos aplicáveis às respectivas faturas;
-3. concluir o tratamento dirigido de `transactions/updated` e `transactions/deleted`; `providerId` já é preservado como metadado opcional sem substituir a chave idempotente do MeuPluggy;
-4. publicar o webhook com sua autenticação HMAC preservada e concluir o smoke test remoto;
-5. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): correção/revisão, consistência visual, período/ordenação e gráficos.
+1. definir `PLUGGY_WEBHOOK_SECRET` no Supabase e como cabeçalho `X-Pluggy-Webhook-Secret` no webhook MeuPluggy criado pela API, habilitar `transactions/created`, `transactions/updated` e `transactions/deleted` e concluir o smoke autenticado;
+2. executar a Etapa 11 documentada em [`PLAN.md`](PLAN.md): CRUD seguro de categorias, correção/revisão, consistência visual, período/ordenação e gráficos.
 
 ## Última validação
 
@@ -64,14 +61,16 @@ Próximas entregas, nesta ordem:
 - Leitura de cartões em 17/11/2026: após o replay completo, a tela quebrava porque o Data API limitava a consulta do livro às 1.000 transações mais recentes enquanto entradas de fatura válidas referenciavam lançamentos anteriores. A integridade referencial remota foi confirmada sem órfãos. O adapter passou a buscar todas as páginas de transações com ordenação estável; check de cartões, typecheck web e o fluxo autenticado de faturas passaram no Chromium.
 - Auditoria de cartões em 17/11/2026: staging, livro e entradas ficaram em paridade para Caixa e Itaú. Consultas agregadas não encontraram órfãos, duplicidades, conta ou competência divergente, semântica inválida, parcela inconsistente, data de fatura inválida ou estorno importado sem vínculo. Pagamentos de fatura continuam neutros; os ainda não associados não apresentaram correspondência única por banco, valor e janela de vencimento e, portanto, não foram vinculados automaticamente.
 - Estabilidade MeuPluggy em 17/11/2026: o contrato oficial atual confirmou que `transactionId` permanece a chave do MeuPluggy e `providerId` é metadado opcional de conexões reguladas. A migration remota adicionou o campo ao staging privado e manteve a RPC restrita ao `service_role`; replays podem preencher o metadado sem alterar o conteúdo financeiro nem inflar o contador de importados. `pluggy-sync` v11 e `pluggy-webhook` v5 estão ativas com JWT obrigatório e HMAC próprio, respectivamente. Os componentes da esteira equivalente a `pnpm check` passaram com Node 24.14.1; o agregador não encontra o shim `pnpm` apenas nas chamadas aninhadas deste sandbox. O tratamento dirigido de `transactions/updated` e `transactions/deleted` continua como próximo incremento.
+- Idempotência remota em 18/11/2026: Caixa e Itaú repetiram a sincronização sem novas importações. A auditoria agregada permaneceu sem duplicidades, órfãos ou divergência entre staging, livro e entradas de fatura. Houve avanço manual nos vínculos de pagamento, mas os restantes continuam sem correspondência inequívoca e não serão associados automaticamente.
+- Ciclo de transações em 18/11/2026: `transactions/updated` passou a reler os IDs indicados pelo MeuPluggy e `transactions/deleted` ganhou exclusão lógica reversível no staging e no livro. A interface ignora lançamentos removidos e seus vínculos, entradas e grupos de parcelas, evitando totais fantasmas e faturas sem lançamento. Duas migrations foram aplicadas; o primeiro smoke encontrou e abortou uma precedência incorreta na chave externa, a correção incremental foi publicada e o smoke de exclusão/reaparecimento passou com rollback. `pluggy-sync` v12 e `pluggy-webhook` v7 estão ativas com ACL interna restrita ao `service_role`; 12 contratos MeuPluggy, 30 testes web, typecheck e o fluxo autenticado de cartões passaram com Node 24.14.1. A chamada remota sem assinatura confirmou o bloqueio operacional `503 webhook_not_configured`.
 
 ## Bloqueios
 
 - Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.
-- A conta/sandbox MeuPluggy ainda precisa confirmar o SDK Connect, paginação e mecanismo real de assinatura do webhook antes do deploy.
+- `PLUGGY_WEBHOOK_SECRET` ainda precisa ser definido no Supabase e no cadastro do webhook MeuPluggy; até lá, a função responde `503 webhook_not_configured` e nenhum evento entra na inbox.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
 - Os 78 baselines visuais precisam ser regenerados e revisados no CI Linux por causa da nova composição do shell; conexões também incorpora a coluna “Atualização da fonte”.
-- A Etapa 10.4 não pode ser encerrada enquanto uma fatura importada não puder ser explicada por suas compras, parcelas, estornos e pagamento sem dupla contagem.
+- A Etapa 10.4 está tecnicamente implementada, mas não será encerrada até existir `PLUGGY_WEBHOOK_SECRET` configurado nos dois lados e um evento autenticado persistido na inbox.
 
 ## Regra de atualização
 

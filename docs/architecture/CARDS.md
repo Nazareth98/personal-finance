@@ -36,7 +36,9 @@ Próximos incrementos:
 3. **Conciliação:** comparar soma de compras, estornos e pagamentos com o valor da fatura, repetir a sincronização sem duplicar e auditar amostras antes de encerrar a Etapa 10.4.
 4. **Estabilidade entre ciclos:** persistir `providerId` quando disponível e tratar eventos de atualização/exclusão. O `id` do MeuPluggy continua sendo a chave idempotente; `providerId` é apenas o identificador adicional da instituição em conexões reguladas/Open Finance.
 
-O contrato oficial atual informa que o MeuPluggy preserva seu `id` quando a instituição altera o identificador da transação. Alterações de status, categoria ou `billId` chegam em `transactions/updated`; exclusões chegam em `transactions/deleted` e podem ser temporárias. A primeira entrega de estabilidade persiste `providerId` sem substituir a chave existente nem editar os dados financeiros importados. O processamento dirigido desses dois eventos fica no incremento seguinte.
+O contrato oficial atual informa que o MeuPluggy preserva seu `id` quando a instituição altera o identificador da transação. Alterações de status, categoria ou `billId` chegam em `transactions/updated`; exclusões chegam em `transactions/deleted` e podem ser temporárias. O processamento dirigido relê até 500 IDs por chamada, atualiza somente metadados mutáveis no staging e mantém o conteúdo financeiro importado imutável. Exclusões são lógicas e reversíveis: o lançamento e seus derivados deixam de alimentar a interface, mas reaparecem quando o mesmo `id` volta a ser recebido.
+
+Pagamentos de fatura só são vinculados quando a fatura correspondente existe e a associação é inequívoca. Pagamentos históricos sem compra/fatura suficiente permanecem neutros e não vinculados; essa ausência explícita é preferível a criar uma conciliação falsa.
 
 Aceite operacional: para uma fatura selecionada, o sistema explica seu valor por entradas importadas e mantém o pagamento separado e neutro. Nova sincronização não duplica nenhuma entrada.
 

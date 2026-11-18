@@ -163,6 +163,7 @@ function transactionRows(
         pluggy_account_id: mappingId,
         external_transaction_id: transaction.id,
         provider_id: transaction.providerId?.slice(0, 200) ?? null,
+        provider_status: transaction.status?.slice(0, 80) ?? null,
         description,
         amount_cents: amount.toString(),
         event_date: eventDate,
@@ -374,6 +375,93 @@ async function persistIncomeRecognition(database: SupabaseClient, ownerId: strin
   if (stored.error) throw stored.error;
 }
 
+async function loadClassificationRules(database: SupabaseClient, ownerId: string): Promise<ClassificationRule[]> {
+  const result = await database.from('classification_rules')
+    .select('id,category_id,evidence_type,pattern,weight_basis_points')
+    .eq('owner_id', ownerId).eq('enabled', true);
+  if (result.error) throw result.error;
+  return (result.data ?? []).map(row => ({
+    id: String(row.id), categoryId: String(row.category_id), kind: row.evidence_type as ClassificationRule['kind'],
+    value: String(row.pattern), weightBasisPoints: Number(row.weight_basis_points)
+  }));
+}
+
+async function persistTransactions(
+  database: SupabaseClient,
+  connection: ConnectionRow,
+  mapped: Awaited<ReturnType<typeof ensureAccount>>,
+  institutionName: string,
+  transactions: PluggyTransaction[],
+  rules: ClassificationRule[]
+): Promise<{ imported: number; skipped: number }> {
+  const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, institutionName, transactions);
+  let imported = 0;
+  if (rows.raw.length) {
+    const rawInsert = await database.rpc('internal_store_pluggy_transactions', { p_rows: rows.raw });
+    if (rawInsert.error) throw rawInsert.error;
+    imported = Number(rawInsert.data ?? 0);
+  }
+  if (rows.ledger.length) {
+    const ledgerInsert = await database.from('transactions')
+      .upsert(rows.ledger, { onConflict: 'owner_id,external_key', ignoreDuplicates: true });
+    if (ledgerInsert.error) throw ledgerInsert.error;
+  }
+  if (mapped.card) await persistCardArtifacts(database, connection.owner_id, mapped.card, rows.cardItems);
+  await persistIncomeRecognition(database, connection.owner_id, rows.incomeCandidates);
+  await persistClassifications(database, connection.owner_id, rows.candidates, rules);
+  return { imported, skipped: rows.skipped };
+}
+
+async function findAccount(pluggy: PluggyClient, itemId: string, accountId: string): Promise<PluggyAccount> {
+  const pageSize = 100;
+  for (let page = 1; ; page += 1) {
+    const response = await pluggy.getAccounts(itemId, page, pageSize);
+    const account = response.results.find(candidate => candidate.id === accountId);
+    if (account) return account;
+    if (response.results.length < pageSize || (response.totalPages && page >= response.totalPages)) {
+      throw new Error('pluggy_account_not_found');
+    }
+  }
+}
+
+export async function synchronizeTransactionUpdates(
+  database: SupabaseClient,
+  pluggy: PluggyClient,
+  connectionId: string,
+  ownerId: string,
+  externalAccountId: string,
+  transactionIds: string[]
+): Promise<void> {
+  const connectionResult = await database.from('pluggy_connections').select('id,owner_id,item_id,last_success_at')
+    .eq('id', connectionId).eq('owner_id', ownerId).single();
+  if (connectionResult.error) throw new Error('connection_not_found');
+  const connection = connectionResult.data as ConnectionRow;
+  const item = await pluggy.getItem(connection.item_id);
+  if ((item.status ?? '').toUpperCase().includes('LOGIN')) throw new Error('pluggy_login_required');
+  const institutionName = item.connector?.name?.trim() || 'InstituiÃ§Ã£o conectada';
+  const account = await findAccount(pluggy, connection.item_id, externalAccountId);
+  const mapped = await ensureAccount(database, connection, account, institutionName);
+  const rules = await loadClassificationRules(database, ownerId);
+
+  for (let offset = 0; offset < transactionIds.length; offset += 500) {
+    const ids = transactionIds.slice(offset, offset + 500);
+    let cursor: string | null = null;
+    do {
+      const page = await pluggy.getTransactionsByIds(externalAccountId, ids, cursor);
+      await persistTransactions(database, connection, mapped, institutionName, page.results, rules);
+      cursor = page.next;
+    } while (cursor);
+  }
+
+  await database.from('pluggy_connections').update({
+    connector_id: item.connector?.id ?? null,
+    institution_name: institutionName.slice(0, 100),
+    last_source_updated_at: item.lastUpdatedAt ?? null,
+    last_error: null,
+    updated_at: new Date().toISOString()
+  }).eq('id', connectionId).eq('owner_id', ownerId);
+}
+
 export async function synchronizeConnection(
   database: SupabaseClient,
   pluggy: PluggyClient,
@@ -403,14 +491,7 @@ export async function synchronizeConnection(
   let skippedTransactions = 0;
 
   try {
-    const rulesResult = await database.from('classification_rules')
-      .select('id,category_id,evidence_type,pattern,weight_basis_points')
-      .eq('owner_id', ownerId).eq('enabled', true);
-    if (rulesResult.error) throw rulesResult.error;
-    const rules: ClassificationRule[] = (rulesResult.data ?? []).map(row => ({
-      id: String(row.id), categoryId: String(row.category_id), kind: row.evidence_type as ClassificationRule['kind'],
-      value: String(row.pattern), weightBasisPoints: Number(row.weight_basis_points)
-    }));
+    const rules = await loadClassificationRules(database, ownerId);
     await database.from('pluggy_connections').update({
       status: 'updating', last_attempt_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString()
     }).eq('id', connectionId).eq('owner_id', ownerId);
@@ -437,21 +518,9 @@ export async function synchronizeConnection(
         do {
           const createdAtFrom = mapped.type === 'credit_card' ? undefined : incrementalFrom(connection.last_success_at);
           const page = await pluggy.getTransactions(account.id, createdAtFrom, transactionCursor);
-          const rows = transactionRows(connection, mapped.mappingId, mapped.accountId, mapped.type, mapped.card, institutionName, page.results);
-          skippedTransactions += rows.skipped;
-          if (rows.raw.length) {
-            const rawInsert = await database.rpc('internal_store_pluggy_transactions', { p_rows: rows.raw });
-            if (rawInsert.error) throw rawInsert.error;
-            importedTransactions += Number(rawInsert.data ?? 0);
-          }
-          if (rows.ledger.length) {
-            const ledgerInsert = await database.from('transactions')
-              .upsert(rows.ledger, { onConflict: 'owner_id,external_key', ignoreDuplicates: true });
-            if (ledgerInsert.error) throw ledgerInsert.error;
-          }
-          if (mapped.card) await persistCardArtifacts(database, ownerId, mapped.card, rows.cardItems);
-          await persistIncomeRecognition(database, ownerId, rows.incomeCandidates);
-          await persistClassifications(database, ownerId, rows.candidates, rules);
+          const persisted = await persistTransactions(database, connection, mapped, institutionName, page.results, rules);
+          skippedTransactions += persisted.skipped;
+          importedTransactions += persisted.imported;
           await database.from('sync_runs').update({
             checkpoint: { accountPage, accountId: account.id, transactionPage, transactionCursor: page.next },
             imported_accounts: importedAccounts,

@@ -27,3 +27,25 @@ test('usa o contrato atual de Connect Token e pagina transações por cursor', a
     globalThis.fetch = originalFetch;
   }
 });
+
+test('busca atualizacoes dirigidas em lotes aceitos pelo Pluggy', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = async input => {
+    const url = String(input);
+    calls.push(url);
+    if (url.endsWith('/auth')) return Response.json({ apiKey: 'synthetic-api-key' });
+    return Response.json({ results: [], next: null });
+  };
+
+  try {
+    const client = new PluggyClient('synthetic-client', 'synthetic-secret', 'https://pluggy.example.test');
+    await client.getTransactionsByIds('account-1', ['transaction-1', 'transaction-2']);
+    assert.equal(calls[1], 'https://pluggy.example.test/v2/transactions?accountId=account-1&ids=transaction-1%2Ctransaction-2');
+    assert.throws(() => client.getTransactionsByIds('account-1', []), /pluggy_transactions_invalid_ids/);
+    assert.throws(() => client.getTransactionsByIds('account-1', Array.from({ length: 501 }, (_, index) => String(index))),
+      /pluggy_transactions_invalid_ids/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

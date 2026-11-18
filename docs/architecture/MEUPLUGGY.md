@@ -8,7 +8,7 @@
 - `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET`, `PLUGGY_WEBHOOK_SECRET` e `SUPABASE_SERVICE_ROLE_KEY` existem somente nas Edge Functions.
 - O navegador lê `pluggy_connections` e `sync_runs` por RLS, sem permissão de escrita.
 
-O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou um segredo direto em `x-pluggy-webhook-secret`/Bearer quando houver um gateway que injete esse cabeçalho. Nunca colocar o segredo na URL. A configuração real deve ser confirmada com o mecanismo disponível na conta MeuPluggy antes do deploy.
+O webhook MeuPluggy deve ser criado pela API com `X-Pluggy-Webhook-Secret: <segredo>` em `headers`, usando o mesmo valor de `PLUGGY_WEBHOOK_SECRET` do Supabase. O endpoint também aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou Bearer para gateways compatíveis. Nunca colocar o segredo na URL.
 
 ## Persistência e idempotência
 
@@ -22,7 +22,7 @@ O webhook aceita HMAC-SHA256 do corpo em `x-pluggy-signature` (hex ou base64) ou
 
 Importações repetidas preservam as chaves existentes sem duplicar o livro. Uma falha mantém tudo já confirmado; a próxima execução recebe trigger `resume`, percorre novamente a janela segura e ignora as chaves existentes. Incrementos reabrem três dias antes do último sucesso para capturar atrasos sem duplicar.
 
-No staging, um replay pode preencher `providerId` que antes estava ausente sem alterar descrição, valor ou data. O contador de importados continua medindo somente novas linhas. Atualizações e exclusões do provedor exigem os eventos `transactions/updated` e `transactions/deleted`; releitura por data não substitui esses eventos.
+No staging, um replay pode preencher `providerId` que antes estava ausente sem alterar descrição, valor ou data. O contador de importados continua medindo somente novas linhas. `transactions/updated` relê os IDs informados em lotes de até 500 e atualiza metadados mutáveis. `transactions/deleted` marca staging e livro como removidos na origem; o mesmo `id` limpa essa marca ao reaparecer. Releitura por data não substitui esses eventos.
 
 Transações usam `GET /v2/transactions`, `createdAtFrom` nos incrementos e o cursor `next` devolvido pelo Pluggy. O endpoint legado paginado `GET /transactions` não é aceito por aplicações novas. Consultas internas com listas de chaves são divididas em lotes para não exceder o tamanho seguro de URL do PostgREST.
 
@@ -50,9 +50,6 @@ Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge F
 
 ## Validação pendente no ambiente real
 
-- confirmar o mecanismo de assinatura/cabeçalho oferecido pela conta MeuPluggy;
+- configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy; sem o secret, a função responde `503 webhook_not_configured`;
 - validar o contrato do SDK Connect e o formato do callback de sucesso;
-- aplicar migration e testar RLS no Supabase hospedado;
-- confirmar paginação e limites com Items sintéticos/sandbox;
-- validar o replay idempotente de compras, parcelas e estornos e persistir `providerId` quando disponível;
-- registrar os webhooks habilitados e o comportamento de retentativa do provedor.
+- registrar os webhooks `transactions/created`, `transactions/updated` e `transactions/deleted` e confirmar o comportamento de retentativa do provedor.

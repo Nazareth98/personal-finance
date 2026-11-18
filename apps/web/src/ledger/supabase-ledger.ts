@@ -7,6 +7,7 @@ type TransactionRow = {
   id: string; account_id: string; category_id: string | null; description: string; amount_cents: string | number;
   nature: TransactionContract['nature']; reporting: TransactionContract['reporting']; source: TransactionContract['source'];
   event_date: string; competence: string; classification_status: TransactionContract['classificationStatus']; external_key: string | null;
+  source_deleted_at: string | null;
 };
 type LinkRow = { id: string; source_transaction_id: string; target_transaction_id: string; link_type: TransactionLink['type'] };
 type BudgetRow = { id: string; category_id: string; percentage_basis_points: number };
@@ -25,7 +26,7 @@ type SemanticOverrideRow = {
 type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
 type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
 type CardStatementEntryRow = { id: string; statement_id: string; transaction_id: string; entry_type: CardStatementEntry['type'] };
-type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
+type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; purchase_group_key: string; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
 const SUPABASE_PAGE_SIZE = 1000;
 
 function classificationEvidence(value: unknown): TransactionClassification['evidence'] {
@@ -47,7 +48,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const rows: TransactionRow[] = [];
     for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
       const result = await this.client.from('transactions')
-        .select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key')
+        .select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key,source_deleted_at')
         .order('event_date', { ascending: false }).order('id')
         .range(from, from + SUPABASE_PAGE_SIZE - 1);
       if (result.error) throw result.error;
@@ -70,19 +71,35 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
       this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false }),
       this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
-      this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
+      this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
     const error = accountsResult.error ?? categoriesResult.error ?? linksResult.error ?? budgetsResult.error
       ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? creditCardsResult.error
       ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
-    const classifications = ((classificationsResult.data ?? []) as ClassificationRow[]).map((row): TransactionClassification => ({
+    const activeTransactionRows = transactionsResult.filter(row => !row.source_deleted_at);
+    const activeTransactionIds = new Set(activeTransactionRows.map(row => row.id));
+    const activeClassifications = ((classificationsResult.data ?? []) as ClassificationRow[])
+      .filter(row => activeTransactionIds.has(row.transaction_id));
+    const activeSemanticOverrides = ((semanticOverridesResult.data ?? []) as SemanticOverrideRow[])
+      .filter(row => activeTransactionIds.has(row.transaction_id)
+        && (!row.counterpart_transaction_id || activeTransactionIds.has(row.counterpart_transaction_id)));
+    const activeCardEntries = ((cardStatementEntriesResult.data ?? []) as CardStatementEntryRow[])
+      .filter(row => activeTransactionIds.has(row.transaction_id));
+    const cardInstallmentRows = (cardInstallmentsResult.data ?? []) as CardInstallmentRow[];
+    const deletedPurchaseGroups = new Set(cardInstallmentRows
+      .filter(row => row.transaction_id && !activeTransactionIds.has(row.transaction_id))
+      .map(row => row.purchase_group_key));
+    const activeCardInstallments = cardInstallmentRows.filter(row =>
+      !deletedPurchaseGroups.has(row.purchase_group_key)
+      && (!row.transaction_id || activeTransactionIds.has(row.transaction_id)));
+    const classifications = activeClassifications.map((row): TransactionClassification => ({
       id: row.id, transactionId: row.transaction_id, categoryId: row.category_id,
       confidenceBasisPoints: row.confidence_basis_points, status: row.status, classifierVersion: row.classifier_version,
       evidence: classificationEvidence(row.explanation)
     }));
     const classificationByTransaction = new Map(classifications.map(item => [item.transactionId, item]));
-    const semanticOverrides = ((semanticOverridesResult.data ?? []) as SemanticOverrideRow[]).map((row): TransactionSemanticOverride => ({
+    const semanticOverrides = activeSemanticOverrides.map((row): TransactionSemanticOverride => ({
       id: row.id, transactionId: row.transaction_id, nature: row.effective_nature, reporting: row.effective_reporting,
       ...(row.counterpart_transaction_id ? { counterpartTransactionId: row.counterpart_transaction_id } : {}),
       ...(row.statement_id ? { statementId: row.statement_id } : {}),
@@ -100,11 +117,12 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         id: row.id, name: row.name, openingBalanceCents: BigInt(row.opening_balance_cents), targetCents: BigInt(row.target_cents),
         ...(row.target_date ? { targetDate: row.target_date } : {})
       })),
-      savingsMovements: ((savingsMovementsResult.data ?? []) as SavingsMovementRow[]).map((row): SavingsMovement => ({
+      savingsMovements: ((savingsMovementsResult.data ?? []) as SavingsMovementRow[])
+        .filter(row => activeTransactionIds.has(row.transaction_id)).map((row): SavingsMovement => ({
         id: row.id, savingsBoxId: row.savings_box_id, transactionId: row.transaction_id,
         type: row.movement_type, amountCents: BigInt(row.amount_cents), eventDate: row.event_date
       })),
-      transactions: transactionsResult.map(row => {
+      transactions: activeTransactionRows.map(row => {
         const classification = classificationByTransaction.get(row.id);
         const semantics = semanticOverrideByTransaction.get(row.id);
         const neutralCategory = semantics?.nature === 'own_transfer' ? 'transfers'
@@ -121,7 +139,9 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         classificationStatus: neutralCategory || semantics?.nature === 'card_payment' ? 'confirmed' : classification?.status ?? row.classification_status,
         ...(row.external_key ? { externalKey: row.external_key } : {})
       }, semantics ? { nature: semantics.nature, reporting: semantics.reporting } : undefined); }),
-      links: ((linksResult.data ?? []) as LinkRow[]).map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type })),
+      links: ((linksResult.data ?? []) as LinkRow[])
+        .filter(row => activeTransactionIds.has(row.source_transaction_id) && activeTransactionIds.has(row.target_transaction_id))
+        .map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type })),
       classifications,
       semanticOverrides,
       creditCards: ((creditCardsResult.data ?? []) as CreditCardRow[]).map((row): CreditCard => ({
@@ -131,10 +151,10 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       cardStatements: ((cardStatementsResult.data ?? []) as CardStatementRow[]).map((row): CardStatement => ({
         id: row.id, cardId: row.card_id, competence: row.competence, closingDate: row.closing_date, dueDate: row.due_date
       })),
-      cardStatementEntries: ((cardStatementEntriesResult.data ?? []) as CardStatementEntryRow[]).map((row): CardStatementEntry => ({
+      cardStatementEntries: activeCardEntries.map((row): CardStatementEntry => ({
         id: row.id, statementId: row.statement_id, transactionId: row.transaction_id, type: row.entry_type
       })),
-      cardInstallments: ((cardInstallmentsResult.data ?? []) as CardInstallmentRow[]).map((row): CardInstallment => ({
+      cardInstallments: activeCardInstallments.map((row): CardInstallment => ({
         id: row.id, cardId: row.card_id, statementId: row.statement_id, ...(row.transaction_id ? { transactionId: row.transaction_id } : {}),
         description: row.description, number: row.installment_number, total: row.total_installments,
         amountCents: BigInt(row.amount_cents), dueCompetence: row.due_competence, status: row.status

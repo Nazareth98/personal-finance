@@ -81,6 +81,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         { id: '44444444-2222-4444-8444-444444444444', account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', category_id: 'transfers', description: 'Reserva mensal', amount_cents: '50000', nature: 'own_transfer', reporting: 'neutral', source: 'manual', event_date: '2026-11-07', competence: '2026-11', classification_status: 'confirmed', external_key: null },
         { id: '88888888-2222-4888-8888-888888888888', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'savings', description: 'Aplicação importada', amount_cents: '-25000', nature: 'own_transfer', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'confirmed', external_key: 'pluggy-savings-1' }
         ,{ id: '77777777-3333-4777-8777-777777777777', account_id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', category_id: null, description: 'Notebook 1/2', amount_cents: '-12000', nature: 'expense', reporting: 'expense', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'uncategorized', external_key: 'pluggy-card-1' }
+        ,{ id: '55555555-3333-4555-8555-555555555555', account_id: 'cccccccc-1111-4ccc-8ccc-cccccccccccc', category_id: null, description: 'Compra removida 1/2', amount_cents: '-9000', nature: 'expense', reporting: 'expense', source: 'pluggy', event_date: '2026-11-08', competence: '2026-11', classification_status: 'uncategorized', external_key: 'pluggy-card-deleted', source_deleted_at: '2026-11-18T10:00:00Z' }
         ,{ id: '66666666-3333-4666-8666-666666666666', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: null, description: 'Pagamento da fatura', amount_cents: '-12000', nature: 'card_payment', reporting: 'neutral', source: 'pluggy', event_date: '2026-11-10', competence: '2026-11', classification_status: 'automatic', external_key: 'pluggy-payment-1' }
         ,{ id: '10000000-3333-4000-8000-000000000001', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-06-05', competence: '2026-06', classification_status: 'confirmed', external_key: 'pluggy-salary-6' }
         ,{ id: '10000000-3333-4000-8000-000000000002', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-07-05', competence: '2026-07', classification_status: 'confirmed', external_key: 'pluggy-salary-7' }
@@ -143,13 +144,16 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     if (url.pathname === '/rest/v1/card_statement_entries') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
         { id: 'eeeeeeee-2222-4eee-8eee-eeeeeeeeeeee', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '77777777-3333-4777-8777-777777777777', entry_type: 'purchase' }
+        ,{ id: 'eeeeeeee-3333-4eee-8eee-eeeeeeeeeeee', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '55555555-3333-4555-8555-555555555555', entry_type: 'purchase' }
       ]) });
       return;
     }
     if (url.pathname === '/rest/v1/card_installments') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
-        { id: 'ffffffff-2222-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '77777777-3333-4777-8777-777777777777', description: 'Notebook', installment_number: 1, total_installments: 2, amount_cents: '12000', due_competence: '2026-11', status: 'posted' },
-        { id: 'ffffffff-3333-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: null, description: 'Notebook', installment_number: 2, total_installments: 2, amount_cents: '12000', due_competence: '2026-12', status: 'projected' }
+        { id: 'ffffffff-2222-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '77777777-3333-4777-8777-777777777777', purchase_group_key: 'notebook-2', description: 'Notebook', installment_number: 1, total_installments: 2, amount_cents: '12000', due_competence: '2026-11', status: 'posted' },
+        { id: 'ffffffff-3333-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: null, purchase_group_key: 'notebook-2', description: 'Notebook', installment_number: 2, total_installments: 2, amount_cents: '12000', due_competence: '2026-12', status: 'projected' },
+        { id: 'ffffffff-4444-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: '55555555-3333-4555-8555-555555555555', purchase_group_key: 'deleted-2', description: 'Compra removida', installment_number: 1, total_installments: 2, amount_cents: '9000', due_competence: '2026-11', status: 'posted' },
+        { id: 'ffffffff-5555-4fff-8fff-ffffffffffff', card_id: 'cccccccc-2222-4ccc-8ccc-cccccccccccc', statement_id: 'dddddddd-2222-4ddd-8ddd-dddddddddddd', transaction_id: null, purchase_group_key: 'deleted-2', description: 'Compra removida', installment_number: 2, total_installments: 2, amount_cents: '9000', due_competence: '2026-12', status: 'projected' }
       ]) });
       return;
     }
@@ -370,6 +374,9 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
   await page.goto('/#cards');
   await expect(page.getByRole('table', { name: 'Faturas dos cartões' })).toContainText('R$ 120,00');
   await expect(page.getByRole('table', { name: 'Parcelas futuras' })).toContainText('2/2');
+
+  await expect(page.getByText('Compra removida')).toHaveCount(0);
+  await expect(page.getByText('R$ 90,00')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Configurar' }).click();
   const cardDialog = page.getByRole('dialog', { name: 'Configurar cartão' });

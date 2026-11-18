@@ -1,7 +1,8 @@
 import { PluggyClient } from '../_shared/pluggy-client.ts';
+import { transactionWebhook, webhookItemId } from '../_shared/pluggy-webhook.ts';
 import { json, safeError } from '../_shared/http.ts';
 import { serviceClient } from '../_shared/supabase.ts';
-import { synchronizeConnection } from '../_shared/sync.ts';
+import { synchronizeConnection, synchronizeTransactionUpdates } from '../_shared/sync.ts';
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 
@@ -40,14 +41,12 @@ async function stableEventId(payload: Record<string, unknown>, rawBody: string):
   return `sha256:${bytesToHex(hash)}`;
 }
 
-function eventItemId(payload: Record<string, unknown>): string | null {
-  const data = payload.data && typeof payload.data === 'object' ? payload.data as Record<string, unknown> : {};
-  const item = data.item && typeof data.item === 'object' ? data.item as Record<string, unknown> : {};
-  const value = payload.itemId ?? data.itemId ?? item.id;
-  return typeof value === 'string' ? value : null;
-}
-
-async function processEvent(eventId: string, itemId: string | null): Promise<void> {
+async function processEvent(
+  eventId: string,
+  eventType: string,
+  itemId: string | null,
+  payload: Record<string, unknown>
+): Promise<void> {
   const database = serviceClient();
   try {
     if (!itemId) {
@@ -64,7 +63,22 @@ async function processEvent(eventId: string, itemId: string | null): Promise<voi
     const clientId = Deno.env.get('PLUGGY_CLIENT_ID');
     const clientSecret = Deno.env.get('PLUGGY_CLIENT_SECRET');
     if (!clientId || !clientSecret) throw new Error('pluggy_not_configured');
-    await synchronizeConnection(database, new PluggyClient(clientId, clientSecret), connection.data.id, connection.data.owner_id, 'webhook');
+    const transactionEvent = transactionWebhook(payload);
+    if (eventType === 'transactions/deleted') {
+      if (!transactionEvent) throw new Error('pluggy_webhook_invalid_transactions');
+      const deleted = await database.rpc('internal_mark_pluggy_transactions_deleted', {
+        p_owner_id: connection.data.owner_id,
+        p_connection_id: connection.data.id,
+        p_external_transaction_ids: transactionEvent.transactionIds
+      });
+      if (deleted.error) throw deleted.error;
+    } else if (eventType === 'transactions/updated') {
+      if (!transactionEvent) throw new Error('pluggy_webhook_invalid_transactions');
+      await synchronizeTransactionUpdates(database, new PluggyClient(clientId, clientSecret), connection.data.id,
+        connection.data.owner_id, transactionEvent.accountId, transactionEvent.transactionIds);
+    } else {
+      await synchronizeConnection(database, new PluggyClient(clientId, clientSecret), connection.data.id, connection.data.owner_id, 'webhook');
+    }
     await database.rpc('internal_update_webhook_event', { p_provider_event_id: eventId, p_status: 'processed', p_last_error: null });
   } catch (error) {
     await database.rpc('internal_update_webhook_event', {
@@ -85,7 +99,7 @@ Deno.serve(async request => {
 
   const eventId = await stableEventId(payload, rawBody);
   const eventType = String(payload.event ?? payload.type ?? 'unknown').slice(0, 120);
-  const itemId = eventItemId(payload);
+  const itemId = webhookItemId(payload);
   const database = serviceClient();
   const stored = await database.rpc('internal_register_webhook_event', {
     p_provider_event_id: eventId, p_event_type: eventType, p_item_id: itemId, p_payload: payload
@@ -93,6 +107,6 @@ Deno.serve(async request => {
   if (stored.error) return json({ error: 'webhook_persistence_failed' }, 503);
   if (stored.data !== 'new' && stored.data !== 'failed') return json({ accepted: true, duplicate: true }, 202);
 
-  EdgeRuntime.waitUntil(processEvent(eventId, itemId));
+  EdgeRuntime.waitUntil(processEvent(eventId, eventType, itemId, payload));
   return json({ accepted: true }, 202);
 });
