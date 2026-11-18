@@ -299,9 +299,9 @@ test('contas: grupos por tipo, edição e arquivamento sem perder lançamentos',
   await page.getByRole('link', { name: /Contas/ }).click();
 
   const checking = page.getByRole('region', { name: /Contas correntes/ });
-  await expect(checking.getByRole('heading', { name: 'Conta principal' })).toBeVisible();
-  await expect(page.getByRole('region', { name: /Reservas e investimentos/ }).getByRole('heading', { name: 'Reserva' })).toBeVisible();
-  await expect(page.getByRole('region', { name: /Cartões de crédito/ }).getByRole('heading', { name: 'Cartão principal' })).toBeVisible();
+  await expect(checking.getByRole('heading', { name: 'Conta principal', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: /Reservas e investimentos/ }).getByRole('heading', { name: 'Reserva', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: /Cartões de crédito/ }).getByRole('heading', { name: 'Cartão principal', exact: true })).toBeVisible();
   await expect(checking.getByRole('link', { name: 'Ver lançamentos' })).toHaveAttribute('href', /account=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/);
 
   await page.getByRole('button', { name: 'Editar conta Conta principal' }).click();
@@ -577,7 +577,7 @@ test('projeta seis meses sem incluir receita extraordinária na média futura', 
   await expect(page.getByRole('table', { name: 'Previsão financeira de seis meses' })).toBeVisible();
   await expect(page.getByText('R$ 5.000,00', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('R$ 1.200,00', { exact: true })).toBeVisible();
-  const december = page.getByRole('row', { name: /dez\/2026/ });
+  const december = page.getByRole('table', { name: 'Previsão financeira de seis meses' }).getByRole('row', { name: /dez\/2026/ });
   await expect(december).toBeVisible();
   await expect(december.locator('.ui-financial-value')).toHaveClass(/ui-financial-value--(positive|negative|neutral)/);
 });
