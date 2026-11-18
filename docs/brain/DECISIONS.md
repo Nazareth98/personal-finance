@@ -29,3 +29,5 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-023 | A Etapa 10.4 encerra com sincronização manual; a configuração operacional do webhook MeuPluggy fica como implementação futura e não bloqueia a Etapa 11. | Vigente |
 | D-024 | Categorias estruturais permanecem globais e protegidas; categorias personalizadas pertencem ao proprietário, declaram aplicabilidade e, quando referenciadas, são arquivadas em vez de excluídas. | Vigente |
 | D-025 | A identidade visual de categoria persiste somente chaves permitidas de ícone Lucide e de cor semântica; valores hexadecimais e nomes arbitrários não entram no banco. | Vigente |
+| D-026 | Revisões substituídas de natureza e de categoria confirmada são copiadas por trigger para `transaction_review_history`; aliases aprendidos nunca são removidos por uma revisão. | Vigente |
+| D-027 | Transferência própria cujo outro lado não é importado registra um lançamento manual neutro em conta própria sem conexão e não cartão; ele é removido ao revisar novamente e oculto se o lado importado for excluído pelo provedor. | Vigente |

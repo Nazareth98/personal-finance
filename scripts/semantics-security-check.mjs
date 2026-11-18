@@ -40,5 +40,23 @@ assert.match(developmentReset, /delete from public\.classification_rules where o
 assert.doesNotMatch(developmentReset, /delete from (auth\.users|public\.profiles|public\.categories)/i);
 assert.match(developmentReset, /Protected Auth, profile, category or alias data changed/i);
 assert.match(developmentReset, /commit;\s*$/i);
+assert.match(developmentReset, /delete from public\.transaction_review_history where owner_id = owner/i);
+
+// Etapa 11.2: versões substituídas e lado manual da transferência própria.
+const reviewVersions = await readFile('supabase/migrations/20261118150000_review_versions_and_manual_counterpart.sql', 'utf8');
+assert.match(reviewVersions, /alter table public\.transaction_review_history enable row level security/i);
+assert.match(reviewVersions, /owner_id = \(select auth\.uid\(\)\)/i);
+assert.doesNotMatch(reviewVersions, /grant (insert|update|delete).*transaction_review_history/i);
+assert.match(reviewVersions, /before delete on public\.transaction_semantic_overrides/i);
+assert.match(reviewVersions, /old\.status = 'confirmed' and old\.category_id is distinct from new\.category_id/i);
+assert.doesNotMatch(reviewVersions, /delete from public\.classification_rules/i, 'aliases nunca são removidos por revisão');
+assert.doesNotMatch(reviewVersions, /update public\.transactions/i);
+assert.match(reviewVersions, /not exists \(select 1 from private\.pluggy_accounts linked where linked\.account_id = account\.id\)/i);
+assert.match(reviewVersions, /account\.account_type <> 'credit_card'/i);
+assert.match(reviewVersions, /-transaction_row\.amount_cents,\s*'own_transfer', 'neutral', 'manual'/i);
+assert.match(reviewVersions, /delete from public\.transactions\s+where id = previous_counterpart_id and owner_id = current_owner and source = 'manual'/i);
+assert.match(reviewVersions, /grant execute on function public\.confirm_transaction_semantics\(uuid, text, uuid, uuid, uuid, uuid\) to authenticated/i);
+assert.match(repository, /p_counterpart_account_id/);
+assert.match(repository, /from\('transaction_review_history'\)/);
 
 console.log('✓ Overlay semântico, vínculos atômicos, imutabilidade, grants e RLS validados estaticamente.');

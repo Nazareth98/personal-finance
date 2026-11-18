@@ -130,6 +130,13 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([...suggested, ...confirmed]) });
       return;
     }
+    if (url.pathname === '/rest/v1/transaction_review_history') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: '92000000-2222-4000-8000-000000000001', transaction_id: '20000000-3333-4000-8000-000000000001', decision_type: 'classification',
+          previous: { categoryId: 'salary', classifierVersion: 'rules-v1' }, superseded_at: '2026-11-17T12:00:00Z' }
+      ]) });
+      return;
+    }
     if (url.pathname === '/rest/v1/transaction_semantic_overrides') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([...semanticOverrides.values()]) });
       return;
@@ -546,7 +553,7 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
   await expect(page.getByText('3 pendentes', { exact: true })).toBeVisible();
   await page.getByRole('tab', { name: /Histórico/ }).click();
-  await expect(page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Corrigir' })).toBeVisible();
+  await expect(page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar novamente' })).toBeVisible();
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
   expect(confirmation?.body).toContain('99999999-3333-4999-8999-999999999999');
   expect(confirmation?.body).toContain('restaurants');
@@ -575,4 +582,34 @@ test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', a
   expect(semanticWrites).toHaveLength(2);
   expect(semanticWrites[0].body).toContain('dddddddd-2222-4ddd-8ddd-dddddddddddd');
   expect(semanticWrites[1].body).toContain('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+});
+
+test('revisa novamente preservando versões e registra o outro lado da transferência própria', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.goto('/#review');
+
+  await page.getByRole('tab', { name: /Histórico/ }).click();
+  await page.getByRole('row', { name: /Bônus extraordinário/ }).getByRole('button', { name: 'Revisar novamente' }).click();
+  let dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
+  await expect(dialog.getByRole('region', { name: 'Versões anteriores' })).toContainText('Categoria: Salário');
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
+
+  await page.getByRole('tab', { name: /Pendências/ }).click();
+  await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+  dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
+  await dialog.getByLabel('Natureza financeira').selectOption('own_transfer');
+  const counterpart = dialog.getByLabel('Outro lado da transferência');
+  await expect(counterpart.getByRole('option', { name: 'Registrar entrada em Cartão principal' })).toHaveCount(0);
+  await expect(counterpart.getByRole('option', { name: /em Conta principal/ })).toHaveCount(0);
+  await counterpart.selectOption({ label: 'Registrar entrada em Reserva' });
+  await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
+  await expect(page.getByText('Natureza e vínculo confirmados.')).toBeVisible();
+
+  const semanticWrite = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_semantics');
+  expect(JSON.parse(semanticWrite!.body!)).toMatchObject({
+    p_transaction_id: '99999999-3333-4999-8999-999999999999', p_effective_nature: 'own_transfer',
+    p_counterpart_transaction_id: null, p_counterpart_account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+  });
 });

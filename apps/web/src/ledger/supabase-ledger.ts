@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -24,6 +24,10 @@ type SemanticOverrideRow = {
   effective_reporting: TransactionSemanticOverride['reporting']; counterpart_transaction_id: string | null;
   statement_id: string | null; savings_box_id: string | null; reason: TransactionSemanticOverride['reason'];
   semantic_version: TransactionSemanticOverride['semanticVersion']; updated_at: string;
+};
+type ReviewHistoryRow = {
+  id: string; transaction_id: string; decision_type: ReviewHistoryEntry['type'];
+  previous: { nature?: ReviewHistoryEntry['nature']; categoryId?: string | null }; superseded_at: string;
 };
 type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
 type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
@@ -60,7 +64,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   }
 
   async load(): Promise<LedgerData> {
-    const [accountsResult, categoriesResult, categoryUsageResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
+    const [accountsResult, categoriesResult, categoryUsageResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, reviewHistoryResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
       this.client.from('categories').select('id,name,category_type,applicability,icon_key,color_key,sort_order,archived_at').order('sort_order'),
       this.client.rpc('get_category_usage'),
@@ -71,20 +75,28 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false }),
       this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false }),
       this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false }),
+      this.client.from('transaction_review_history').select('id,transaction_id,decision_type,previous,superseded_at').order('superseded_at', { ascending: false }),
       this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
       this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false }),
       this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
       this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
     ]);
     const error = accountsResult.error ?? categoriesResult.error ?? categoryUsageResult.error ?? linksResult.error ?? budgetsResult.error
-      ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? creditCardsResult.error
+      ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? reviewHistoryResult.error ?? creditCardsResult.error
       ?? cardStatementsResult.error ?? cardStatementEntriesResult.error ?? cardInstallmentsResult.error;
     if (error) throw error;
-    const activeTransactionRows = transactionsResult.filter(row => !row.source_deleted_at);
+    const semanticOverrideRows = (semanticOverridesResult.data ?? []) as SemanticOverrideRow[];
+    const deletedTransactionIds = new Set(transactionsResult.filter(row => row.source_deleted_at).map(row => row.id));
+    // O lado manual criado para completar uma transferência some junto com o lançamento importado removido.
+    const orphanCounterpartIds = new Set(semanticOverrideRows
+      .filter(row => deletedTransactionIds.has(row.transaction_id) && row.counterpart_transaction_id)
+      .map(row => row.counterpart_transaction_id));
+    const activeTransactionRows = transactionsResult.filter(row => !row.source_deleted_at
+      && !(row.source === 'manual' && orphanCounterpartIds.has(row.id)));
     const activeTransactionIds = new Set(activeTransactionRows.map(row => row.id));
     const activeClassifications = ((classificationsResult.data ?? []) as ClassificationRow[])
       .filter(row => activeTransactionIds.has(row.transaction_id));
-    const activeSemanticOverrides = ((semanticOverridesResult.data ?? []) as SemanticOverrideRow[])
+    const activeSemanticOverrides = semanticOverrideRows
       .filter(row => activeTransactionIds.has(row.transaction_id)
         && (!row.counterpart_transaction_id || activeTransactionIds.has(row.counterpart_transaction_id)));
     const activeCardEntries = ((cardStatementEntriesResult.data ?? []) as CardStatementEntryRow[])
@@ -154,6 +166,12 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         .map(row => ({ id: row.id, sourceTransactionId: row.source_transaction_id, targetTransactionId: row.target_transaction_id, type: row.link_type })),
       classifications,
       semanticOverrides,
+      reviewHistory: ((reviewHistoryResult.data ?? []) as ReviewHistoryRow[])
+        .filter(row => activeTransactionIds.has(row.transaction_id)).map((row): ReviewHistoryEntry => ({
+        id: row.id, transactionId: row.transaction_id, type: row.decision_type, supersededAt: row.superseded_at,
+        ...(row.previous.nature ? { nature: row.previous.nature } : {}),
+        ...(row.previous.categoryId ? { categoryId: row.previous.categoryId } : {})
+      })),
       creditCards: ((creditCardsResult.data ?? []) as CreditCardRow[]).map((row): CreditCard => ({
         id: row.id, accountId: row.account_id, closingDay: row.closing_day, dueDay: row.due_day,
         ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) })
@@ -284,7 +302,8 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       p_effective_nature: draft.nature,
       p_counterpart_transaction_id: draft.counterpartTransactionId ?? null,
       p_statement_id: draft.statementId ?? null,
-      p_savings_box_id: draft.savingsBoxId ?? null
+      p_savings_box_id: draft.savingsBoxId ?? null,
+      p_counterpart_account_id: draft.counterpartAccountId ?? null
     });
     if (error) throw error;
   }

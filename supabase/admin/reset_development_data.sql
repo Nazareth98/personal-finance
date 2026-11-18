@@ -34,6 +34,7 @@ begin
   delete from public.transaction_semantic_overrides where owner_id = owner;
   delete from public.classification_feedback where owner_id = owner;
   delete from public.transaction_classifications where owner_id = owner;
+  delete from public.transaction_review_history where owner_id = owner;
   delete from public.card_installments where owner_id = owner;
   delete from public.card_statement_entries where owner_id = owner;
   delete from public.savings_movements where owner_id = owner;

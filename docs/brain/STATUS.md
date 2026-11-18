@@ -4,7 +4,7 @@ Atualizado em: 18/11/2026.
 
 ## Situação
 
-- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines precisam ser atualizados no CI Linux após as mudanças visuais intencionais.
+- Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines foram regenerados no CI Linux em 18/11/2026.
 - No modo autenticado, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
 - Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
@@ -22,12 +22,12 @@ Atualizado em: 18/11/2026.
 
 ## Marco atual
 
-**Etapa 11.2 — correção e movimentação.** A gestão de categorias foi publicada e validada sem alterar as 23 categorias estruturais existentes. O próximo marco é permitir nova versão do overlay, correção explícita e registro/vínculo dos dois lados de transferências próprias.
+**Etapa 11.2 — correção e movimentação.** Implementada localmente: histórico de versões substituídas (D-026), “Revisar novamente” e registro do lado manual de transferência própria (D-027).
 
 Próximas entregas, nesta ordem:
 
-1. implementar a Etapa 11.2 documentada em [`PLAN.md`](PLAN.md), preservando versões anteriores do overlay e aliases aprendidos;
-2. seguir para consistência visual, período/ordenação e gráficos nas subetapas seguintes.
+1. ensaiar com rollback e aplicar a migration `20261118150000_review_versions_and_manual_counterpart` no Supabase hospedado; só então fazer push do frontend, que depende da nova tabela e do novo parâmetro da RPC;
+2. seguir para consistência visual (11.3), período/ordenação (11.4) e gráficos (11.5).
 
 ## Última validação
 
@@ -71,7 +71,6 @@ Próximas entregas, nesta ordem:
 
 - Docker não está disponível nesta máquina; migrations e RLS foram aplicadas no Supabase hospedado, mas a execução local continua indisponível.
 - A fidelidade visual final depende de leitura ou exportação verificável do Figma.
-- Os 78 baselines visuais precisam ser regenerados e revisados no CI Linux por causa da nova composição do shell; conexões também incorpora a coluna “Atualização da fonte”.
 
 ## Implementações futuras
 

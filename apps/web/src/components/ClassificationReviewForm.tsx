@@ -42,9 +42,12 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       && (item.sourceTransactionId === transaction.id || item.targetTransactionId === transaction.id));
     const payment = data?.cardStatementEntries.find(item => item.type === 'payment' && item.transactionId === transaction.id);
     const movement = data?.savingsMovements.find(item => item.transactionId === transaction.id);
-    setRelationId(semanticOverride?.counterpartTransactionId ?? semanticOverride?.statementId ?? semanticOverride?.savingsBoxId
-      ?? (link ? (link.sourceTransactionId === transaction.id ? link.targetTransactionId : link.sourceTransactionId) : undefined)
-      ?? payment?.statementId ?? movement?.savingsBoxId ?? '');
+    const counterpartId = semanticOverride?.counterpartTransactionId
+      ?? (link ? (link.sourceTransactionId === transaction.id ? link.targetTransactionId : link.sourceTransactionId) : undefined);
+    const counterpart = data?.transactions.find(item => item.id === counterpartId);
+    setRelationId(counterpart
+      ? (counterpart.source === 'manual' ? `account:${counterpart.accountId}` : `transaction:${counterpart.id}`)
+      : semanticOverride?.statementId ?? semanticOverride?.savingsBoxId ?? payment?.statementId ?? movement?.savingsBoxId ?? '');
     setError('');
   }, [data, semanticOverride, transaction]);
 
@@ -61,9 +64,19 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     candidate.id !== transaction.id && candidate.source === 'pluggy' && candidate.accountId !== transaction.accountId
     && candidate.amountCents + transaction.amountCents === 0n && daysApart(candidate.eventDate, transaction.eventDate) <= 3
   ).map(candidate => ({
-    value: candidate.id,
+    value: `transaction:${candidate.id}`,
     label: `${candidate.description} · ${data?.accounts.find(account => account.id === candidate.accountId)?.name ?? 'Conta'} · ${formatLocalDate(candidate.eventDate)}`
   })) : [];
+  // Conta conectada receberá o próprio lado pela importação; registrar outro duplicaria o saldo.
+  const connectedAccountIds = new Set((data?.transactions ?? []).filter(item => item.source === 'pluggy').map(item => item.accountId));
+  const counterpartAccountOptions = transaction ? (data?.accounts ?? []).filter(account =>
+    account.id !== transaction.accountId && account.type !== 'credit_card' && !connectedAccountIds.has(account.id)
+  ).map(account => ({
+    value: `account:${account.id}`,
+    label: `Registrar ${transaction.amountCents < 0n ? 'entrada' : 'saída'} em ${account.name}`
+  })) : [];
+  const categoryNames = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
+  const previousVersions = (data?.reviewHistory ?? []).filter(item => item.transactionId === transaction?.id);
   const statementOptions = (data?.cardStatements ?? []).map(statement => {
     const card = data?.creditCards.find(item => item.id === statement.cardId);
     const account = data?.accounts.find(item => item.id === card?.accountId);
@@ -71,7 +84,8 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   });
   const savingsOptions = (data?.savingsBoxes ?? []).map(box => ({ value: box.id, label: box.name }));
   const relation = nature === 'own_transfer'
-    ? { label: 'Lançamento contraparte', placeholder: 'Selecione o outro lado da transferência', options: counterpartOptions }
+    ? { label: 'Outro lado da transferência', placeholder: 'Selecione o lançamento ou a conta de destino',
+      options: [...counterpartOptions, ...counterpartAccountOptions] }
     : nature === 'card_payment'
       ? { label: 'Fatura paga', placeholder: 'Selecione a fatura', options: statementOptions }
       : nature === 'savings_contribution' || nature === 'savings_withdrawal'
@@ -85,7 +99,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       setError('Selecione a categoria confirmada.'); return;
     }
     if (relation && !relationId) {
-      setError(`Selecione ${nature === 'own_transfer' ? 'o lançamento contraparte' : nature === 'card_payment' ? 'a fatura' : 'a caixinha'}.`); return;
+      setError(`Selecione ${nature === 'own_transfer' ? 'o outro lado da transferência' : nature === 'card_payment' ? 'a fatura' : 'a caixinha'}.`); return;
     }
     setLoading(true);
     setError('');
@@ -93,7 +107,8 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       if ((nature !== 'income' && nature !== 'expense') || nature !== transaction.nature) {
         await ledger.confirmTransactionSemantics({
           transactionId: transaction.id, nature,
-          ...(nature === 'own_transfer' ? { counterpartTransactionId: relationId } : {}),
+          ...(nature === 'own_transfer' && relationId.startsWith('transaction:') ? { counterpartTransactionId: relationId.slice('transaction:'.length) } : {}),
+          ...(nature === 'own_transfer' && relationId.startsWith('account:') ? { counterpartAccountId: relationId.slice('account:'.length) } : {}),
           ...(nature === 'card_payment' ? { statementId: relationId } : {}),
           ...(nature === 'savings_contribution' || nature === 'savings_withdrawal' ? { savingsBoxId: relationId } : {})
         });
@@ -119,6 +134,14 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         placeholder="Selecione" options={categoryOptions} required onChange={event => setCategoryId(event.target.value)} />}
       {relation && <Select label={relation.label} value={relationId} placeholder={relation.placeholder}
         options={relation.options} required onChange={event => setRelationId(event.target.value)} />}
+      {previousVersions.length > 0 && <section className="review-versions" aria-label="Versões anteriores">
+        <p className="muted">Versões anteriores ({previousVersions.length}) — preservadas ao confirmar uma nova revisão.</p>
+        <ul>{previousVersions.map(item => <li key={item.id}>
+          {new Date(item.supersededAt).toLocaleDateString('pt-BR')} · {item.type === 'semantics'
+            ? `Natureza: ${item.nature ? natureLabels[item.nature] : 'Não informada'}`
+            : `Categoria: ${item.categoryId ? categoryNames.get(item.categoryId) ?? 'Categoria removida' : 'Sem categoria'}`}
+        </li>)}</ul>
+      </section>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div className="transaction-form__actions">
         <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>

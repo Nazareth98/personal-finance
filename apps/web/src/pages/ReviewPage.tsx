@@ -66,7 +66,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     { key: 'amount', header: 'Valor', align: 'end', cell: row => <FinancialValue value={formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}
       tone={row.amountCents < 0n ? 'negative' : 'positive'} showSign/> },
     { key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" onClick={() => setSelected(row)}>
-      {view === 'history' ? 'Corrigir' : resolutions.get(row.id)?.semanticResolved ? 'Revisar' : 'Vincular'}
+      {view === 'history' ? 'Revisar novamente' : resolutions.get(row.id)?.semanticResolved ? 'Revisar' : 'Vincular'}
     </Button> }
   ];
 

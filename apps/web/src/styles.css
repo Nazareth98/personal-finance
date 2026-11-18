@@ -106,6 +106,9 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .review-tabs{display:flex;gap:var(--spacing-2);flex-wrap:wrap}
 .review-toolbar>.ui-field{width:min(100%,220px)}
 .review-card>.ui-pagination{padding:var(--spacing-4)}
+.review-versions{display:grid;gap:var(--spacing-1);padding:var(--spacing-3);border-radius:var(--radius-md);background:var(--color-bg-subtle);font-size:var(--font-size-sm)}
+.review-versions p,.review-versions ul{margin:0}
+.review-versions ul{padding-left:var(--spacing-4);color:var(--color-text-primary)}
 .category-toolbar{padding:var(--spacing-4);border-bottom:1px solid var(--color-border-default);background:var(--color-bg-surface)}
 .category-toolbar>.ui-field{width:min(100%,320px)}
 .category-actions{display:flex;align-items:center;gap:var(--spacing-1);white-space:nowrap}

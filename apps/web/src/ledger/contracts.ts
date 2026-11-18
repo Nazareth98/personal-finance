@@ -30,6 +30,16 @@ export type TransactionSemanticOverride = {
   updatedAt: string;
 };
 
+/** Decisão substituída por uma nova revisão; a vigente continua no overlay. */
+export type ReviewHistoryEntry = {
+  id: string;
+  transactionId: string;
+  type: 'semantics' | 'classification';
+  nature?: TransactionSemanticOverride['nature'];
+  categoryId?: string;
+  supersededAt: string;
+};
+
 export type LedgerData = {
   accounts: FinancialAccount[];
   categories: Category[];
@@ -40,6 +50,7 @@ export type LedgerData = {
   links: TransactionLink[];
   classifications: TransactionClassification[];
   semanticOverrides: TransactionSemanticOverride[];
+  reviewHistory: ReviewHistoryEntry[];
   creditCards: CreditCard[];
   cardStatements: CardStatement[];
   cardStatementEntries: CardStatementEntry[];
@@ -69,6 +80,8 @@ export type SemanticConfirmation = Pick<TransactionSemanticOverride, 'transactio
   counterpartTransactionId?: string;
   statementId?: string;
   savingsBoxId?: string;
+  /** Conta própria sem conexão onde o outro lado da transferência será registrado. */
+  counterpartAccountId?: string;
 };
 
 export type ManualTransactionDraft = {
