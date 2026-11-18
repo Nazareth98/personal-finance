@@ -6,3 +6,4 @@ const meta={title:'Charts/TrendLineChart',component:TrendLineChart,tags:['autodo
 export default meta;type Story=StoryObj<typeof meta>;
 export const Default:Story={};
 export const Empty:Story={args:{data:[]}};
+export const NeutralMagnitude:Story={args:{title:'Compromissos de cartão',valueTone:'neutral'}};

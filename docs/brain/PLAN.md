@@ -208,6 +208,8 @@ Aceite: toda tabela indica a ordenação com `aria-sort`, todos os elementos da 
 
 ### 11.5 — gráficos de acompanhamento
 
+Estado: concluída em 18/11/2026 (D-029).
+
 - receitas versus despesas por mês;
 - evolução do resultado acumulado;
 - orçado versus realizado por categoria;

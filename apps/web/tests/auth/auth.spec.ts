@@ -674,3 +674,20 @@ test('busca no histórico de revisão e ordena colunas sem ordenar ações', asy
   await expect(table.getByRole('columnheader', { name: 'Data' })).toHaveAttribute('aria-sort', 'descending');
   await expect(table.getByRole('columnheader', { name: 'Ação', exact: true })).not.toHaveAttribute('aria-sort');
 });
+
+test('gráficos da visão geral seguem o período e os totais do livro', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  const flow = page.getByRole('figure', { name: 'Receitas e despesas por mês' });
+  await expect(flow.getByRole('row', { name: /nov\/2026/ })).toContainText('R$ 5.000,00');
+  await expect(flow.getByRole('row', { name: /out\/2026/ })).toContainText('R$ 6.200,00');
+  const budgets = page.getByRole('list', { name: 'Orçado versus realizado por categoria' });
+  await expect(budgets).toContainText('R$ 100,00 realizados de R$ 500,00 orçados');
+  await expect(budgets).toContainText('Dentro do teto');
+  await expect(page.getByRole('figure', { name: 'Compromissos de cartão por mês' })).toContainText('dez/2026 (previsto)');
+
+  await page.getByRole('button', { name: 'Mês anterior' }).click();
+  await expect(budgets).toContainText('R$ 0,00 realizados de R$ 620,00 orçados');
+  await expect(flow.getByRole('row', { name: /out\/2026/ })).toContainText('R$ 6.200,00');
+  await expect(flow.getByRole('row', { name: /nov\/2026/ })).toHaveCount(0);
+});

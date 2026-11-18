@@ -1,11 +1,13 @@
-import { Badge, Button, Card, MetricCard, CashFlowChart, DataState, Icon, NextIcon, PreviousIcon, type DataStatus } from '@personal-finance/ui';
+import { Badge, Button, Card, MetricCard, CashFlowChart, DataState, EmptyState, Icon, NextIcon, PreviousIcon, TrendLineChart, type DataStatus } from '@personal-finance/ui';
+import type { ReactNode } from 'react';
+import { cardCommitmentSeries, cashFlowSeries, competenceWindow, cumulativeResultSeries } from '../lib/overview-charts';
 import { useHashParams } from '../hooks/useHashParams';
 import { useState } from 'react';
 import { demoCashFlow } from '../lib/demo-charts';
 import { TransactionsDemo } from '../components/TransactionsDemo';
 import { accountsBalance, demoAccounts, demoBudgets, demoInvoices, invoiceOpenCents, monthlyReport } from '../lib/demo-finance';
 import { demoTransactions, formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
-import { accountBalance, addCompetenceMonths, ledgerTotals } from '@personal-finance/domain';
+import { accountBalance, addCompetenceMonths, categoryBudgetProgress, ledgerTotals } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
 
@@ -21,6 +23,39 @@ function PeriodNavigator({ period, onChange }: { period: string; onChange: (peri
     <strong className="period-navigator__label" aria-live="polite">{formatCompetence(period)}</strong>
     <Button variant="ghost" size="sm" aria-label="Próximo mês" onClick={() => onChange(addCompetenceMonths(period, 1))}><Icon icon={NextIcon} size="sm" /></Button>
     <Button variant="secondary" size="sm" disabled={period === current} onClick={() => onChange(current)}>Mês atual</Button>
+  </div>;
+}
+
+function OverviewCharts({ ledger, period }: { ledger: LedgerState; period: string }) {
+  const data = ledger.data;
+  const transactions = data?.transactions ?? [];
+  const status = ledger.status === 'idle' ? 'loading' : ledger.status;
+  const flow = cashFlowSeries(transactions, competenceWindow(period, 6));
+  const categories = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
+  const budgets = (data?.budgets ?? []).map(budget => ({ budget, category: categories.get(budget.categoryId) ?? 'Categoria indisponível', progress: categoryBudgetProgress(budget, transactions, period) }));
+  const commitments = cardCommitmentSeries({ statements: data?.cardStatements ?? [], entries: data?.cardStatementEntries ?? [], transactions,
+    installments: data?.cardInstallments ?? [], months: competenceWindow(addCompetenceMonths(period, 6), 9), period });
+  const chartState = (children: ReactNode, chartKind: 'bars' | 'line') => <DataState status={status} kind="chart" chartKind={chartKind}
+    errorDescription={ledger.error} onRetry={() => void ledger.reload()}>{children}</DataState>;
+  return <div className="template-chart-grid">
+    <Card><h2>Receitas e despesas</h2><p className="muted">Seis meses até {formatCompetence(period)}, sem transferências próprias.</p>
+      {chartState(<CashFlowChart data={flow} formatValue={formatCentsBRL} title="Receitas e despesas por mês" />, 'bars')}</Card>
+    <Card><h2>Resultado acumulado</h2><p className="muted">Soma de receitas menos despesas desde o início da janela.</p>
+      {chartState(<TrendLineChart data={cumulativeResultSeries(flow)} formatValue={formatCentsBRL} title="Resultado acumulado por mês" />, 'line')}</Card>
+    <Card><h2>Metas do período</h2><p className="muted">Orçado versus realizado em {formatCompetence(period)}.</p>
+      {budgets.length === 0 ? <EmptyState title="Nenhuma meta definida" description="Defina tetos por categoria para acompanhá-los aqui." action={<a href="#budgets">Definir metas</a>} />
+        : <ul className="overview-budgets" aria-label="Orçado versus realizado por categoria">{budgets.map(({ budget, category, progress }) => {
+          const label = progress.status === 'exceeded' ? 'Acima do teto' : progress.status === 'approaching' ? 'Próximo do teto' : 'Dentro do teto';
+          return <li key={budget.id}>
+            <div className="summary-row"><strong>{category}</strong><Badge tone={progress.status === 'exceeded' ? 'expense' : progress.status === 'within' ? 'income' : 'neutral'}>{label}</Badge></div>
+            <progress className={`budget-progress ${progress.status === 'exceeded' ? 'budget-progress--exceeded' : ''}`} max={10000}
+              value={Number(progress.usageBasisPoints > 10000n ? 10000n : progress.usageBasisPoints)} aria-label={`Uso da meta de ${category}`} />
+            <p className="muted">{formatCentsBRL(progress.usedCents)} realizados de {formatCentsBRL(progress.limitCents)} orçados</p>
+          </li>;
+        })}</ul>}</Card>
+    <Card><h2>Compromissos de cartão</h2><p className="muted">Faturas por vencimento e parcelas futuras já assumidas.</p>
+      {(data?.creditCards.length ?? 0) === 0 ? <EmptyState title="Nenhum cartão configurado" description="Configure um cartão para acompanhar faturas e parcelas." />
+        : chartState(<TrendLineChart data={commitments} formatValue={formatCentsBRL} title="Compromissos de cartão por mês" valueTone="neutral" />, 'line')}</Card>
   </div>;
 }
 
@@ -48,6 +83,7 @@ export function OverviewPage({ ledger, headerAction }: PageProps) {
       </div>
       <div className="template-grid"><Card><h2>Livro financeiro</h2><div className="summary-row"><span>Contas cadastradas</span><strong>{data?.accounts.length ?? 0}</strong></div><div className="summary-row"><a href={`#transactions?period=${period}`}>Lançamentos no período</a><strong>{periodRows.length}</strong></div><div className="summary-row"><span>Ajustes vinculados</span><strong>{adjustments}</strong></div></Card>
       <Card><h2>Resultado</h2><strong className="template-highlight">{formatCentsBRL(totals.netCents)}</strong><p className="muted">Movimentos patrimoniais permanecem neutros no resultado.</p></Card></div>
+      <OverviewCharts ledger={ledger} period={period} />
     </div>;
   }
   const report = monthlyReport(demoTransactions);

@@ -1,8 +1,9 @@
 import {signedRatio} from '../lib/chart-data';
 import {EmptyState} from './EmptyState';
 export type TrendPoint={label:string;valueCents:bigint};
-export type TrendLineChartProps={data:readonly TrendPoint[];formatValue:(value:bigint)=>string;title?:string};
-export function TrendLineChart({data,formatValue,title='Evolução do saldo'}:TrendLineChartProps){
+/** `signed` colore resultado por sinal; `neutral` serve a magnitudes sem ganho/perda, como compromissos a pagar. */
+export type TrendLineChartProps={data:readonly TrendPoint[];formatValue:(value:bigint)=>string;title?:string;valueTone?:'signed'|'neutral'};
+export function TrendLineChart({data,formatValue,title='Evolução do saldo',valueTone='signed'}:TrendLineChartProps){
  if(!data.length)return <EmptyState title="Sem valores para a evolução" description="Adicione períodos para consultar a série temporal."/>;
  const max=data.reduce((m,p)=>p.valueCents>m?p.valueCents:m,data[0].valueCents);
  const min=data.reduce((m,p)=>p.valueCents<m?p.valueCents:m,data[0].valueCents);
@@ -18,8 +19,8 @@ export function TrendLineChart({data,formatValue,title='Evolução do saldo'}:Tr
   </svg>
   <figcaption className="ui-sr-only">{title}. Evolução por período detalhada abaixo.</figcaption>
   <div className="ui-chart__details">{data.map((p,i)=><div key={i}><strong>{p.label}</strong>
-    <span className={p.valueCents>0n?'ui-chart__positive':p.valueCents<0n?'ui-chart__negative':'ui-chart__neutral'}>
-      {p.valueCents>0n?'+ ':''}{formatValue(p.valueCents)}
+    <span className={valueTone==='neutral'?'ui-chart__neutral':p.valueCents>0n?'ui-chart__positive':p.valueCents<0n?'ui-chart__negative':'ui-chart__neutral'}>
+      {valueTone==='signed'&&p.valueCents>0n?'+ ':''}{formatValue(p.valueCents)}
     </span>
   </div>)}</div>
  </figure>;

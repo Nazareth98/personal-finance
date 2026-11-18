@@ -22,12 +22,11 @@ Atualizado em: 18/11/2026.
 
 ## Marco atual
 
-**Etapa 11.5 — gráficos de acompanhamento.** A 11.4 foi concluída: período navegável na visão geral, todas as tabelas autenticadas ordenáveis, busca e filtros em Transações e Revisão com estado na URL (D-028).
+**Preparação do redesign com Claude Design.** A Etapa 11 foi concluída: a 11.5 levou à visão geral fluxo de caixa, resultado acumulado, metas e compromissos de cartão, todos no período selecionado (D-029).
 
 Próximas entregas, nesta ordem:
 
-1. gráficos de acompanhamento (11.5) conforme [`PLAN.md`](PLAN.md), incluindo faturas e metas da visão geral no período selecionado;
-2. preparar o redesign com Claude Design: tokens de elevação e z-index e `DESIGN.md` sincronizado com `themes.json`.
+1. preparar o redesign com Claude Design: tokens de elevação e z-index, `DESIGN.md` sincronizado com `themes.json` e inventário de telas com dados fictícios.
 
 ## Última validação
 
@@ -69,6 +68,7 @@ Próximas entregas, nesta ordem:
 - Etapa 11.2 em 18/11/2026: `pnpm check` e 18 fluxos autenticados passaram com Node 22.13. Ensaio remoto com rollback forçado aprovou 7 cenários (lado manual criado, nova revisão remove o lado manual e versiona, categoria confirmada versionada com alias preservado, cartão, conta conectada e vínculo duplo recusados, grants/RLS). Migration aplicada pelo SQL Editor (o conector recusa escrita) e conferida pelo conector: tabela com RLS, RPC de 6 argumentos, assinatura antiga removida e 2 triggers.
 - Etapa 11.3 em 18/11/2026: o hover deslocava os links da sidebar e a lista com `overflow-y` rolava lateralmente; removido o deslocamento, eixo X cortado e foco desenhado por dentro. Novo teste mede a largura rolável em hover, foco e durante a transição de recolher (falhou antes da correção). `pnpm check`, 18 fluxos autenticados e 72 cenários de comportamento/acessibilidade passaram com Node 22.13.
 - Etapa 11.4 em 18/11/2026: `pnpm check`, 35 testes unitários (4 novos de filtro), 21 fluxos autenticados (3 novos: período, filtros com URL e histórico da revisão) e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13. Tabelas demonstrativas não ganharam ordenação para preservar os 78 baselines. Capturas desktop/mobile revisadas localmente com dados fictícios.
+- Etapa 11.5 em 18/11/2026: séries puras com 3 testes (janela na virada do ano, totais do livro sem transferências, fatura líquida mais parcelas projetadas). `TrendLineChart` ganhou `valueTone="neutral"` para compromissos não parecerem ganho. `pnpm check`, 38 testes unitários, 22 fluxos autenticados e 90 cenários de comportamento/acessibilidade/estados passaram com Node 22.13; capturas Light/Dark e mobile revisadas com dados fictícios.
 
 ## Bloqueios
 

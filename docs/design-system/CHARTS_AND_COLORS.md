@@ -30,7 +30,7 @@ As cores categóricas indicam apenas categorias distintas e não têm significad
 | Componente | Props | Aplicação |
 | --- | --- | --- |
 | `CashFlowChart` | `data: { label, incomeCents, expenseCents }[]`, `formatValue` | comparação de receitas e despesas por período |
-| `TrendLineChart` | `data: { label, valueCents }[]`, `formatValue` | tendência temporal de saldos/resultado |
+| `TrendLineChart` | `data: { label, valueCents }[]`, `formatValue`, `valueTone?: 'signed' | 'neutral'` | tendência temporal de saldos/resultado; use `neutral` para magnitudes sem ganho/perda, como compromissos de cartão |
 | `CategoryDonutChart` | `data: { label, valueCents }[]`, `formatValue` | composição de despesas por categoria |
 
 O layout é responsivo, usa CSS/SVG sem biblioteca externa e fornece valores textuais. Os gráficos recebem `bigint`; a função de escala converte **apenas razões limitadas para coordenadas ou porcentagens**, nunca o montante integral em ponto flutuante.

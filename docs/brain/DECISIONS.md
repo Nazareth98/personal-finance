@@ -32,3 +32,4 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-026 | Revisões substituídas de natureza e de categoria confirmada são copiadas por trigger para `transaction_review_history`; aliases aprendidos nunca são removidos por uma revisão. | Vigente |
 | D-027 | Transferência própria cujo outro lado não é importado registra um lançamento manual neutro em conta própria sem conexão e não cartão; ele é removido ao revisar novamente e oculto se o lado importado for excluído pelo provedor. | Vigente |
 | D-028 | Período, busca e filtros ficam nos parâmetros do hash da URL; a busca considera apenas a descrição, e a ordenação permanece local à sessão da tela. | Vigente |
+| D-029 | Gráficos de acompanhamento ficam na visão geral e seguem o período selecionado: fluxo e resultado acumulado em seis meses até o período, metas do mês e compromissos de cartão de três meses antes a seis depois. Relatórios mantém a previsão. | Vigente |
