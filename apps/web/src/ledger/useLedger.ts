@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
+import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -8,7 +8,7 @@ export type LedgerState = {
   reload: () => Promise<void>;
   createAccount: (draft: AccountDraft) => Promise<void>;
   createCategory: (draft: CategoryDraft) => Promise<void>;
-  renameCategory: (categoryId: string, name: string) => Promise<void>;
+  updateCategory: (categoryId: string, update: CategoryUpdate) => Promise<void>;
   moveCategory: (categoryId: string, direction: -1 | 1) => Promise<void>;
   archiveCategory: (draft: CategoryArchiveDraft) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
@@ -112,7 +112,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   return {
     data, status, error, reload, createAccount,
     createCategory: draft => mutateCategory(() => repository!.createCategory(draft)),
-    renameCategory: (categoryId, name) => mutateCategory(() => repository!.renameCategory(categoryId, name)),
+    updateCategory: (categoryId, update) => mutateCategory(() => repository!.updateCategory(categoryId, update)),
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),

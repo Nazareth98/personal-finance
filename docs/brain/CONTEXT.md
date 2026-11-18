@@ -28,7 +28,7 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 - Metas são tetos por categoria calculados sobre toda receita confirmada do período e não acumulam.
 - Previsão usa seis meses de receitas recorrentes; extraordinárias não entram na média.
 - Categorização: 90–100% automática, 70–89% revisão, abaixo de 70% sem categoria.
-- Categorias estruturais são protegidas; categorias personalizadas pertencem ao proprietário, têm aplicabilidade financeira explícita e são arquivadas quando possuem histórico.
+- Categorias estruturais são protegidas; categorias personalizadas pertencem ao proprietário, têm aplicabilidade financeira explícita, ícone Lucide e cor semântica versionados, e são arquivadas quando possuem histórico.
 - Caixinha indistinguível no extrato exige associação manual; o sistema não inventa vínculo.
 - Figma “Corporate UI — Design System Foundations” é referência visual; JSON e código são fonte técnica.
 - Exportação de dados, múltiplos usuários e aplicativo nativo estão fora do escopo inicial.

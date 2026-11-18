@@ -28,3 +28,4 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 | D-022 | A chave idempotente bancária permanece `pluggy:<transactionId>`; `providerId` é metadado opcional de conexões reguladas e não substitui o identificador do MeuPluggy. | Vigente |
 | D-023 | A Etapa 10.4 encerra com sincronização manual; a configuração operacional do webhook MeuPluggy fica como implementação futura e não bloqueia a Etapa 11. | Vigente |
 | D-024 | Categorias estruturais permanecem globais e protegidas; categorias personalizadas pertencem ao proprietário, declaram aplicabilidade e, quando referenciadas, são arquivadas em vez de excluídas. | Vigente |
+| D-025 | A identidade visual de categoria persiste somente chaves permitidas de ícone Lucide e de cor semântica; valores hexadecimais e nomes arbitrários não entram no banco. | Vigente |

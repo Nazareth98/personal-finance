@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
+import type { AccountDraft, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -11,7 +11,7 @@ type TransactionRow = {
 };
 type LinkRow = { id: string; source_transaction_id: string; target_transaction_id: string; link_type: TransactionLink['type'] };
 type BudgetRow = { id: string; category_id: string; percentage_basis_points: number };
-type CategoryRow = { id: string; name: string; category_type: 'system' | 'custom'; applicability: 'income' | 'expense' | 'neutral'; sort_order: number; archived_at: string | null };
+type CategoryRow = { id: string; name: string; category_type: 'system' | 'custom'; applicability: 'income' | 'expense' | 'neutral'; icon_key: Category['iconKey']; color_key: Category['colorKey']; sort_order: number; archived_at: string | null };
 type CategoryUsageRow = { category_id: string; dependency_count: number | string };
 type SavingsBoxRow = { id: string; name: string; opening_balance_cents: string | number; target_cents: string | number; target_date: string | null };
 type SavingsMovementRow = { id: string; savings_box_id: string; transaction_id: string; movement_type: SavingsMovement['type']; amount_cents: string | number; event_date: string };
@@ -62,7 +62,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   async load(): Promise<LedgerData> {
     const [accountsResult, categoriesResult, categoryUsageResult, transactionsResult, linksResult, budgetsResult, savingsBoxesResult, savingsMovementsResult, classificationsResult, semanticOverridesResult, creditCardsResult, cardStatementsResult, cardStatementEntriesResult, cardInstallmentsResult] = await Promise.all([
       this.client.from('financial_accounts').select('id,name,account_type,opening_balance_cents').is('archived_at', null).order('created_at'),
-      this.client.from('categories').select('id,name,category_type,applicability,sort_order,archived_at').order('sort_order'),
+      this.client.from('categories').select('id,name,category_type,applicability,icon_key,color_key,sort_order,archived_at').order('sort_order'),
       this.client.rpc('get_category_usage'),
       this.loadTransactions(),
       this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
@@ -116,6 +116,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: ((categoriesResult.data ?? []) as CategoryRow[]).map(row => ({
         id: row.id, name: row.name, type: row.category_type, applicability: row.applicability,
+        iconKey: row.icon_key, colorKey: row.color_key,
         sortOrder: row.sort_order, ...(row.archived_at ? { archivedAt: row.archived_at } : {}),
         dependencyCount: categoryUsage.get(row.id) ?? 0
       })),
@@ -179,12 +180,16 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   }
 
   async createCategory(draft: CategoryDraft): Promise<void> {
-    const { error } = await this.client.rpc('create_category', { p_name: draft.name, p_applicability: draft.applicability });
+    const { error } = await this.client.rpc('create_category', {
+      p_name: draft.name, p_applicability: draft.applicability, p_icon_key: draft.iconKey, p_color_key: draft.colorKey
+    });
     if (error) throw error;
   }
 
-  async renameCategory(categoryId: string, name: string): Promise<void> {
-    const { error } = await this.client.rpc('rename_category', { p_category_id: categoryId, p_name: name });
+  async updateCategory(categoryId: string, update: CategoryUpdate): Promise<void> {
+    const { error } = await this.client.rpc('update_category', {
+      p_category_id: categoryId, p_name: update.name, p_icon_key: update.iconKey, p_color_key: update.colorKey
+    });
     if (error) throw error;
   }
 

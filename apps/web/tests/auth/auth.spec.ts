@@ -70,10 +70,10 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname === '/rest/v1/categories') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
-        { id: 'salary', name: 'Salário', category_type: 'system', applicability: 'income', sort_order: 10, archived_at: null },
-        { id: 'groceries', name: 'Supermercado', category_type: 'system', applicability: 'expense', sort_order: 20, archived_at: null },
-        { id: 'restaurants', name: 'Restaurantes', category_type: 'system', applicability: 'expense', sort_order: 30, archived_at: null },
-        { id: 'custom_hobbies', name: 'Hobbies', category_type: 'custom', applicability: 'expense', sort_order: 40, archived_at: null }
+        { id: 'salary', name: 'Salário', category_type: 'system', applicability: 'income', icon_key: 'briefcase', color_key: 'chart-category-2', sort_order: 10, archived_at: null },
+        { id: 'groceries', name: 'Supermercado', category_type: 'system', applicability: 'expense', icon_key: 'shopping-cart', color_key: 'chart-category-2', sort_order: 20, archived_at: null },
+        { id: 'restaurants', name: 'Restaurantes', category_type: 'system', applicability: 'expense', icon_key: 'utensils', color_key: 'chart-category-3', sort_order: 30, archived_at: null },
+        { id: 'custom_hobbies', name: 'Hobbies', category_type: 'custom', applicability: 'expense', icon_key: 'gamepad', color_key: 'chart-category-3', sort_order: 40, archived_at: null }
       ]) });
       return;
     }
@@ -379,7 +379,7 @@ test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', a
   }
 });
 
-test('cria, renomeia e arquiva categoria personalizada com segurança', async ({ page }) => {
+test('cria, edita e arquiva categoria personalizada com identidade visual', async ({ page }) => {
   const writes: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, writes);
   await login(page);
@@ -390,16 +390,20 @@ test('cria, renomeia e arquiva categoria personalizada com segurança', async ({
   await page.getByRole('button', { name: 'Nova categoria' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Nova categoria' });
   await createDialog.getByLabel('Nome').fill('Pets');
+  await createDialog.getByLabel('Ícone').selectOption('heart-pulse');
+  await createDialog.getByLabel('Cor').selectOption('chart-category-4');
   await createDialog.getByLabel('Despesa').check();
   await createDialog.getByRole('button', { name: 'Salvar categoria' }).click();
   await expect(page.getByText('Categoria criada.')).toBeVisible();
 
   const hobbies = page.getByRole('row', { name: /Hobbies/ });
-  await hobbies.getByRole('button', { name: 'Renomear Hobbies' }).click();
-  const renameDialog = page.getByRole('dialog', { name: 'Renomear categoria' });
-  await renameDialog.getByLabel('Nome').fill('Lazer pessoal');
-  await renameDialog.getByRole('button', { name: 'Salvar categoria' }).click();
-  await expect(page.getByText('Categoria renomeada.')).toBeVisible();
+  await hobbies.getByRole('button', { name: 'Editar Hobbies' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar categoria' });
+  await editDialog.getByLabel('Nome').fill('Lazer pessoal');
+  await editDialog.getByLabel('Ícone').selectOption('gift');
+  await editDialog.getByLabel('Cor').selectOption('chart-category-1');
+  await editDialog.getByRole('button', { name: 'Salvar categoria' }).click();
+  await expect(page.getByText('Categoria atualizada.')).toBeVisible();
 
   await hobbies.getByRole('button', { name: 'Arquivar Hobbies' }).click();
   const removalDialog = page.getByRole('dialog', { name: 'Arquivar ou excluir categoria' });
@@ -408,8 +412,10 @@ test('cria, renomeia e arquiva categoria personalizada com segurança', async ({
   await expect.poll(() => writes.some(write => write.path.endsWith('/archive_category'))).toBe(true);
 
   expect(writes.map(write => write.path)).toEqual([
-    '/rest/v1/rpc/create_category', '/rest/v1/rpc/rename_category', '/rest/v1/rpc/archive_category'
+    '/rest/v1/rpc/create_category', '/rest/v1/rpc/update_category', '/rest/v1/rpc/archive_category'
   ]);
+  expect(JSON.parse(writes[0]!.body!)).toMatchObject({ p_icon_key: 'heart-pulse', p_color_key: 'chart-category-4' });
+  expect(JSON.parse(writes[1]!.body!)).toMatchObject({ p_icon_key: 'gift', p_color_key: 'chart-category-1' });
 });
 
 test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutro', async ({ page }) => {

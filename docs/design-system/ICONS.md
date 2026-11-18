@@ -18,3 +18,7 @@ import { Button, Icon, PlusIcon } from '@personal-finance/ui';
 ```
 
 Não use emojis, caracteres Unicode ou SVGs copiados para representar ações cobertas pelo catálogo.
+
+## Categorias financeiras
+
+Categorias usam um catálogo curado de ícones Lucide e uma das cores semânticas `chart-category-1` a `chart-category-5`. A interface sempre mantém o nome textual junto do ícone: cor e forma reforçam reconhecimento, mas não carregam significado isoladamente.

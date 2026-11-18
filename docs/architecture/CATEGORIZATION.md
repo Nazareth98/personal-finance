@@ -63,3 +63,5 @@ Em uma limpeza de desenvolvimento, preservar `classification_rules` com `evidenc
 - o modo demonstrativo exibe estado vazio, sem exemplos que imitem dados privados.
 
 Categorias arquivadas permanecem legíveis para explicar o histórico, mas deixam de ser aceitas em novos formulários e por novas classificações. Ao arquivar, regras são reatribuídas ou desativadas sem apagar feedback anterior.
+
+Cada categoria mantém `icon_key` e `color_key`. O ícone pertence ao catálogo Lucide curado pela aplicação e a cor referencia um papel `chart-category-*` dos tokens Light/Dark; o banco rejeita valores fora dessas listas. Categorias estruturais recebem identidade versionada pela migration, enquanto o proprietário escolhe e edita a identidade das personalizadas.

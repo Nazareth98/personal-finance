@@ -1,9 +1,13 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import type { Category } from '@personal-finance/domain';
+import type { Category, CategoryColorKey, CategoryIconKey } from '@personal-finance/domain';
 import {
   ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon,
   EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, PlusIcon, RadioGroup, Select, useToast,
-  type DataTableColumn
+  CategoryBriefcaseIcon, CategoryBusIcon, CategoryCarIcon, CategoryEducationIcon, CategoryFuelIcon,
+  CategoryGameIcon, CategoryGiftIcon, CategoryHealthIcon, CategoryHomeIcon, CategoryLandmarkIcon,
+  CategoryPiggyBankIcon, CategoryReceiptIcon, CategoryRepeatIcon, CategoryShoppingCartIcon,
+  CategorySparklesIcon, CategoryTagIcon, CategoryTransferIcon, CategoryTravelIcon, CategoryUtensilsIcon,
+  CategoryWalletIcon, type DataTableColumn, type LucideIcon
 } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
@@ -12,11 +16,36 @@ const applicabilityLabels: Record<Category['applicability'], string> = {
   income: 'Receita', expense: 'Despesa', neutral: 'Movimento neutro'
 };
 
+const categoryIcons: Record<CategoryIconKey, { label: string; icon: LucideIcon }> = {
+  home: { label: 'Casa', icon: CategoryHomeIcon }, receipt: { label: 'Conta', icon: CategoryReceiptIcon },
+  'shopping-cart': { label: 'Compras', icon: CategoryShoppingCartIcon }, utensils: { label: 'Alimentação', icon: CategoryUtensilsIcon },
+  car: { label: 'Carro', icon: CategoryCarIcon }, bus: { label: 'Transporte público', icon: CategoryBusIcon },
+  fuel: { label: 'Combustível', icon: CategoryFuelIcon }, 'heart-pulse': { label: 'Saúde', icon: CategoryHealthIcon },
+  sparkles: { label: 'Destaque', icon: CategorySparklesIcon }, gamepad: { label: 'Lazer', icon: CategoryGameIcon },
+  repeat: { label: 'Recorrência', icon: CategoryRepeatIcon }, 'graduation-cap': { label: 'Educação', icon: CategoryEducationIcon },
+  plane: { label: 'Viagem', icon: CategoryTravelIcon }, landmark: { label: 'Instituição', icon: CategoryLandmarkIcon },
+  gift: { label: 'Presente', icon: CategoryGiftIcon }, briefcase: { label: 'Trabalho', icon: CategoryBriefcaseIcon },
+  wallet: { label: 'Carteira', icon: CategoryWalletIcon }, 'arrow-left-right': { label: 'Transferência', icon: CategoryTransferIcon },
+  'piggy-bank': { label: 'Reserva', icon: CategoryPiggyBankIcon }, tag: { label: 'Etiqueta', icon: CategoryTagIcon }
+};
+
+const categoryColors: Record<CategoryColorKey, string> = {
+  'chart-category-1': 'Azul', 'chart-category-2': 'Verde-água', 'chart-category-3': 'Violeta',
+  'chart-category-4': 'Âmbar', 'chart-category-5': 'Cinza'
+};
+
+function CategoryIdentity({ category, name = category.name }: { category: Pick<Category, 'iconKey' | 'colorKey' | 'name'>; name?: string }) {
+  const CategoryIcon = categoryIcons[category.iconKey].icon;
+  return <span className="category-identity"><span className={`category-identity__icon category-identity__icon--${category.colorKey}`} aria-hidden="true"><Icon icon={CategoryIcon} size="sm" /></span><strong>{name}</strong></span>;
+}
+
 function CategoryEditor({ category, open, onClose, ledger }: {
   category: Category | null; open: boolean; onClose: () => void; ledger: LedgerState;
 }) {
   const [name, setName] = useState(category?.name ?? '');
   const [applicability, setApplicability] = useState<Category['applicability']>('expense');
+  const [iconKey, setIconKey] = useState<CategoryIconKey>(category?.iconKey ?? 'tag');
+  const [colorKey, setColorKey] = useState<CategoryColorKey>(category?.colorKey ?? 'chart-category-1');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { notify } = useToast();
@@ -28,18 +57,23 @@ function CategoryEditor({ category, open, onClose, ledger }: {
     if (nextName.length < 2) { setError('Informe um nome com pelo menos 2 caracteres.'); return; }
     setLoading(true); setError('');
     try {
-      if (category) await ledger.renameCategory(category.id, nextName);
-      else await ledger.createCategory({ name: nextName, applicability });
-      notify({ message: category ? 'Categoria renomeada.' : 'Categoria criada.', tone: 'success' });
+      if (category) await ledger.updateCategory(category.id, { name: nextName, iconKey, colorKey });
+      else await ledger.createCategory({ name: nextName, applicability, iconKey, colorKey });
+      notify({ message: category ? 'Categoria atualizada.' : 'Categoria criada.', tone: 'success' });
       close();
     } catch { setError('NÃ£o foi possÃ­vel salvar a categoria. Verifique se o nome jÃ¡ existe.'); }
     finally { setLoading(false); }
   }
 
-  return <Dialog open={open} onClose={close} title={category ? 'Renomear categoria' : 'Nova categoria'}
-    description={category ? 'O novo nome aparecerÃ¡ tambÃ©m no histÃ³rico.' : 'A aplicabilidade restringe onde a categoria pode ser selecionada.'}>
+  return <Dialog open={open} onClose={close} title={category ? 'Editar categoria' : 'Nova categoria'}
+    description={category ? 'Nome, ícone e cor também aparecem no histórico.' : 'A aplicabilidade restringe onde a categoria pode ser selecionada.'}>
     <form className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome" value={name} maxLength={60} required onChange={event => setName(event.target.value)} />
+      <div className="category-visual-fields">
+        <Select label="Ícone" value={iconKey} options={Object.entries(categoryIcons).map(([value, option]) => ({ value, label: option.label }))} onChange={event => setIconKey(event.target.value as CategoryIconKey)} />
+        <Select label="Cor" value={colorKey} options={Object.entries(categoryColors).map(([value, label]) => ({ value, label }))} onChange={event => setColorKey(event.target.value as CategoryColorKey)} />
+      </div>
+      <div className="category-preview" aria-label="Prévia da categoria"><span className="muted">Prévia</span><CategoryIdentity category={{ name: name.trim() || 'Nome da categoria', iconKey, colorKey }} /></div>
       {!category && <RadioGroup legend="Aplica-se a" name="category-applicability" value={applicability} required
         options={[{ value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'neutral', label: 'Movimento neutro' }]}
         onChange={value => setApplicability(value as Category['applicability'])} />}
@@ -105,7 +139,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
 
   const custom = categories.filter(category => category.type === 'custom' && !category.archivedAt);
   const columns: DataTableColumn<Category>[] = [
-    { key: 'name', header: 'Categoria', headerIcon: CategoriesIcon, cell: category => <strong>{category.name}</strong> },
+    { key: 'name', header: 'Categoria', headerIcon: CategoriesIcon, cell: category => <CategoryIdentity category={category} /> },
     { key: 'applicability', header: 'AplicaÃ§Ã£o', cell: category => <Badge>{applicabilityLabels[category.applicability]}</Badge> },
     { key: 'type', header: 'Origem', cell: category => <Badge tone={category.type === 'system' ? 'neutral' : 'income'}>{category.type === 'system' ? 'Estrutural' : 'Personalizada'}</Badge> },
     { key: 'status', header: 'Estado', cell: category => <Badge tone={category.archivedAt ? 'expense' : 'neutral'}>{category.archivedAt ? 'Arquivada' : 'Ativa'}</Badge> },
@@ -113,7 +147,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
     { key: 'actions', header: 'AÃ§Ãµes', cell: category => category.type === 'system' ? <span className="muted">Protegida</span> : category.archivedAt ? <span className="muted">Somente histÃ³rico</span> : <div className="category-actions">
       <Button size="sm" variant="ghost" aria-label={`Mover ${category.name} para cima`} disabled={custom.findIndex(item => item.id === category.id) <= 0} onClick={() => void ledger.moveCategory(category.id, -1)}><Icon icon={MoveUpIcon} size="sm"/></Button>
       <Button size="sm" variant="ghost" aria-label={`Mover ${category.name} para baixo`} disabled={custom.findIndex(item => item.id === category.id) === custom.length - 1} onClick={() => void ledger.moveCategory(category.id, 1)}><Icon icon={MoveDownIcon} size="sm"/></Button>
-      <Button size="sm" variant="ghost" aria-label={`Renomear ${category.name}`} onClick={() => { setSelected(category); setEditorOpen(true); }}><Icon icon={EditIcon} size="sm"/></Button>
+      <Button size="sm" variant="ghost" aria-label={`Editar ${category.name}`} onClick={() => { setSelected(category); setEditorOpen(true); }}><Icon icon={EditIcon} size="sm"/></Button>
       <Button size="sm" variant="ghost" aria-label={`Arquivar ${category.name}`} onClick={() => setRemoving(category)}><Icon icon={ArchiveIcon} size="sm"/></Button>
     </div> }
   ];

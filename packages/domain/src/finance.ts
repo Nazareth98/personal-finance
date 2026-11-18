@@ -21,11 +21,26 @@ export type FinancialAccount = {
   openingBalanceCents: bigint;
 };
 
+export const categoryIconKeys = [
+  'home', 'receipt', 'shopping-cart', 'utensils', 'car', 'bus', 'fuel',
+  'heart-pulse', 'sparkles', 'gamepad', 'repeat', 'graduation-cap', 'plane',
+  'landmark', 'gift', 'briefcase', 'wallet', 'arrow-left-right', 'piggy-bank', 'tag'
+] as const;
+
+export const categoryColorKeys = [
+  'chart-category-1', 'chart-category-2', 'chart-category-3', 'chart-category-4', 'chart-category-5'
+] as const;
+
+export type CategoryIconKey = typeof categoryIconKeys[number];
+export type CategoryColorKey = typeof categoryColorKeys[number];
+
 export type Category = {
   id: string;
   name: string;
   type: 'system' | 'custom';
   applicability: 'income' | 'expense' | 'neutral';
+  iconKey: CategoryIconKey;
+  colorKey: CategoryColorKey;
   sortOrder: number;
   archivedAt?: string;
   dependencyCount: number;

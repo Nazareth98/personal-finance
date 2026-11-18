@@ -166,6 +166,7 @@ Estado: concluída em 18/11/2026; migration aplicada e CRUD autenticado validado
 - arquivar categorias em uso, mantendo o histórico, e permitir exclusão definitiva somente de categoria personalizada nunca utilizada;
 - oferecer reatribuição para outra categoria antes do arquivamento quando houver dependências;
 - remover categorias arquivadas de novos formulários, preservando sua exibição nos registros históricos.
+- vincular cada categoria a um ícone do catálogo Lucide e a uma cor semântica dos tokens, editáveis nas categorias personalizadas.
 
 Aceite: o proprietário gerencia categorias sem criar referências órfãs; categorias arquivadas deixam de aparecer em novas seleções, mas lançamentos e relatórios históricos continuam explicáveis.
 

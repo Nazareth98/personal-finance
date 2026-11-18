@@ -27,6 +27,28 @@ export {
   PanelLeftClose as SidebarCollapseIcon,
   PanelLeftOpen as SidebarExpandIcon
 } from 'lucide-react';
+export {
+  House as CategoryHomeIcon,
+  ReceiptText as CategoryReceiptIcon,
+  ShoppingCart as CategoryShoppingCartIcon,
+  Utensils as CategoryUtensilsIcon,
+  Car as CategoryCarIcon,
+  Bus as CategoryBusIcon,
+  Fuel as CategoryFuelIcon,
+  HeartPulse as CategoryHealthIcon,
+  Sparkles as CategorySparklesIcon,
+  Gamepad2 as CategoryGameIcon,
+  Repeat2 as CategoryRepeatIcon,
+  GraduationCap as CategoryEducationIcon,
+  Plane as CategoryTravelIcon,
+  Landmark as CategoryLandmarkIcon,
+  Gift as CategoryGiftIcon,
+  BriefcaseBusiness as CategoryBriefcaseIcon,
+  WalletCards as CategoryWalletIcon,
+  ArrowLeftRight as CategoryTransferIcon,
+  PiggyBank as CategoryPiggyBankIcon,
+  Tag as CategoryTagIcon
+} from 'lucide-react';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';
 export { Badge } from './components/Badge';

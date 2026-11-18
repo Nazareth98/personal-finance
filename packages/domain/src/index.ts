@@ -6,6 +6,8 @@ export {
   ledgerTotals,
   requireNonZeroCents,
   savingsBoxProgress,
+  categoryColorKeys,
+  categoryIconKeys,
   transactionNatures,
   validateTransaction
 } from './finance.ts';
@@ -23,6 +25,8 @@ export { buildSixMonthForecast, recognizeItauSalary } from './forecast.ts';
 export type { ForecastMonth, SixMonthForecastInput } from './forecast.ts';
 export type {
   Category,
+  CategoryColorKey,
+  CategoryIconKey,
   CategoryBudget,
   CategoryBudgetProgress,
   ClassificationStatus,
