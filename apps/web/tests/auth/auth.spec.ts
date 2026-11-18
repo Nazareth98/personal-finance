@@ -370,13 +370,18 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   await expect(summary.getByText('+ R$ 31.200,00')).toBeVisible();
 });
 
-test('cadastra caixinha, registra aporte neutro e associa lançamento importado', async ({ page }) => {
+test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão', async ({ page }) => {
   const writes: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, writes);
   await login(page);
   await page.getByRole('link', { name: /Caixinhas/ }).click();
 
-  await expect(page.getByText('R$ 1.000,00 de R$ 10.000,00')).toBeVisible();
+  // Sem aportes recentes e com data-alvo: abaixo do ritmo.
+  const behind = page.getByRole('region', { name: /Abaixo do ritmo/ });
+  await expect(behind.getByRole('heading', { name: 'Reserva de emergência' })).toBeVisible();
+  await expect(behind.getByText('R$ 1.000,00 de R$ 10.000,00')).toBeVisible();
+  await expect(page.getByLabel('Resumo das caixinhas').getByText('R$ 9.000,00')).toBeVisible();
+
   await page.getByRole('button', { name: 'Nova caixinha' }).click();
   const boxDialog = page.getByRole('dialog', { name: 'Nova caixinha' });
   await boxDialog.getByLabel('Nome da caixinha').fill('Viagem');
@@ -385,27 +390,48 @@ test('cadastra caixinha, registra aporte neutro e associa lançamento importado'
   await boxDialog.getByRole('button', { name: 'Cadastrar caixinha' }).click();
   await expect(page.getByText('Caixinha cadastrada.')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Registrar movimento' }).click();
-  const movementDialog = page.getByRole('dialog', { name: 'Registrar movimento' });
+  await behind.getByRole('button', { name: 'Aportar' }).click();
+  const movementDialog = page.getByRole('dialog', { name: 'Registrar aporte' });
+  await expect(movementDialog.getByLabel('Tipo de movimento')).toHaveValue('contribution');
   await movementDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   await movementDialog.getByLabel('Descrição').fill('Aporte mensal');
   await movementDialog.getByLabel('Valor (R$)').fill('250,00');
   await movementDialog.getByRole('button', { name: 'Salvar movimento' }).click();
   await expect(page.getByText('Movimento da caixinha registrado.')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Associar importado' }).click();
+  await behind.getByRole('button', { name: 'Movimentos · 0' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Movimentos de Reserva de emergência' });
+  await expect(drawer.getByText('Nenhum aporte ou resgate ainda.', { exact: false })).toBeVisible();
+  await drawer.getByRole('button', { name: 'Associar lançamento importado' }).click();
   const linkDialog = page.getByRole('dialog', { name: 'Associar lançamento importado' });
   await linkDialog.getByLabel('Lançamento importado').selectOption('88888888-2222-4888-8888-888888888888');
   await linkDialog.getByRole('button', { name: 'Salvar movimento' }).click();
   await expect(page.getByText('Lançamento associado à caixinha.')).toBeVisible();
 
+  await page.getByRole('button', { name: 'Editar caixinha Reserva de emergência' }).click();
+  const edit = page.getByRole('dialog', { name: 'Editar Reserva de emergência' });
+  await expect(edit.getByLabel('Saldo inicial (R$)')).toHaveValue('1.000,00');
+  await expect(edit.getByLabel('Meta (R$)')).toHaveValue('10.000,00');
+  await edit.getByLabel('Meta (R$)').fill('12.000,00');
+  await edit.getByRole('button', { name: 'Salvar caixinha' }).click();
+  await expect(page.getByText('Caixinha atualizada.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Editar caixinha Reserva de emergência' }).click();
+  await page.getByRole('dialog', { name: 'Editar Reserva de emergência' }).getByRole('button', { name: 'Excluir caixinha' }).click();
+  await page.getByRole('dialog', { name: 'Excluir Reserva de emergência?' }).getByRole('button', { name: 'Excluir caixinha' }).click();
+  await expect(page.getByText('Caixinha excluída.')).toBeVisible();
+
   expect(writes.map(write => write.path)).toEqual([
     '/rest/v1/rpc/create_savings_box',
     '/rest/v1/rpc/create_savings_movement',
-    '/rest/v1/rpc/link_savings_movement'
+    '/rest/v1/rpc/link_savings_movement',
+    '/rest/v1/rpc/update_savings_box',
+    '/rest/v1/rpc/delete_savings_box'
   ]);
   expect(writes[1].body).toContain('25000');
   expect(writes[2].body).toContain('88888888-2222-4888-8888-888888888888');
+  expect(writes[3].body).toContain('1200000');
+  expect(writes[4].body).toContain('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
 });
 
 test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', async ({ page }) => {

@@ -271,6 +271,23 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     if (error) throw error;
   }
 
+  async updateSavingsBox(savingsBoxId: string, draft: SavingsBoxDraft): Promise<void> {
+    const { error } = await this.client.rpc('update_savings_box', {
+      p_savings_box_id: savingsBoxId,
+      p_name: draft.name,
+      p_opening_balance_cents: draft.openingBalanceCents.toString(),
+      p_target_cents: draft.targetCents.toString(),
+      p_target_date: draft.targetDate || null
+    });
+    if (error) throw error;
+  }
+
+  async deleteSavingsBox(savingsBoxId: string): Promise<'deleted' | 'archived'> {
+    const { data, error } = await this.client.rpc('delete_savings_box', { p_savings_box_id: savingsBoxId });
+    if (error) throw error;
+    return data === 'archived' ? 'archived' : 'deleted';
+  }
+
   async createSavingsMovement(draft: SavingsMovementDraft): Promise<void> {
     const { error } = await this.client.rpc('create_savings_movement', {
       p_savings_box_id: draft.savingsBoxId,

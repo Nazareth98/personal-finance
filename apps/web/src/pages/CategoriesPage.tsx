@@ -1,13 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import type { Category, CategoryColorKey, CategoryIconKey } from '@personal-finance/domain';
-import {
-  ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon,
-  EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, PlusIcon, RadioGroup, Select, useToast, VisualSelect,
-  type DataTableColumn
-} from '@personal-finance/ui';
+import { ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon, EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, RadioGroup, Select, useToast, VisualSelect, type DataTableColumn } from '@personal-finance/ui';
 import { CategoryIdentity, CategoryIdentityIcon, categoryColors, categoryIcons } from '../components/CategoryIdentity';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
+import { PageAction } from '../components/PageAction';
 
 const applicabilityLabels: Record<Category['applicability'], string> = {
   income: 'Receita', expense: 'Despesa', neutral: 'Movimento neutro'
@@ -129,7 +126,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
   ];
 
   return <div className="template-page">
-    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lançamentos, metas, regras ou histórico.</p></div><div className="template-heading__actions"><Button variant="secondary" onClick={() => { setSelected(null); setEditorOpen(true); }}><Icon icon={PlusIcon} size="sm"/>Nova categoria</Button>{headerAction}</div></div>
+    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lançamentos, metas, regras ou histórico.</p></div><div className="template-heading__actions"><PageAction label="Nova categoria" onClick={() => { setSelected(null); setEditorOpen(true); }} />{headerAction}</div></div>
     <Card className="template-table-card"><div className="category-toolbar"><Input label="Buscar categorias" value={query} placeholder="Nome da categoria" onChange={event => setQuery(event.target.value)} /></div>
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={6} columns={6} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {rows.length ? <DataTable ariaLabel="Categorias financeiras" columns={columns} rows={rows} getRowKey={category => category.id} /> : <EmptyState title="Nenhuma categoria encontrada" description="Altere a busca e tente novamente." />}

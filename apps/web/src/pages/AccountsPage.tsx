@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { accountBalance, type FinancialAccount } from '@personal-finance/domain';
-import { AccountsIcon, Badge, Button, Card, DataState, DataTable, EmptyState, Icon, MetricCard, PlusIcon, type DataTableColumn } from '@personal-finance/ui';
+import { AccountsIcon, Badge, Button, Card, DataState, DataTable, EmptyState, MetricCard, type DataTableColumn } from '@personal-finance/ui';
 import { accountsBalance, demoAccounts, type DemoAccount } from '../lib/demo-finance';
 import { formatCentsBRL } from '../lib/demo-transactions';
 import type { LedgerState } from '../ledger/useLedger';
 import { AccountForm } from '../components/AccountForm';
 import type { PageProps } from './PageProps';
+import { PageAction } from '../components/PageAction';
 const types: Record<DemoAccount['type'], string> = { checking:'Conta corrente', savings:'Reserva', investment:'Investimento' };
 const realTypes: Record<FinancialAccount['type'], string> = { ...types, credit_card: 'Cartão de crédito' };
 const columns:DataTableColumn<DemoAccount>[] = [
@@ -24,7 +25,7 @@ export function AccountsPage({ ledger, headerAction }: PageProps) {
     ];
     const total = rows.filter(account => account.type !== 'credit_card').reduce((sum, account) => sum + accountBalance(account, ledger.data?.transactions ?? []), 0n);
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1><p className="muted">Saldos reconstruídos pelo saldo inicial e pelos lançamentos.</p></div><div className="template-heading__actions"><Button variant="secondary" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova conta</Button>{headerAction}</div></div>
+      <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1><p className="muted">Saldos reconstruídos pelo saldo inicial e pelos lançamentos.</p></div><div className="template-heading__actions"><PageAction label="Nova conta" onClick={() => setFormOpen(true)} />{headerAction}</div></div>
       <div className="template-metrics"><MetricCard label="Saldo total em contas" value={formatCentsBRL(total)} supportingText="Cartões não compõem o patrimônio disponível" /></div>
       <Card className="template-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={4} columns={3} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {rows.length ? <DataTable ariaLabel="Contas financeiras" columns={realColumns} rows={rows} getRowKey={account => account.id} /> : <EmptyState title="Nenhuma conta cadastrada" description="Cadastre a primeira conta para iniciar o livro financeiro." action={<Button onClick={() => setFormOpen(true)}>Cadastrar conta</Button>} />}

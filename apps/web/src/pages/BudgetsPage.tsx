@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { addCompetenceMonths, type CategoryBudget } from '@personal-finance/domain';
-import {
-  Badge, Button, Card, EditIcon, EmptyState, Icon, MetricCard, NextIcon, PlusIcon, PreviousIcon,
-  StatusAlertIcon, StatusOkIcon, StatusPendingIcon, type LucideIcon
-} from '@personal-finance/ui';
+import { Badge, Button, Card, EditIcon, EmptyState, Icon, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, type LucideIcon } from '@personal-finance/ui';
 import { BudgetForm, formatBasisPoints } from '../components/BudgetForm';
 import { CategoryIdentityIcon } from '../components/CategoryIdentity';
 import type { LedgerState } from '../ledger/useLedger';
@@ -11,6 +8,7 @@ import { buildBudgetPanels, type BudgetCardView, type BudgetPace, type BudgetSta
 import { budgetPercent,budgetRemaining,demoBudgets } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
+import { PageAction } from '../components/PageAction';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const localToday = () => {
@@ -56,7 +54,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
   const { progress, budget, category, name, pace } = item;
   const exceeded = progress.status === 'exceeded';
   const visualPercent = Number(progress.usageBasisPoints > 10000n ? 10000n : progress.usageBasisPoints) / 100;
-  return <Card className={`budget-card budget-goal budget-goal--${progress.status}`}>
+  return <Card className={`budget-card goal-card ${progress.status === 'exceeded' ? 'goal-card--alert' : ''}`}>
     <div className="budget-card__top">
       {category ? <CategoryIdentityIcon iconKey={category.iconKey} colorKey={category.colorKey} /> : null}
       <div className="budget-card__title"><h3>{name}</h3>
@@ -68,7 +66,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
     <progress className={`budget-progress budget-progress--${progress.status}`} max={100} value={visualPercent}
       aria-label={`Uso da meta de ${name}: ${formatBasisPoints(progress.usageBasisPoints)}`} />
     <div className="budget-card__usage"><span className="muted">{formatCentsBRL(progress.usedCents)} de {formatCentsBRL(progress.limitCents)}</span>
-      <strong className={`budget-status--${progress.status}`}>{formatBasisPoints(progress.usageBasisPoints)}</strong></div>
+      <strong className={`status-tone--${progress.status}`}>{formatBasisPoints(progress.usageBasisPoints)}</strong></div>
     {pace ? <p className="budget-card__pace muted">{paceText(pace)}</p> : null}
   </Card>;
 }
@@ -90,9 +88,9 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
       <p className="muted">Tetos por categoria calculados sobre toda receita confirmada do período.</p></div>
-      <div className="template-heading__actions"><Button onClick={() => setForm({})}><Icon icon={PlusIcon} size="sm" />Definir meta</Button>{headerAction}</div></div>
+      <div className="template-heading__actions"><PageAction label="Definir meta" onClick={() => setForm({})} />{headerAction}</div></div>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
-    <section className="budget-summary" aria-label="Resumo das metas por categoria">
+    <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Base de todos os tetos</span></div>
       <div><span className="muted">Comprometido em tetos</span><strong>{formatBasisPoints(panels.committedBasisPoints)}</strong>
         <span className="muted">{formatCentsBRL(panels.totalLimitCents)} · {free > 0 ? `${formatBasisPoints(free)} livre` : 'sem folga'}</span></div>
@@ -104,10 +102,10 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
       ? <EmptyState title="Nenhuma meta definida" description="Defina um percentual para acompanhar o teto de uma categoria." action={<Button onClick={() => setForm({})}>Definir primeira meta</Button>} />
       : panels.groups.map(group => {
         const copy = statusCopy[group.status];
-        return <section key={group.status} className="budget-group" aria-labelledby={`budget-group-${group.status}`}>
-          <h2 id={`budget-group-${group.status}`} className={`budget-group__title budget-status--${group.status}`}>
+        return <section key={group.status} className="status-group" aria-labelledby={`status-group-${group.status}`}>
+          <h2 id={`status-group-${group.status}`} className={`status-group__title status-tone--${group.status}`}>
             <Icon icon={copy.icon} size="sm" />{copy.title}<span className="muted"> · {group.items.length}</span></h2>
-          <div className="budget-grid">{group.items.map(item =>
+          <div className="goal-grid">{group.items.map(item =>
             <BudgetCard key={item.budget.id} item={item} onEdit={() => setForm({ budget: item.budget })} />)}</div>
         </section>;
       })}

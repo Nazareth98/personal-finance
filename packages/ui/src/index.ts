@@ -31,7 +31,10 @@ export {
   PanelLeftOpen as SidebarExpandIcon,
   TriangleAlert as StatusAlertIcon,
   Clock3 as StatusPendingIcon,
-  CircleCheck as StatusOkIcon
+  CircleCheck as StatusOkIcon,
+  TrendingUp as StatusTrendIcon,
+  CalendarDays as CalendarIcon,
+  ExternalLink as OpenIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,

@@ -109,6 +109,9 @@ export interface LedgerRepository {
   saveCategoryBudget(draft: CategoryBudgetDraft): Promise<void>;
   deleteCategoryBudget(categoryId: string): Promise<void>;
   createSavingsBox(draft: SavingsBoxDraft): Promise<void>;
+  updateSavingsBox(savingsBoxId: string, draft: SavingsBoxDraft): Promise<void>;
+  /** Exclui a caixinha sem histórico; com movimentos ou vínculos, arquiva. */
+  deleteSavingsBox(savingsBoxId: string): Promise<'deleted' | 'archived'>;
   createSavingsMovement(draft: SavingsMovementDraft): Promise<void>;
   linkSavingsMovement(draft: SavingsMovementLinkDraft): Promise<void>;
   confirmClassification(draft: ClassificationConfirmation): Promise<void>;

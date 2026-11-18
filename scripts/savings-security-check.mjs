@@ -17,4 +17,16 @@ assert.match(sql, /'neutral', 'manual'/i);
 assert.match(sql, /grant execute on function public\.create_savings_movement/i);
 assert.match(sql, /grant execute on function public\.link_savings_movement/i);
 
-console.log('✓ Caixinhas, movimentos patrimoniais, grants e RLS validados estaticamente.');
+const management = await readFile('supabase/migrations/20261118200000_savings_box_management.sql', 'utf8');
+assert.match(management, /create unique index savings_boxes_owner_active_name on public\.savings_boxes \(owner_id, name\) where archived_at is null/i);
+assert.match(management, /owner_id = current_owner and archived_at is null for update/i);
+assert.match(management, /balance would be negative/i);
+assert.match(management, /set archived_at = now\(\)/i);
+assert.match(management, /exists \(select 1 from public\.savings_movements where savings_box_id = p_savings_box_id\)/i);
+assert.equal((management.match(/security definer set search_path = public, pg_temp/gi) ?? []).length, 2);
+assert.match(management, /grant execute on function public\.update_savings_box\(uuid, text, bigint, bigint, date\) to authenticated/i);
+assert.match(management, /grant execute on function public\.delete_savings_box\(uuid\) to authenticated/i);
+assert.doesNotMatch(management, /grant (insert|update|delete).*savings_/i);
+assert.doesNotMatch(management, /to anon/i);
+
+console.log('✓ Caixinhas, movimentos patrimoniais, edição/exclusão, grants e RLS validados estaticamente.');

@@ -16,6 +16,8 @@ export type LedgerState = {
   saveBudget: (draft: CategoryBudgetDraft) => Promise<void>;
   deleteBudget: (categoryId: string) => Promise<void>;
   createSavingsBox: (draft: SavingsBoxDraft) => Promise<void>;
+  updateSavingsBox: (savingsBoxId: string, draft: SavingsBoxDraft) => Promise<void>;
+  deleteSavingsBox: (savingsBoxId: string) => Promise<'deleted' | 'archived'>;
   createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
   linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
   confirmClassification: (draft: ClassificationConfirmation) => Promise<void>;
@@ -80,6 +82,19 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function updateSavingsBox(savingsBoxId: string, draft: SavingsBoxDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.updateSavingsBox(savingsBoxId, draft);
+    await reload();
+  }
+
+  async function deleteSavingsBox(savingsBoxId: string) {
+    if (!repository) throw new Error('ledger repository missing');
+    const result = await repository.deleteSavingsBox(savingsBoxId);
+    await reload();
+    return result;
+  }
+
   async function createSavingsMovement(draft: SavingsMovementDraft) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.createSavingsMovement(draft);
@@ -123,7 +138,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
-    createTransaction, saveBudget, deleteBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement,
+    createTransaction, saveBudget, deleteBudget, createSavingsBox, updateSavingsBox, deleteSavingsBox, createSavingsMovement, linkSavingsMovement,
     confirmClassification, confirmTransactionSemantics, configureCreditCard, linkCardPayment
   };
 }

@@ -11,13 +11,15 @@ function localToday() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
-export function SavingsMovementForm({ box, mode, onClose, ledger }: {
+export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 'contribution' }: {
   box: SavingsBox | null;
   mode: 'manual' | 'link';
   onClose: () => void;
   ledger: LedgerState;
+  /** Aportar/Resgatar abrem o formulário já no tipo certo; monte com `key` para reiniciar. */
+  initialType?: MovementType;
 }) {
-  const [type, setType] = useState<MovementType>('contribution');
+  const [type, setType] = useState<MovementType>(initialType);
   const [accountId, setAccountId] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -70,7 +72,7 @@ export function SavingsMovementForm({ box, mode, onClose, ledger }: {
     value: transaction.id,
     label: `${formatLocalDate(transaction.eventDate)} · ${transaction.description} · ${formatCentsBRL(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents)}`
   }));
-  const title = mode === 'manual' ? 'Registrar movimento' : 'Associar lançamento importado';
+  const title = mode === 'link' ? 'Associar lançamento importado' : type === 'withdrawal' ? 'Registrar resgate' : 'Registrar aporte';
 
   return <Dialog open={Boolean(box)} onClose={onClose} title={title} description={box ? `Caixinha: ${box.name}` : undefined}>
     <form className="transaction-form" noValidate onSubmit={submit}>
