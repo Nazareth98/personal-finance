@@ -6,6 +6,7 @@
 - **Primitives**: Button, Card, Badge.
 - **Icons**: `Icon` + catálogo semântico curado de `lucide-react`.
 - **Forms**: Input, Select, VisualSelect, Checkbox, RadioGroup, Field, FormMessage, Dialog, ToastProvider/useToast.
+- **Navigation**: Tabs (abas WAI-ARIA com foco itinerante por setas, Home e End; o conteúdo da aba vem do chamador).
 - **Data display (próxima etapa)**: DataTable, EmptyState, Skeleton, MetricCard, Progress, ChartLegend.
 - **Patterns**: filtros, validação e confirmação de ações, formulários de lançamento, revisão de importações.
 - **Templates financeiros**: visão geral, transações, contas, cartões/faturas, orçamentos e relatórios.

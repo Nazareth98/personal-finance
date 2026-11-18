@@ -107,3 +107,5 @@ export {ErrorState} from './components/ErrorState';
 export type {ErrorStateProps} from './components/ErrorState';
 export {DataState} from './components/DataState';
 export type {DataStateProps,DataStatus} from './components/DataState';
+export { Tabs } from './components/Tabs';
+export type { TabItem, TabsProps } from './components/Tabs';

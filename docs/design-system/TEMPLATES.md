@@ -25,7 +25,7 @@ Os templates ficam em `apps/web/src/pages`: componentes de domínio compostos pe
 - O formulário de nova movimentação é demonstrativo no modo `test` e persistente no modo autenticado.
 - Storybook contém os nove templates para revisão visual.
 - Sidebar com indicador ativo lateral e ícone destacado; desktop permite recolher o menu para uma faixa de ícones, mantendo nomes acessíveis e navegação por teclado. Cabeçalho e rodapé permanecem fixos na altura da viewport; quando necessário, somente a lista de abas recebe rolagem vertical. A preferência de recolhimento vale durante a sessão da tela.
-- Até 1000 px, marca e tema formam um cabeçalho compacto e a navegação principal vira uma barra inferior fixa com Visão geral, Transações, Revisão e Cartões; “Mais” abre uma folha com as demais telas, o tema e a saída. A Revisão mostra a contagem de pendências também na sidebar. Microinterações respeitam `prefers-reduced-motion`.
+- Até 1000 px, marca e tema formam um cabeçalho compacto e a navegação principal vira uma barra inferior fixa com Visão geral, Transações, Revisão e Cartões; “Mais” abre uma folha com as demais telas e a saída; o tema fica só no cabeçalho. A Revisão mostra a contagem de pendências também na sidebar. Microinterações respeitam `prefers-reduced-motion`.
 
 ## Regras financeiras críticas
 

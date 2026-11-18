@@ -159,12 +159,9 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
           <Icon icon={item.icon}/><span>{item.title}</span>
         </a>)}
       </div>
-      <div className="more-sheet__actions">
-        <Button variant="secondary" onClick={() => setPreference(theme === 'light' ? 'dark' : 'light')}>
-          <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm"/>{themeLabel}
-        </Button>
-        {onSignOut && <Button variant="danger" loading={signingOut} onClick={signOut}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>}
-      </div>
+      {onSignOut && <div className="more-sheet__actions">
+        <Button variant="danger" loading={signingOut} onClick={signOut}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>
+      </div>}
     </Dialog>
     {ledgerRepository
       ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />

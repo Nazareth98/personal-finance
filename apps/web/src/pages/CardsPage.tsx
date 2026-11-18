@@ -1,6 +1,6 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useState } from 'react';
 import type { CardStatement, FinancialAccount } from '@personal-finance/domain';
-import { Badge, Button, Card, CardsIcon, DataState, DataTable, EmptyState, MetricCard, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, CardsIcon, DataState, DataTable, EmptyState, MetricCard, Tabs, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import { buildCardPanels, defaultTab, limitShare, type CardPanel, type StatementTab } from '../lib/card-panels';
@@ -25,18 +25,9 @@ function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel
   const active = panel.tabs.find(tab => tab.competence === selected) ?? defaultTab(panel.tabs);
   const { account, card } = panel;
   const titleId = `card-${account.id}`;
-  const tabId = (competence: string) => `${titleId}-tab-${competence}`;
   const limit = card?.creditLimitCents;
   const share = limit === undefined ? undefined : limitShare(panel.committedCents, limit);
   const openCents = panel.tabs.reduce((sum, tab) => sum + tab.openCents, 0n);
-  const select = (competence: string, focus = false) => { setSelected(competence); if (focus) document.getElementById(tabId(competence))?.focus(); };
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const last = panel.tabs.length - 1;
-    const next = { ArrowRight: index === last ? 0 : index + 1, ArrowLeft: index === 0 ? last : index - 1, Home: 0, End: last }[event.key];
-    if (next === undefined) return;
-    event.preventDefault();
-    select(panel.tabs[next]!.competence, true);
-  };
   return <Card className="card-panel" aria-labelledby={titleId}>
     <div className="card-panel__top">
       <div><h2 id={titleId}>{account.name}</h2>{card ? <p className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</p> : <Badge>Configuração pendente</Badge>}</div>
@@ -48,14 +39,9 @@ function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel
       <p className="muted card-panel__note">Faturas em aberto {formatCentsBRL(openCents)} + parcelas futuras {formatCentsBRL(panel.committedCents - openCents)}{share && limit !== undefined ? ` · disponível ${formatCentsBRL(limit - panel.committedCents)}` : ''}</p>
     </div>}
     {card && !active && <EmptyState title="Nenhuma fatura ainda" description="Faturas surgem quando compras deste cartão são sincronizadas." />}
-    {active && <>
-      <div role="tablist" aria-label={`Faturas do ${account.name}`} className="card-tabs">
-        {panel.tabs.map((tab, index) => <button key={tab.competence} id={tabId(tab.competence)} type="button" role="tab" aria-selected={tab === active} aria-controls={`${titleId}-panel`}
-          tabIndex={tab === active ? 0 : -1} className={`card-tab card-tab--${tab.status}`} onClick={() => select(tab.competence)} onKeyDown={event => onKeyDown(event, index)}>
-          <strong>{formatCompetence(tab.competence)}</strong><span className="card-tab__status">{tabStatusLabels[tab.status]} · {formatCentsBRL(tabValue(tab))}</span>
-        </button>)}
-      </div>
-      <div role="tabpanel" id={`${titleId}-panel`} aria-labelledby={tabId(active.competence)} className="card-statement">
+    {active && <Tabs label={`Faturas do ${account.name}`} className="card-tabs" panelClassName="card-statement" selectedId={active.competence} onSelect={setSelected}
+      items={panel.tabs.map(tab => ({ id: tab.competence, className: `card-tab--${tab.status}`,
+        label: <><strong>{formatCompetence(tab.competence)}</strong><span>{tabStatusLabels[tab.status]} · <span className="card-tab__value">{formatCentsBRL(tabValue(tab))}</span></span></> }))}>
         <div className="card-statement__lines">
           <p className="card-statement__head"><span>Lançamentos da fatura</span><span>Valor</span></p>
           <ul>{active.lines.map(line => <li key={line.id}>
@@ -77,8 +63,7 @@ function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel
           <p className="muted">{active.statement ? `Vence em ${formatLocalDate(active.statement.dueDate)} · fecha em ${formatLocalDate(active.statement.closingDate)}` : 'Previsão; entra no realizado quando a fatura fechar.'}</p>
           {active.statement && active.openCents > 0n && <Button onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>}
         </div>
-      </div>
-    </>}
+    </Tabs>}
   </Card>;
 }
 

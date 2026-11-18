@@ -216,3 +216,13 @@
 .ui-error-state__icon{color:var(--color-status-danger);font-size:var(--font-size-xl)}
 .ui-error-state p{margin:0;max-width:46ch;color:var(--color-text-secondary);font-size:var(--font-size-sm)}
 .ui-error-state .ui-button{margin-top:var(--spacing-2)}
+
+/* Tabs: WAI-ARIA tablist with roving focus. */
+.ui-tabs{display:flex;gap:var(--spacing-2);flex-wrap:wrap}
+.ui-tab{display:grid;justify-items:start;gap:2px;min-width:150px;padding:var(--spacing-2) var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-bg-surface);color:var(--color-text-primary);font:500 var(--font-size-xs)/1.4 var(--font-family-sans);cursor:pointer;text-align:left}
+.ui-tab strong{font-size:var(--font-size-sm)}
+.ui-tab>span{color:var(--color-text-secondary)}
+.ui-tab[aria-selected="true"]{border:2px solid var(--color-border-focus);background:var(--color-bg-subtle)}
+.ui-tab:hover{background:var(--color-bg-subtle)}
+.ui-tab:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+@media (max-width: 680px) { .ui-tabs { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); } .ui-tab { min-width:0;padding:var(--spacing-2); } }
