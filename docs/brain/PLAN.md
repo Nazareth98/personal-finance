@@ -172,7 +172,7 @@ Aceite: o proprietário gerencia categorias sem criar referências órfãs; cate
 
 ### 11.2 — correção e movimentação
 
-Estado: implementada e validada localmente em 18/11/2026; migration `review_versions_and_manual_counterpart` aguarda ensaio e aplicação no Supabase hospedado antes do push do frontend.
+Estado: concluída em 18/11/2026; migration `review_versions_and_manual_counterpart` ensaiada com rollback e aplicada no Supabase hospedado.
 
 - permitir “Revisar novamente” no histórico, criando nova versão do overlay sem alterar o lançamento importado;
 - permitir corrigir categoria e natureza, exigindo contraparte, fatura ou caixinha quando aplicável;

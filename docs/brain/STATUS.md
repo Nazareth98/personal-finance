@@ -22,12 +22,12 @@ Atualizado em: 18/11/2026.
 
 ## Marco atual
 
-**Etapa 11.2 — correção e movimentação.** Implementada localmente: histórico de versões substituídas (D-026), “Revisar novamente” e registro do lado manual de transferência própria (D-027).
+**Etapa 11.3 — consistência visual.** A 11.2 foi publicada: histórico de versões substituídas (D-026), “Revisar novamente” e registro do lado manual de transferência própria (D-027).
 
 Próximas entregas, nesta ordem:
 
-1. ensaiar com rollback e aplicar a migration `20261118150000_review_versions_and_manual_counterpart` no Supabase hospedado; só então fazer push do frontend, que depende da nova tabela e do novo parâmetro da RPC;
-2. seguir para consistência visual (11.3), período/ordenação (11.4) e gráficos (11.5).
+1. consistência visual (11.3), período/ordenação (11.4) e gráficos (11.5) conforme [`PLAN.md`](PLAN.md);
+2. preparar o redesign com Claude Design: tokens de elevação e z-index e `DESIGN.md` sincronizado com `themes.json`.
 
 ## Última validação
 
@@ -66,6 +66,7 @@ Próximas entregas, nesta ordem:
 - Ciclo de transações em 18/11/2026: `transactions/updated` passou a reler os IDs indicados pelo MeuPluggy e `transactions/deleted` ganhou exclusão lógica reversível no staging e no livro. A interface ignora lançamentos removidos e seus vínculos, entradas e grupos de parcelas, evitando totais fantasmas e faturas sem lançamento. Duas migrations foram aplicadas; o primeiro smoke encontrou e abortou uma precedência incorreta na chave externa, a correção incremental foi publicada e o smoke de exclusão/reaparecimento passou com rollback. `pluggy-sync` v12 e `pluggy-webhook` v7 estão ativas com ACL interna restrita ao `service_role`; 12 contratos MeuPluggy, 30 testes web, typecheck e o fluxo autenticado de cartões passaram com Node 24.14.1. A chamada remota sem assinatura confirmou o bloqueio operacional `503 webhook_not_configured`.
 - Etapa 11.1 em 18/11/2026: migration `category_management` aplicada no Supabase hospedado após ensaio com rollback. O smoke CRUD transacional passou e foi revertido; permaneceram 23 categorias estruturais, nenhuma personalizada ou aplicabilidade ausente, cinco novas colunas e seis RPCs autenticadas. `pnpm check`, fluxo CRUD e auditoria WCAG A/AA da nova tela passaram com Node 22.12.
 - Identidade visual de categorias em 18/11/2026: migration `category_visual_identity` aplicada no Supabase hospedado; as 23 categorias estruturais receberam ícone e cor por chave permitida, e as RPCs de criação/edição validam ambos os campos. O smoke remoto de criar, editar e excluir foi revertido sem linhas temporárias; `pnpm check`, fluxo autenticado e auditoria WCAG A/AA passaram com Node 22.12 e Chromium.
+- Etapa 11.2 em 18/11/2026: `pnpm check` e 18 fluxos autenticados passaram com Node 22.13. Ensaio remoto com rollback forçado aprovou 7 cenários (lado manual criado, nova revisão remove o lado manual e versiona, categoria confirmada versionada com alias preservado, cartão, conta conectada e vínculo duplo recusados, grants/RLS). Migration aplicada pelo SQL Editor (o conector recusa escrita) e conferida pelo conector: tabela com RLS, RPC de 6 argumentos, assinatura antiga removida e 2 triggers.
 
 ## Bloqueios
 
