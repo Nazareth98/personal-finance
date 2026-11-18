@@ -6,9 +6,10 @@ Base inicial de um gerenciador de finanças pessoais com **React + TypeScript**,
 
 ## Iniciar
 
-Requisitos: Node.js 22.12+ e pnpm 10+.
+Requisitos: Node.js 22.x (22.12+) e pnpm 10+. Outras versões majors não são suportadas, mesmo que funcionem.
 
 ```bash
+nvm use 22.13.0   # ou outra 22.x instalada
 corepack enable
 pnpm install
 pnpm dev

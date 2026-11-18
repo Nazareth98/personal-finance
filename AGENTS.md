@@ -19,11 +19,12 @@ Ao terminar uma mudança relevante:
 ## Forma de trabalho
 
 - Use a skill `ponytail` em toda tarefa de programação, no modo `full`.
-- Use a skill `playwright` ao interagir com navegador, verificar interfaces ou validar fluxos web.
+- Use a skill `playwright-cli` ao interagir com navegador, verificar interfaces ou validar fluxos web.
+- Use Node 22.x. A máquina alterna versões para projetos legados: confira `node -v` antes de `pnpm` e, se não for 22, rode `nvm use 22.13.0`.
 - Faça a menor mudança completa; não antecipe abstrações ou funcionalidades de marcos futuros.
 - Não restaure a implementação antiga do histórico Git. Reimplemente a partir dos contratos atuais.
 - Não altere Supabase, migrations, infraestrutura ou dados remotos sem tarefa explícita.
-- Antes de concluir código, execute `pnpm check`; se não for possível, informe exatamente o que não foi validado.
+- Antes de concluir código, execute `pnpm check` com Node 22.x; se não for possível, informe exatamente o que não foi validado.
 
 ## Contratos invariáveis
 
