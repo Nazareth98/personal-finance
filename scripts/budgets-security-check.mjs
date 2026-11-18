@@ -14,4 +14,12 @@ assert.match(sql, /security definer set search_path = public, pg_temp/i);
 assert.match(sql, /grant execute on function public\.set_category_budget\(text, integer\) to authenticated/i);
 assert.match(sql, /owner_id = \(select auth\.uid\(\)\)/i);
 
-console.log('✓ Metas por categoria, grants e RLS validados estaticamente.');
+const deletion = await readFile('supabase/migrations/20261118190000_delete_category_budget.sql', 'utf8');
+assert.match(deletion, /security definer set search_path = public, pg_temp/i);
+assert.match(deletion, /where owner_id = current_owner and category_id = p_category_id/i);
+assert.match(deletion, /revoke all on function public\.delete_category_budget\(text\) from public, anon/i);
+assert.match(deletion, /grant execute on function public\.delete_category_budget\(text\) to authenticated/i);
+assert.doesNotMatch(deletion, /grant (insert|update|delete).*category_budgets/i);
+assert.doesNotMatch(deletion, /to anon/i);
+
+console.log('✓ Metas por categoria, exclusão, grants e RLS validados estaticamente.');

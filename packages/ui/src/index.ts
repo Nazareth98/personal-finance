@@ -28,7 +28,10 @@ export {
   Moon as MoonIcon,
   Sun as SunIcon,
   PanelLeftClose as SidebarCollapseIcon,
-  PanelLeftOpen as SidebarExpandIcon
+  PanelLeftOpen as SidebarExpandIcon,
+  TriangleAlert as StatusAlertIcon,
+  Clock3 as StatusPendingIcon,
+  CircleCheck as StatusOkIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,

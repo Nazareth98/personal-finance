@@ -14,6 +14,7 @@ export type LedgerState = {
   deleteCategory: (categoryId: string) => Promise<void>;
   createTransaction: (draft: ManualTransactionDraft) => Promise<void>;
   saveBudget: (draft: CategoryBudgetDraft) => Promise<void>;
+  deleteBudget: (categoryId: string) => Promise<void>;
   createSavingsBox: (draft: SavingsBoxDraft) => Promise<void>;
   createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
   linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
@@ -67,6 +68,12 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function deleteBudget(categoryId: string) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.deleteCategoryBudget(categoryId);
+    await reload();
+  }
+
   async function createSavingsBox(draft: SavingsBoxDraft) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.createSavingsBox(draft);
@@ -116,7 +123,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
-    createTransaction, saveBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement,
+    createTransaction, saveBudget, deleteBudget, createSavingsBox, createSavingsMovement, linkSavingsMovement,
     confirmClassification, confirmTransactionSemantics, configureCreditCard, linkCardPayment
   };
 }

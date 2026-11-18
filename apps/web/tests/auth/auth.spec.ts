@@ -318,25 +318,56 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   expect(writes[1].body).toContain('-1250');
 });
 
-test('calcula e atualiza meta percentual por categoria', async ({ page }) => {
+test('agrupa metas por situação, cria, edita e exclui meta por categoria', async ({ page }) => {
   const writes: { path: string; body: string | null }[] = [];
   await mockSupabase(page, true, writes);
   await login(page);
   await page.getByRole('link', { name: /Orçamentos/ }).click();
 
-  await expect(page.getByLabel('Resumo das metas por categoria').getByText('R$ 5.000,00')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Supermercado' })).toBeVisible();
-  await expect(page.getByText('R$ 100,00 utilizados de R$ 500,00')).toBeVisible();
-  await page.getByRole('button', { name: 'Definir meta' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Definir meta' });
-  await dialog.getByLabel('Categoria').selectOption('groceries');
-  await dialog.getByLabel('Percentual da receita').fill('12,50');
-  await dialog.getByRole('button', { name: 'Salvar meta' }).click();
+  const summary = page.getByLabel('Resumo das metas por categoria');
+  await expect(summary.getByText('+ R$ 5.000,00')).toBeVisible();
+  await expect(summary.getByText('10%', { exact: true })).toBeVisible();
+  const within = page.getByRole('region', { name: /Dentro do teto/ });
+  await expect(within.getByRole('heading', { name: 'Supermercado' })).toBeVisible();
+  await expect(within.getByText('R$ 100,00 utilizados de R$ 500,00')).toBeVisible();
+  await expect(within.getByText('R$ 400,00')).toBeVisible();
+  await expect(page.getByRole('region', { name: /Acima do teto/ })).toHaveCount(0);
+  await expect(page.getByText('Nenhum gasto categorizado fora das metas neste período.')).toBeVisible();
 
+  await page.getByRole('button', { name: 'Definir meta', exact: true }).click();
+  const create = page.getByRole('dialog', { name: 'Definir meta' });
+  await expect(create.getByLabel('Categoria').locator('option[value="groceries"]')).toHaveCount(0);
+  await create.getByLabel('Categoria').selectOption('restaurants');
+  await create.getByLabel('Percentual da receita').fill('12,50');
+  await create.getByRole('button', { name: 'Salvar meta' }).click();
   await expect(page.getByText('Meta por categoria salva.')).toBeVisible();
-  expect(writes).toHaveLength(1);
-  expect(writes[0].path).toContain('set_category_budget');
-  expect(writes[0].body).toContain('1250');
+  expect(writes.at(-1)?.path).toContain('set_category_budget');
+  expect(writes.at(-1)?.body).toContain('restaurants');
+  expect(writes.at(-1)?.body).toContain('1250');
+
+  await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
+  const edit = page.getByRole('dialog', { name: 'Editar meta de Supermercado' });
+  await expect(edit.getByLabel('Categoria')).toBeDisabled();
+  await expect(edit.getByLabel('Percentual da receita')).toHaveValue('10');
+  await edit.getByLabel('Percentual da receita').fill('15');
+  await edit.getByRole('button', { name: 'Salvar meta' }).click();
+  await expect(page.getByText('Meta atualizada.')).toBeVisible();
+  expect(writes.at(-1)?.path).toContain('set_category_budget');
+  expect(writes.at(-1)?.body).toContain('groceries');
+  expect(writes.at(-1)?.body).toContain('1500');
+
+  await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
+  await page.getByRole('dialog', { name: 'Editar meta de Supermercado' }).getByRole('button', { name: 'Excluir meta' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Excluir meta de Supermercado?' });
+  await confirm.getByRole('button', { name: 'Excluir meta' }).click();
+  await expect(page.getByText('Meta excluída.')).toBeVisible();
+  expect(writes.at(-1)?.path).toContain('delete_category_budget');
+  expect(writes.at(-1)?.body).toContain('groceries');
+  expect(writes).toHaveLength(3);
+
+  await page.getByRole('button', { name: 'Anual' }).click();
+  await expect(page.getByRole('group', { name: 'Período das metas' })).toContainText('Ano 2026');
+  await expect(summary.getByText('+ R$ 31.200,00')).toBeVisible();
 });
 
 test('cadastra caixinha, registra aporte neutro e associa lançamento importado', async ({ page }) => {

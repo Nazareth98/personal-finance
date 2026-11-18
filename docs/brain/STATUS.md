@@ -26,9 +26,10 @@ Atualizado em: 18/11/2026.
 
 Próximas entregas, nesta ordem:
 
-1. próxima tela do ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md); sem candidata definida — revisar o inventário com o proprietário.
+1. aplicar no Supabase hospedado a migration `20261118190000_delete_category_budget` (sem ela, “Excluir meta” falha) e validar Orçamentos com `pnpm check`, fluxos autenticados e inventário;
+2. próxima tela do ciclo de [`REDESIGN.md`](../design-system/REDESIGN.md); restam Contas, Caixinhas, Categorias, Conexões e Relatórios.
 
-Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034) [Revisão](https://claude.ai/artifact/54jdzfr3GMPkSGTzBTkWnw) (D-035) e [Transações](https://claude.ai/artifact/NtjPcPGSx2c6ccrsTVgcxK) (D-036). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
+Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034) [Revisão](https://claude.ai/artifact/54jdzfr3GMPkSGTzBTkWnw) (D-035) [Transações](https://claude.ai/artifact/NtjPcPGSx2c6ccrsTVgcxK) (D-036) e [Orçamentos](https://claude.ai/artifact/VuDnEwqDrX9Y5J4ddzDp2N) (D-037). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
 
 ## Última validação
 
@@ -79,6 +80,8 @@ Canvas do Claude Design são privados da conta que os criou; ao trocar de conta,
 - Ajustes pós-cartões em 18/11/2026: abas extraídas para `Tabs` em `packages/ui` (story `Navigation/Tabs`); no mobile as abas ficam em uma linha sem quebrar o valor; o tema saiu da folha “Mais” e fica só no cabeçalho. `pnpm check`, 24 fluxos autenticados e os testes de tema passaram com Node 22.13; capturas revisadas.
 - Revisão em 18/11/2026: proposta do canvas implementada (D-035) com fila agrupada, filtro por motivo, “Confirmar” direto da sugestão e `TransactionFilterFields` recolhível (Transações mantém os filtros abertos). `reviewReason` e `suggestedCategoryId` ganharam teste. `pnpm check`, 47 testes unitários e 25 fluxos autenticados (novo: confirmar direto e filtrar por motivo; axe na fila mobile) passaram com Node 22.13; capturas Light/Dark revisadas.
 - Transações em 18/11/2026: proposta do canvas implementada (D-036). Primeira versão vazava a lista no mobile: `nowrap` nos detalhes removeu os pontos de quebra; os detalhes passaram a flex com quebra entre itens e o teste mobile ganhou verificação de vazamento (confirmado falhando sem a correção) e de totais em uma linha. `pnpm check` e 25 fluxos autenticados passaram com Node 22.13; capturas Light/Dark revisadas.
+
+- Orçamentos em 18/11/2026: opção B do canvas implementada (D-037) com `lib/budget-panels.ts` (grupos, ritmo diário e gastos sem meta em bigint, 3 testes) e edição/exclusão de meta; nova migration `delete_category_budget` (RPC security definer restrita ao proprietário, verificada por `budgets:check`), ainda **não aplicada** no remoto. Sessão sem instalação de pacotes: passaram somente os 47 testes unitários que não dependem de React, `budgets:check` e uma checagem de tipos isolada de `budget-panels`; `pnpm check`, typecheck completo, build, E2E (fluxo autenticado reescrito: agrupar, criar, editar, excluir e alternar para Anual) e capturas **não foram executados**.
 
 ## Bloqueios
 
