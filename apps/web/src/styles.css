@@ -354,8 +354,8 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .budget-status--exceeded{color:var(--color-status-danger)}
 .budget-status--approaching{color:var(--color-status-warning)}
 .budget-status--within{color:var(--color-text-secondary)}
-.budget-card--exceeded{border-color:var(--color-status-danger)}
-.budget-card .budget-card__top{flex-wrap:nowrap;align-items:center}
+.budget-goal--exceeded{border-color:var(--color-status-danger)}
+.budget-goal .budget-card__top{flex-wrap:nowrap;align-items:center}
 .budget-card__title{display:grid;flex:1;min-width:0}
 .budget-card__title h3{margin:0;font-size:var(--font-size-base);overflow-wrap:anywhere}
 .budget-card__title span{font-size:var(--font-size-xs)}
@@ -366,14 +366,14 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .budget-card__pace{margin:0;padding-top:var(--spacing-3);border-top:1px solid var(--color-border-default);font-size:var(--font-size-sm)}
 .budget-progress--approaching::-webkit-progress-value{background:var(--color-status-warning)}
 .budget-progress--approaching::-moz-progress-bar{background:var(--color-status-warning)}
-.budget-unbudgeted{display:grid;gap:var(--spacing-2)}
+.budget-unbudgeted{display:grid;gap:var(--spacing-2);min-width:0}
 .budget-unbudgeted__heading{display:flex;justify-content:space-between;align-items:baseline;gap:var(--spacing-2);flex-wrap:wrap}
 .budget-unbudgeted__heading h2{margin:0;font-size:var(--font-size-base)}
 .budget-unbudgeted>.muted{margin:0}
 .budget-unbudgeted ul{margin:0;padding:0;list-style:none}
-.budget-unbudgeted li{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-3);min-height:44px;padding:var(--spacing-2) 0;border-top:1px solid var(--color-border-default)}
-.budget-unbudgeted__name{display:flex;align-items:center;gap:var(--spacing-3);min-width:0;font-size:var(--font-size-sm);font-weight:500}
-.budget-unbudgeted__value{display:flex;align-items:center;gap:var(--spacing-3);font-size:var(--font-size-sm);font-variant-numeric:tabular-nums;white-space:nowrap}
+.budget-unbudgeted li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--spacing-2) var(--spacing-3);min-height:44px;padding:var(--spacing-2) 0;border-top:1px solid var(--color-border-default)}
+.budget-unbudgeted__name{display:flex;flex:1 1 140px;align-items:center;gap:var(--spacing-3);min-width:0;overflow-wrap:anywhere;font-size:var(--font-size-sm);font-weight:500}
+.budget-unbudgeted__value{display:flex;margin-left:auto;align-items:center;gap:var(--spacing-3);font-size:var(--font-size-sm);font-variant-numeric:tabular-nums;white-space:nowrap}
 .budget-form__actions .budget-form__delete{margin-right:auto;color:var(--color-status-danger)}
 @media(max-width:1100px){.budget-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){
@@ -384,4 +384,19 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .budget-summary>div:nth-child(n+3){border-top:1px solid var(--color-border-default)}
   .budget-summary>div>span:last-child{display:none}
   .budget-toolbar .period-navigator{flex:1 1 auto;justify-content:space-between}
+}
+
+/* Nova movimentação: ação principal no topo da sidebar (desktop) e botão flutuante acima da barra inferior (até 1000 px). */
+.sidebar-new-entry.ui-button{width:100%;justify-content:flex-start;margin-top:var(--spacing-2)}
+.fab-new-entry.ui-button{display:none}
+@media (min-width: 1001px) {
+  .sidebar.is-collapsed .sidebar-new-entry.ui-button{justify-content:center;padding-inline:var(--spacing-1)}
+  .sidebar.is-collapsed .sidebar-new-entry__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
+@media (max-width: 1000px) {
+  .sidebar-new-entry.ui-button{display:none}
+  .fab-new-entry.ui-button{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(80px + env(safe-area-inset-bottom));z-index:var(--z-sticky);display:inline-flex;width:56px;height:56px;min-height:56px;padding:0;justify-content:center;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+  .fab-new-entry.ui-button svg{width:24px;height:24px}
+  .main{padding-bottom:calc(160px + env(safe-area-inset-bottom))}
+  .ui-toast-viewport{bottom:calc(148px + env(safe-area-inset-bottom))}
 }

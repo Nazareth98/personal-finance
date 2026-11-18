@@ -95,6 +95,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   }
 
   const CurrentPage = pages[page];
+  const newEntryLabel = `Nova movimentação${ledgerRepository ? '' : ' (demo)'}`;
   return <div className={`app-shell${sidebarCollapsed ? ' app-shell--sidebar-collapsed' : ''}`}>
     <aside className={`sidebar${sidebarCollapsed ? ' is-collapsed' : ''}`}>
       <div className="sidebar-header">
@@ -108,6 +109,10 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
           <Icon icon={sidebarCollapsed ? SidebarExpandIcon : SidebarCollapseIcon} size="sm" />
         </Button>
       </div>
+      {/* Ação principal do app: no desktop fica no topo da sidebar; até 1000 px vira o botão flutuante. */}
+      <Button className="sidebar-new-entry" onClick={() => setFormOpen(true)} title={sidebarCollapsed ? newEntryLabel : undefined}>
+        <Icon icon={PlusIcon} size="sm"/><span className="sidebar-new-entry__label">{newEntryLabel}</span>
+      </Button>
       <span className="sidebar-section-label">Menu principal</span>
       <nav id="sidebar-navigation" className="navigation" aria-label="Navegação principal">
         {navigation.map(item => <a key={item.id} href={`#${item.id}`}
@@ -135,11 +140,11 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
       <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined}
-        headerAction={<>
-          {canInstall && <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button>}
-          <Button size="sm" onClick={() => setFormOpen(true)}><Icon icon={PlusIcon} size="sm"/>Nova movimentação{ledgerRepository ? '' : ' (demo)'}</Button>
-        </>} />
+        headerAction={canInstall ? <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button> : undefined} />
     </main>
+    <Button className="fab-new-entry" aria-label={newEntryLabel} title={newEntryLabel} onClick={() => setFormOpen(true)}>
+      <Icon icon={PlusIcon}/>
+    </Button>
     {/* Até 1000 px a lista da sidebar some e esta barra assume o papel de navegação principal. */}
     <nav className="bottom-nav" aria-label="Navegação principal">
       {primaryMobile.map(id => navigation.find(item => item.id === id)!).map(item => <a key={item.id} href={`#${item.id}`}
