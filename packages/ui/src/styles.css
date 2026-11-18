@@ -98,6 +98,22 @@
 .ui-table-heading__icon--warning{color:var(--color-status-warning)}
 .ui-table-sort:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px;border-radius:var(--radius-sm)}
 .ui-table tbody tr:hover td{background:var(--color-bg-subtle)}
+/* Lista compacta: o DataTable a renderiza no lugar da tabela abaixo de 680 px quando as colunas declaram papel mobile. */
+.ui-table-list{display:grid}
+.ui-table-list>.ui-field{padding:var(--spacing-3) var(--spacing-4);border-bottom:1px solid var(--color-border-default)}
+.ui-table-list ul{margin:0;padding:0;list-style:none}
+.ui-table-list__item{display:grid;gap:var(--spacing-2);padding:var(--spacing-3) var(--spacing-4);border-bottom:1px solid var(--color-border-default);font:400 var(--font-size-sm)/1.4 var(--font-family-sans);color:var(--color-text-primary)}
+.ui-table-list__item:last-child{border-bottom:0}
+.ui-table-list__top{display:flex;justify-content:space-between;gap:var(--spacing-3)}
+.ui-table-list__main{display:grid;gap:var(--spacing-1);min-width:0}
+.ui-table-list__detail{color:var(--color-text-secondary);font-size:var(--font-size-xs)}
+.ui-table-list__detail>span+span::before{content:' · '}
+.ui-table-list__value{display:grid;justify-items:end;align-content:start;gap:var(--spacing-1);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ui-table-list__fields{display:grid;gap:var(--spacing-1);margin:0}
+.ui-table-list__fields>div{display:flex;justify-content:space-between;gap:var(--spacing-3)}
+.ui-table-list__fields dt{color:var(--color-text-secondary)}
+.ui-table-list__fields dd{margin:0;font-variant-numeric:tabular-nums}
+.ui-table-list__footer{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2);flex-wrap:wrap}
 .ui-empty-state{min-height:220px;padding:var(--spacing-8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--spacing-3);text-align:center;color:var(--color-text-primary)}
 .ui-empty-state p{margin:0;color:var(--color-text-secondary);font-size:var(--font-size-sm)}
 .ui-empty-state__icon{font-size:var(--font-size-2xl);color:var(--color-text-secondary)}

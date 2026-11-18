@@ -36,24 +36,24 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     const totalOpen = statements.reduce((sum, statement) => sum + statement.openCents, 0n);
     const totalProjected = projected.reduce((sum, installment) => sum + installment.amountCents, 0n);
     const cardColumns: DataTableColumn<FinancialAccount>[] = [
-      { key: 'name', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', sortable: true, sortValue: account => account.name, cell: account => <strong>{account.name}</strong> },
-      { key: 'calendar', header: 'Ciclo', sortable: true, sortValue: account => data?.creditCards.find(item => item.accountId === account.id)?.closingDay, cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card ? `Fecha dia ${card.closingDay} · vence dia ${card.dueDay}` : <Badge>Configuração pendente</Badge>; } },
-      { key: 'limit', header: 'Limite', align: 'end', sortable: true, sortValue: account => data?.creditCards.find(item => item.accountId === account.id)?.creditLimitCents, cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card?.creditLimitCents === undefined ? 'Não informado' : formatCentsBRL(card.creditLimitCents); } },
-      { key: 'action', header: 'Ação', align: 'end', cell: account => <Button variant="secondary" onClick={() => setSelectedCard(account)}>Configurar</Button> }
+      { mobile: 'primary', key: 'name', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', sortable: true, sortValue: account => account.name, cell: account => <strong>{account.name}</strong> },
+      { mobile: 'detail', key: 'calendar', header: 'Ciclo', sortable: true, sortValue: account => data?.creditCards.find(item => item.accountId === account.id)?.closingDay, cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card ? `Fecha dia ${card.closingDay} · vence dia ${card.dueDay}` : <Badge>Configuração pendente</Badge>; } },
+      { mobile: 'field', key: 'limit', header: 'Limite', align: 'end', sortable: true, sortValue: account => data?.creditCards.find(item => item.accountId === account.id)?.creditLimitCents, cell: account => { const card = data?.creditCards.find(item => item.accountId === account.id); return card?.creditLimitCents === undefined ? 'Não informado' : formatCentsBRL(card.creditLimitCents); } },
+      { mobile: 'footer', key: 'action', header: 'Ação', align: 'end', cell: account => <Button variant="secondary" onClick={() => setSelectedCard(account)}>Configurar</Button> }
     ];
     const statementColumns: DataTableColumn<StatementView>[] = [
-      { key: 'card', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', sortable: true, sortValue: statement => statement.cardName, cell: statement => <strong>{statement.cardName}</strong> },
-      { key: 'competence', header: 'Competência', sortable: true, sortValue: statement => statement.competence, cell: statement => formatCompetence(statement.competence) },
-      { key: 'due', header: 'Vencimento', sortable: true, sortValue: statement => statement.dueDate, cell: statement => formatLocalDate(statement.dueDate) },
-      { key: 'status', header: 'Status', sortable: true, sortValue: statement => statusLabels[statement.status], cell: statement => <Badge>{statusLabels[statement.status]}</Badge> },
-      { key: 'open', header: 'Pendente', align: 'end', sortable: true, sortValue: statement => statement.openCents, cell: statement => formatCentsBRL(statement.openCents) },
-      { key: 'action', header: 'Ação', align: 'end', cell: statement => <Button variant="secondary" onClick={() => setSelectedStatement(statement)}>Vincular pagamento</Button> }
+      { mobile: 'primary', key: 'card', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', sortable: true, sortValue: statement => statement.cardName, cell: statement => <strong>{statement.cardName}</strong> },
+      { mobile: 'detail', key: 'competence', header: 'Competência', sortable: true, sortValue: statement => statement.competence, cell: statement => formatCompetence(statement.competence) },
+      { mobile: 'detail', key: 'due', header: 'Vencimento', sortable: true, sortValue: statement => statement.dueDate, cell: statement => formatLocalDate(statement.dueDate) },
+      { mobile: 'detail', key: 'status', header: 'Status', sortable: true, sortValue: statement => statusLabels[statement.status], cell: statement => <Badge>{statusLabels[statement.status]}</Badge> },
+      { mobile: 'value', key: 'open', header: 'Pendente', align: 'end', sortable: true, sortValue: statement => statement.openCents, cell: statement => formatCentsBRL(statement.openCents) },
+      { mobile: 'footer', key: 'action', header: 'Ação', align: 'end', cell: statement => <Button variant="secondary" onClick={() => setSelectedStatement(statement)}>Vincular pagamento</Button> }
     ];
     const installmentColumns: DataTableColumn<CardInstallment>[] = [
-      { key: 'description', header: 'Compra', headerIcon: TransactionsIcon, iconTone: 'expense', sortable: true, sortValue: item => item.description, cell: item => <strong>{item.description}</strong> },
-      { key: 'number', header: 'Parcela', sortable: true, sortValue: item => item.number, cell: item => `${item.number}/${item.total}` },
-      { key: 'competence', header: 'Fatura prevista', sortable: true, sortValue: item => item.dueCompetence, cell: item => formatCompetence(item.dueCompetence) },
-      { key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: item => item.amountCents, cell: item => formatCentsBRL(item.amountCents) }
+      { mobile: 'primary', key: 'description', header: 'Compra', headerIcon: TransactionsIcon, iconTone: 'expense', sortable: true, sortValue: item => item.description, cell: item => <strong>{item.description}</strong> },
+      { mobile: 'detail', key: 'number', header: 'Parcela', sortable: true, sortValue: item => item.number, cell: item => `${item.number}/${item.total}` },
+      { mobile: 'detail', key: 'competence', header: 'Fatura prevista', sortable: true, sortValue: item => item.dueCompetence, cell: item => formatCompetence(item.dueCompetence) },
+      { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: item => item.amountCents, cell: item => formatCentsBRL(item.amountCents) }
     ];
     return <div className="template-page">
       <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras entram na competência do vencimento; pagamentos não viram uma nova despesa.</p></div><div className="template-heading__actions"><Badge>Livro financeiro</Badge>{headerAction}</div></div>

@@ -21,12 +21,12 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const categories = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
   const categoryName = (row: TransactionContract) => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : 'Sem categoria';
   const columns: DataTableColumn<TransactionContract>[] = [
-    { key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
-    { key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <><strong>{row.description}</strong><br/><span className="muted">{row.source === 'pluggy' ? 'Importado · imutável' : 'Manual'}</span></> },
-    { key: 'account', header: 'Conta', sortable: true, sortValue: row => accounts.get(row.accountId), cell: row => accounts.get(row.accountId) ?? 'Conta removida' },
-    { key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: categoryName },
-    { key: 'nature', header: 'Tipo', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={tone(row)}>{natureLabels[row.nature]}</Badge> },
-    { key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <span className={`transaction-amount transaction-amount--${tone(row)}`}>{row.amountCents > 0n ? '+ ' : '− '}{formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}</span> }
+    { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
+    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <><strong>{row.description}</strong><br/><span className="muted">{row.source === 'pluggy' ? 'Importado · imutável' : 'Manual'}</span></> },
+    { mobile: 'detail', key: 'account', header: 'Conta', sortable: true, sortValue: row => accounts.get(row.accountId), cell: row => accounts.get(row.accountId) ?? 'Conta removida' },
+    { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: categoryName },
+    { mobile: 'detail', key: 'nature', header: 'Tipo', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={tone(row)}>{natureLabels[row.nature]}</Badge> },
+    { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <span className={`transaction-amount transaction-amount--${tone(row)}`}>{row.amountCents > 0n ? '+ ' : '− '}{formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}</span> }
   ];
   const periodOptions = useMemo(() => {
     const months = [...new Set((data?.transactions ?? []).map(row => row.competence))].sort().reverse();

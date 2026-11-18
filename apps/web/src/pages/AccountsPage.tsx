@@ -18,9 +18,9 @@ export function AccountsPage({ ledger, headerAction }: PageProps) {
   if (ledger) {
     const rows = ledger.data?.accounts ?? [];
     const realColumns: DataTableColumn<FinancialAccount>[] = [
-      { key: 'name', header: 'Conta', headerIcon: AccountsIcon, iconTone: 'transfer', sortable: true, sortValue: account => account.name, cell: account => <strong>{account.name}</strong> },
-      { key: 'type', header: 'Tipo', sortable: true, sortValue: account => realTypes[account.type], cell: account => <Badge>{realTypes[account.type]}</Badge> },
-      { key: 'balance', header: 'Saldo pelo livro', align: 'end', sortable: true, sortValue: account => accountBalance(account, ledger.data?.transactions ?? []), cell: account => formatCentsBRL(accountBalance(account, ledger.data?.transactions ?? [])) }
+      { mobile: 'primary', key: 'name', header: 'Conta', headerIcon: AccountsIcon, iconTone: 'transfer', sortable: true, sortValue: account => account.name, cell: account => <strong>{account.name}</strong> },
+      { mobile: 'detail', key: 'type', header: 'Tipo', sortable: true, sortValue: account => realTypes[account.type], cell: account => <Badge>{realTypes[account.type]}</Badge> },
+      { mobile: 'value', key: 'balance', header: 'Saldo pelo livro', align: 'end', sortable: true, sortValue: account => accountBalance(account, ledger.data?.transactions ?? []), cell: account => formatCentsBRL(accountBalance(account, ledger.data?.transactions ?? [])) }
     ];
     const total = rows.filter(account => account.type !== 'credit_card').reduce((sum, account) => sum + accountBalance(account, ledger.data?.transactions ?? []), 0n);
     return <div className="template-page">

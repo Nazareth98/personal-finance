@@ -37,13 +37,13 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
     finally { setSyncingId(''); }
   }
   const columns: DataTableColumn<PluggyConnection>[] = [
-    { key: 'institution', header: 'Instituição', headerIcon: ConnectionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.institutionName, cell: row => <strong>{row.institutionName}</strong> },
-    { key: 'status', header: 'Estado', sortable: true, sortValue: row => statusLabels[row.status], cell: row => <Badge>{statusLabels[row.status]}</Badge> },
+    { mobile: 'primary', key: 'institution', header: 'Instituição', headerIcon: ConnectionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.institutionName, cell: row => <strong>{row.institutionName}</strong> },
+    { mobile: 'detail', key: 'status', header: 'Estado', sortable: true, sortValue: row => statusLabels[row.status], cell: row => <Badge>{statusLabels[row.status]}</Badge> },
     // Timestamps ISO em UTC ordenam cronologicamente como texto; ausentes ficam por último.
-    { key: 'source', header: 'Atualização da fonte', sortable: true, sortValue: row => row.lastSourceUpdatedAt, cell: row => dateTime(row.lastSourceUpdatedAt) },
-    { key: 'attempt', header: 'Última tentativa', sortable: true, sortValue: row => row.lastAttemptAt, cell: row => dateTime(row.lastAttemptAt) },
-    { key: 'success', header: 'Última importação', sortable: true, sortValue: row => row.lastSuccessAt, cell: row => dateTime(row.lastSuccessAt) },
-    { key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" loading={syncingId === row.id} onClick={() => void sync(row.id)}>Sincronizar agora</Button> }
+    { mobile: 'field', key: 'source', header: 'Atualização da fonte', sortable: true, sortValue: row => row.lastSourceUpdatedAt, cell: row => dateTime(row.lastSourceUpdatedAt) },
+    { mobile: 'field', key: 'attempt', header: 'Última tentativa', sortable: true, sortValue: row => row.lastAttemptAt, cell: row => dateTime(row.lastAttemptAt) },
+    { mobile: 'field', key: 'success', header: 'Última importação', sortable: true, sortValue: row => row.lastSuccessAt, cell: row => dateTime(row.lastSuccessAt) },
+    { mobile: 'footer', key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" loading={syncingId === row.id} onClick={() => void sync(row.id)}>Sincronizar agora</Button> }
   ];
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>

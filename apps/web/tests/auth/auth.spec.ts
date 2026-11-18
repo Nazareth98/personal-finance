@@ -710,7 +710,7 @@ test('inventário de telas para redesign', async ({ page }) => {
         await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-${screen.replace('?view=', '-')}.png`, fullPage: true });
       }
       await page.goto('/#review');
-      await page.getByRole('row', { name: /Café sintético/ }).getByRole('button', { name: 'Revisar' }).click();
+      await page.getByRole(viewport === 'mobile' ? 'listitem' : 'row').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Revisar' }).click();
       await page.screenshot({ path: `output/redesign-inventory/${viewport}-${colorScheme}-dialog-review.png` });
       await page.keyboard.press('Escape');
       if (viewport === 'mobile') {
@@ -731,4 +731,27 @@ test('barra inferior mostra pendências da revisão e a folha Mais permite sair'
   await navigation.getByRole('button', { name: 'Mais' }).click();
   await page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+});
+
+test('tabelas viram lista compacta no mobile com ordenação e ações', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#transactions');
+  await expect(page.getByRole('table', { name: 'Livro financeiro' })).toHaveCount(0);
+  const list = page.getByRole('region', { name: 'Livro financeiro' });
+  const items = list.getByRole('listitem');
+  await expect(items.first()).toContainText('Pagamento da fatura');
+  await list.getByLabel('Ordenar por').selectOption('amount:desc');
+  await expect(items.first()).toContainText('R$ 5.000,00');
+  const dimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
+
+  await page.goto('/#review');
+  const pending = page.getByRole('region', { name: 'Pendências de revisão' });
+  await pending.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Revisar' }).click();
+  await expect(page.getByRole('dialog', { name: 'Revisar lançamento' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  const scan = await new AxeBuilder({ page }).include('.ui-table-list').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  expect(scan.violations).toEqual([]);
 });

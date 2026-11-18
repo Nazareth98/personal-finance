@@ -17,3 +17,7 @@ function Example(){
 const meta={title:'Data/DataTable',component:Example,tags:['autodocs']} satisfies Meta<typeof Example>;
 export default meta;type Story=StoryObj<typeof meta>;
 export const Default:Story={};
+// Abaixo de 680 px (use o viewport mobile do Storybook) as colunas com papel `mobile` viram lista compacta.
+const compactColumns:DataTableColumn<Row>[]=columns.map(col=>({...col,mobile:col.key==='description'?'primary':col.key==='amount'?'value':'detail'}));
+export const CompactMobile:Story={render:()=><div style={{width:'min(750px,95vw)'}}><DataTable ariaLabel="Transações fictícias" rows={data} columns={compactColumns} getRowKey={row=>row.id}/></div>,
+ parameters:{viewport:{defaultViewport:'mobile1'}}};

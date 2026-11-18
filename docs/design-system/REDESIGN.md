@@ -31,7 +31,7 @@ Nunca envie ao Claude Design capturas com dados reais. As do inventário vêm do
 ## Pontos já observados no inventário
 
 - ~~No mobile, a navegação em grade ocupa cerca de 360 px antes do conteúdo.~~ Resolvido com a barra inferior (opção A do canvas “Navegação mobile”, D-031).
-- Tabelas largas rolam lateralmente no mobile (Categorias, Revisão, Transações); avaliar lista em cartões abaixo de 680 px.
+- ~~Tabelas largas rolam lateralmente no mobile.~~ Resolvido com a lista compacta (opção B do canvas “Tabelas no mobile”, D-032).
 - Detalhes textuais dos gráficos ficam longos com rótulos “(previsto)”.
 
 ## Restrições que o redesign não muda

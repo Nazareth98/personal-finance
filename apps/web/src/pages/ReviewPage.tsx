@@ -55,18 +55,18 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const confirmed = history.length - automatic;
 
   const columns: DataTableColumn<TransactionContract>[] = [
-    { key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
-    { key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', sortable: true, sortValue: row => row.description, cell: row => {
+    { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
+    { mobile: 'primary', key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', sortable: true, sortValue: row => row.description, cell: row => {
       const classification: TransactionClassification | undefined = classifications.get(row.id);
       return <><strong>{row.description}</strong><br/><span className="muted">{accounts.get(row.accountId) ?? 'Conta'}
         {classification?.evidence.length ? ` · ${classification.evidence.map(item => item.label).join(' · ')} · ${confidenceLabel(classification.confidenceBasisPoints)}` : ''}</span></>;
     } },
-    { key: 'nature', header: 'Natureza', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer'}>{natureLabels[row.nature]}</Badge> },
-    { key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: row => categoryName(row) ?? <span className="muted">Não se aplica</span> },
-    { key: 'status', header: 'Situação', sortable: true, sortValue: statusLabel, cell: row => <Badge>{statusLabel(row)}</Badge> },
-    { key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <FinancialValue value={formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}
+    { mobile: 'detail', key: 'nature', header: 'Natureza', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer'}>{natureLabels[row.nature]}</Badge> },
+    { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: row => categoryName(row) ?? <span className="muted">Não se aplica</span> },
+    { mobile: 'footer', key: 'status', header: 'Situação', sortable: true, sortValue: statusLabel, cell: row => <Badge>{statusLabel(row)}</Badge> },
+    { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <FinancialValue value={formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}
       tone={row.amountCents < 0n ? 'negative' : 'positive'} showSign/> },
-    { key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" onClick={() => setSelected(row)}>
+    { mobile: 'footer', key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" onClick={() => setSelected(row)}>
       {view === 'history' ? 'Revisar novamente' : resolutions.get(row.id)?.semanticResolved ? 'Revisar' : 'Vincular'}
     </Button> }
   ];

@@ -37,3 +37,18 @@ Use os formatadores de `apps/web/src/lib/demo-transactions.ts`; não formate dat
 - Sem `onSortChange`, o `DataTable` ordena sozinho. Tabelas paginadas controlam `sort` e ordenam antes de paginar.
 - Filtros de tela vivem na URL (`#pagina?chave=valor`) via `useHashParams`, que usa `replaceState` e não polui o histórico.
 - Transações e Revisão compartilham `TransactionFilterFields`: busca por descrição sem acentos e maiúsculas, conta, categoria, natureza, contagem e “Limpar filtros”.
+
+## Lista compacta no mobile
+
+Abaixo de 680 px, o `DataTable` troca a tabela por uma lista quando alguma coluna declara `mobile`; só uma forma é renderizada por vez.
+
+| Papel | Onde aparece |
+| --- | --- |
+| `primary` | título do item |
+| `detail` | linha secundária, separada por “·” |
+| `value` | à direita, alinhado e com números tabulares |
+| `field` | par “rótulo: valor” abaixo do item, para números que precisam de nome |
+| `footer` | linha final: situação à esquerda, ação à direita |
+| `hidden` | omitido na lista |
+
+As colunas ordenáveis viram o seletor “Ordenar por”. Tabelas sem papéis (hoje, só as demonstrativas) continuam com rolagem lateral.
