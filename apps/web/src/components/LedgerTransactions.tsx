@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ledgerTotals, type TransactionContract } from '@personal-finance/domain';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, MetricCard, Pagination, Select, TransactionsIcon, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
+import { Badge, Button, Card, DataState, DataTable, EmptyState, Pagination, Select, TransactionsIcon, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { useHashParams } from '../hooks/useHashParams';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
@@ -22,8 +22,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const categoryName = (row: TransactionContract) => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : 'Sem categoria';
   const columns: DataTableColumn<TransactionContract>[] = [
     { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
-    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <><strong>{row.description}</strong><br/><span className="muted">{row.source === 'pluggy' ? 'Importado · imutável' : 'Manual'}</span></> },
-    { mobile: 'detail', key: 'account', header: 'Conta', sortable: true, sortValue: row => accounts.get(row.accountId), cell: row => accounts.get(row.accountId) ?? 'Conta removida' },
+    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{row.source !== 'pluggy' && <Badge>Manual</Badge>}</span><span className="muted">{accounts.get(row.accountId) ?? 'Conta removida'}</span></span> },
     { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: categoryName },
     { mobile: 'detail', key: 'nature', header: 'Tipo', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={tone(row)}>{natureLabels[row.nature]}</Badge> },
     { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <span className={`transaction-amount transaction-amount--${tone(row)}`}>{row.amountCents > 0n ? '+ ' : '− '}{formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}</span> }
@@ -43,16 +42,16 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const clear = () => { setParams({ q: null, account: null, category: null, nature: null, period: null }); setPage(1); };
   const natures = [...new Set((data?.transactions ?? []).map(row => row.nature))];
 
-  return <section className="transactions-demo" aria-labelledby="transactions-title">
-    <TransactionFilterFields filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
-      accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={natures}>
-      <Select label="Período" value={period} options={periodOptions} onChange={event => change('period', event.target.value)} />
-    </TransactionFilterFields>
-    <div className="transactions-metrics" aria-label="Totais do período">
-      <MetricCard label="Receitas" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Transferências não entram" />
-      <MetricCard label="Despesas" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText="Inclui ajustes de despesa" />
-      <MetricCard label="Resultado" value={formatCentsBRL(totals.netCents)} supportingText="Receitas menos despesas" />
-    </div>
+  const net = totals.netCents < 0n ? `− ${formatCentsBRL(-totals.netCents)}` : formatCentsBRL(totals.netCents);
+  return <section className="transactions-demo ledger-transactions" aria-labelledby="transactions-title">
+    <TransactionFilterFields collapsible filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
+      accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={natures}
+      toolbar={<div className="ledger-period"><Select label="Período" value={period} options={periodOptions} onChange={event => change('period', event.target.value)} /></div>} />
+    <section className="ledger-totals" aria-label="Totais do período">
+      <div><span className="muted">Receitas</span><strong className="transaction-amount--income">+ {formatCentsBRL(totals.incomeCents)}</strong><span className="muted">Transferências não entram</span></div>
+      <div><span className="muted">Despesas</span><strong className="transaction-amount--expense">− {formatCentsBRL(totals.expenseCents)}</strong><span className="muted">Inclui ajustes de despesa</span></div>
+      <div><span className="muted">Resultado</span><strong>{net}</strong><span className="muted">Receitas menos despesas</span></div>
+    </section>
     <Card className="transactions-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={5} columns={6} label="Carregando livro financeiro" errorTitle="Erro ao carregar lançamentos" errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
       {rows.length ? <><DataTable ariaLabel="Livro financeiro" columns={columns} rows={paginateRows(rows, currentPage, PAGE_SIZE)} getRowKey={row => row.id} sort={sort} onSortChange={setSort} /><Pagination page={currentPage} pageSize={PAGE_SIZE} totalItems={rows.length} onPageChange={setPage} /></>
         : <EmptyState title="Nenhuma movimentação encontrada" description="Cadastre uma movimentação ou altere os filtros." action={active ? <Button variant="secondary" onClick={clear}>Limpar filtros</Button> : undefined} />}

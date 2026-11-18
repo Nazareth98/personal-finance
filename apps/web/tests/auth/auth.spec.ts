@@ -670,8 +670,13 @@ test('busca e filtra transações com estado na URL', async ({ page }) => {
   await login(page);
   await page.goto('/#transactions');
   const table = page.getByRole('table', { name: 'Livro financeiro' });
+  await expect(table.getByRole('row').filter({ hasText: 'Receita mensal' })).toContainText('Manual');
+  await expect(table).not.toContainText('Importado');
   await page.getByRole('searchbox', { name: 'Pesquisar descrição' }).fill('SALARIO');
   await expect(page.getByText('5 lançamentos encontrados')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Totais do período' })).toContainText('+ R$ 25.000,00');
+  await expect(page.getByLabel('Conta', { exact: true })).toBeHidden();
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click();
   await page.getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   await page.getByLabel('Período', { exact: true }).selectOption('2026-10');
   await expect(page.getByText('1 lançamento encontrado')).toBeVisible();
@@ -776,6 +781,10 @@ test('tabelas viram lista compacta no mobile com ordenação e ações', async (
   await expect(items.first()).toContainText('Pagamento da fatura');
   await list.getByLabel('Ordenar por').selectOption('amount:desc');
   await expect(items.first()).toContainText('R$ 5.000,00');
+  const totalLines = await page.getByRole('region', { name: 'Totais do período' }).locator('strong').evaluateAll(values =>
+    values.map(value => value.getBoundingClientRect().height < parseFloat(getComputedStyle(value).fontSize) * 2));
+  expect(totalLines).toEqual([true, true, true]);
+  expect(await list.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   const dimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
 
