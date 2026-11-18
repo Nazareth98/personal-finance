@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ledgerTotals, type TransactionContract } from '@personal-finance/domain';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, Input, MetricCard, Pagination, Select, TransactionsIcon, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
+import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 
 const PAGE_SIZE = 10;
 const labels: Record<TransactionContract['nature'], string> = {
@@ -32,7 +32,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const periodOptions = useMemo(() => {
     const months = [...new Set((data?.transactions ?? []).map(row => row.competence))].sort().reverse();
     const years = [...new Set(months.map(month => month.slice(0, 4)))];
-    return [{ value: 'all', label: 'Todo o histórico' }, ...months.map(value => ({ value, label: `Mês ${value.slice(5)}/${value.slice(0, 4)}` })), ...years.map(value => ({ value, label: `Ano ${value}` }))];
+    return [{ value: 'all', label: 'Todo o histórico' }, ...months.map(value => ({ value, label: formatCompetence(value) })), ...years.map(value => ({ value, label: `Ano ${value}` }))];
   }, [data]);
   const filtered = useMemo(() => (data?.transactions ?? []).filter(row => {
     const search = normalize(query.trim());

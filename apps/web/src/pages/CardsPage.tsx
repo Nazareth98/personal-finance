@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { cardStatementSummary, type CardInstallment, type CardStatement, type FinancialAccount } from '@personal-finance/domain';
 import { Badge, Button, Card, CardsIcon, DataState, DataTable, EmptyState, MetricCard, TransactionsIcon, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
-import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
+import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import type { LedgerState } from '../ledger/useLedger';
 import { CreditCardForm } from '../components/CreditCardForm';
 import { CardPaymentForm } from '../components/CardPaymentForm';
@@ -43,7 +43,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     ];
     const statementColumns: DataTableColumn<StatementView>[] = [
       { key: 'card', header: 'Cartão', headerIcon: CardsIcon, iconTone: 'warning', cell: statement => <strong>{statement.cardName}</strong> },
-      { key: 'competence', header: 'Competência', cell: statement => statement.competence },
+      { key: 'competence', header: 'Competência', cell: statement => formatCompetence(statement.competence) },
       { key: 'due', header: 'Vencimento', cell: statement => formatLocalDate(statement.dueDate) },
       { key: 'status', header: 'Status', cell: statement => <Badge>{statusLabels[statement.status]}</Badge> },
       { key: 'open', header: 'Pendente', align: 'end', cell: statement => formatCentsBRL(statement.openCents) },
@@ -52,7 +52,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     const installmentColumns: DataTableColumn<CardInstallment>[] = [
       { key: 'description', header: 'Compra', headerIcon: TransactionsIcon, iconTone: 'expense', cell: item => <strong>{item.description}</strong> },
       { key: 'number', header: 'Parcela', cell: item => `${item.number}/${item.total}` },
-      { key: 'competence', header: 'Fatura prevista', cell: item => item.dueCompetence },
+      { key: 'competence', header: 'Fatura prevista', cell: item => formatCompetence(item.dueCompetence) },
       { key: 'amount', header: 'Valor', align: 'end', cell: item => formatCentsBRL(item.amountCents) }
     ];
     return <div className="template-page">

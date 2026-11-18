@@ -184,6 +184,8 @@ Aceite: uma correção preserva o histórico anterior e uma transferência próp
 
 ### 11.3 — consistência visual
 
+Estado: concluída em 18/11/2026.
+
 - eliminar o overflow horizontal da sidebar inclusive durante hover, foco e transições;
 - colorir valores negativos da previsão com o token financeiro negativo, preservando também o sinal textual;
 - padronizar datas bancárias como `dd/MM/yyyy`, competências como mês/ano e data/hora operacional sem conversão que altere o dia.

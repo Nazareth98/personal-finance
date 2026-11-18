@@ -18,7 +18,13 @@ export function formatCentsBRL(cents:bigint):string{
  const neg=cents<0n;const mag=neg?-cents:cents;const full=new Intl.NumberFormat('pt-BR',{useGrouping:true,maximumFractionDigits:0}).format(mag/100n);
  return `${neg?'-':''}R$ ${full},${String(mag%100n).padStart(2,'0')}`;
 }
+/** Data bancária `yyyy-MM-dd` → `dd/MM/yyyy`, sem `Date` para não deslocar o dia por fuso. */
 export function formatLocalDate(date:string):string{const [year,month,day]=date.split('-');return `${day}/${month}/${year}`;}
+const competenceMonths=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+/** Competência `yyyy-MM` → `nov/2026`. */
+export function formatCompetence(competence:string):string{const [year,month]=competence.split('-');return `${competenceMonths[Number(month)-1]}/${year}`;}
+/** Instante operacional (timestamp) → `dd/MM/yyyy, HH:mm` no fuso do navegador. */
+export function formatDateTime(value:string):string{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
 export function transactionKindLabel(kind:TransactionType){return {income:'Receita',expense:'Despesa',transfer:'Transferência'}[kind];}
 export type TransactionFilters={query:string;kind:'all'|TransactionType;category:string};
 const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();

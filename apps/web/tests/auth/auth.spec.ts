@@ -474,7 +474,9 @@ test('projeta seis meses sem incluir receita extraordinária na média futura', 
   await expect(page.getByRole('table', { name: 'Previsão financeira de seis meses' })).toBeVisible();
   await expect(page.getByText('R$ 5.000,00', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('R$ 1.200,00', { exact: true })).toBeVisible();
-  await expect(page.getByRole('row', { name: /2026-12/ })).toBeVisible();
+  const december = page.getByRole('row', { name: /dez\/2026/ });
+  await expect(december).toBeVisible();
+  await expect(december.locator('.ui-financial-value')).toHaveClass(/ui-financial-value--(positive|negative|neutral)/);
 });
 
 test('exibe estado da fonte e solicita sincronização sem enviar credenciais', async ({ page }) => {

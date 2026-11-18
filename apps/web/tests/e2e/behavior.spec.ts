@@ -56,6 +56,27 @@ test('sidebar pode ser recolhida e expandida no desktop',async ({page},testInfo)
   await expect(sidebar).not.toHaveClass(/is-collapsed/);
 });
 
+test('sidebar não rola lateralmente em hover, foco ou ao recolher',async ({page},testInfo)=>{
+  if(!testInfo.project.name.startsWith('desktop'))test.skip();
+  await page.goto('/#overview');
+  const navigation=page.getByRole('navigation',{name:'Navegação principal'});
+  const overflow=()=>navigation.evaluate(element=>element.scrollWidth-element.clientWidth);
+  const links=navigation.getByRole('link');
+  for(const state of ['expandido','recolhido']){
+    for(let index=0;index<await links.count();index+=1){
+      await links.nth(index).hover();
+      expect(await overflow(),`${state}: hover no link ${index}`).toBeLessThanOrEqual(0);
+      await links.nth(index).focus();
+      expect(await overflow(),`${state}: foco no link ${index}`).toBeLessThanOrEqual(0);
+    }
+    if(state==='expandido'){
+      await page.getByRole('button',{name:'Recolher menu'}).click();
+      expect(await overflow(),'durante a transição').toBeLessThanOrEqual(0);
+      await expect(page.locator('.sidebar')).toHaveClass(/is-collapsed/);
+    }
+  }
+});
+
 test('mobile não tem overflow horizontal do documento',async ({page},testInfo)=>{
   if(!testInfo.project.name.startsWith('mobile'))test.skip();
   await page.goto('/#reports');

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Badge, Button, Card, ConnectionsIcon, DataState, DataTable, EmptyState, Icon, PlusIcon, useToast, type DataTableColumn } from '@personal-finance/ui';
 import type { PluggyConnection } from '../integrations/contracts';
 import type { ConnectionsState } from '../integrations/useConnections';
+import { formatDateTime } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
 
 const statusLabels: Record<PluggyConnection['status'], string> = {
@@ -9,7 +10,7 @@ const statusLabels: Record<PluggyConnection['status'], string> = {
 };
 
 function dateTime(value?: string): string {
-  return value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : 'Ainda não ocorreu';
+  return value ? formatDateTime(value) : 'Ainda não ocorreu';
 }
 
 export function ConnectionsPage({ connections, headerAction }: PageProps) {

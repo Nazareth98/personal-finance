@@ -3,7 +3,7 @@ import type { TransactionContract } from '@personal-finance/domain';
 import { Button, Dialog, FormMessage, Select, useToast } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatLocalDate } from '../lib/demo-transactions';
+import { formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
 
 type ReviewNature = SemanticConfirmation['nature'];
 
@@ -80,7 +80,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   const statementOptions = (data?.cardStatements ?? []).map(statement => {
     const card = data?.creditCards.find(item => item.id === statement.cardId);
     const account = data?.accounts.find(item => item.id === card?.accountId);
-    return { value: statement.id, label: `${account?.name ?? 'Cartão'} · ${statement.competence}` };
+    return { value: statement.id, label: `${account?.name ?? 'Cartão'} · ${formatCompetence(statement.competence)}` };
   });
   const savingsOptions = (data?.savingsBoxes ?? []).map(box => ({ value: box.id, label: box.name }));
   const relation = nature === 'own_transfer'
@@ -137,7 +137,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       {previousVersions.length > 0 && <section className="review-versions" aria-label="Versões anteriores">
         <p className="muted">Versões anteriores ({previousVersions.length}) — preservadas ao confirmar uma nova revisão.</p>
         <ul>{previousVersions.map(item => <li key={item.id}>
-          {new Date(item.supersededAt).toLocaleDateString('pt-BR')} · {item.type === 'semantics'
+          {formatDateTime(item.supersededAt)} · {item.type === 'semantics'
             ? `Natureza: ${item.nature ? natureLabels[item.nature] : 'Não informada'}`
             : `Categoria: ${item.categoryId ? categoryNames.get(item.categoryId) ?? 'Categoria removida' : 'Sem categoria'}`}
         </li>)}</ul>

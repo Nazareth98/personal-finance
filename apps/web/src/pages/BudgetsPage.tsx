@@ -4,7 +4,7 @@ import { Badge, Button, Card, EmptyState, MetricCard, Select } from '@personal-f
 import { BudgetForm } from '../components/BudgetForm';
 import type { LedgerState } from '../ledger/useLedger';
 import { budgetPercent,budgetRemaining,demoBudgets } from '../lib/demo-finance';
-import { formatCentsBRL } from '../lib/demo-transactions';
+import { formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
 
 const currentPeriod = () => {
@@ -13,10 +13,7 @@ const currentPeriod = () => {
 };
 
 function formatPeriod(period: string) {
-  if (period.length === 4) return `Ano ${period}`;
-  const [year, month] = period.split('-').map(Number);
-  const label = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(year, month - 1, 1));
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  return period.length === 4 ? `Ano ${period}` : formatCompetence(period);
 }
 
 function formatBasisPoints(value: number | bigint) {

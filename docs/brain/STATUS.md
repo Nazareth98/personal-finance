@@ -22,11 +22,11 @@ Atualizado em: 18/11/2026.
 
 ## Marco atual
 
-**Etapa 11.3 — consistência visual.** A 11.2 foi publicada: histórico de versões substituídas (D-026), “Revisar novamente” e registro do lado manual de transferência própria (D-027).
+**Etapa 11.4 — período, ordenação, busca e filtros.** A 11.3 foi concluída: sidebar sem rolagem lateral, previsão com tom financeiro e datas padronizadas (ver [`DATA_DISPLAY.md`](../design-system/DATA_DISPLAY.md)).
 
 Próximas entregas, nesta ordem:
 
-1. consistência visual (11.3), período/ordenação (11.4) e gráficos (11.5) conforme [`PLAN.md`](PLAN.md);
+1. período, ordenação, busca e filtros (11.4) e gráficos (11.5) conforme [`PLAN.md`](PLAN.md);
 2. preparar o redesign com Claude Design: tokens de elevação e z-index e `DESIGN.md` sincronizado com `themes.json`.
 
 ## Última validação
@@ -67,6 +67,7 @@ Próximas entregas, nesta ordem:
 - Etapa 11.1 em 18/11/2026: migration `category_management` aplicada no Supabase hospedado após ensaio com rollback. O smoke CRUD transacional passou e foi revertido; permaneceram 23 categorias estruturais, nenhuma personalizada ou aplicabilidade ausente, cinco novas colunas e seis RPCs autenticadas. `pnpm check`, fluxo CRUD e auditoria WCAG A/AA da nova tela passaram com Node 22.12.
 - Identidade visual de categorias em 18/11/2026: migration `category_visual_identity` aplicada no Supabase hospedado; as 23 categorias estruturais receberam ícone e cor por chave permitida, e as RPCs de criação/edição validam ambos os campos. O smoke remoto de criar, editar e excluir foi revertido sem linhas temporárias; `pnpm check`, fluxo autenticado e auditoria WCAG A/AA passaram com Node 22.12 e Chromium.
 - Etapa 11.2 em 18/11/2026: `pnpm check` e 18 fluxos autenticados passaram com Node 22.13. Ensaio remoto com rollback forçado aprovou 7 cenários (lado manual criado, nova revisão remove o lado manual e versiona, categoria confirmada versionada com alias preservado, cartão, conta conectada e vínculo duplo recusados, grants/RLS). Migration aplicada pelo SQL Editor (o conector recusa escrita) e conferida pelo conector: tabela com RLS, RPC de 6 argumentos, assinatura antiga removida e 2 triggers.
+- Etapa 11.3 em 18/11/2026: o hover deslocava os links da sidebar e a lista com `overflow-y` rolava lateralmente; removido o deslocamento, eixo X cortado e foco desenhado por dentro. Novo teste mede a largura rolável em hover, foco e durante a transição de recolher (falhou antes da correção). `pnpm check`, 18 fluxos autenticados e 72 cenários de comportamento/acessibilidade passaram com Node 22.13.
 
 ## Bloqueios
 

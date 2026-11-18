@@ -20,3 +20,13 @@ O exemplo em `TransactionsDemo` contém filtros, ordenação, cinco registros po
 Ícones e cores semânticas reforçam a leitura de cards e entidades financeiras, mas nunca são o único sinal: texto, sinal monetário e rótulos permanecem obrigatórios.
 
 Limites Beta: faltam testes reais de leitores de tela/navegadores, regressão visual e integração de API com paginação remota.
+
+## Datas e competências
+
+Use os formatadores de `apps/web/src/lib/demo-transactions.ts`; não formate datas inline.
+
+| Tipo | Exemplo | Formatador |
+| --- | --- | --- |
+| data bancária (`yyyy-MM-dd`) | `05/11/2026` | `formatLocalDate`, sem `Date`, para não deslocar o dia |
+| competência (`yyyy-MM`) | `nov/2026` | `formatCompetence` |
+| instante operacional (timestamp) | `18/11/2026, 10:30` | `formatDateTime`, no fuso do navegador |
