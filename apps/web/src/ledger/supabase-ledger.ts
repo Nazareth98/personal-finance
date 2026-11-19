@@ -124,7 +124,12 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const semanticOverrideByTransaction = new Map(semanticOverrides.map(item => [item.transactionId, item]));
     const categoryUsage = new Map(((categoryUsageResult.data ?? []) as CategoryUsageRow[])
       .map(row => [row.category_id, Number(row.dependency_count)]));
+    // D-052: logo/nome do banco por conta; falha aqui não impede o livro de carregar.
+    const institutionsResult = await this.client.rpc('get_account_institutions');
+    const institutions = institutionsResult.error ? [] : ((institutionsResult.data ?? []) as { account_id: string; connector_id: number | null; institution_name: string }[])
+      .map(row => ({ accountId: row.account_id, name: row.institution_name, ...(row.connector_id ? { connectorId: row.connector_id } : {}) }));
     return {
+      institutions,
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: ((categoriesResult.data ?? []) as CategoryRow[]).map(row => ({
         id: row.id, name: row.name, type: row.category_type, applicability: row.applicability,

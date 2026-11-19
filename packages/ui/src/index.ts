@@ -127,3 +127,4 @@ export type {DataStateProps,DataStatus} from './components/DataState';
 export { Tabs } from './components/Tabs';
 export type { TabItem, TabsProps } from './components/Tabs';
 export { BrandMark, type BrandMarkProps } from './components/BrandMark';
+export { LogoAvatar, monogram, type LogoAvatarProps } from './components/LogoAvatar';

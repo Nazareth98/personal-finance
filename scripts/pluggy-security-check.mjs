@@ -64,3 +64,15 @@ assert.match(client, /createdAtFrom/);
 assert.doesNotMatch(client, /query\.set\('dateFrom'/);
 
 console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de secrets validados estaticamente.');
+
+// D-052: instituição por conta — só leitura, só o dono, sem credenciais nem ids externos.
+{
+  const { readFile: read } = await import('node:fs/promises');
+  const { default: check } = await import('node:assert/strict');
+  const sql = await read('supabase/migrations/20261119120000_account_institutions.sql', 'utf8');
+  check.match(sql, /stable security definer set search_path = public, pg_temp/i);
+  check.match(sql, /where pa\.owner_id = \(select auth\.uid\(\)\)/i);
+  check.match(sql, /revoke all on function public\.get_account_institutions\(\) from public, anon/i);
+  check.doesNotMatch(sql, /item_id|external_account_id|api_key|credential/i);
+  console.log('✓ Instituição por conta exposta só ao dono, sem identificadores do provedor.');
+}

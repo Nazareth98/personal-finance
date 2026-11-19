@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
-import { Button, CardsIcon, Dialog, FormMessage, Icon, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { Button, Dialog, FormMessage, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
 import { statementChoices } from '../lib/statement-choices';
+import { InstitutionLogo } from './InstitutionLogo';
 
 type ReviewNature = SemanticConfirmation['nature'];
 
@@ -89,7 +90,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     label: `${data?.accounts.find(account => account.id === choice.accountId)?.name ?? 'Cartão'} · vence ${shortDate(choice.dueDate)}`,
     description: `Fatura de ${formatCompetence(choice.competence)} · compras de ${shortDate(choice.periodStart)} a ${shortDate(choice.closingDate)}`,
     aside: <><strong>{formatCentsBRL(choice.openCents)}</strong>{choice.status === 'paid' ? 'quitada' : `em aberto de ${formatCentsBRL(choice.totalCents)}`}</>,
-    visual: <Icon icon={CardsIcon} size="sm" />,
+    visual: <InstitutionLogo accountId={choice.accountId} accountName={data?.accounts.find(account => account.id === choice.accountId)?.name ?? 'Cartão'} institutions={data?.institutions} />,
     group: choice.suggested ? 'Sugerida' : choice.status === 'paid' ? 'Já pagas' : 'Em aberto',
     ...(choice.suggested ? { badge: { label: 'Mesmo valor', tone: 'accent' as const } }
       : choice.status === 'partial' ? { badge: { label: 'Parcial', tone: 'warning' as const } }

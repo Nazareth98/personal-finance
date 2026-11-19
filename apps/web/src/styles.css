@@ -614,4 +614,8 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .ledger-totals>div{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--spacing-1) var(--spacing-3);padding:var(--spacing-2) var(--spacing-3)}
   .ledger-totals>div>span:last-child{display:none}
 }
+/* D-052: logo do banco ao lado do nome da conta/cartão. */
+.card-panel__top{align-items:center;gap:var(--spacing-3)}
+.card-panel__heading{flex:1;min-width:0}
+.ledger-description__account{display:inline-flex;align-items:center;gap:var(--spacing-1)}
 

@@ -7,6 +7,8 @@ import { buildCardPanels, defaultTab, limitShare, type CardPanel, type Statement
 import { CreditCardForm } from '../components/CreditCardForm';
 import { CardPaymentForm } from '../components/CardPaymentForm';
 import type { PageProps } from './PageProps';
+import { InstitutionLogo } from '../components/InstitutionLogo';
+import type { AccountInstitution } from '../ledger/contracts';
 
 const statusLabels = { open: 'Em aberto', partial: 'Parcialmente paga', paid: 'Paga' } as const;
 const demoColumns: DataTableColumn<DemoInvoice>[] = [
@@ -22,7 +24,7 @@ const PREVIEW_LINES = 6;
 const tabStatusLabels = { ...statusLabels, projected: 'Prevista' } as const;
 const tabValue = (tab: StatementTab) => !tab.statement ? tab.projectedCents : tab.status === 'paid' ? tab.purchasesCents - tab.refundsCents : tab.openCents;
 
-function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel; onConfigure: () => void; onLinkPayment: (statement: CardStatement) => void }) {
+function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { panel: CardPanel; onConfigure: () => void; onLinkPayment: (statement: CardStatement) => void; institutions?: readonly AccountInstitution[] }) {
   const [selected, setSelected] = useState<string>();
   const [linesOpen, setLinesOpen] = useState(false);
   const linesId = useId();
@@ -35,7 +37,8 @@ function CardPanelView({ panel, onConfigure, onLinkPayment }: { panel: CardPanel
   const visibleLines = active ? [...active.lines].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')).slice(0, PREVIEW_LINES) : [];
   return <Card className="card-panel" aria-labelledby={titleId}>
     <div className="card-panel__top">
-      <div><h2 id={titleId}>{account.name}</h2>{card ? <p className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</p> : <Badge>Configuração pendente</Badge>}</div>
+      <InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="lg" />
+      <div className="card-panel__heading"><h2 id={titleId}>{account.name}</h2>{card ? <p className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</p> : <Badge>Configuração pendente</Badge>}</div>
       <Button variant="secondary" onClick={onConfigure}>Configurar</Button>
     </div>
     {card && <div className="card-panel__limit">
@@ -102,7 +105,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
         <MetricCard label="Parcelas futuras" value={formatCentsBRL(totalProjected)} supportingText={lastProjected ? `${projected.length} ${projected.length === 1 ? 'parcela' : 'parcelas'} até ${formatCompetence(lastProjected)} · fora do realizado` : 'Nenhuma parcela prevista'}/>
       </div>
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={3} columns={4} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
-        {panels.length ? panels.map(panel => <CardPanelView key={panel.account.id} panel={panel} onConfigure={() => setSelectedCard(panel.account)} onLinkPayment={setSelectedStatement}/>)
+        {panels.length ? panels.map(panel => <CardPanelView key={panel.account.id} panel={panel} institutions={ledger.data?.institutions} onConfigure={() => setSelectedCard(panel.account)} onLinkPayment={setSelectedStatement}/>)
           : <Card><EmptyState title="Nenhum cartão cadastrado" description="Cadastre uma conta do tipo cartão de crédito para começar."/></Card>}
       </DataState>
       <CreditCardForm account={selectedCard} onClose={() => setSelectedCard(null)} ledger={ledger}/>

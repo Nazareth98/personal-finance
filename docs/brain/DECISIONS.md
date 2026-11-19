@@ -112,3 +112,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - `VisualSelect` (packages/ui) ganhou `description`, `aside`, `badge`, `group` e `placeholder`; com descrição ou aside vira layout rico (56 px), e em contêiner estreito o valor desce para baixo da descrição.
 - “Fatura paga” na Revisão usa `statementChoices` (lib): rótulo “Cartão · vence dd/mm”, descrição “Fatura de mês · compras de dd/mm a dd/mm”, em aberto e total à direita, selos Mesmo valor/Parcial/Paga, grupos Sugerida/Em aberto/Já pagas. A sugerida única vem marcada; a dica mostra o pendente após o vínculo ou avisa se o valor difere.
 
+## D-052 — Logo do banco nas contas (19/11/2026)
+
+- `get_account_institutions()` (só o dono, só leitura) devolve conta → id do conector e nome da instituição, sem identificadores do provedor; o app tolera falha e segue com monograma.
+- Logo do Pluggy por id de conector (`cdn.pluggy.ai/assets/connector-icons/<id>.svg`, o mesmo do Pluggy Connect), carregada com `referrerPolicy=no-referrer`; se falhar, monograma do nome (`LogoAvatar` em packages/ui).
+- Aparece nos cards de Contas (conta manual mantém o ícone do tipo), no cabeçalho de cada cartão, na linha da conta nas Transações e nas opções do seletor de fatura.
+- Pendente: guardar `imageUrl`/`primaryColor` do conector na sincronização e cópia local da logo — exige publicar as Edge Functions.
+

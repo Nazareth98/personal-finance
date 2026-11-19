@@ -44,6 +44,9 @@ export type ReviewHistoryEntry = {
   supersededAt: string;
 };
 
+/** Instituição de uma conta conectada (D-052). Sem `connectorId`, a interface usa monograma. */
+export type AccountInstitution = { accountId: string; connectorId?: number; name: string };
+
 export type LedgerData = {
   accounts: FinancialAccount[];
   categories: Category[];
@@ -59,6 +62,8 @@ export type LedgerData = {
   cardStatements: CardStatement[];
   cardStatementEntries: CardStatementEntry[];
   cardInstallments: CardInstallment[];
+  /** Opcional: ausente em demonstração ou se a consulta falhar. */
+  institutions?: AccountInstitution[];
 };
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;

@@ -7,6 +7,7 @@ import { useHashParams } from '../hooks/useHashParams';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import { matchesTransactionFilters, readTransactionFilters, transactionFilterKeys, type TransactionFilters } from '../lib/transaction-filters';
 import { TransactionFilterFields, natureLabels } from './TransactionFilterFields';
+import { InstitutionLogo } from './InstitutionLogo';
 
 const tone = (row: TransactionContract) => row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer';
 
@@ -23,7 +24,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const categoryName = (row: TransactionContract) => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : 'Sem categoria';
   const columns: DataTableColumn<TransactionContract>[] = [
     { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
-    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{row.source !== 'pluggy' && <Badge>Manual</Badge>}</span><span className="muted">{accounts.get(row.accountId) ?? 'Conta arquivada'}</span></span> },
+    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{row.source !== 'pluggy' && <Badge>Manual</Badge>}</span><span className="muted ledger-description__account"><InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />{accounts.get(row.accountId) ?? 'Conta arquivada'}</span></span> },
     { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: categoryName },
     { mobile: 'detail', key: 'nature', header: 'Tipo', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={tone(row)}>{natureLabels[row.nature]}</Badge> },
     { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <span className={`transaction-amount transaction-amount--${tone(row)}`}>{row.amountCents > 0n ? '+ ' : '− '}{formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}</span> }

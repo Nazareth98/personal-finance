@@ -9,6 +9,8 @@ import type { LedgerState } from '../ledger/useLedger';
 import { AccountForm } from '../components/AccountForm';
 import type { PageProps } from './PageProps';
 import { PageAction } from '../components/PageAction';
+import { InstitutionLogo } from '../components/InstitutionLogo';
+import type { AccountInstitution } from '../ledger/contracts';
 const types: Record<DemoAccount['type'], string> = { checking:'Conta corrente', savings:'Reserva', investment:'Investimento' };
 const realTypes: Record<FinancialAccount['type'], string> = { ...types, credit_card: 'Cartão de crédito' };
 const columns:DataTableColumn<DemoAccount>[] = [
@@ -26,13 +28,16 @@ const kindCopy: Record<AccountKind, { title: string; icon: LucideIcon; color: st
 };
 const signedBRL = (cents: bigint) => cents < 0n ? `− ${formatCentsBRL(-cents)}` : formatCentsBRL(cents);
 
-function AccountCard({ item, month, onEdit }: { item: AccountCardView; month: string; onEdit: () => void }) {
+function AccountCard({ item, month, onEdit, institutions }: { item: AccountCardView; month: string; onEdit: () => void; institutions?: readonly AccountInstitution[] }) {
   const { account, balanceCents, inCents, outCents, lastEventDate, bill } = item;
   const copy = kindCopy[account.type === 'credit_card' ? 'credit_card' : account.type === 'checking' ? 'checking' : 'reserve'];
   const transactionsLink = `#transactions?period=${month}&account=${account.id}`;
   return <Card className="budget-card goal-card">
     <div className="budget-card__top">
-      <span className={`category-identity__icon category-identity__icon--${copy.color}`} aria-hidden="true"><Icon icon={copy.icon} size="sm" /></span>
+      {/* D-052: conta conectada mostra o banco real; manual mantém o ícone do tipo. */}
+      {institutions?.some(entry => entry.accountId === account.id)
+        ? <InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="lg" />
+        : <span className={`category-identity__icon category-identity__icon--${copy.color}`} aria-hidden="true"><Icon icon={copy.icon} size="sm" /></span>}
       <div className="budget-card__title"><h3>{account.name}</h3><span className="muted">{realTypes[account.type]}</span></div>
       <Button variant="ghost" size="sm" aria-label={`Editar conta ${account.name}`} onClick={onEdit}><Icon icon={EditIcon} size="sm" /></Button>
     </div>
@@ -85,7 +90,7 @@ function RealAccounts({ ledger, headerAction }: { ledger: LedgerState; headerAct
           const copy = kindCopy[group.kind];
           return <section key={group.kind} className="status-group" aria-labelledby={`accounts-group-${group.kind}`}>
             <h2 id={`accounts-group-${group.kind}`} className="status-group__title status-tone--within"><Icon icon={copy.icon} size="sm" />{copy.title}<span className="muted"> · {group.items.length}</span></h2>
-            <div className="goal-grid">{group.items.map(item => <AccountCard key={item.account.id} item={item} month={month} onEdit={() => setForm({ account: item.account })} />)}</div>
+            <div className="goal-grid">{group.items.map(item => <AccountCard key={item.account.id} item={item} month={month} institutions={data?.institutions} onEdit={() => setForm({ account: item.account })} />)}</div>
           </section>;
         })}
     </DataState>
