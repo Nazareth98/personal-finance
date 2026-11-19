@@ -720,8 +720,16 @@ test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', a
 
   await page.getByRole('region', { name: /Vincular/ }).getByRole('listitem').filter({ hasText: 'Pagamento da fatura' }).getByRole('button', { name: 'Vincular' }).click();
   let dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
-  await expect(dialog.getByLabel('Fatura paga')).toBeVisible();
-  await dialog.getByLabel('Fatura paga').selectOption('dddddddd-2222-4ddd-8ddd-dddddddddddd');
+  // D-051: seletor rico — fatura pelo vencimento, período de compras e valor em aberto.
+  const statementPicker = dialog.getByRole('combobox', { name: /Fatura paga/ });
+  await expect(statementPicker).toBeVisible();
+  await statementPicker.click();
+  const option = dialog.getByRole('option', { name: /vence 10\/11/ });
+  await expect(option).toContainText('compras de');
+  await expect(option).toContainText('em aberto de');
+  await option.click();
+  await expect(statementPicker).toBeFocused();
+  await expect(dialog.getByText(/Pendente após o vínculo|difere do em aberto/)).toBeVisible();
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Natureza e vínculo confirmados.')).toBeVisible();
 

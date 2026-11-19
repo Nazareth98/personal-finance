@@ -320,4 +320,27 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-brand-mark--animated .ui-brand-mark__out{animation:ui-brand-out 1.6s var(--ease-standard,ease-in-out) infinite}
 @media (prefers-reduced-motion: reduce){.ui-brand-mark--animated .ui-brand-mark__in,.ui-brand-mark--animated .ui-brand-mark__out{animation:ui-brand-pulse 1.6s ease-in-out infinite alternate}}
 @keyframes ui-brand-pulse{from{opacity:1}to{opacity:.55}}
+/* VisualSelect rico (D-051): descrição, valor à direita, selo e grupos — ex.: escolher a fatura paga. */
+.ui-visual-select__text{display:grid;gap:2px;min-width:0;text-align:left}
+.ui-visual-select__label{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacing-2);font-weight:500;color:var(--color-text-primary)}
+.ui-visual-select__description{color:var(--color-text-secondary);font-size:var(--font-size-xs);line-height:1.35}
+.ui-visual-select__aside{margin-left:auto;padding-left:var(--spacing-3);text-align:right;font-size:var(--font-size-xs);color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ui-visual-select__aside strong{display:block;color:var(--color-text-primary);font-size:var(--font-size-sm)}
+.ui-visual-select__placeholder{color:var(--color-text-secondary)}
+.ui-visual-select__badge{display:inline-flex;align-items:center;height:20px;padding:0 var(--spacing-2);border-radius:10px;font-size:11px;font-weight:600;background:var(--color-bg-subtle);color:var(--color-text-secondary)}
+.ui-visual-select__badge--accent{background:color-mix(in srgb,var(--color-action-primary) 14%,transparent);color:var(--color-text-accent)}
+.ui-visual-select__badge--success{background:color-mix(in srgb,var(--color-status-success) 14%,transparent);color:var(--color-status-success)}
+.ui-visual-select__badge--warning{background:color-mix(in srgb,var(--color-status-warning) 16%,transparent);color:var(--color-status-warning)}
+.ui-visual-select__group{padding:var(--spacing-2) var(--spacing-3) var(--spacing-1);color:var(--color-text-secondary);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.ui-visual-select--rich .ui-visual-select__trigger{min-height:56px;height:auto;padding-block:var(--spacing-2)}
+.ui-visual-select--rich{container-type:inline-size}
+.ui-visual-select--rich .ui-visual-select__value{flex:1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:var(--spacing-3)}
+.ui-visual-select--rich .ui-visual-select__aside{margin:0;padding:0}
+@container (max-width: 26rem){
+  .ui-visual-select--rich .ui-visual-select__value{grid-template-columns:auto minmax(0,1fr);row-gap:2px}
+  .ui-visual-select--rich .ui-visual-select__aside{grid-column:2;text-align:left}
+  .ui-visual-select--rich .ui-visual-select__aside strong{display:inline;margin-right:var(--spacing-1)}
+}
+.ui-visual-select--rich .ui-visual-select__option{min-height:56px;padding-block:var(--spacing-2);align-items:center}
+.ui-visual-select--rich .ui-visual-select__list{max-height:min(360px,60vh)}
 

@@ -1,10 +1,20 @@
 import { Check, ChevronDown } from 'lucide-react';
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { FormMessage } from './FormMessage';
 import { Icon } from './Icon';
 import { RequiredMark, useFieldIds } from './Field';
 
-export type VisualSelectOption = { value: string; label: string; visual: ReactNode; disabled?: boolean };
+export type VisualSelectOption = {
+  value: string; label: string; visual: ReactNode; disabled?: boolean;
+  /** Linha secundária (período, data, conta). Entra no nome acessível da opção. */
+  description?: ReactNode;
+  /** Informação à direita, alinhada (valor, saldo). */
+  aside?: ReactNode;
+  /** Selo curto ao lado do rótulo (“Sugerida”, “Paga”). */
+  badge?: { label: string; tone?: 'accent' | 'success' | 'warning' | 'neutral' };
+  /** Opções consecutivas com o mesmo grupo ganham um título. */
+  group?: string;
+};
 export type VisualSelectProps = {
   label: string;
   value: string;
@@ -14,9 +24,23 @@ export type VisualSelectProps = {
   required?: boolean;
   hint?: string;
   error?: string;
+  /** Texto do gatilho sem valor escolhido. */
+  placeholder?: string;
 };
 
-export function VisualSelect({ label, value, options, onChange, disabled, required, hint, error }: VisualSelectProps) {
+function OptionBody({ option }: { option: VisualSelectOption }) {
+  return <>
+    <span className="ui-visual-select__visual" aria-hidden="true">{option.visual}</span>
+    <span className="ui-visual-select__text">
+      <span className="ui-visual-select__label">{option.label}{option.badge
+        ? <span className={`ui-visual-select__badge ui-visual-select__badge--${option.badge.tone ?? 'neutral'}`}>{option.badge.label}</span> : null}</span>
+      {option.description ? <span className="ui-visual-select__description">{option.description}</span> : null}
+    </span>
+    {option.aside ? <span className="ui-visual-select__aside">{option.aside}</span> : null}
+  </>;
+}
+
+export function VisualSelect({ label, value, options, onChange, disabled, required, hint, error, placeholder = 'Selecione' }: VisualSelectProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -24,8 +48,10 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
   const generatedId = useId();
   const { controlId, hintId, errorId, description } = useFieldIds(generatedId, hint, error);
   const labelId = `${controlId}-label`, listboxId = `${controlId}-listbox`;
-  const selectedIndex = Math.max(0, options.findIndex(option => option.value === value));
-  const selected = options[selectedIndex];
+  const matchIndex = options.findIndex(option => option.value === value);
+  const selectedIndex = matchIndex >= 0 ? matchIndex : Math.max(0, options.findIndex(option => !option.disabled));
+  const selected = matchIndex >= 0 ? options[matchIndex] : undefined;
+  const rich = options.some(option => option.description || option.aside);
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +94,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
     } else if (event.key === 'Tab') setOpen(false);
   }
 
-  return <div className="ui-field ui-visual-select" ref={rootRef}>
+  return <div className={['ui-field', 'ui-visual-select', rich ? 'ui-visual-select--rich' : ''].filter(Boolean).join(' ')} ref={rootRef}>
     <div className="ui-field__label-row"><span className="ui-field__label" id={labelId}>{label}</span>{required ? <RequiredMark /> : null}</div>
     <button ref={triggerRef} id={controlId} type="button" role="combobox" aria-labelledby={`${labelId} ${controlId}`}
       aria-controls={listboxId} aria-expanded={open} aria-haspopup="listbox" aria-describedby={description}
@@ -77,17 +103,23 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); setOpen(true); }
         if (event.key === 'Escape') close();
       }}>
-      <span className="ui-visual-select__value"><span className="ui-visual-select__visual" aria-hidden="true">{selected?.visual}</span>{selected?.label}</span>
+      <span className="ui-visual-select__value">{selected
+        ? <OptionBody option={selected} />
+        : <span className="ui-visual-select__placeholder">{placeholder}</span>}</span>
       <Icon icon={ChevronDown} size="sm" />
     </button>
     {open ? <div id={listboxId} role="listbox" aria-labelledby={labelId} className="ui-visual-select__list">
-      {options.map((option, index) => <div key={option.value} ref={node => { optionRefs.current[index] = node; }}
-        role="option" aria-selected={option.value === value} aria-disabled={option.disabled || undefined}
-        tabIndex={option.value === value ? 0 : -1} className="ui-visual-select__option"
-        onClick={() => select(option)} onKeyDown={event => handleOptionKeyDown(event, option, index)}>
-        <span className="ui-visual-select__value"><span className="ui-visual-select__visual" aria-hidden="true">{option.visual}</span>{option.label}</span>
-        {option.value === value ? <Icon icon={Check} size="sm" /> : null}
-      </div>)}
+      {options.map((option, index) => <Fragment key={option.value}>
+        {option.group && option.group !== options[index - 1]?.group
+          ? <div role="presentation" className="ui-visual-select__group">{option.group}</div> : null}
+        <div ref={node => { optionRefs.current[index] = node; }}
+          role="option" aria-selected={option.value === value} aria-disabled={option.disabled || undefined}
+          tabIndex={index === selectedIndex ? 0 : -1} className="ui-visual-select__option"
+          onClick={() => select(option)} onKeyDown={event => handleOptionKeyDown(event, option, index)}>
+          <span className="ui-visual-select__value"><OptionBody option={option} /></span>
+          {option.value === value ? <Icon icon={Check} size="sm" /> : null}
+        </div>
+      </Fragment>)}
     </div> : null}
     {hint ? <FormMessage tone="hint" id={hintId}>{hint}</FormMessage> : null}
     {error ? <FormMessage tone="error" id={errorId}>{error}</FormMessage> : null}

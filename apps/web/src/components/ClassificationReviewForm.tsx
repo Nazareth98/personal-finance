@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
-import { Button, Dialog, FormMessage, Select, useToast } from '@personal-finance/ui';
+import { Button, CardsIcon, Dialog, FormMessage, Icon, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
+import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
+import { statementChoices } from '../lib/statement-choices';
 
 type ReviewNature = SemanticConfirmation['nature'];
 
@@ -77,11 +78,30 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   })) : [];
   const categoryNames = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
   const previousVersions = (data?.reviewHistory ?? []).filter(item => item.transactionId === transaction?.id);
-  const statementOptions = (data?.cardStatements ?? []).map(statement => {
-    const card = data?.creditCards.find(item => item.id === statement.cardId);
-    const account = data?.accounts.find(item => item.id === card?.accountId);
-    return { value: statement.id, label: `${account?.name ?? 'Cartão'} · ${formatCompetence(statement.competence)}` };
-  });
+  // D-051: fatura nomeada pelo vencimento, com período de compras, valores e situação; sugerida primeiro.
+  const choices = transaction && nature === 'card_payment' ? statementChoices({
+    payment: transaction, statements: data?.cardStatements ?? [], entries: data?.cardStatementEntries ?? [],
+    cards: data?.creditCards ?? [], transactions: data?.transactions ?? []
+  }) : [];
+  const shortDate = (date: string) => formatLocalDate(date).slice(0, 5);
+  const statementOptions: VisualSelectOption[] = choices.map(choice => ({
+    value: choice.statementId,
+    label: `${data?.accounts.find(account => account.id === choice.accountId)?.name ?? 'Cartão'} · vence ${shortDate(choice.dueDate)}`,
+    description: `Fatura de ${formatCompetence(choice.competence)} · compras de ${shortDate(choice.periodStart)} a ${shortDate(choice.closingDate)}`,
+    aside: <><strong>{formatCentsBRL(choice.openCents)}</strong>{choice.status === 'paid' ? 'quitada' : `em aberto de ${formatCentsBRL(choice.totalCents)}`}</>,
+    visual: <Icon icon={CardsIcon} size="sm" />,
+    group: choice.suggested ? 'Sugerida' : choice.status === 'paid' ? 'Já pagas' : 'Em aberto',
+    ...(choice.suggested ? { badge: { label: 'Mesmo valor', tone: 'accent' as const } }
+      : choice.status === 'partial' ? { badge: { label: 'Parcial', tone: 'warning' as const } }
+        : choice.status === 'paid' ? { badge: { label: 'Paga', tone: 'success' as const } } : {})
+  }));
+  const chosen = choices.find(choice => choice.statementId === relationId);
+  const paymentAmount = transaction ? (transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents) : 0n;
+  const statementHint = chosen
+    ? chosen.openCents === paymentAmount || chosen.totalCents === paymentAmount
+      ? `Pendente após o vínculo: ${formatCentsBRL(chosen.openAfterCents)}.`
+      : `O pagamento (${formatCentsBRL(paymentAmount)}) difere do em aberto (${formatCentsBRL(chosen.openCents)}). Pendente após o vínculo: ${formatCentsBRL(chosen.openAfterCents)}.`
+    : 'A fatura leva o mês do vencimento. A sugerida tem o mesmo valor do pagamento.';
   const savingsOptions = (data?.savingsBoxes ?? []).map(box => ({ value: box.id, label: box.name }));
   const relation = nature === 'own_transfer'
     ? { label: 'Outro lado da transferência', placeholder: 'Selecione o lançamento ou a conta de destino',
@@ -91,6 +111,12 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       : nature === 'savings_contribution' || nature === 'savings_withdrawal'
         ? { label: 'Caixinha', placeholder: 'Selecione a caixinha', options: savingsOptions }
         : null;
+
+  // Sem fatura escolhida, a sugerida única já vem marcada (o proprietário ainda confirma).
+  const suggestedStatement = choices.filter(choice => choice.suggested);
+  useEffect(() => {
+    if (nature === 'card_payment' && !relationId && suggestedStatement.length === 1) setRelationId(suggestedStatement[0]!.statementId);
+  }, [nature, relationId, suggestedStatement.length, suggestedStatement[0]?.statementId]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -132,8 +158,11 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
       {(nature === 'income' || nature === 'expense') && <Select label="Categoria confirmada" value={categoryId}
         placeholder="Selecione" options={categoryOptions} required onChange={event => setCategoryId(event.target.value)} />}
-      {relation && <Select label={relation.label} value={relationId} placeholder={relation.placeholder}
-        options={relation.options} required onChange={event => setRelationId(event.target.value)} />}
+      {relation && nature === 'card_payment'
+        ? <VisualSelect label={relation.label} value={relationId} placeholder={relation.placeholder} options={statementOptions}
+          required hint={statementHint} onChange={setRelationId} />
+        : relation && <Select label={relation.label} value={relationId} placeholder={relation.placeholder}
+          options={relation.options as { value: string; label: string }[]} required onChange={event => setRelationId(event.target.value)} />}
       {previousVersions.length > 0 && <section className="review-versions" aria-label="Versões anteriores">
         <p className="muted">Versões anteriores ({previousVersions.length}) — preservadas ao confirmar uma nova revisão.</p>
         <ul>{previousVersions.map(item => <li key={item.id}>

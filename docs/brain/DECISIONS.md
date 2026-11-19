@@ -106,3 +106,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Roda no banco (`internal_match_card_payments`, só `service_role`) por gatilho após inserir lançamentos e itens de fatura — independe da versão publicada das Edge Functions.
 - Aplicado em 19/11/2026: 8 linhas informativas neutralizadas e 4 pagamentos vinculados.
 
+## D-051 — Seletor de fatura com vencimento, período e valores (19/11/2026)
+
+- A fatura leva o mês do vencimento: pagamento em 15/10 de compras de 09/09 a 08/10 quita a que vence em 15/10.
+- `VisualSelect` (packages/ui) ganhou `description`, `aside`, `badge`, `group` e `placeholder`; com descrição ou aside vira layout rico (56 px), e em contêiner estreito o valor desce para baixo da descrição.
+- “Fatura paga” na Revisão usa `statementChoices` (lib): rótulo “Cartão · vence dd/mm”, descrição “Fatura de mês · compras de dd/mm a dd/mm”, em aberto e total à direita, selos Mesmo valor/Parcial/Paga, grupos Sugerida/Em aberto/Já pagas. A sugerida única vem marcada; a dica mostra o pendente após o vínculo ou avisa se o valor difere.
+
