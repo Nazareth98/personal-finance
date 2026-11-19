@@ -15,6 +15,8 @@ export type VisualSelectOption = {
   badge?: { label: string; tone?: 'accent' | 'success' | 'warning' | 'neutral' };
   /** Opções consecutivas com o mesmo grupo ganham um título. */
   group?: string;
+  /** Sinônimos para a busca (`searchable`), sem aparecer na tela. */
+  keywords?: string;
 };
 export type VisualSelectProps = {
   label: string;
@@ -27,7 +29,11 @@ export type VisualSelectProps = {
   error?: string;
   /** Texto do gatilho sem valor escolhido. */
   placeholder?: string;
+  /** Campo de busca no topo da lista (D-059): filtra por rótulo e `keywords`, sem acento. */
+  searchable?: boolean;
 };
+
+const normalized = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function OptionBody({ option }: { option: VisualSelectOption }) {
   return <>
@@ -41,33 +47,39 @@ function OptionBody({ option }: { option: VisualSelectOption }) {
   </>;
 }
 
-export function VisualSelect({ label, value, options, onChange, disabled, required, hint, error, placeholder = 'Selecione' }: VisualSelectProps) {
+export function VisualSelect({ label, value, options, onChange, disabled, required, hint, error, placeholder = 'Selecione', searchable }: VisualSelectProps) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const generatedId = useId();
   const { controlId, hintId, errorId, description } = useFieldIds(generatedId, hint, error);
   const labelId = `${controlId}-label`, listboxId = `${controlId}-listbox`;
-  const matchIndex = options.findIndex(option => option.value === value);
-  const selectedIndex = matchIndex >= 0 ? matchIndex : Math.max(0, options.findIndex(option => !option.disabled));
-  const selected = matchIndex >= 0 ? options[matchIndex] : undefined;
+  const selected = options.find(option => option.value === value);
+  const terms = normalized(query.trim());
+  const shown = terms ? options.filter(option => normalized(`${option.label} ${option.keywords ?? ''}`).includes(terms)) : options;
+  const matchIndex = shown.findIndex(option => option.value === value);
+  const selectedIndex = matchIndex >= 0 ? matchIndex : Math.max(0, shown.findIndex(option => !option.disabled));
   const rich = options.some(option => option.description || option.aside);
   useFloatingLayer(open, triggerRef, listRef, true);
 
   useEffect(() => {
     if (!open) return;
-    optionRefs.current[selectedIndex]?.focus();
+    // Foco só ao abrir: filtrar não pode tirar o foco do campo de busca.
+    if (searchable) searchRef.current?.focus(); else optionRefs.current[selectedIndex]?.focus();
     const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) { setOpen(false); setQuery(''); }
     };
     document.addEventListener('pointerdown', closeOnOutsideClick);
     return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
-  }, [open, selectedIndex]);
+  }, [open]);
 
   function close(focusTrigger = false) {
     setOpen(false);
+    setQuery('');
     if (focusTrigger) triggerRef.current?.focus();
   }
 
@@ -78,23 +90,35 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
   }
 
   function moveFocus(currentIndex: number, direction: -1 | 1) {
-    for (let step = 1; step <= options.length; step += 1) {
-      const nextIndex = (currentIndex + direction * step + options.length) % options.length;
-      if (!options[nextIndex]?.disabled) { optionRefs.current[nextIndex]?.focus(); return; }
+    for (let step = 1; step <= shown.length; step += 1) {
+      const nextIndex = (currentIndex + direction * step + shown.length) % shown.length;
+      if (!shown[nextIndex]?.disabled) { optionRefs.current[nextIndex]?.focus(); return; }
     }
   }
 
   function handleOptionKeyDown(event: KeyboardEvent<HTMLDivElement>, option: VisualSelectOption, index: number) {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault(); moveFocus(index, event.key === 'ArrowDown' ? 1 : -1);
+      event.preventDefault();
+      if (searchable && event.key === 'ArrowUp' && index === shown.findIndex(item => !item.disabled)) searchRef.current?.focus();
+      else moveFocus(index, event.key === 'ArrowDown' ? 1 : -1);
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      if (event.key === 'Home') moveFocus(-1, 1); else moveFocus(options.length, -1);
+      if (event.key === 'Home') moveFocus(-1, 1); else moveFocus(shown.length, -1);
     } else if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault(); select(option);
     } else if (event.key === 'Escape') {
       event.preventDefault(); close(true);
-    } else if (event.key === 'Tab') setOpen(false);
+    } else if (event.key === 'Tab') close();
+  }
+
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown') { event.preventDefault(); optionRefs.current[selectedIndex]?.focus(); }
+    else if (event.key === 'Enter') {
+      event.preventDefault();
+      const first = shown.find(option => !option.disabled);
+      if (first) select(first);
+    } else if (event.key === 'Escape') { event.preventDefault(); close(true); }
+    else if (event.key === 'Tab') close();
   }
 
   return <div className={['ui-field', 'ui-visual-select', rich ? 'ui-visual-select--rich' : ''].filter(Boolean).join(' ')} ref={rootRef}>
@@ -102,7 +126,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
     <button ref={triggerRef} id={controlId} type="button" role="combobox" aria-labelledby={`${labelId} ${controlId}`}
       aria-controls={listboxId} aria-expanded={open} aria-haspopup="listbox" aria-describedby={description}
       aria-invalid={Boolean(error)} disabled={disabled} className="ui-input ui-visual-select__trigger"
-      onClick={() => setOpen(current => !current)} onKeyDown={event => {
+      onClick={() => open ? close() : setOpen(true)} onKeyDown={event => {
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); setOpen(true); }
         if (event.key === 'Escape') close();
       }}>
@@ -111,18 +135,26 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
         : <span className="ui-visual-select__placeholder">{placeholder}</span>}</span>
       <Icon icon={ChevronDown} size="sm" />
     </button>
-    {open ? <div ref={listRef} id={listboxId} role="listbox" aria-labelledby={labelId} popover="manual" className="ui-floating ui-visual-select__list">
-      {options.map((option, index) => <Fragment key={option.value}>
-        {option.group && option.group !== options[index - 1]?.group
-          ? <div role="presentation" className="ui-visual-select__group">{option.group}</div> : null}
-        <div ref={node => { optionRefs.current[index] = node; }}
-          role="option" aria-selected={option.value === value} aria-disabled={option.disabled || undefined}
-          tabIndex={index === selectedIndex ? 0 : -1} className="ui-visual-select__option"
-          onClick={() => select(option)} onKeyDown={event => handleOptionKeyDown(event, option, index)}>
-          <span className="ui-visual-select__value"><OptionBody option={option} /></span>
-          {option.value === value ? <Icon icon={Check} size="sm" /> : null}
-        </div>
-      </Fragment>)}
+    {open ? <div ref={listRef} popover="manual" className={`ui-floating ui-visual-select__list${searchable ? ' ui-visual-select__list--search' : ''}`}>
+      {searchable ? <div className="ui-visual-select__search">
+        <input ref={searchRef} type="search" className="ui-input" value={query} aria-label={`Pesquisar ${label.toLowerCase()}`} aria-controls={listboxId}
+          placeholder="Pesquisar" autoComplete="off" onChange={event => setQuery(event.target.value)} onKeyDown={handleSearchKeyDown} />
+        <span className="ui-sr-only" aria-live="polite">{terms ? `${shown.length} resultado${shown.length === 1 ? '' : 's'}` : ''}</span>
+      </div> : null}
+      <div id={listboxId} role="listbox" aria-labelledby={labelId} className="ui-visual-select__options">
+        {shown.length === 0 ? <p className="ui-visual-select__empty">Nada encontrado para “{query.trim()}”.</p> : null}
+        {shown.map((option, index) => <Fragment key={option.value}>
+          {option.group && option.group !== shown[index - 1]?.group
+            ? <div role="presentation" className="ui-visual-select__group">{option.group}</div> : null}
+          <div ref={node => { optionRefs.current[index] = node; }}
+            role="option" aria-selected={option.value === value} aria-disabled={option.disabled || undefined}
+            tabIndex={index === selectedIndex ? 0 : -1} className="ui-visual-select__option"
+            onClick={() => select(option)} onKeyDown={event => handleOptionKeyDown(event, option, index)}>
+            <span className="ui-visual-select__value"><OptionBody option={option} /></span>
+            {option.value === value ? <Icon icon={Check} size="sm" /> : null}
+          </div>
+        </Fragment>)}
+      </div>
     </div> : null}
     {hint ? <FormMessage tone="hint" id={hintId}>{hint}</FormMessage> : null}
     {error ? <FormMessage tone="error" id={errorId}>{error}</FormMessage> : null}

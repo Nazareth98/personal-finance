@@ -24,11 +24,16 @@ export type FinancialAccount = {
 export const categoryIconKeys = [
   'home', 'receipt', 'shopping-cart', 'utensils', 'car', 'bus', 'fuel',
   'heart-pulse', 'sparkles', 'gamepad', 'repeat', 'graduation-cap', 'plane',
-  'landmark', 'gift', 'briefcase', 'wallet', 'arrow-left-right', 'piggy-bank', 'tag'
+  'landmark', 'gift', 'briefcase', 'wallet', 'arrow-left-right', 'piggy-bank', 'tag',
+  // D-059: precisam constar também em private.is_category_icon_key (migration 20261119160000).
+  'paw-print', 'shirt', 'smartphone', 'wifi', 'zap', 'droplet', 'book-open', 'music',
+  'dumbbell', 'coffee', 'film', 'scissors', 'wrench', 'pill', 'shield', 'percent',
+  'trending-up', 'hand-heart', 'ticket', 'bike'
 ] as const;
 
 export const categoryColorKeys = [
-  'chart-category-1', 'chart-category-2', 'chart-category-3', 'chart-category-4', 'chart-category-5'
+  'chart-category-1', 'chart-category-2', 'chart-category-3', 'chart-category-4', 'chart-category-5',
+  'chart-category-6', 'chart-category-7', 'chart-category-8', 'chart-category-9', 'chart-category-10'
 ] as const;
 
 export type CategoryIconKey = typeof categoryIconKeys[number];

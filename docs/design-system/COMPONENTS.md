@@ -5,7 +5,7 @@
 - **Foundations**: cores, tipografia, espaçamento, raios, alturas e contraste.
 - **Primitives**: Button, Card, Badge.
 - **Icons**: `Icon` + catálogo semântico curado de `lucide-react`.
-- **Forms**: Input (`startText`/`endText` para R$ e %), Select (aparência própria), VisualSelect (com `description`, `aside`, `badge`, `group` e `placeholder` para opções ricas, ex.: fatura paga; lista na top layer via `useFloatingLayer`, D-055), Checkbox, RadioGroup, Field, FormMessage, Dialog (folha inferior até 680 px), ToastProvider/useToast.
+- **Forms**: Input (`startText`/`endText` para R$ e %), Select (aparência própria), VisualSelect (com `description`, `aside`, `badge`, `group` e `placeholder` para opções ricas, ex.: fatura paga; lista na top layer via `useFloatingLayer`, D-055; `searchable` põe busca no topo, por rótulo e `keywords`, sem acento, D-059), Checkbox, RadioGroup, Field, FormMessage, Dialog (folha inferior até 680 px), ToastProvider/useToast.
 - **Brand e identidade**: BrandMark (marca Balanço, `animated` no carregamento) e LogoAvatar (logo de instituição com monograma de reserva).
 - **Navigation**: Tabs (abas WAI-ARIA com foco itinerante por setas, Home e End; o conteúdo da aba vem do chamador).
 - **Data display (próxima etapa)**: DataTable, EmptyState, Skeleton, MetricCard, Progress, ChartLegend.

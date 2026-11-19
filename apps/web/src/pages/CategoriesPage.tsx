@@ -45,8 +45,8 @@ function CategoryEditor({ category, open, onClose, ledger }: {
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome" value={name} maxLength={60} required onChange={event => setName(event.target.value)} />
       <div className="category-visual-fields">
-        <VisualSelect label="Ícone" value={iconKey} onChange={value => setIconKey(value as CategoryIconKey)}
-          options={Object.entries(categoryIcons).map(([value, option]) => ({ value, label: option.label, visual: <CategoryIdentityIcon iconKey={value as CategoryIconKey} colorKey={colorKey} /> }))} />
+        <VisualSelect label="Ícone" searchable value={iconKey} onChange={value => setIconKey(value as CategoryIconKey)}
+          options={Object.entries(categoryIcons).map(([value, option]) => ({ value, label: option.label, keywords: option.keywords, visual: <CategoryIdentityIcon iconKey={value as CategoryIconKey} colorKey={colorKey} /> }))} />
         <VisualSelect label="Cor" value={colorKey} onChange={value => setColorKey(value as CategoryColorKey)}
           options={Object.entries(categoryColors).map(([value, label]) => ({ value, label, visual: <CategoryIdentityIcon iconKey={iconKey} colorKey={value as CategoryColorKey} /> }))} />
       </div>

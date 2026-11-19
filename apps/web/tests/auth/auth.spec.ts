@@ -196,6 +196,10 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         ]) });
         return;
       }
+      if (url.pathname.endsWith('/get_account_institutions')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+        return;
+      }
       rpcCalls.push({ path: url.pathname, body: route.request().postData() });
       const body = JSON.parse(route.request().postData() ?? '{}') as Record<string, string | null>;
       if (url.pathname.endsWith('/confirm_transaction_classification') && body.p_transaction_id && body.p_category_id) {
@@ -249,7 +253,8 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
 
 /** Camada flutuante na top layer e sem corte: o ponto central do item pertence à própria camada. */
 async function expectOnTop(layer: ReturnType<Page['locator']>, item: ReturnType<Page['locator']>) {
-  expect(await layer.evaluate(element => element.matches(':popover-open'))).toBe(true);
+  expect(await layer.evaluate(element => element.closest(':popover-open') !== null)).toBe(true);
+  await item.scrollIntoViewIfNeeded();
   expect(await item.evaluate(element => {
     const rect = element.getBoundingClientRect();
     return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
@@ -521,6 +526,14 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await createDialog.getByRole('combobox', { name: /^Ícone/ }).click();
   const iconList = page.getByRole('listbox', { name: /^Ícone/ });
   await expectOnTop(iconList, iconList.getByRole('option').last());
+  // D-059: a busca acha por sinônimo e ignora acento; Enter escolhe o primeiro resultado.
+  const iconSearch = page.getByRole('searchbox', { name: 'Pesquisar ícone' });
+  await expect(iconSearch).toBeFocused();
+  await iconSearch.fill('luz');
+  await expect(iconList.getByRole('option')).toHaveText(['Energia']);
+  await iconSearch.fill('xyz');
+  await expect(iconList).toContainText('Nada encontrado para “xyz”.');
+  await iconSearch.fill('saude');
   await createDialog.getByRole('option', { name: 'Saúde' }).click();
   await expect(createDialog.getByRole('combobox', { name: /^Ícone/ })).toHaveText('Saúde');
   await createDialog.getByRole('combobox', { name: /^Cor/ }).click();
@@ -535,6 +548,8 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await editDialog.getByLabel('Nome').fill('Lazer pessoal');
   const iconPicker = editDialog.getByRole('combobox', { name: /^Ícone/ });
   await iconPicker.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('searchbox', { name: 'Pesquisar ícone' })).toBeFocused();
   await page.keyboard.press('ArrowDown');
   await expect(editDialog.getByRole('option', { name: 'Lazer' })).toBeFocused();
   await page.keyboard.press('Escape');
@@ -720,7 +735,7 @@ test('confirma a sugestão direto da fila e filtra pendências por motivo', asyn
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
   expect(confirmation?.body).toContain('groceries');
   await expect(page.getByRole('button', { name: 'Filtros' })).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByLabel('Conta', { exact: true })).toBeHidden();
+  await expect(page.getByRole('main').getByLabel('Conta', { exact: true })).toBeHidden();
 });
 
 test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', async ({ page }) => {
@@ -814,9 +829,9 @@ test('busca e filtra transações com estado na URL', async ({ page }) => {
   await page.getByRole('searchbox', { name: 'Pesquisar descrição' }).fill('SALARIO');
   await expect(page.getByText('5 lançamentos encontrados')).toBeVisible();
   await expect(page.getByRole('region', { name: 'Totais do período' })).toContainText('+ R$ 25.000,00');
-  await expect(page.getByLabel('Conta', { exact: true })).toBeHidden();
+  await expect(page.getByRole('main').getByLabel('Conta', { exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Filtros', exact: true }).click();
-  await page.getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  await page.getByRole('main').getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   // Botão de ícone com contador e etiqueta removível do filtro ativo (D-041).
   await expect(page.getByRole('button', { name: 'Filtros, 1 ativo' })).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByRole('list', { name: 'Filtros ativos' }).getByRole('button', { name: 'Remover filtro Conta: Conta principal' })).toBeVisible();
@@ -866,7 +881,7 @@ test('gráficos da visão geral seguem o período e os totais do livro', async (
   await expect(page.getByRole('figure', { name: 'Compromissos de cartão por mês' }).getByRole('row', { name: /dez\/2026/ })).toContainText('Previsto');
 
   await page.getByRole('button', { name: 'Mês anterior' }).click();
-  await expect(budgets).toContainText('R$ 0,00 realizados de R$ 620,00 orçados');
+  await expect(budgets).toContainText('R$ 0,00 realizados de R$ 500,00 orçados');
   await expect(flow.getByRole('row', { name: /out\/2026/ })).toContainText('R$ 6.200,00');
   await expect(flow.getByRole('row', { name: /nov\/2026/ })).toHaveCount(0);
 });

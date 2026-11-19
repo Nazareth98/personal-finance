@@ -65,7 +65,27 @@ export {
   WalletCards as CategoryWalletIcon,
   ArrowLeftRight as CategoryTransferIcon,
   PiggyBank as CategoryPiggyBankIcon,
-  Tag as CategoryTagIcon
+  Tag as CategoryTagIcon,
+  PawPrint as CategoryPetIcon,
+  Shirt as CategoryClothingIcon,
+  Smartphone as CategoryPhoneIcon,
+  Wifi as CategoryInternetIcon,
+  Zap as CategoryEnergyIcon,
+  Droplet as CategoryWaterIcon,
+  BookOpen as CategoryBookIcon,
+  Music as CategoryMusicIcon,
+  Dumbbell as CategoryGymIcon,
+  Coffee as CategoryCoffeeIcon,
+  Film as CategoryStreamingIcon,
+  Scissors as CategoryBeautyIcon,
+  Wrench as CategoryMaintenanceIcon,
+  Pill as CategoryPharmacyIcon,
+  Shield as CategoryInsuranceIcon,
+  Percent as CategoryTaxIcon,
+  TrendingUp as CategoryInvestmentIcon,
+  HandHeart as CategoryDonationIcon,
+  Ticket as CategoryEventIcon,
+  Bike as CategoryBikeIcon
 } from 'lucide-react';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';

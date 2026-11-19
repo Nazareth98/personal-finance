@@ -33,3 +33,18 @@ for (const signature of ['create_category\\(text, text, text, text\\)', 'update_
 }
 
 console.log('✓ Gestão autenticada, arquivamento e integridade de categorias validados estaticamente.');
+
+// D-059: listas em funções imutáveis, usadas pela tabela e pelas RPCs; grants das RPCs preservados.
+{
+  const optionsSql = await readFile('supabase/migrations/20261119160000_category_visual_options.sql', 'utf8');
+  assert.match(optionsSql, /create function private\.is_category_icon_key\(p_key text\) returns boolean\s+language sql immutable/i);
+  assert.match(optionsSql, /add constraint categories_icon_key_check check \(private\.is_category_icon_key\(icon_key\)\)/i);
+  assert.match(optionsSql, /add constraint categories_color_key_check check \(private\.is_category_color_key\(color_key\)\)/i);
+  assert.match(optionsSql, /'chart-category-10'/);
+  assert.equal((optionsSql.match(/private\.require_owner\(\)/g) ?? []).length, 2);
+  for (const name of ['create_category', 'update_category']) {
+    assert.ok(optionsSql.includes(`revoke all on function public.${name}(text, text, text, text) from public, anon;`));
+    assert.ok(optionsSql.includes(`grant execute on function public.${name}(text, text, text, text) to authenticated;`));
+  }
+  console.log('✓ Novos ícones e cores de categoria aceitos só pelas listas fechadas, com as mesmas permissões.');
+}

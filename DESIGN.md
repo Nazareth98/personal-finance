@@ -34,6 +34,11 @@ colors:
   chart-category-3: "#7C3AED"
   chart-category-4: "#B45309"
   chart-category-5: "#64748B"
+  chart-category-6: "#BE185D"
+  chart-category-7: "#0E7490"
+  chart-category-8: "#C2410C"
+  chart-category-9: "#4338CA"
+  chart-category-10: "#4D7C0F"
 typography:
   sans:
     fontFamily: "Inter Variable, Inter, ui-sans-serif, system-ui, sans-serif"
@@ -103,6 +108,11 @@ O tema segue a preferência do sistema e pode ser sobrescrito pelo usuário. Pre
 | `chart-category-3` | `#7C3AED` | `#C4B5FD` |
 | `chart-category-4` | `#B45309` | `#FBBF24` |
 | `chart-category-5` | `#64748B` | `#94A3B8` |
+| `chart-category-6` | `#BE185D` | `#F9A8D4` |
+| `chart-category-7` | `#0E7490` | `#67E8F9` |
+| `chart-category-8` | `#C2410C` | `#FDBA74` |
+| `chart-category-9` | `#4338CA` | `#A5B4FC` |
+| `chart-category-10` | `#4D7C0F` | `#BEF264` |
 
 ## Typography
 

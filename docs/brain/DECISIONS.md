@@ -160,3 +160,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Gráficos de série ganham hover, toque e teclado com destaque do período, tooltip (valores e variação contra o anterior) e anúncio para leitor de tela; a peça é `useChartFocus`/`ChartTooltip` em packages/ui.
 - “Ver valores” deixa de ser `<details>` com cartões soltos: vira botão com rótulo que alterna e uma tabela única, ligada ao gráfico nos dois sentidos. A tabela oculta separada para leitor de tela saiu (a mesma tabela cumpre o papel).
 - Fora: gráfico de rosca de categorias e o resumo ao lado do botão (`summary` existe, sem uso ainda). Etapa 2 de 5 do canvas “Personal Finance — melhorias de UI”.
+
+## D-059 — Categorias com 10 cores, 40 ícones e busca (19/11/2026)
+
+- Cores `chart-category-6…10` (rosa, ciano, laranja, índigo, oliva) nos dois temas, todas com 4.5:1 ou mais sobre a superfície; verde e vermelho puros continuam reservados a receita e despesa.
+- 20 ícones Lucide novos (pet, vestuário, celular, internet, energia, água etc.). As listas aceitas vivem em `private.is_category_icon_key`/`is_category_color_key`, usadas pelas restrições de `categories` e pelas RPCs `create_category`/`update_category` (migration `20261119160000_category_visual_options`). O domínio repete a lista em `categoryIconKeys`.
+- `VisualSelect` ganhou `searchable`: busca no topo, sinônimos em `keywords` (“luz” acha Energia), Enter escolhe o primeiro, seta para baixo vai à opção escolhida.
+- O mock dos testes autenticados respondia `get_account_institutions` (D-052) com texto e derrubava o carregamento do livro; corrigido, e quatro expectativas desatualizadas ajustadas (meta em reais da D-046, camada flutuante da D-055, campo Conta duplicado com o formulário fechado).
