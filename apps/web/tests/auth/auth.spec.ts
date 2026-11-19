@@ -232,14 +232,14 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
   await expect(page.getByText('owner@example.test')).toHaveCount(0);
   // Sair mora no menu da conta (D-042) e sempre pede confirmação, começando no Cancelar (D-041).
-  await page.getByRole('button', { name: 'Conta' }).click();
-  await page.getByRole('menu', { name: 'Conta' }).getByRole('menuitem', { name: 'Sair' }).click();
+  await page.getByRole('button', { name: 'Menu da conta' }).click();
+  await page.getByRole('menu', { name: 'Menu da conta' }).getByRole('menuitem', { name: 'Sair' }).click();
   const confirm = page.getByRole('dialog', { name: 'Sair do Personal Finance?' });
   await expect(confirm.getByRole('button', { name: 'Cancelar' })).toBeFocused();
   await confirm.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Conta' })).toBeFocused();
-  await page.getByRole('button', { name: 'Conta' }).click();
+  await expect(page.getByRole('button', { name: 'Menu da conta' })).toBeFocused();
+  await page.getByRole('button', { name: 'Menu da conta' }).click();
   await page.getByRole('menuitem', { name: 'Sair' }).click();
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
@@ -486,6 +486,8 @@ test('mantém as telas reais do livro sem violações WCAG A/AA detectáveis', a
   for (const destination of ['overview', 'transactions', 'accounts', 'cards', 'budgets', 'savings', 'categories', 'connections', 'review']) {
     await page.goto(`/#${destination}`);
     await expect(page.getByRole('main')).toBeVisible();
+    // Axe mede cor real: espera as entradas (fade/rise) terminarem para não medir texto translúcido.
+    await page.waitForFunction(() => document.getAnimations().every(animation => animation.playState !== 'running' || animation.effect?.getTiming().iterations === Infinity));
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(results.violations).toEqual([]);
   }
@@ -889,7 +891,7 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await navigation.getByRole('button', { name: 'Mais' }).click();
   await expect(page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' })).toHaveCount(0);
   await page.keyboard.press('Escape');
-  const account = page.getByRole('button', { name: 'Conta' });
+  const account = page.getByRole('button', { name: 'Menu da conta' });
   await account.click();
   const theme = page.getByRole('menuitemcheckbox', { name: 'Tema escuro' });
   await expect(theme).toBeFocused();
@@ -897,7 +899,7 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await theme.click();
   await expect(theme).toHaveAttribute('aria-checked', before === 'true' ? 'false' : 'true');
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('menu', { name: 'Conta' })).toHaveCount(0);
+  await expect(page.getByRole('menu', { name: 'Menu da conta' })).toHaveCount(0);
   await expect(account).toBeFocused();
   await account.click();
   await page.keyboard.press('ArrowDown');
@@ -962,7 +964,10 @@ test('itens por página das transações ficam salvos no navegador e a lista cab
   const pagination = page.getByRole('navigation', { name: 'Paginação' });
   await pagination.getByLabel('Por página').selectOption('20');
   await expect(pagination).toContainText('de');
-  await page.reload();
+  // Remonta a tela (o login simulado não sobrevive a reload): a escolha volta do localStorage.
+  await page.goto('/#overview');
+  await expect(page.getByRole('heading', { name: 'Visão geral', level: 1 })).toBeAttached();
+  await page.goto('/#transactions');
   await expect(page.getByRole('navigation', { name: 'Paginação' }).getByLabel('Por página')).toHaveValue('20');
   expect(await page.evaluate(() => localStorage.getItem('pf-page-size:transactions'))).toBe('20');
   // Lista de cards não pode ficar mais larga que a tela (fonte ampliada no Android estreita a área útil).

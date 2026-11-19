@@ -34,10 +34,10 @@ export function AccountMenu({ darkTheme, onToggleTheme, onSignOut }: AccountMenu
 
   return <div className="account-menu" ref={root} onKeyDown={onKeyDown}>
     <button ref={trigger} type="button" className="account-menu__trigger" aria-haspopup="menu" aria-expanded={open}
-      aria-controls={open ? menuId : undefined} aria-label="Conta" title="Conta" onClick={() => setOpen(value => !value)}>
+      aria-controls={open ? menuId : undefined} aria-label="Menu da conta" title="Menu da conta" onClick={() => setOpen(value => !value)}>
       <Icon icon={AccountIcon} size="sm" /><span className="account-menu__label">Conta</span>
     </button>
-    {open && <div id={menuId} role="menu" aria-label="Conta" className="account-menu__list">
+    {open && <div id={menuId} role="menu" aria-label="Menu da conta" className="account-menu__list">
       <button type="button" role="menuitemcheckbox" aria-checked={darkTheme} className="account-menu__item" onClick={onToggleTheme}>
         <Icon icon={MoonIcon} size="sm" /><span>Tema escuro</span><span className="account-menu__switch" aria-hidden="true" />
       </button>
