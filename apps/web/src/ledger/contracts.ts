@@ -86,7 +86,9 @@ export type SavingsMovementLinkDraft = Pick<SavingsMovement, 'savingsBoxId' | 't
 export type ClassificationConfirmation = { transactionId: string; categoryId: string };
 export type CreditCardConfiguration = Pick<CreditCard, 'accountId' | 'closingDay' | 'dueDay'> & { creditLimitCents?: bigint };
 export type CardPaymentLink = { statementId: string; transactionId: string };
-export type SemanticConfirmation = Pick<TransactionSemanticOverride, 'transactionId' | 'nature'> & {
+export type SemanticConfirmation = Pick<TransactionSemanticOverride, 'transactionId'> & {
+  /** O proprietário nunca confirma `adjustment`: ele só vem de regra automática (D-050). */
+  nature: ReviewableNature;
   counterpartTransactionId?: string;
   statementId?: string;
   savingsBoxId?: string;
