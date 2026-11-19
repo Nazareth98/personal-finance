@@ -224,7 +224,7 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await expect(page.getByRole('navigation', { name: 'Navegação principal' })).toHaveCount(0);
 
   await page.getByLabel('E-mail').fill('owner@example.test');
-  await page.getByLabel('Senha').fill('uma-senha-local-segura');
+  await page.getByLabel('Senha', { exact: true }).fill('uma-senha-local-segura');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
@@ -245,7 +245,7 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
 async function login(page: Page) {
   await page.goto('/#overview');
   await page.getByLabel('E-mail').fill('owner@example.test');
-  await page.getByLabel('Senha').fill('uma-senha-local-segura');
+  await page.getByLabel('Senha', { exact: true }).fill('uma-senha-local-segura');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
 }
@@ -263,7 +263,7 @@ test('nega sessão autenticada sem perfil proprietário', async ({ page }) => {
   await mockSupabase(page, false);
   await page.goto('/');
   await page.getByLabel('E-mail').fill('other@example.test');
-  await page.getByLabel('Senha').fill('uma-senha-local-segura');
+  await page.getByLabel('Senha', { exact: true }).fill('uma-senha-local-segura');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('alert')).toContainText('não está autorizada');
   await expect(page.getByRole('navigation', { name: 'Navegação principal' })).toHaveCount(0);
