@@ -96,6 +96,8 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+  // Nova aba começa do topo; filtros usam replaceState e não trocam a página, então não mexem na rolagem.
+  useEffect(() => { window.scrollTo(0, 0); }, [page]);
 
   async function signOut() {
     if (!onSignOut) return;
