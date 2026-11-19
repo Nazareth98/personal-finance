@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { AccountIcon, Icon, LogOutIcon, MoonIcon } from '@personal-finance/ui';
+import { AccountIcon, Icon, LogOutIcon, MoonIcon, useFloatingLayer } from '@personal-finance/ui';
 
 type AccountMenuProps = { darkTheme: boolean; onToggleTheme: () => void; onSignOut: () => void };
 
@@ -9,7 +9,9 @@ type AccountMenuProps = { darkTheme: boolean; onToggleTheme: () => void; onSignO
  */
 export function AccountMenu({ darkTheme, onToggleTheme, onSignOut }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), menuId = useId();
+  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), list = useRef<HTMLDivElement>(null), menuId = useId();
+  // Top layer: a sidebar recolhida (overflow hidden) cortava o menu.
+  useFloatingLayer(open, trigger, list);
   const items = () => Array.from(root.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? []);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function AccountMenu({ darkTheme, onToggleTheme, onSignOut }: AccountMenu
       aria-controls={open ? menuId : undefined} aria-label="Menu da conta" title="Menu da conta" onClick={() => setOpen(value => !value)}>
       <Icon icon={AccountIcon} size="sm" /><span className="account-menu__label">Conta</span>
     </button>
-    {open && <div id={menuId} role="menu" aria-label="Menu da conta" className="account-menu__list">
+    {open && <div ref={list} id={menuId} role="menu" aria-label="Menu da conta" popover="manual" className="ui-floating account-menu__list">
       <button type="button" role="menuitemcheckbox" aria-checked={darkTheme} className="account-menu__item" onClick={onToggleTheme}>
         <Icon icon={MoonIcon} size="sm" /><span>Tema escuro</span><span className="account-menu__switch" aria-hidden="true" />
       </button>

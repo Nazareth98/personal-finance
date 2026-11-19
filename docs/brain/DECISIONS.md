@@ -134,3 +134,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Pagamento da conta quita a primeira fatura com evidência que vence a partir do pagamento (tolerância de 3 dias de atraso, até 40 dias à frente).
 - `competence` de lançamento importado é derivada: o gatilho de imutabilidade passa a aceitar mudança dela só pelo backend (`auth.uid()` nulo); o app continua sem alterar importados.
 - Migration `card_bill_statements` reaplica o calendário atual dos cartões (Itaú: fechamento 7, vencimento 15), move entradas, competências e parcelas, e refaz os vínculos automáticos; os do proprietário ficam.
+
+## D-055 — Camadas flutuantes na top layer (19/11/2026)
+
+- Problema: a lista do `VisualSelect` ficava presa ao corpo rolável do modal e o menu da conta era cortado pela sidebar recolhida (`overflow`); z-index não resolve, porque o `<dialog>` está na top layer.
+- `useFloatingLayer` (packages/ui) abre a camada com `popover="manual"` e a posiciona fixa pela âncora: abaixo, ou acima se faltar espaço; presa às bordas; acompanha rolagem e redimensionamento. Classe `.ui-floating`.
+- Usado no `VisualSelect` e no `AccountMenu`. `Select` é nativo e não precisa. Toast continua com `--z-toast` e fica atrás de um diálogo aberto (não tratado).

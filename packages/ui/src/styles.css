@@ -56,7 +56,9 @@
 .ui-visual-select__trigger[aria-expanded="true"]{border-color:var(--color-border-focus)}
 .ui-visual-select__value{display:inline-flex;align-items:center;gap:var(--spacing-2);min-width:0}
 .ui-visual-select__visual{display:inline-grid;place-items:center;flex:none}
-.ui-visual-select__list{position:absolute;z-index:var(--z-dropdown);inset:calc(100% + var(--spacing-1)) 0 auto;max-height:240px;overflow-y:auto;padding:var(--spacing-1);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-bg-surface);box-shadow:var(--shadow-md)}
+/* Camada flutuante (useFloatingLayer): top layer via popover; posição fixa calculada pela âncora. z-index só vale sem suporte a popover. */
+.ui-floating{position:fixed;inset:auto;margin:0;z-index:var(--z-dropdown);color:inherit;overflow:auto}
+.ui-visual-select__list{max-height:240px;overflow-y:auto;padding:var(--spacing-1);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-bg-surface);box-shadow:var(--shadow-md)}
 .ui-visual-select__option{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-3);min-height:var(--control-height-md);padding:0 var(--spacing-3);border-radius:var(--radius-sm);color:var(--color-text-primary);font:400 var(--font-size-sm)/1.4 var(--font-family-sans);cursor:pointer}
 .ui-visual-select__option:hover,.ui-visual-select__option:focus-visible{background:var(--color-bg-subtle);outline:none}
 .ui-visual-select__option[aria-selected="true"]{font-weight:600;color:var(--color-text-accent)}

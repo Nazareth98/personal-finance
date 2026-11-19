@@ -3,6 +3,7 @@ import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent, type 
 import { FormMessage } from './FormMessage';
 import { Icon } from './Icon';
 import { RequiredMark, useFieldIds } from './Field';
+import { useFloatingLayer } from './useFloatingLayer';
 
 export type VisualSelectOption = {
   value: string; label: string; visual: ReactNode; disabled?: boolean;
@@ -44,6 +45,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const generatedId = useId();
   const { controlId, hintId, errorId, description } = useFieldIds(generatedId, hint, error);
@@ -52,6 +54,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
   const selectedIndex = matchIndex >= 0 ? matchIndex : Math.max(0, options.findIndex(option => !option.disabled));
   const selected = matchIndex >= 0 ? options[matchIndex] : undefined;
   const rich = options.some(option => option.description || option.aside);
+  useFloatingLayer(open, triggerRef, listRef, true);
 
   useEffect(() => {
     if (!open) return;
@@ -108,7 +111,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
         : <span className="ui-visual-select__placeholder">{placeholder}</span>}</span>
       <Icon icon={ChevronDown} size="sm" />
     </button>
-    {open ? <div id={listboxId} role="listbox" aria-labelledby={labelId} className="ui-visual-select__list">
+    {open ? <div ref={listRef} id={listboxId} role="listbox" aria-labelledby={labelId} popover="manual" className="ui-floating ui-visual-select__list">
       {options.map((option, index) => <Fragment key={option.value}>
         {option.group && option.group !== options[index - 1]?.group
           ? <div role="presentation" className="ui-visual-select__group">{option.group}</div> : null}

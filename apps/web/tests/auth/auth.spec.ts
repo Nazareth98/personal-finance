@@ -247,6 +247,15 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await expect(page.getByLabel('Senha', { exact: true })).toHaveAttribute('type', 'text');
 });
 
+/** Camada flutuante na top layer e sem corte: o ponto central do item pertence à própria camada. */
+async function expectOnTop(layer: ReturnType<Page['locator']>, item: ReturnType<Page['locator']>) {
+  expect(await layer.evaluate(element => element.matches(':popover-open'))).toBe(true);
+  expect(await item.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
+  })).toBe(true);
+}
+
 async function login(page: Page) {
   await page.goto('/#overview');
   await page.getByLabel('E-mail').fill('owner@example.test');
@@ -510,6 +519,8 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   const createDialog = page.getByRole('dialog', { name: 'Nova categoria' });
   await createDialog.getByLabel('Nome').fill('Pets');
   await createDialog.getByRole('combobox', { name: /^Ícone/ }).click();
+  const iconList = page.getByRole('listbox', { name: /^Ícone/ });
+  await expectOnTop(iconList, iconList.getByRole('option').last());
   await createDialog.getByRole('option', { name: 'Saúde' }).click();
   await expect(createDialog.getByRole('combobox', { name: /^Ícone/ })).toHaveText('Saúde');
   await createDialog.getByRole('combobox', { name: /^Cor/ }).click();
@@ -915,6 +926,17 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await page.keyboard.press('Enter');
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
+});
+
+test('menu da conta abre inteiro acima da sidebar recolhida', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockSupabase(page);
+  await login(page);
+  await page.getByRole('button', { name: 'Recolher menu' }).click();
+  await page.getByRole('button', { name: 'Menu da conta' }).click();
+  const menu = page.getByRole('menu', { name: 'Menu da conta' });
+  await expectOnTop(menu, menu.getByRole('menuitemcheckbox', { name: 'Tema escuro' }));
+  await expectOnTop(menu, menu.getByRole('menuitem', { name: 'Sair' }));
 });
 
 test('no mobile o título e a ação principal sobem para o cabeçalho do app', async ({ page }) => {

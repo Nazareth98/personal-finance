@@ -123,7 +123,7 @@ Crie hierarquia principalmente com superfícies, bordas e espaçamento. Sombras 
 | `shadow-lg` | diálogo | `0 22px 60px rgba(0,0,0,.22)` | `0 22px 60px rgba(0,0,0,.55)` |
 | `overlay-backdrop` | fundo atrás de diálogo | `rgba(0,0,0,.58)` | `rgba(0,0,0,.72)` |
 
-Camadas (`--z-*`): `sticky` 20 (cabeçalho móvel), `dropdown` 30 (menus), `toast` 50. Diálogos usam a top layer nativa de `<dialog>` e não precisam de z-index.
+Camadas (`--z-*`): `sticky` 20 (cabeçalho móvel), `dropdown` 30 (menus), `toast` 50. Diálogos usam a top layer nativa de `<dialog>`; listas de select e menus usam `useFloatingLayer` (`popover="manual"`, também na top layer), para ficarem acima de um diálogo e não serem cortados por `overflow`. Nesses casos `dropdown` é só fallback sem suporte a popover (D-055).
 
 ## Motion
 
