@@ -167,3 +167,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - 20 ícones Lucide novos (pet, vestuário, celular, internet, energia, água etc.). As listas aceitas vivem em `private.is_category_icon_key`/`is_category_color_key`, usadas pelas restrições de `categories` e pelas RPCs `create_category`/`update_category` (migration `20261119160000_category_visual_options`). O domínio repete a lista em `categoryIconKeys`.
 - `VisualSelect` ganhou `searchable`: busca no topo, sinônimos em `keywords` (“luz” acha Energia), Enter escolhe o primeiro, seta para baixo vai à opção escolhida.
 - O mock dos testes autenticados respondia `get_account_institutions` (D-052) com texto e derrubava o carregamento do livro; corrigido, e quatro expectativas desatualizadas ajustadas (meta em reais da D-046, camada flutuante da D-055, campo Conta duplicado com o formulário fechado).
+
+## D-060 — Confirmar a categoria nos lançamentos iguais (19/11/2026)
+
+- Antes: confirmar a categoria de um lançamento já passava a mesma categoria, como sugestão automática, aos iguais (mesma descrição normalizada, qualquer conta) ainda não confirmados; os já confirmados pelo dono não mudavam e a tela não avisava.
+- Agora a revisão (pendências e histórico) mostra “Aplicar a”: “Só este lançamento” mantém o comportamento acima e diz isso; “Este e os iguais (N)” confirma todos na categoria escolhida, com a lista do que muda e o botão com a contagem. Os confirmados em outra categoria só entram marcando a caixa.
+- RPC `confirm_transaction_classifications(uuid[], text)`: até 200 itens, delega à confirmação individual para cada um (mesmas validações, alias e histórico de versões) numa única transação. Critério de “igual” no front em `similarTransactions`, o mesmo do alias no banco.
+- Vínculos (transferência, fatura, caixinha) continuam um a um, porque dependem do par.

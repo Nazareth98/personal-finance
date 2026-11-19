@@ -330,10 +330,15 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   }
 
   async confirmClassification(draft: ClassificationConfirmation): Promise<void> {
-    const { error } = await this.client.rpc('confirm_transaction_classification', {
-      p_transaction_id: draft.transactionId,
-      p_category_id: draft.categoryId
-    });
+    const { error } = draft.similarTransactionIds?.length
+      ? await this.client.rpc('confirm_transaction_classifications', {
+        p_transaction_ids: [draft.transactionId, ...draft.similarTransactionIds],
+        p_category_id: draft.categoryId
+      })
+      : await this.client.rpc('confirm_transaction_classification', {
+        p_transaction_id: draft.transactionId,
+        p_category_id: draft.categoryId
+      });
     if (error) throw error;
   }
 

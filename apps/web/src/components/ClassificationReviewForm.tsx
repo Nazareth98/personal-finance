@@ -1,10 +1,11 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
-import { Button, Dialog, FormMessage, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { Button, Checkbox, Dialog, FormMessage, RadioGroup, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
 import { statementChoices } from '../lib/statement-choices';
+import { MAX_BULK_CONFIRMATIONS, similarTransactions } from '../lib/similar-transactions';
 import { InstitutionLogo } from './InstitutionLogo';
 
 type ReviewNature = SemanticConfirmation['nature'];
@@ -30,6 +31,8 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   const [nature, setNature] = useState<ReviewNature>('expense');
   const [categoryId, setCategoryId] = useState('');
   const [relationId, setRelationId] = useState('');
+  const [scope, setScope] = useState<'one' | 'similar'>('one');
+  const [includeConfirmed, setIncludeConfirmed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const formId = useId();
@@ -53,6 +56,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       : semanticOverride?.statementId ?? semanticOverride?.savingsBoxId ?? payment?.statementId ?? movement?.savingsBoxId ?? '');
     setError('');
   }, [data, semanticOverride, transaction]);
+  useEffect(() => { setScope('one'); setIncludeConfirmed(false); }, [transaction?.id]);
 
   const natureOptions = transaction
     ? (transaction.amountCents < 0n
@@ -79,6 +83,13 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     label: `Registrar ${transaction.amountCents < 0n ? 'entrada' : 'saída'} em ${account.name}`
   })) : [];
   const categoryNames = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
+  const accountNames = new Map((data?.accounts ?? []).map(account => [account.id, account.name]));
+  // D-060: só categoria em lote; vínculos (transferência, fatura, caixinha) dependem do par e seguem um a um.
+  const similar = transaction && (nature === 'income' || nature === 'expense') && categoryId
+    ? similarTransactions(transaction, data?.transactions ?? [], categoryId) : { unconfirmed: [], confirmed: [] };
+  const bulkTargets = [...similar.unconfirmed, ...(includeConfirmed ? similar.confirmed : [])].slice(0, MAX_BULK_CONFIRMATIONS - 1);
+  const hasSimilar = similar.unconfirmed.length + similar.confirmed.length > 0;
+  const bulk = scope === 'similar' && hasSimilar && bulkTargets.length > 0;
   const previousVersions = (data?.reviewHistory ?? []).filter(item => item.transactionId === transaction?.id);
   // D-051: fatura nomeada pelo vencimento, com período de compras, valores e situação; sugerida primeiro.
   const choices = transaction && nature === 'card_payment' ? statementChoices({
@@ -142,9 +153,12 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         });
       }
       if (nature === 'income' || nature === 'expense') {
-        await ledger.confirmClassification({ transactionId: transaction.id, categoryId });
+        await ledger.confirmClassification({ transactionId: transaction.id, categoryId,
+          ...(bulk ? { similarTransactionIds: bulkTargets.map(item => item.id) } : {}) });
       }
-      notify({ message: nature === 'income' || nature === 'expense'
+      notify({ message: bulk
+        ? `Categoria confirmada em ${bulkTargets.length + 1} lançamentos.`
+        : nature === 'income' || nature === 'expense'
         ? 'Revisão confirmada e alias aprendido.'
         : 'Natureza e vínculo confirmados.', tone: 'success' });
       onClose();
@@ -155,7 +169,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
 
   return <Dialog open={Boolean(transaction)} onClose={onClose} title="Revisar lançamento"
     description={transaction ? `Defina o efeito financeiro de “${transaction.description}”. O registro importado não será alterado.` : undefined}
-    footer={<><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>Confirmar revisão</Button></>}>
+    footer={<><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>{bulk ? `Confirmar em ${bulkTargets.length + 1} lançamentos` : 'Confirmar revisão'}</Button></>}>
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Natureza financeira" value={nature} options={natureOptions} required
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
@@ -166,6 +180,27 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
           required hint={statementHint} onChange={setRelationId} />
         : relation && <Select label={relation.label} value={relationId} placeholder={relation.placeholder}
           options={relation.options as { value: string; label: string }[]} required onChange={event => setRelationId(event.target.value)} />}
+      {hasSimilar && <div className="review-scope">
+        <RadioGroup legend="Aplicar a" name={`${formId}-scope`} value={scope} onChange={value => setScope(value as 'one' | 'similar')}
+          options={[{ value: 'one', label: 'Só este lançamento' },
+            { value: 'similar', label: `Este e os iguais (${similar.unconfirmed.length + similar.confirmed.length})` }]}
+          hint={scope === 'one'
+            ? similar.unconfirmed.length
+              ? `Os ${similar.unconfirmed.length} iguais ainda não confirmados recebem a categoria como sugestão automática.`
+              : 'Os iguais que você já confirmou não mudam.'
+            : 'Mesma descrição, em qualquer conta. Todos ficam confirmados por você.'} />
+        {scope === 'similar' && similar.confirmed.length > 0 && <Checkbox checked={includeConfirmed} onChange={event => setIncludeConfirmed(event.target.checked)}
+          label={`Incluir ${similar.confirmed.length === 1 ? 'o que' : `os ${similar.confirmed.length} que`} você já confirmou em outra categoria`} />}
+        {bulk && <section className="review-scope__preview" aria-label="O que vai mudar">
+          <p className="muted">O que vai mudar · {bulkTargets.length + 1} lançamentos</p>
+          <ul>{[transaction!, ...bulkTargets].map(item => <li key={item.id}>
+            <span className="muted">{formatLocalDate(item.eventDate)}</span>
+            <span>{accountNames.get(item.accountId) ?? 'Conta'} · {item.categoryId ? categoryNames.get(item.categoryId) ?? 'Categoria removida' : 'Sem categoria'} → <strong>{categoryNames.get(categoryId) ?? 'Categoria'}</strong>
+              {item.classificationStatus === 'confirmed' ? <span className="muted"> · confirmado por você</span> : null}</span>
+            <span className="review-scope__amount">{formatCentsBRL(item.amountCents < 0n ? -item.amountCents : item.amountCents)}</span>
+          </li>)}</ul>
+        </section>}
+      </div>}
       {previousVersions.length > 0 && <section className="review-versions" aria-label="Versões anteriores">
         <p className="muted">Versões anteriores ({previousVersions.length}) — preservadas ao confirmar uma nova revisão.</p>
         <ul>{previousVersions.map(item => <li key={item.id}>

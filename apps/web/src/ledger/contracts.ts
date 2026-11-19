@@ -83,7 +83,8 @@ export type SavingsMovementDraft = {
   competence: string;
 };
 export type SavingsMovementLinkDraft = Pick<SavingsMovement, 'savingsBoxId' | 'transactionId' | 'type'>;
-export type ClassificationConfirmation = { transactionId: string; categoryId: string };
+/** `similarTransactionIds` (D-060): outros lançamentos confirmados na mesma categoria, na mesma transação. */
+export type ClassificationConfirmation = { transactionId: string; categoryId: string; similarTransactionIds?: readonly string[] };
 export type CreditCardConfiguration = Pick<CreditCard, 'accountId' | 'closingDay' | 'dueDay'> & { creditLimitCents?: bigint };
 export type CardPaymentLink = { statementId: string; transactionId: string };
 export type SemanticConfirmation = Pick<TransactionSemanticOverride, 'transactionId'> & {

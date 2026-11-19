@@ -34,7 +34,7 @@ function session(email: string) {
   };
 }
 
-async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; body: string | null }[] = []) {
+async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; body: string | null }[] = [], extraTransactions: object[] = []) {
   // Os dados de teste são de nov/2026 e as telas abrem no mês corrente: o relógio fica fixo.
   await page.clock.setFixedTime(new Date('2026-11-18T12:00:00-03:00'));
   const confirmedCategories = new Map<string, string>();
@@ -96,6 +96,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         ,{ id: '10000000-3333-4000-8000-000000000004', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-09-05', competence: '2026-09', classification_status: 'confirmed', external_key: 'pluggy-salary-9' }
         ,{ id: '10000000-3333-4000-8000-000000000005', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'salary', description: 'Salário histórico', amount_cents: '500000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-10-05', competence: '2026-10', classification_status: 'confirmed', external_key: 'pluggy-salary-10' }
         ,{ id: '20000000-3333-4000-8000-000000000001', account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'extraordinary_income', description: 'Bônus extraordinário', amount_cents: '120000', nature: 'income', reporting: 'income', source: 'pluggy', event_date: '2026-10-15', competence: '2026-10', classification_status: 'confirmed', external_key: 'pluggy-bonus-10' }
+        ,...extraTransactions
       ]) });
       return;
     }
@@ -867,6 +868,34 @@ test('busca no histórico de revisão e ordena colunas sem ordenar ações', asy
   await page.getByRole('button', { name: 'Limpar filtros' }).click();
   await expect(table.getByRole('columnheader', { name: 'Data' })).toHaveAttribute('aria-sort', 'descending');
   await expect(table.getByRole('columnheader', { name: 'Ação', exact: true })).not.toHaveAttribute('aria-sort');
+});
+
+test('revisão pelo histórico confirma a categoria em todos os lançamentos iguais (D-060)', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  // Dois cafés iguais (um em outra conta), além do pendente “Café sintético 1234” já existente no mock.
+  const coffee = { account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', category_id: 'restaurants', description: 'CAFÉ SINTÉTICO 5678', amount_cents: '-1200', nature: 'expense', reporting: 'expense', source: 'pluggy', competence: '2026-10' };
+  await mockSupabase(page, true, writes, [
+    { ...coffee, id: '30000000-3333-4000-8000-000000000001', event_date: '2026-10-20', classification_status: 'confirmed', external_key: 'pluggy-coffee-1' },
+    { ...coffee, id: '30000000-3333-4000-8000-000000000002', event_date: '2026-10-10', classification_status: 'automatic', account_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', external_key: 'pluggy-coffee-2' }
+  ]);
+  await login(page);
+  await page.goto('/#review?view=history&q=cafe');
+  const table = page.getByRole('table', { name: 'Histórico de revisões' });
+  await table.getByRole('row', { name: '20/10/2026' }).getByRole('button', { name: 'Revisar novamente' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
+  await dialog.getByLabel('Categoria confirmada').selectOption('groceries');
+  const scope = dialog.getByRole('group', { name: 'Aplicar a' });
+  await expect(scope.getByLabel('Só este lançamento')).toBeChecked();
+  await expect(dialog.getByRole('button', { name: 'Confirmar revisão' })).toBeVisible();
+  await scope.getByLabel('Este e os iguais (2)').check();
+  await expect(dialog.getByRole('region', { name: 'O que vai mudar' }).getByRole('listitem')).toHaveCount(3);
+  await dialog.getByRole('button', { name: 'Confirmar em 3 lançamentos' }).click();
+  await expect(page.getByText('Categoria confirmada em 3 lançamentos.')).toBeVisible();
+  const bulk = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classifications');
+  const body = JSON.parse(bulk?.body ?? '{}') as { p_transaction_ids: string[]; p_category_id: string };
+  expect(body.p_category_id).toBe('groceries');
+  expect([...body.p_transaction_ids].sort()).toEqual(['30000000-3333-4000-8000-000000000001', '30000000-3333-4000-8000-000000000002', '99999999-3333-4999-8999-999999999999']);
+  expect(writes.some(write => write.path === '/rest/v1/rpc/confirm_transaction_classification')).toBe(false);
 });
 
 test('gráficos da visão geral seguem o período e os totais do livro', async ({ page }) => {
