@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, sanitizedDescription, isStatementCarryover } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, sanitizedDescription, isStatementCarryover } from './pluggy-domain.ts';
 
 test('converte valores Pluggy em centavos exatos', () => {
   assert.equal(centsFromPluggy(-42.9), -4290n);
@@ -71,3 +71,15 @@ test('linha informativa da fatura anterior fica neutra e fora da fatura (D-050)'
   assert.equal(cardLedgerSemantics({ ...carryover, description: 'MERCADO TOTAL' }).nature, 'expense');
 });
 
+
+test('banco da conta do MeuPluggy sai do nome da conta, sem chute quando ambíguo (D-056)', () => {
+  const connectors = [
+    { id: 601, name: 'Itaú', isOpenFinance: true }, { id: 201, name: 'Itaú' }, { id: 219, name: 'Caixa Econômica Federal' },
+    { id: 212, name: 'Nubank' }, { id: 1, name: 'Banco do Brasil' }, { id: 2, name: 'Banco Inter' }
+  ];
+  assert.equal(institutionFromAccountName('LATAM PASS ITAU VISA GOLD', connectors)?.id, 201);
+  assert.equal(institutionFromAccountName('itau', connectors)?.id, 201);
+  assert.equal(institutionFromAccountName('CAIXA SIM VISA INTERN CREDITO', connectors)?.id, 219);
+  assert.equal(institutionFromAccountName('Banco conta corrente', connectors), undefined);
+  assert.equal(institutionFromAccountName('NUBANK ITAU', connectors), undefined);
+});

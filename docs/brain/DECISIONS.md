@@ -140,3 +140,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Problema: a lista do `VisualSelect` ficava presa ao corpo rolável do modal e o menu da conta era cortado pela sidebar recolhida (`overflow`); z-index não resolve, porque o `<dialog>` está na top layer.
 - `useFloatingLayer` (packages/ui) abre a camada com `popover="manual"` e a posiciona fixa pela âncora: abaixo, ou acima se faltar espaço; presa às bordas; acompanha rolagem e redimensionamento. Classe `.ui-floating`.
 - Usado no `VisualSelect` e no `AccountMenu`. `Select` é nativo e não precisa. Toast continua com `--z-toast` e fica atrás de um diálogo aberto (não tratado).
+
+## D-056 — Banco de cada conta vinda do MeuPluggy (19/11/2026)
+
+- Problema: as conexões são do agregador MeuPluggy (conector 200), então todas as contas mostravam a logo e o nome do MeuPluggy; o reconhecimento de salário do Itaú (pelo nome da instituição) também não disparava.
+- A Pluggy não informa o banco por conta. Na sincronização, para conexões MeuPluggy, o backend lê o catálogo de bancos (`GET /connectors?countries=BR&types=PERSONAL_BANK`) e casa a primeira palavra própria do nome do banco com o nome da conta (`institutionFromAccountName`); mais de um banco possível → nenhum.
+- O conector e o nome do banco ficam em `private.pluggy_accounts` (gravados só pelo `service_role`); `get_account_institutions` os prefere ao da conexão. Falha no catálogo não interrompe a importação.
+- Limite: salário já importado não é reconhecido de novo; o catálogo é lido só na primeira página.

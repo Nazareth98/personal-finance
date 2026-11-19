@@ -42,7 +42,7 @@ O manifesto, instalação, fallback offline e fronteiras de cache estão em [`..
 - Webhook registra `eventId`, responde rapidamente e agenda processamento idempotente.
 - O botão “Sincronizar agora” busca o dado mais recente disponível; não promete nova coleta bancária.
 - Casamento de pagamento de fatura e neutralização da linha informativa rodam no banco (`internal_match_card_payments`, só `service_role`) por gatilho após inserir lançamentos e itens de fatura — independem da versão publicada das Edge Functions (D-050).
-- `get_account_institutions()` expõe ao dono conta → id do conector e nome da instituição; a logo vem do CDN do Pluggy pelo id, com monograma de reserva (D-052).
+- `get_account_institutions()` expõe ao dono conta → id do conector e nome da instituição; a logo vem do CDN do Pluggy pelo id, com monograma de reserva (D-052). Em conexão MeuPluggy, o banco de cada conta vem do catálogo de conectores casado pelo nome da conta (D-056).
 - Edge Functions são publicadas manualmente (`supabase functions deploy`); o deploy da Vercel não as atualiza.
 
 ## Segurança

@@ -74,5 +74,12 @@ console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de se
   check.match(sql, /where pa\.owner_id = \(select auth\.uid\(\)\)/i);
   check.match(sql, /revoke all on function public\.get_account_institutions\(\) from public, anon/i);
   check.doesNotMatch(sql, /item_id|external_account_id|api_key|credential/i);
+  // D-056: a versão vigente mantém as mesmas fronteiras; a gravação do banco é só do backend.
+  const bank = await read('supabase/migrations/20261119150000_account_bank_institution.sql', 'utf8');
+  check.match(bank, /where pa\.owner_id = \(select auth\.uid\(\)\)/i);
+  check.match(bank, /revoke all on function public\.get_account_institutions\(\) from public, anon/i);
+  check.match(bank, /revoke all on function public\.internal_set_pluggy_account_institution\(uuid, integer, text\) from public, anon, authenticated/i);
+  check.match(bank, /grant execute on function public\.internal_set_pluggy_account_institution\(uuid, integer, text\) to service_role/i);
+  check.doesNotMatch(bank, /item_id|external_account_id|api_key|credential/i);
   console.log('✓ Instituição por conta exposta só ao dono, sem identificadores do provedor.');
 }

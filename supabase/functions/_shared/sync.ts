@@ -2,7 +2,7 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
 import { billCompetences, cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
 import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, merchantName, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, merchantName, MEU_PLUGGY_CONNECTOR_ID, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyConnector, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
 import { safeError } from './http.ts';
 
@@ -96,6 +96,25 @@ async function ensureCreditCard(database: SupabaseClient, ownerId: string, accou
   return { id: String(stored.data.id), closingDay, dueDay };
 }
 
+/**
+ * D-056: no MeuPluggy a conexão é do agregador; o banco de cada conta (logo e reconhecimento de salário) vem do
+ * catálogo de bancos da Pluggy casado pelo nome da conta. Falha no catálogo não interrompe a importação.
+ */
+async function accountInstitution(
+  database: SupabaseClient, pluggy: PluggyClient, connectorId: number | undefined, fallbackName: string,
+  account: PluggyAccount, mappingId: string, catalog: { banks?: Promise<PluggyConnector[]> }
+): Promise<string> {
+  if (connectorId !== MEU_PLUGGY_CONNECTOR_ID) return fallbackName;
+  catalog.banks ??= pluggy.getBankConnectors().then(page => page.results).catch(() => []);
+  const bank = institutionFromAccountName(account.name ?? '', await catalog.banks);
+  if (!bank) return fallbackName;
+  const stored = await database.rpc('internal_set_pluggy_account_institution', {
+    p_mapping_id: mappingId, p_connector_id: bank.id, p_institution_name: bank.name.slice(0, 100)
+  });
+  if (stored.error) throw stored.error;
+  return bank.name;
+}
+
 async function ensureAccount(
   database: SupabaseClient,
   connection: ConnectionRow,
@@ -184,7 +203,7 @@ function transactionRows(
         const competence = cardCompetence(eventDate, card);
         ledger.push({ owner_id: connection.owner_id, account_id: accountId, category_id: null, description,
           amount_cents: semantics.amountCents.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence,
-          classification_status: nature === 'card_payment' || nature === 'adjustment' ? 'automatic' : 'uncategorized', external_key: externalKey });
+          classification_status: nature === 'adjustment' ? 'automatic' : 'uncategorized', external_key: externalKey });
         // Linha informativa (D-050): sem entrada na fatura, sem sugestão de categoria.
         if (nature === 'adjustment') continue;
         cardItems.push({ externalKey, externalTransactionId: transaction.id, description, amountCents: semantics.amountCents, competence, nature,
@@ -449,6 +468,7 @@ export async function synchronizeTransactionUpdates(
   const institutionName = item.connector?.name?.trim() || 'Instituição conectada';
   const account = await findAccount(pluggy, connection.item_id, externalAccountId);
   const mapped = await ensureAccount(database, connection, account, institutionName);
+  const accountInstitutionName = await accountInstitution(database, pluggy, item.connector?.id, institutionName, account, mapped.mappingId, {});
   const rules = await loadClassificationRules(database, ownerId);
 
   for (let offset = 0; offset < transactionIds.length; offset += 500) {
@@ -456,7 +476,7 @@ export async function synchronizeTransactionUpdates(
     let cursor: string | null = null;
     do {
       const page = await pluggy.getTransactionsByIds(externalAccountId, ids, cursor);
-      await persistTransactions(database, connection, mapped, institutionName, page.results, rules);
+      await persistTransactions(database, connection, mapped, accountInstitutionName, page.results, rules);
       cursor = page.next;
     } while (cursor);
   }
@@ -516,17 +536,19 @@ export async function synchronizeConnection(
 
     let accountPage = 1;
     const accountPageSize = 100;
+    const catalog: { banks?: Promise<PluggyConnector[]> } = {};
     while (true) {
       const response = await pluggy.getAccounts(connection.item_id, accountPage, accountPageSize);
       for (const account of response.results) {
         const mapped = await ensureAccount(database, connection, account, institutionName);
+        const accountInstitutionName = await accountInstitution(database, pluggy, item.connector?.id, institutionName, account, mapped.mappingId, catalog);
         if (mapped.created) importedAccounts += 1;
         let transactionPage = 1;
         let transactionCursor: string | null = null;
         do {
           const createdAtFrom = mapped.type === 'credit_card' ? undefined : incrementalFrom(connection.last_success_at);
           const page = await pluggy.getTransactions(account.id, createdAtFrom, transactionCursor);
-          const persisted = await persistTransactions(database, connection, mapped, institutionName, page.results, rules);
+          const persisted = await persistTransactions(database, connection, mapped, accountInstitutionName, page.results, rules);
           skippedTransactions += persisted.skipped;
           importedTransactions += persisted.imported;
           await database.from('sync_runs').update({

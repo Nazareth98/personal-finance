@@ -69,6 +69,23 @@ function normalizedEvidence(value: string | null): string {
   return (value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+export type PluggyConnector = { id: number; name: string; isOpenFinance?: boolean | null };
+/** Conector agregador: a conex\u00e3o \u00e9 do MeuPluggy, n\u00e3o do banco; o banco de cada conta vem do nome dela. */
+export const MEU_PLUGGY_CONNECTOR_ID = 200;
+const GENERIC_NAME_WORDS = new Set(['banco', 'bank', 'conta', 'cartao', 'de', 'do', 'da']);
+
+/**
+ * D-056: banco da conta pelo nome (\u201cLATAM PASS ITAU VISA GOLD\u201d \u2192 Ita\u00fa): a primeira palavra pr\u00f3pria do nome do
+ * conector precisa aparecer no nome da conta. Mais de um banco poss\u00edvel \u2192 nenhum (sem chute).
+ */
+export function institutionFromAccountName(accountName: string, connectors: readonly PluggyConnector[]): PluggyConnector | undefined {
+  const words = new Set(normalizedEvidence(accountName).split(' '));
+  const keyOf = (connector: PluggyConnector) => normalizedEvidence(connector.name).split(' ').find(word => word.length >= 3 && !GENERIC_NAME_WORDS.has(word));
+  const matches = connectors.filter(connector => { const key = keyOf(connector); return key !== undefined && words.has(key); })
+    .sort((a, b) => Number(Boolean(a.isOpenFinance)) - Number(Boolean(b.isOpenFinance)) || a.id - b.id);
+  return new Set(matches.map(keyOf)).size === 1 ? matches[0] : undefined;
+}
+
 export function ledgerSemantics(transaction: PluggyTransaction): {
   nature: 'income' | 'expense' | 'card_payment' | 'savings_contribution' | 'savings_withdrawal';
   reporting: 'income' | 'expense' | 'neutral';
