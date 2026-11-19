@@ -2,7 +2,7 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
 import { billCompetences, cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
 import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, merchantName, MEU_PLUGGY_CONNECTOR_ID, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyConnector, type PluggyTransaction } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, merchantName, MEU_PLUGGY_CONNECTOR_ID, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
 import { safeError } from './http.ts';
 
@@ -97,27 +97,14 @@ async function ensureCreditCard(database: SupabaseClient, ownerId: string, accou
 }
 
 /**
- * D-056: no MeuPluggy a conexão é do agregador; o banco de cada conta (logo e reconhecimento de salário) vem do
- * catálogo de bancos da Pluggy casado pelo nome da conta. Falha no catálogo não interrompe a importação.
+ * D-056: no MeuPluggy a conexão é do agregador; o banco de cada conta (logo e reconhecimento de salário) vem da
+ * lista de bancos conhecidos (`KNOWN_BANKS`) casada pelo nome da conta. Sem casamento, vale o nome da conexão.
  */
 async function accountInstitution(
-  database: SupabaseClient, pluggy: PluggyClient, connectorId: number | undefined, fallbackName: string,
-  account: PluggyAccount, mappingId: string, catalog: { banks?: Promise<PluggyConnector[]> }
+  database: SupabaseClient, connectorId: number | undefined, fallbackName: string, account: PluggyAccount, mappingId: string
 ): Promise<string> {
   if (connectorId !== MEU_PLUGGY_CONNECTOR_ID) return fallbackName;
-  // Diagnóstico sem dados pessoais (D-056): tamanho do catálogo, código do erro e o banco casado por tipo de conta.
-  catalog.banks ??= pluggy.getBankConnectors()
-    .then(page => {
-      const banks = Array.isArray(page?.results) ? page.results : [];
-      console.info('pluggy_bank_catalog', { size: banks.length });
-      return banks;
-    })
-    .catch(error => {
-      console.warn('pluggy_bank_catalog_failed', { reason: error instanceof Error ? error.message.slice(0, 60) : 'unknown' });
-      return [];
-    });
-  const bank = institutionFromAccountName(account.name ?? '', await catalog.banks);
-  console.info('pluggy_account_bank', { accountType: account.type ?? null, matchedConnectorId: bank?.id ?? null });
+  const bank = institutionFromAccountName(account.name ?? '');
   if (!bank) return fallbackName;
   const stored = await database.rpc('internal_set_pluggy_account_institution', {
     p_mapping_id: mappingId, p_connector_id: bank.id, p_institution_name: bank.name.slice(0, 100)
@@ -479,7 +466,7 @@ export async function synchronizeTransactionUpdates(
   const institutionName = item.connector?.name?.trim() || 'Instituição conectada';
   const account = await findAccount(pluggy, connection.item_id, externalAccountId);
   const mapped = await ensureAccount(database, connection, account, institutionName);
-  const accountInstitutionName = await accountInstitution(database, pluggy, item.connector?.id, institutionName, account, mapped.mappingId, {});
+  const accountInstitutionName = await accountInstitution(database, item.connector?.id, institutionName, account, mapped.mappingId);
   const rules = await loadClassificationRules(database, ownerId);
 
   for (let offset = 0; offset < transactionIds.length; offset += 500) {
@@ -547,12 +534,11 @@ export async function synchronizeConnection(
 
     let accountPage = 1;
     const accountPageSize = 100;
-    const catalog: { banks?: Promise<PluggyConnector[]> } = {};
     while (true) {
       const response = await pluggy.getAccounts(connection.item_id, accountPage, accountPageSize);
       for (const account of response.results) {
         const mapped = await ensureAccount(database, connection, account, institutionName);
-        const accountInstitutionName = await accountInstitution(database, pluggy, item.connector?.id, institutionName, account, mapped.mappingId, catalog);
+        const accountInstitutionName = await accountInstitution(database, item.connector?.id, institutionName, account, mapped.mappingId);
         if (mapped.created) importedAccounts += 1;
         let transactionPage = 1;
         let transactionCursor: string | null = null;

@@ -1,4 +1,4 @@
-import type { PluggyAccount, PluggyConnector, PluggyTransaction } from './pluggy-domain.ts';
+import type { PluggyAccount, PluggyTransaction } from './pluggy-domain.ts';
 
 type Page<T> = { results: T[]; total?: number; totalPages?: number; page?: number };
 type CursorPage<T> = { results: T[]; next: string | null };
@@ -46,11 +46,6 @@ export class PluggyClient {
 
   getItem(itemId: string): Promise<PluggyItem> {
     return this.request(`/items/${encodeURIComponent(itemId)}`);
-  }
-
-  // shortcut: lê só a primeira página do catálogo; se a Pluggy paginar os bancos do BR, percorrer totalPages.
-  getBankConnectors(): Promise<Page<PluggyConnector>> {
-    return this.request('/connectors?countries=BR&types=PERSONAL_BANK');
   }
 
   getAccounts(itemId: string, page: number, pageSize = 100): Promise<Page<PluggyAccount>> {

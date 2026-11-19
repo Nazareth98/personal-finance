@@ -73,13 +73,15 @@ test('linha informativa da fatura anterior fica neutra e fora da fatura (D-050)'
 
 
 test('banco da conta do MeuPluggy sai do nome da conta, sem chute quando ambíguo (D-056)', () => {
-  const connectors = [
-    { id: 601, name: 'Itaú', isOpenFinance: true }, { id: 201, name: 'Itaú' }, { id: 219, name: 'Caixa Econômica Federal' },
-    { id: 212, name: 'Nubank' }, { id: 1, name: 'Banco do Brasil' }, { id: 2, name: 'Banco Inter' }
-  ];
-  assert.equal(institutionFromAccountName('LATAM PASS ITAU VISA GOLD', connectors)?.id, 201);
-  assert.equal(institutionFromAccountName('itau', connectors)?.id, 201);
-  assert.equal(institutionFromAccountName('CAIXA SIM VISA INTERN CREDITO', connectors)?.id, 219);
-  assert.equal(institutionFromAccountName('Banco conta corrente', connectors), undefined);
-  assert.equal(institutionFromAccountName('NUBANK ITAU', connectors), undefined);
+  // Nomes reais das contas do MeuPluggy (produto, sem dado pessoal); a lista padrão é KNOWN_BANKS.
+  assert.equal(institutionFromAccountName('LATAM PASS ITAU VISA GOLD')?.id, 201);
+  assert.equal(institutionFromAccountName('ITAU VISA PLATINUM')?.id, 201);
+  assert.equal(institutionFromAccountName('itau')?.id, 201);
+  assert.equal(institutionFromAccountName('CAIXA')?.id, 219);
+  assert.equal(institutionFromAccountName('CAIXA SIM VISA INTERN CREDITO')?.id, 219);
+  assert.equal(institutionFromAccountName('C6 CARBON')?.id, 226);
+  assert.equal(institutionFromAccountName('Banco conta corrente'), undefined);
+  assert.equal(institutionFromAccountName('NUBANK ITAU'), undefined);
+  // O catálogo explícito ainda prefere o conector clássico ao Open Finance do mesmo banco.
+  assert.equal(institutionFromAccountName('itau', [{ id: 601, name: 'Itaú', isOpenFinance: true }, { id: 201, name: 'Itaú' }])?.id, 201);
 });

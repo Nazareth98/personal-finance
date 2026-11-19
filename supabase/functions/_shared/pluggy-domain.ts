@@ -75,12 +75,24 @@ export const MEU_PLUGGY_CONNECTOR_ID = 200;
 const GENERIC_NAME_WORDS = new Set(['banco', 'bank', 'conta', 'cartao', 'de', 'do', 'da']);
 
 /**
+ * Bancos com conector conhecido na Pluggy, conferidos pelos \u00edcones do CDN em 19/11/2026. O cat\u00e1logo
+ * `GET /connectors` com a chave do MeuPluggy s\u00f3 devolve o pr\u00f3prio MeuPluggy (D-056, log `size: 1`).
+ * shortcut: lista curta e manual; inclua o banco aqui quando conectar outro pelo MeuPluggy.
+ */
+export const KNOWN_BANKS: readonly PluggyConnector[] = [
+  { id: 201, name: 'Ita\u00fa' }, { id: 219, name: 'Caixa Econ\u00f4mica Federal' }, { id: 203, name: 'Bradesco' },
+  { id: 208, name: 'Santander' }, { id: 211, name: 'Banco do Brasil' }, { id: 212, name: 'Nubank' },
+  { id: 215, name: 'Banco Inter' }, { id: 226, name: 'C6 Bank' }, { id: 214, name: 'BTG Pactual' },
+  { id: 206, name: 'Mercado Pago' }, { id: 202, name: 'XP Investimentos' }
+];
+
+/**
  * D-056: banco da conta pelo nome (\u201cLATAM PASS ITAU VISA GOLD\u201d \u2192 Ita\u00fa): a primeira palavra pr\u00f3pria do nome do
  * conector precisa aparecer no nome da conta. Mais de um banco poss\u00edvel \u2192 nenhum (sem chute).
  */
-export function institutionFromAccountName(accountName: string, connectors: readonly PluggyConnector[]): PluggyConnector | undefined {
+export function institutionFromAccountName(accountName: string, connectors: readonly PluggyConnector[] = KNOWN_BANKS): PluggyConnector | undefined {
   const words = new Set(normalizedEvidence(accountName).split(' '));
-  const keyOf = (connector: PluggyConnector) => normalizedEvidence(connector.name).split(' ').find(word => word.length >= 3 && !GENERIC_NAME_WORDS.has(word));
+  const keyOf = (connector: PluggyConnector) => normalizedEvidence(connector.name).split(' ').find(word => word.length >= 2 && !GENERIC_NAME_WORDS.has(word));
   const matches = connectors.filter(connector => { const key = keyOf(connector); return key !== undefined && words.has(key); })
     .sort((a, b) => Number(Boolean(a.isOpenFinance)) - Number(Boolean(b.isOpenFinance)) || a.id - b.id);
   return new Set(matches.map(keyOf)).size === 1 ? matches[0] : undefined;

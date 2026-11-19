@@ -144,9 +144,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 ## D-056 — Banco de cada conta vinda do MeuPluggy (19/11/2026)
 
 - Problema: as conexões são do agregador MeuPluggy (conector 200), então todas as contas mostravam a logo e o nome do MeuPluggy; o reconhecimento de salário do Itaú (pelo nome da instituição) também não disparava.
-- A Pluggy não informa o banco por conta. Na sincronização, para conexões MeuPluggy, o backend lê o catálogo de bancos (`GET /connectors?countries=BR&types=PERSONAL_BANK`) e casa a primeira palavra própria do nome do banco com o nome da conta (`institutionFromAccountName`); mais de um banco possível → nenhum.
+- A Pluggy não informa o banco por conta. Na sincronização, para conexões MeuPluggy, o backend casa com a lista `KNOWN_BANKS` (ids conferidos pelos ícones do CDN da Pluggy; o catálogo `GET /connectors` com a chave do MeuPluggy só devolve o próprio MeuPluggy, visto no log em 19/11) e casa a primeira palavra própria do nome do banco com o nome da conta (`institutionFromAccountName`); mais de um banco possível → nenhum.
 - O conector e o nome do banco ficam em `private.pluggy_accounts` (gravados só pelo `service_role`); `get_account_institutions` os prefere ao da conexão. Falha no catálogo não interrompe a importação.
-- Limite: salário já importado não é reconhecido de novo; o catálogo é lido só na primeira página.
+- Limite: salário já importado não é reconhecido de novo; banco fora de `KNOWN_BANKS` continua com a logo do MeuPluggy até entrar na lista.
 
 ## D-057 — Diálogo: rodapé de verdade e pergunta no corpo (19/11/2026)
 
