@@ -49,9 +49,17 @@ test('normaliza compras, estornos e pagamentos de cartão para o domínio', () =
   assert.deepEqual(cardLedgerSemantics({ id: '2', accountId: 'card', amount: '-23.45', date: '2026-11-02', type: 'CREDIT', operationType: 'ESTORNO' }), {
     amountCents: 2345n, nature: 'refund', reporting: 'expense'
   });
-  assert.deepEqual(cardLedgerSemantics({ id: '3', accountId: 'card', amount: '-100.00', date: '2026-11-03', type: 'CREDIT', operationType: 'PAGAMENTO_FATURA' }), {
-    amountCents: -10000n, nature: 'card_payment', reporting: 'neutral'
-  });
+});
+
+test('pagamento visto pelo cartão é espelho neutro, não estorno nem pagamento (D-053)', () => {
+  const credit = { id: 'p', accountId: 'card', amount: '-100.00', date: '2026-11-03', type: 'CREDIT' } as PluggyTransaction;
+  const mirror = { amountCents: 10000n, nature: 'adjustment', reporting: 'neutral' };
+  assert.deepEqual(cardLedgerSemantics({ ...credit, operationType: 'PAGAMENTO_FATURA' }), mirror);
+  assert.deepEqual(cardLedgerSemantics({ ...credit, description: 'PGTO BOLETO CAIXA' }), mirror);
+  assert.deepEqual(cardLedgerSemantics({ ...credit, description: 'PAGAMENTO COM SALDO' }), mirror);
+  assert.deepEqual(cardLedgerSemantics({ ...credit, description: 'Pagamento recebido' }), mirror);
+  assert.equal(cardLedgerSemantics({ ...credit, description: 'PAG*LOJA EXEMPLO' }).nature, 'refund');
+  assert.equal(cardLedgerSemantics({ ...credit, description: 'ESTORNO PAGAMENTO LOJA' }).nature, 'refund');
 });
 
 test('linha informativa da fatura anterior fica neutra e fora da fatura (D-050)', () => {

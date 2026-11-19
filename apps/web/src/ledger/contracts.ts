@@ -29,7 +29,7 @@ export type TransactionSemanticOverride = {
   statementId?: string;
   savingsBoxId?: string;
   /** Automáticos (D-050) são reversíveis e nunca substituem uma decisão do proprietário. */
-  reason: 'owner_confirmation' | 'auto_statement_carryover' | 'auto_card_payment_match';
+  reason: 'owner_confirmation' | 'auto_statement_carryover' | 'auto_card_payment_match' | 'auto_card_payment_mirror';
   semanticVersion: 'semantics-v1';
   updatedAt: string;
 };

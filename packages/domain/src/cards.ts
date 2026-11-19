@@ -82,6 +82,19 @@ export function cardCompetence(eventDate: string, card: CardCalendar): string {
   return monthString(dueMonth);
 }
 
+/**
+ * D-054: a fatura informada pelo banco (billId) vence uma vez, então todas as suas compras ficam na competência
+ * da compra mais recente — parcelas chegam com a data da compra original e cairiam numa fatura antiga.
+ * shortcut: só enxerga os itens do lote; uma fatura com apenas parcelas antigas no lote fica na competência delas.
+ */
+export function billCompetences(items: readonly { billId?: string; competence: string }[]): Map<string, string> {
+  const result = new Map<string, string>();
+  for (const item of items) {
+    if (item.billId && item.competence > (result.get(item.billId) ?? '')) result.set(item.billId, item.competence);
+  }
+  return result;
+}
+
 export function cardStatementDates(competence: string, card: CardCalendar): { closingDate: string; dueDate: string } {
   validateCalendar(card);
   const match = /^(\d{4})-(\d{2})$/.exec(competence);

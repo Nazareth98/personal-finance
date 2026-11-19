@@ -19,7 +19,7 @@ export type {
   ClassificationResult,
   ClassificationRule
 } from './classification.ts';
-export { addCompetenceMonths, cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments } from './cards.ts';
+export { addCompetenceMonths, billCompetences, cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments } from './cards.ts';
 export type { CardInstallment, CardStatement, CardStatementEntry, CardStatementSummary, CreditCard } from './cards.ts';
 export { buildSixMonthForecast, recognizeItauSalary } from './forecast.ts';
 export type { ForecastMonth, SixMonthForecastInput } from './forecast.ts';

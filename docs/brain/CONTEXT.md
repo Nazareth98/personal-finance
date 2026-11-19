@@ -26,7 +26,7 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 - Transferências próprias têm os dois lados vinculados e não alteram receita ou consumo.
 - Ajustes manuais são lançamentos separados; o dado importado permanece imutável.
 - Metas são tetos mensais em reais por categoria (12× na visão anual), independentes da receita, e não acumulam (D-046).
-- Linha informativa do cartão (“TOTAL DA FATURA ANTERIOR”) é ajuste neutro fora da fatura; pagamento na conta só é vinculado automaticamente a uma fatura do mesmo banco com evidência única (D-050).
+- Linhas do cartão que não são compra — informativa (“TOTAL DA FATURA ANTERIOR”) e espelho do pagamento — são ajuste neutro fora da fatura; só o débito na conta quita a fatura e é vinculado automaticamente à primeira fatura do mesmo banco, com evidência, que vence a partir do pagamento (D-050, D-053, D-054). Compra com `billId` fica na fatura informada pelo banco (D-054).
 - Correções automáticas usam overrides reversíveis e nunca sobrepõem decisão do proprietário nem lançamento confirmado.
 - “Ocultar valores” é preferência do aparelho: mascara a exibição, não altera dados (D-049).
 - Previsão usa seis meses de receitas recorrentes; extraordinárias não entram na média.

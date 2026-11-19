@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments, type CardStatement, type TransactionContract } from '../src/index.ts';
+import { billCompetences, cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments, type CardStatement, type TransactionContract } from '../src/index.ts';
 
 test('atribui compra à fatura pelo fechamento e vencimento sem conversão de fuso', () => {
   assert.equal(cardCompetence('2026-11-20', { closingDay: 28, dueDay: 5 }), '2026-12');
@@ -31,4 +31,14 @@ test('pagamento não vira despesa e estorno reduz o aberto da fatura', () => {
     { id: '3', statementId: 'statement', transactionId: 'payment', type: 'payment' }
   ], transactions);
   assert.deepEqual(summary, { purchasesCents: 10000n, refundsCents: 2000n, paymentsCents: 3000n, openCents: 5000n, status: 'partial' });
+});
+
+test('compra fica na fatura informada pelo banco, não na da data original da parcela (D-054)', () => {
+  const byBill = billCompetences([
+    { billId: 'b1', competence: '2026-04' }, // parcela com a data da compra original
+    { billId: 'b1', competence: '2026-09' },
+    { billId: 'b2', competence: '2026-10' },
+    { competence: '2026-05' }
+  ]);
+  assert.deepEqual([...byBill], [['b1', '2026-09'], ['b2', '2026-10']]);
 });

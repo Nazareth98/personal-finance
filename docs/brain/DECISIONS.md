@@ -119,3 +119,18 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Aparece nos cards de Contas (conta manual mantém o ícone do tipo), no cabeçalho de cada cartão, na linha da conta nas Transações e nas opções do seletor de fatura.
 - Pendente: guardar `imageUrl`/`primaryColor` do conector na sincronização e cópia local da logo — exige publicar as Edge Functions.
 
+
+## D-053 — Pagamento visto pelo cartão é espelho neutro (19/11/2026)
+
+- Problema: o crédito do pagamento no extrato do cartão (Caixa “PGTO BOLETO …”, outro cartão “PAGAMENTO COM SALDO/DEBITO AUTOMATICO/PIX”) entrava como estorno — abatia o gasto do mês e o total da fatura (faturas da Caixa a 2–103% do banco, algumas negativas); o “Pagamento recebido” reconhecido entrava como pagamento e contava junto com o débito da conta.
+- Crédito no cartão que começa com “pagamento/pagto/pgto”, ou reconhecido como pagamento de fatura, é `adjustment` neutro e fora da fatura. Só o débito na conta quita a fatura (D-050). “PAG*LOJA” continua estorno.
+- Já gravados: override automático `auto_card_payment_mirror` em `internal_match_card_payments` (aplicado em 19/11: 28 espelhos neutralizados, 19 pagamentos da conta vinculados); a linha espelho também serve de evidência de valor para o casamento da conta.
+- Limite: fatura paga por conta não conectada aparece em aberto, pois não há débito para vincular.
+
+## D-054 — Fatura pelo billId e pagamento na próxima fatura a vencer (19/11/2026)
+
+- Problema: parcelas chegam do MeuPluggy com a data da compra original e caíam numa fatura antiga (Itaú com faturas a 11% e 214% pagas); pagamento feito após o vencimento ia para a fatura já vencida (janela de +20 dias).
+- Compras com `billId` (fatura informada pelo banco) ficam todas na competência da compra mais recente do billId (`billCompetences`); sem billId vale a data. Limite: só enxerga o lote importado.
+- Pagamento da conta quita a primeira fatura com evidência que vence a partir do pagamento (tolerância de 3 dias de atraso, até 40 dias à frente).
+- `competence` de lançamento importado é derivada: o gatilho de imutabilidade passa a aceitar mudança dela só pelo backend (`auth.uid()` nulo); o app continua sem alterar importados.
+- Migration `card_bill_statements` reaplica o calendário atual dos cartões (Itaú: fechamento 7, vencimento 15), move entradas, competências e parcelas, e refaz os vínculos automáticos; os do proprietário ficam.

@@ -101,9 +101,15 @@ export function isStatementCarryover(transaction: PluggyTransaction): boolean {
   return /\b(?:total da fatura anterior|saldo (?:da )?fatura anterior|saldo anterior da fatura)\b/.test(normalizedEvidence(transaction.description ?? ''));
 }
 
+/** Crédito no cartão que é o pagamento da fatura (“PGTO BOLETO …”, “PAGAMENTO COM SALDO”). */
+function isCardPaymentMirror(transaction: PluggyTransaction): boolean {
+  // Sem “pag” sozinho: “PAG*LOJA” é estabelecimento e o estorno dele é estorno de verdade.
+  return /^(?:pagamento|pagto|pgto)\b/.test(normalizedEvidence(transaction.description ?? ''));
+}
+
 export function cardLedgerSemantics(transaction: PluggyTransaction): {
   amountCents: bigint;
-  nature: 'expense' | 'refund' | 'card_payment' | 'adjustment';
+  nature: 'expense' | 'refund' | 'adjustment';
   reporting: 'expense' | 'neutral';
 } {
   const amount = centsFromPluggy(transaction.amount);
@@ -111,11 +117,13 @@ export function cardLedgerSemantics(transaction: PluggyTransaction): {
   if (isStatementCarryover(transaction)) {
     return { amountCents: amount < 0n ? amount : -amount, nature: 'adjustment', reporting: 'neutral' };
   }
-  if (ledgerSemantics(transaction).nature === 'card_payment') {
-    return { amountCents: amount < 0n ? amount : -amount, nature: 'card_payment', reporting: 'neutral' };
-  }
   const magnitude = amount < 0n ? -amount : amount;
   const credit = transaction.type?.toUpperCase() === 'CREDIT' || (!transaction.type && amount < 0n);
+  // D-053: o pagamento visto pelo cartão espelha o débito na conta, que é quem quita a fatura;
+  // como estorno ele abatia gasto e fatura, e como pagamento contava duas vezes.
+  if (ledgerSemantics(transaction).nature === 'card_payment' || (credit && isCardPaymentMirror(transaction))) {
+    return { amountCents: magnitude, nature: 'adjustment', reporting: 'neutral' };
+  }
   return credit
     ? { amountCents: magnitude, nature: 'refund', reporting: 'expense' }
     : { amountCents: -magnitude, nature: 'expense', reporting: 'expense' };

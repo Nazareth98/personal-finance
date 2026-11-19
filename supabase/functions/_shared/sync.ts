@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
-import { cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
+import { billCompetences, cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
 import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
 import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, merchantName, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
@@ -221,6 +221,11 @@ function transactionRows(
       skipped += 1;
     }
   }
+  // D-054: compra vai para a fatura que o banco informou (billId), não para a da data da compra original.
+  const byBill = billCompetences(cardItems.map(item => ({ billId: item.providerBillId, competence: item.competence })));
+  for (const item of cardItems) item.competence = (item.providerBillId && byBill.get(item.providerBillId)) || item.competence;
+  const competenceByKey = new Map(cardItems.map(item => [item.externalKey, item.competence]));
+  for (const row of ledger) row.competence = competenceByKey.get(String(row.external_key)) ?? row.competence;
   return { raw, ledger, cardItems, incomeCandidates, candidates, skipped };
 }
 
