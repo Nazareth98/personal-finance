@@ -205,13 +205,14 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .auth-brand img{display:block;width:40px;height:40px;border-radius:10px}
 /* Painel da marca: superfície da ação primária; tudo dentro deriva de --color-text-on-action. */
 .auth-hero{--hero-ink:var(--color-text-on-action);--hero-soft:color-mix(in srgb,var(--hero-ink) 72%,transparent);--hero-line:color-mix(in srgb,var(--hero-ink) 22%,transparent);--hero-fill:color-mix(in srgb,var(--hero-ink) 12%,transparent);
-  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:var(--spacing-8);padding:var(--spacing-8) var(--spacing-12);background:var(--color-action-primary);color:var(--hero-ink)}
+  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:var(--spacing-8);padding:var(--spacing-8) clamp(var(--spacing-12),calc((50vw - 560px) / 2),240px);background:var(--color-action-primary);color:var(--hero-ink)}
 .auth-hero::before{content:"";position:absolute;inset:auto -20% -45% auto;width:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,var(--hero-fill),transparent);pointer-events:none}
 .auth-hero .auth-brand img{box-shadow:0 0 0 1px var(--hero-line)}
 /* No escuro o azul cheio ofusca: o painel vira um azul profundo, mantendo o tom da marca. */
 [data-theme="dark"] .auth-hero{background:color-mix(in srgb,var(--color-action-primary) 30%,var(--color-bg-canvas))}
 [data-theme="dark"] .auth-flow__tile{background:var(--color-action-primary);color:var(--color-text-on-action)}
-.auth-hero__body{position:relative;display:grid;gap:var(--spacing-4);max-width:480px}
+/* Telas grandes: coluna de 560px centralizada no painel — marca, texto e rodapé no mesmo eixo (D-048). */
+.auth-hero__body{position:relative;display:grid;gap:var(--spacing-4);width:100%;max-width:560px}
 .auth-hero__title{margin:0;font:700 clamp(28px,3vw,40px)/1.12 var(--font-family-sans);letter-spacing:-.02em}
 .auth-hero__copy{margin:0 0 var(--spacing-6);color:var(--hero-ink);font-size:var(--font-size-base);line-height:1.55}
 .auth-hero__foot{position:relative;display:inline-flex;align-items:center;gap:var(--spacing-2);margin:0;color:var(--hero-ink);font-size:var(--font-size-sm)}
