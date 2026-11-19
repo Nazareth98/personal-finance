@@ -115,11 +115,12 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
       {panels.unbudgeted.length === 0
         ? <p className="muted">Nenhum gasto categorizado fora das metas neste período.</p>
         : <ul aria-label="Categorias com gasto e sem meta">{panels.unbudgeted.map(item => <li key={item.categoryId}>
-          <span className="budget-unbudgeted__name">{item.category ? <CategoryIdentityIcon iconKey={item.category.iconKey} colorKey={item.category.colorKey} /> : null}{item.name}</span>
-          <span className="budget-unbudgeted__value">− {formatCentsBRL(item.spentCents)}
-            {item.category && !item.category.archivedAt && item.category.applicability === 'expense'
-              ? <Button variant="secondary" size="sm" aria-label={`Definir meta para ${item.name}`} onClick={() => setForm({ categoryId: item.categoryId })}>Definir meta</Button>
-              : null}</span>
+          {item.category ? <CategoryIdentityIcon iconKey={item.category.iconKey} colorKey={item.category.colorKey} /> : <span aria-hidden="true" />}
+          <span className="budget-unbudgeted__text"><span className="budget-unbudgeted__name">{item.name}</span>
+            <span className="budget-unbudgeted__value">− {formatCentsBRL(item.spentCents)}</span></span>
+          {item.category && !item.category.archivedAt && item.category.applicability === 'expense'
+            ? <Button variant="secondary" size="sm" aria-label={`Definir meta para ${item.name}`} onClick={() => setForm({ categoryId: item.categoryId })}>Definir meta</Button>
+            : null}
         </li>)}</ul>}
     </Card>
     {form && <BudgetForm key={form.budget?.id ?? form.categoryId ?? 'new'} open onClose={() => setForm(null)} ledger={ledger}

@@ -438,9 +438,15 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .budget-unbudgeted__heading h2{margin:0;font-size:var(--font-size-base)}
 .budget-unbudgeted>.muted{margin:0}
 .budget-unbudgeted ul{margin:0;padding:0;list-style:none}
-.budget-unbudgeted li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--spacing-2) var(--spacing-3);min-height:44px;padding:var(--spacing-2) 0;border-top:1px solid var(--color-border-default)}
-.budget-unbudgeted__name{display:flex;flex:1 1 140px;align-items:center;gap:var(--spacing-3);min-width:0;overflow-wrap:anywhere;font-size:var(--font-size-sm);font-weight:500}
-.budget-unbudgeted__value{display:flex;margin-left:auto;align-items:center;gap:var(--spacing-3);font-size:var(--font-size-sm);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* D-047: ícone | nome e valor | ação, sempre numa linha; em telas estreitas o valor desce para baixo do nome. */
+.budget-unbudgeted li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--spacing-3);min-height:56px;padding:var(--spacing-3) 0;border-top:1px solid var(--color-border-default)}
+.budget-unbudgeted__text{display:flex;align-items:baseline;justify-content:space-between;gap:var(--spacing-1) var(--spacing-3);min-width:0}
+.budget-unbudgeted__name{min-width:0;overflow-wrap:anywhere;font-size:var(--font-size-sm);font-weight:500}
+.budget-unbudgeted__value{font-size:var(--font-size-sm);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:680px){
+  .budget-unbudgeted__text{flex-direction:column;align-items:flex-start}
+  .budget-unbudgeted__value{color:var(--color-text-secondary);font-size:var(--font-size-xs)}
+}
 .budget-form__actions .budget-form__delete{margin-right:auto;color:var(--color-status-danger)}
 @media(max-width:1100px){.goal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){

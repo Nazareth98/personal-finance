@@ -82,3 +82,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Previsão de 6 meses: o envelope de metas passa a ser a soma dos tetos mensais.
 - Aplicada no Supabase em 19/11/2026 (versão remota 20261119095640).
 
+## D-047 — Select com aparência própria e linhas de “Gastos sem meta” (19/11/2026)
+
+- `Select` deixa a aparência nativa: mesmo recuo do input à esquerda e seta própria (máscara SVG com `--color-text-secondary`) com respiro à direita. No Android o nativo somava recuo e colava a seta na borda. Campo de data alinhado à esquerda.
+- “Gastos sem meta”: grade ícone | nome e valor | ação numa linha só; até 680 px o valor desce para baixo do nome, em tom secundário.
+
