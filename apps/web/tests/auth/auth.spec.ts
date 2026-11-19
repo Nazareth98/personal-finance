@@ -202,6 +202,10 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         return;
       }
       rpcCalls.push({ path: url.pathname, body: route.request().postData() });
+      if (url.pathname.endsWith('/set_holder_name')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ paired: 5, neutralized: 41 }) });
+        return;
+      }
       const body = JSON.parse(route.request().postData() ?? '{}') as Record<string, string | null>;
       if (url.pathname.endsWith('/confirm_transaction_classification') && body.p_transaction_id && body.p_category_id) {
         confirmedCategories.set(body.p_transaction_id, body.p_category_id);
@@ -687,6 +691,24 @@ test('não sincroniza ao abrir quando a última tentativa é recente (D-061)', a
   expect(writes.some(write => write.path === '/functions/v1/pluggy-sync')).toBe(false);
 });
 
+test('nome do titular em Conta aplica a regra de Pix para si mesmo (D-062)', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await page.getByRole('button', { name: 'Menu da conta' }).click();
+  await page.getByRole('menuitem', { name: 'Nome do titular' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nome do titular' });
+  await dialog.getByLabel('Nome completo').fill('Titular');
+  await dialog.getByRole('button', { name: 'Salvar' }).click();
+  await expect(dialog.getByText('Informe nome e sobrenome.')).toBeVisible();
+  expect(writes.some(write => write.path === '/rest/v1/rpc/set_holder_name')).toBe(false);
+  await dialog.getByLabel('Nome completo').fill('  Titular   Sintético ');
+  await dialog.getByLabel('Nome completo').press('Enter');
+  await expect(page.getByText('Nome salvo. 5 transferências vinculadas e 41 Pix neutralizados.')).toBeVisible();
+  const call = writes.find(write => write.path === '/rest/v1/rpc/set_holder_name');
+  expect(JSON.parse(call?.body ?? '{}')).toEqual({ p_name: 'Titular Sintético' });
+});
+
 test('avisa quando não consegue iniciar uma conexão bancária', async ({ page }) => {
   await mockSupabase(page);
   await page.route('http://127.0.0.1:54321/functions/v1/pluggy-connect-token', route => route.fulfill({
@@ -1000,6 +1022,8 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await expect(page.getByRole('menu', { name: 'Menu da conta' })).toHaveCount(0);
   await expect(account).toBeFocused();
   await account.click();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitem', { name: 'Nome do titular' })).toBeFocused();
   await page.keyboard.press('ArrowDown');
   await expect(page.getByRole('menuitem', { name: 'Sair' })).toBeFocused();
   await page.keyboard.press('Enter');

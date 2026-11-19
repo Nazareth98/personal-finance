@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, SelfTransferResult, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
   data: LedgerData | null;
@@ -25,6 +25,7 @@ export type LedgerState = {
   createSavingsMovement: (draft: SavingsMovementDraft) => Promise<void>;
   linkSavingsMovement: (draft: SavingsMovementLinkDraft) => Promise<void>;
   confirmClassification: (draft: ClassificationConfirmation) => Promise<void>;
+  setHolderName: (name: string) => Promise<SelfTransferResult>;
   confirmTransactionSemantics: (draft: SemanticConfirmation) => Promise<void>;
   configureCreditCard: (draft: CreditCardConfiguration) => Promise<void>;
   linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
@@ -128,6 +129,13 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function setHolderName(name: string) {
+    if (!repository) throw new Error('ledger repository missing');
+    const result = await repository.setHolderName(name);
+    await refresh();
+    return result;
+  }
+
   async function confirmClassification(draft: ClassificationConfirmation) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.confirmClassification(draft);
@@ -160,6 +168,6 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
     createTransaction, saveBudget, deleteBudget, createSavingsBox, updateSavingsBox, deleteSavingsBox, createSavingsMovement, linkSavingsMovement,
-    confirmClassification, confirmTransactionSemantics, configureCreditCard, linkCardPayment
+    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, linkCardPayment
   };
 }

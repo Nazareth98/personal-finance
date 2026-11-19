@@ -1,13 +1,13 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { AccountIcon, Icon, LogOutIcon, MoonIcon, useFloatingLayer } from '@personal-finance/ui';
+import { AccountIcon, EditIcon, Icon, LogOutIcon, MoonIcon, useFloatingLayer } from '@personal-finance/ui';
 
-type AccountMenuProps = { darkTheme: boolean; onToggleTheme: () => void; onSignOut: () => void };
+type AccountMenuProps = { darkTheme: boolean; onToggleTheme: () => void; onSignOut: () => void; onEditHolder?: () => void };
 
 /**
  * Menu da conta (D-042, opção A): reúne tema e “Sair” num só lugar — no cabeçalho até 1000 px e
  * no rodapé da sidebar no desktop. “Sair” continua pedindo confirmação em quem chama.
  */
-export function AccountMenu({ darkTheme, onToggleTheme, onSignOut }: AccountMenuProps) {
+export function AccountMenu({ darkTheme, onToggleTheme, onSignOut, onEditHolder }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), list = useRef<HTMLDivElement>(null), menuId = useId();
   // Top layer: a sidebar recolhida (overflow hidden) cortava o menu.
@@ -43,6 +43,9 @@ export function AccountMenu({ darkTheme, onToggleTheme, onSignOut }: AccountMenu
       <button type="button" role="menuitemcheckbox" aria-checked={darkTheme} className="account-menu__item" onClick={onToggleTheme}>
         <Icon icon={MoonIcon} size="sm" /><span>Tema escuro</span><span className="account-menu__switch" aria-hidden="true" />
       </button>
+      {onEditHolder && <button type="button" role="menuitem" className="account-menu__item" onClick={() => { close(); onEditHolder(); }}>
+        <Icon icon={EditIcon} size="sm" /><span>Nome do titular</span>
+      </button>}
       <button type="button" role="menuitem" className="account-menu__item account-menu__item--danger"
         onClick={() => { close(); onSignOut(); }}>
         <Icon icon={LogOutIcon} size="sm" /><span>Sair</span>

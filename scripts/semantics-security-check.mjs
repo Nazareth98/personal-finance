@@ -60,3 +60,18 @@ assert.match(repository, /p_counterpart_account_id/);
 assert.match(repository, /from\('transaction_review_history'\)/);
 
 console.log('✓ Overlay semântico, vínculos atômicos, imutabilidade, grants e RLS validados estaticamente.');
+
+// D-062: Pix para o próprio titular — gravação interna só pelo backend/gatilho; o dono só define o nome.
+{
+  const selfSql = await readFile('supabase/migrations/20261119180000_self_transfers.sql', 'utf8');
+  assert.ok(selfSql.includes("'auto_self_transfer'"));
+  assert.ok(selfSql.includes('revoke all on function public.internal_match_self_transfers(uuid) from public, anon, authenticated;'));
+  assert.ok(selfSql.includes('grant execute on function public.internal_match_self_transfers(uuid) to service_role;'));
+  assert.ok(selfSql.includes('declare current_owner uuid := private.require_owner();'));
+  assert.ok(selfSql.includes('revoke all on function public.set_holder_name(text) from public, anon;'));
+  assert.ok(selfSql.includes('grant execute on function public.set_holder_name(text) to authenticated;'));
+  assert.ok(selfSql.includes('if pg_trigger_depth() > 1 then return null; end if;'));
+  assert.ok(selfSql.includes('first_name = last_name'), 'exige nome e sobrenome');
+  assert.ok(/not exists \(select 1 from public\.transaction_semantic_overrides where transaction_id = c\.id\)/.test(selfSql), 'não sobrescreve decisão existente');
+  console.log('✓ Pix para o próprio titular: nome definido só pelo dono, casamento interno sem sobrescrever decisões.');
+}

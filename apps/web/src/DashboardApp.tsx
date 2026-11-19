@@ -3,6 +3,7 @@ import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, Cards
 import { useTheme } from './hooks/useTheme';
 import { useValuesHidden } from './hooks/useValuesHidden';
 import { AccountMenu } from './components/AccountMenu';
+import { HolderNameForm } from './components/HolderNameForm';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
 import { TransactionsPage } from './pages/TransactionsPage';
@@ -69,6 +70,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   const [formOpen, setFormOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [holderOpen, setHolderOpen] = useState(false);
   const [actionSlot, setActionSlot] = useState<HTMLDivElement | null>(null);
   const cancelSignOut = useRef<HTMLButtonElement>(null);
   // Confirmação de saída começa no Cancelar (D-041); o diálogo nativo focaria o botão de fechar.
@@ -164,7 +166,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
         </Button>
         {onSignOut
           ? <AccountMenu darkTheme={theme === 'dark'} onToggleTheme={() => setPreference(theme === 'light' ? 'dark' : 'light')}
-            onSignOut={() => setConfirmingSignOut(true)} />
+            onSignOut={() => setConfirmingSignOut(true)} {...(ledgerRepository ? { onEditHolder: () => setHolderOpen(true) } : {})} />
           : <div className="sidebar-theme">
             <Button className="theme-toggle" size="sm" variant="ghost"
               aria-label={themeLabel} title={themeLabel}
@@ -218,6 +220,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       <p className="ui-dialog__question">Deseja sair do Personal Finance?</p>
       <p className="muted">Para voltar, você entra de novo com e-mail e senha. Nada é apagado.</p>
     </Dialog>
+    {ledgerRepository && <HolderNameForm open={holderOpen} onClose={() => setHolderOpen(false)} ledger={ledger} />}
     {ledgerRepository
       ? <ManualTransactionForm open={formOpen} onClose={() => setFormOpen(false)} ledger={ledger} />
       : <TransactionDemoForm open={formOpen} onClose={() => setFormOpen(false)} />}

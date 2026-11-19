@@ -181,3 +181,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Enquanto roda, aviso “Atualizando contas…” no topo; se falhar, aviso com link para Conexões. O livro é atualizado sem voltar ao carregamento (`ledger.refresh`). O botão “Sincronizar agora” em Conexões continua.
 - Por que não a cada X minutos: o MeuPluggy atualiza poucas vezes por dia, cada sincronização custa chamadas da Pluggy e execuções da Edge Function, e o webhook já cobre mudanças. Se o webhook falhar com frequência, a evolução é um agendamento no servidor.
 - Fora do protótipo: o selo “Atualizado há X” permanente no topo (a data continua em Conexões).
+
+## D-062 — Pix para o próprio titular (19/11/2026)
+
+- Problema: 23 Pix enviados ao próprio titular contavam como despesa e 29 recebidos dele como receita extraordinária (≈ R$ 49,5 mil e R$ 16,6 mil). A regra de não presumir conta própria só por ser Pix continua; o nome do titular é a evidência que faltava.
+- O nome do titular fica em `profiles.holder_name`, editado em Conta → “Nome do titular” (RPC `set_holder_name`, só o dono). Exige nome e sobrenome, para não casar Pix de parentes.
+- `internal_match_self_transfers` (service_role, gatilho por instrução após importar e ao salvar o nome): Pix com nome e sobrenome do titular e par em conta conectada (não cartão, mesmo valor oposto, até 3 dias) → transferência própria vinculada; sem par (conta fora do app, ex.: Nubank, a pedido do dono) → `adjustment` neutro. Motivo `auto_self_transfer`. Nunca sobrescreve override, vínculo, caixinha ou fatura.
+- O dono ainda pode corrigir pela Revisão (override do dono substitui o automático).

@@ -29,7 +29,7 @@ export type TransactionSemanticOverride = {
   statementId?: string;
   savingsBoxId?: string;
   /** Automáticos (D-050) são reversíveis e nunca substituem uma decisão do proprietário. */
-  reason: 'owner_confirmation' | 'auto_statement_carryover' | 'auto_card_payment_match' | 'auto_card_payment_mirror';
+  reason: 'owner_confirmation' | 'auto_statement_carryover' | 'auto_card_payment_match' | 'auto_card_payment_mirror' | 'auto_self_transfer';
   semanticVersion: 'semantics-v1';
   updatedAt: string;
 };
@@ -64,7 +64,11 @@ export type LedgerData = {
   cardInstallments: CardInstallment[];
   /** Opcional: ausente em demonstração ou se a consulta falhar. */
   institutions?: AccountInstitution[];
+  /** D-062: nome do titular, usado para reconhecer Pix para si mesmo. */
+  holderName?: string;
 };
+
+export type SelfTransferResult = { paired: number; neutralized: number };
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;
 export type AccountUpdate = Pick<FinancialAccount, 'name' | 'openingBalanceCents'>;
@@ -112,6 +116,7 @@ export type ManualTransactionDraft = {
 
 export interface LedgerRepository {
   load(): Promise<LedgerData>;
+  setHolderName(name: string): Promise<SelfTransferResult>;
   createAccount(draft: AccountDraft): Promise<void>;
   updateAccount(accountId: string, update: AccountUpdate): Promise<void>;
   /** Arquiva a conta; os lançamentos continuam no livro. */

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, SelfTransferResult, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -126,10 +126,14 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       .map(row => [row.category_id, Number(row.dependency_count)]));
     // D-052: logo/nome do banco por conta; falha aqui não impede o livro de carregar.
     const institutionsResult = await this.client.rpc('get_account_institutions');
+    // D-062: falha aqui também não impede o livro de carregar.
+    const profileResult = await this.client.from('profiles').select('holder_name').maybeSingle();
+    const holderName = profileResult.error ? undefined : (profileResult.data as { holder_name: string | null } | null)?.holder_name ?? undefined;
     const institutions = institutionsResult.error ? [] : ((institutionsResult.data ?? []) as { account_id: string; connector_id: number | null; institution_name: string }[])
       .map(row => ({ accountId: row.account_id, name: row.institution_name, ...(row.connector_id ? { connectorId: row.connector_id } : {}) }));
     return {
       institutions,
+      ...(holderName ? { holderName } : {}),
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: ((categoriesResult.data ?? []) as CategoryRow[]).map(row => ({
         id: row.id, name: row.name, type: row.category_type, applicability: row.applicability,
@@ -327,6 +331,13 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       p_movement_type: draft.type
     });
     if (error) throw error;
+  }
+
+  async setHolderName(name: string): Promise<SelfTransferResult> {
+    const { data, error } = await this.client.rpc('set_holder_name', { p_name: name });
+    if (error) throw error;
+    const result = (data ?? {}) as Partial<SelfTransferResult>;
+    return { paired: Number(result.paired ?? 0), neutralized: Number(result.neutralized ?? 0) };
   }
 
   async confirmClassification(draft: ClassificationConfirmation): Promise<void> {

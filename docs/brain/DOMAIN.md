@@ -22,7 +22,7 @@
 
 Vincular os dois lados por valor, proximidade de data, contas e descrição normalizada. Um lado ausente ou diferença por tarifa gera revisão; tarifa é despesa financeira separada.
 
-“Transferência” ou “PIX” informado pelo provedor descreve o meio de pagamento, não a natureza contábil. PIX enviado a terceiro é despesa; PIX recebido de terceiro é receita. O movimento só é `own_transfer` quando houver evidência positiva de titularidade do destino/origem ou conciliação com o outro lado em uma conta própria. Na dúvida, manter receita/despesa pendente de revisão; nunca neutralizar somente pela categoria do provedor.
+“Transferência” ou “PIX” informado pelo provedor descreve o meio de pagamento, não a natureza contábil. PIX enviado a terceiro é despesa; PIX recebido de terceiro é receita. O movimento só é `own_transfer` quando houver evidência positiva de titularidade do destino/origem ou conciliação com o outro lado em uma conta própria. Na dúvida, manter receita/despesa pendente de revisão; nunca neutralizar somente pela categoria do provedor. Nome e sobrenome do titular (cadastrado em Conta) no Pix são evidência positiva: com o outro lado numa conta conectada vira `own_transfer`; sem ele (conta própria fora do app), fica neutro (D-062).
 
 ## Metas
 
