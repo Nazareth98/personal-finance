@@ -158,9 +158,32 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-chart__bar-tracks{display:grid;gap:5px}
 .ui-chart__bar-track{height:11px;border-radius:var(--radius-sm);background:var(--color-bg-subtle);overflow:hidden}
 .ui-chart__bar-fill{height:100%;display:block;border-radius:var(--radius-sm)}
-.ui-chart__details{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:var(--spacing-2);font-size:var(--font-size-xs)}
-.ui-chart__details>div{display:grid;gap:2px}
-.ui-chart__details strong{color:var(--color-text-primary)}
+/* D-058: período em foco — faixa no mês, demais séries esmaecidas, tooltip acima do gráfico. */
+.ui-chart__columns,.ui-chart__bars,.ui-diverging,.ui-trend-plot{position:relative;border-radius:var(--radius-md)}
+.ui-chart__columns:focus-visible,.ui-chart__bars:focus-visible,.ui-diverging:focus-visible,.ui-trend-plot:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:4px}
+.ui-chart__column-group,.ui-chart__bar-group,.ui-diverging__group{position:relative;cursor:default}
+.ui-chart__column-group.is-active .ui-chart__column-bars,.ui-diverging__group.is-active,.ui-chart__bar-group.is-active{background:var(--color-bg-subtle);border-radius:var(--radius-sm)}
+.ui-chart__column,.ui-chart__bar-fill,.ui-diverging__bar{transition:opacity var(--motion-fast,150ms) var(--ease-standard,ease)}
+.has-active>:not(.is-active) :is(.ui-chart__column,.ui-chart__bar-fill,.ui-diverging__bar){opacity:.35}
+.ui-chart__column-group.is-active .ui-chart__column-label{color:var(--color-text-primary);font-weight:700}
+.ui-chart-tooltip{--tx:-50%;position:absolute;left:50%;bottom:100%;z-index:2;transform:translate(var(--tx),-8px);display:grid;gap:2px;min-width:max-content;padding:var(--spacing-2) var(--spacing-3);border-radius:var(--radius-md);background:var(--color-text-primary);color:var(--color-bg-surface);box-shadow:var(--shadow-md);font-size:var(--font-size-xs);line-height:1.4;font-variant-numeric:tabular-nums;pointer-events:none;text-align:left}
+.ui-chart-tooltip--start{--tx:-12px}
+.ui-chart-tooltip--end{--tx:calc(-100% + 12px)}
+.ui-chart-tooltip__title{opacity:.8}
+.ui-chart-tooltip strong{font-size:var(--font-size-sm)}
+.ui-chart-tooltip__row{display:flex;align-items:center;gap:var(--spacing-2)}
+.ui-chart-tooltip__row strong{margin-left:auto}
+.ui-trend-plot .ui-chart-tooltip{bottom:auto;transform:translate(var(--tx),calc(-100% - 14px))}
+.ui-trend-plot__hits{position:absolute;inset:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+.ui-trend-chart__guide{stroke:var(--color-chart-grid);stroke-width:2}
+.ui-trend-chart__point.is-active{fill:var(--color-chart-neutral)}
+.ui-chart-table{width:100%;border-collapse:collapse;font-size:var(--font-size-sm);font-variant-numeric:tabular-nums}
+.ui-chart-table th,.ui-chart-table td{padding:var(--spacing-2) var(--spacing-3);border-bottom:1px solid var(--color-border-default);text-align:right;white-space:nowrap}
+.ui-chart-table thead th{font-weight:500;color:var(--color-text-secondary)}
+.ui-chart-table :is(th,td):first-child{text-align:left}
+.ui-chart-table tbody th{font-weight:600}
+.ui-chart-table tbody tr.is-active{background:var(--color-bg-subtle)}
+.ui-chart__values{overflow-x:auto}
 .ui-chart__positive{color:var(--color-finance-positive);font-variant-numeric:tabular-nums}
 .ui-chart__negative{color:var(--color-finance-negative);font-variant-numeric:tabular-nums}
 .ui-chart__neutral{color:var(--color-finance-neutral);font-variant-numeric:tabular-nums}
@@ -172,9 +195,14 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-chart__column--projected,.ui-chart__swatch--projected{background:repeating-linear-gradient(45deg,var(--color-finance-neutral) 0 2px,transparent 2px 5px);border:1px solid var(--color-finance-neutral)}
 .ui-chart__column-label{text-align:center;font-size:var(--font-size-xs);color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ui-chart__column-group.is-current .ui-chart__column-label{color:var(--color-text-primary);font-weight:700}
-.ui-chart__more>summary{width:max-content;padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-md);color:var(--color-text-primary);font:600 var(--font-size-xs)/1.6 var(--font-family-sans);cursor:pointer}
-.ui-chart__more>summary:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
-.ui-chart__more[open]>summary{margin-bottom:var(--spacing-3)}
+.ui-chart__more{display:grid;gap:var(--spacing-3);padding-top:var(--spacing-3);border-top:1px solid var(--color-border-default)}
+.ui-chart__more-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--spacing-3)}
+.ui-chart__more-toggle{display:inline-flex;align-items:center;gap:var(--spacing-2);min-height:36px;padding:0 var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-bg-surface);color:var(--color-text-primary);font:500 var(--font-size-sm)/1 var(--font-family-sans);cursor:pointer}
+.ui-chart__more-toggle:hover{background:var(--color-bg-subtle)}
+.ui-chart__more-toggle:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+.ui-chart__more-chevron{transition:transform var(--motion-fast,150ms) var(--ease-standard,ease)}
+.ui-chart__more-toggle[aria-expanded="true"] .ui-chart__more-chevron{transform:rotate(90deg)}
+.ui-chart__more-summary{font-size:var(--font-size-sm);color:var(--color-text-secondary)}
 .ui-metric-card__support--positive{color:var(--color-finance-positive)}
 .ui-metric-card__support--negative{color:var(--color-finance-negative)}
 .ui-trend-chart{display:block;width:100%;height:auto;max-height:265px}
@@ -353,3 +381,5 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-logo-avatar--lg{width:40px;height:40px;font-size:13px}
 .ui-logo-avatar--monogram{background:var(--color-bg-subtle)}
 
+.ui-chart__values:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+.ui-trend-plot .ui-chart-tooltip--below{transform:translate(var(--tx),14px)}

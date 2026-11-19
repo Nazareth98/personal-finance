@@ -14,3 +14,13 @@ export function categoryPercentages(parts:readonly CategoryPart[]):{label:string
   const total=clean.reduce((sum,v)=>sum+v,0n);
   return parts.map((p,index)=>({label:p.label,percent:percentage(clean[index],total),index}));
 }
+/** Variação contra o período anterior com uma casa, arredondada (“+12,6%”, “−3%”); sem base, “—”. */
+export function changeLabel(value:bigint,previous:bigint|undefined):string {
+  if(previous===undefined||previous===0n)return '—';
+  const base=previous<0n?-previous:previous;
+  const scaled=(value-previous)*1000n;
+  const tenths=(scaled*2n+(scaled<0n?-base:base))/(2n*base);
+  if(tenths===0n)return '0%';
+  const size=tenths<0n?-tenths:tenths;
+  return `${tenths<0n?'−':'+'}${size/10n}${size%10n?`,${size%10n}`:''}%`;
+}

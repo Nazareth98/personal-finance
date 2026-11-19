@@ -51,4 +51,6 @@ O layout é responsivo, usa CSS/SVG sem biblioteca externa e fornece valores tex
 
 Playwright/Vitest para interações, análise axe, verificação dos pares de contraste em componentes reais e comparação visual Light/Dark. Não declarar componentes Stable somente por existirem histórias Storybook.
 
-`collapsibleDetails` recolhe os valores textuais em “Ver valores” (`<details>` nativo); a tabela para leitor de tela de cada gráfico continua sempre disponível. `axisLabel` encurta o rótulo do eixo e mantém o `label` completo na tabela e nos valores.
+**Interação (D-058).** Nos gráficos de série (`ColumnChart`, `CashFlowChart`, `TrendLineChart`, `DivergingColumnChart`), mouse, toque e teclado apontam o mesmo período (`useChartFocus`): a área do gráfico é um grupo focável (setas, Home, End), o período em foco ganha faixa `bg-subtle`, as demais séries caem para 35% e um tooltip mostra período, valores e variação contra o anterior. Uma região viva repete o texto para leitor de tela.
+
+**Valores.** Cada gráfico tem uma única tabela (`.ui-chart-table`: período, valores e “vs. anterior”). Com `collapsibleDetails`, o botão alterna “Ver valores”/“Ocultar valores” (`aria-expanded`); recolhida, a tabela continua acessível ao leitor de tela. Linha e coluna se destacam juntas. `axisLabel` encurta o rótulo do eixo e mantém o `label` completo na tabela e no tooltip.

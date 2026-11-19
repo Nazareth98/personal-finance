@@ -142,8 +142,36 @@ test('diálogo rola só o corpo; cabeçalho e ações ficam fixos',async ({page}
   const submit=dialog.getByRole('button',{name:'Validar demonstração'});
   expect(await body.evaluate(element=>element.scrollHeight>element.clientHeight)).toBe(true);
   await expect(dialog.locator('.ui-dialog__footer')).toContainText('Validar demonstração');
+  await dialog.evaluate(element=>Promise.all(element.getAnimations({subtree:true}).map(animation=>animation.finished)));
   const before=await submit.boundingBox();
   await body.evaluate(element=>{element.scrollTop=element.scrollHeight;});
   expect(await submit.boundingBox()).toEqual(before);
   expect(await dialog.evaluate(element=>element.scrollHeight<=element.clientHeight+1)).toBe(true);
+});
+
+test('gráfico destaca o período por mouse e teclado e liga a tabela de valores',async ({page})=>{
+  await page.goto('/#overview');
+  const plot=page.getByRole('group',{name:/use as setas/}).first();
+  await expect(plot).toBeVisible();
+  const group=plot.locator(':scope > *').nth(1);
+  await group.hover();
+  await expect(group).toHaveClass(/is-active/);
+  await expect(plot.locator('.ui-chart-tooltip')).toHaveCount(1);
+  await page.mouse.move(0,0);
+  await expect(plot.locator('.ui-chart-tooltip')).toHaveCount(0);
+  await plot.focus();
+  await page.keyboard.press('Home');
+  await expect(plot.locator(':scope > *').first()).toHaveClass(/is-active/);
+  await page.keyboard.press('ArrowRight');
+  await expect(plot.locator(':scope > *').nth(1)).toHaveClass(/is-active/);
+  const figure=page.locator('figure',{has:plot});
+  const toggle=figure.getByRole('button',{name:'Ver valores'});
+  if(await toggle.count()){
+    await toggle.click();
+    await expect(figure.getByRole('button',{name:'Ocultar valores'})).toHaveAttribute('aria-expanded','true');
+  }
+  const table=figure.getByRole('table');
+  await expect(table).toBeVisible();
+  await table.locator('tbody tr').nth(2).hover();
+  await expect(plot.locator(':scope > *').nth(2)).toHaveClass(/is-active/);
 });

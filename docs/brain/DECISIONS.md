@@ -154,3 +154,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Todos os diálogos usam a prop `footer` do `Dialog`; o botão de envio aponta para o formulário com `form`. `data-dialog-actions` e `.transaction-form__actions` saíram.
 - Confirmações (sair, arquivar conta, excluir meta, excluir caixinha): título curto com a ação, pergunta em `.ui-dialog__question` e consequência no corpo. Substitui a regra do README do design system de pôr a pergunta no título.
 - Protótipos no canvas “Personal Finance — melhorias de UI” (etapa 1 de 5).
+
+## D-058 — Gráficos com período em foco e tabela de valores (19/11/2026)
+
+- Gráficos de série ganham hover, toque e teclado com destaque do período, tooltip (valores e variação contra o anterior) e anúncio para leitor de tela; a peça é `useChartFocus`/`ChartTooltip` em packages/ui.
+- “Ver valores” deixa de ser `<details>` com cartões soltos: vira botão com rótulo que alterna e uma tabela única, ligada ao gráfico nos dois sentidos. A tabela oculta separada para leitor de tela saiu (a mesma tabela cumpre o papel).
+- Fora: gráfico de rosca de categorias e o resumo ao lado do botão (`summary` existe, sem uso ainda). Etapa 2 de 5 do canvas “Personal Finance — melhorias de UI”.
