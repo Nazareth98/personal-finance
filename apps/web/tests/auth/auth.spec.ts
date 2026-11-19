@@ -975,3 +975,29 @@ test('itens por página das transações ficam salvos no navegador e a lista cab
   const overflow = await page.locator('.ui-table-list__item').evaluateAll(items => items.filter(item => item.scrollWidth > item.clientWidth + 1).length);
   expect(overflow).toBe(0);
 });
+
+test('ocultar valores mascara o app todo, fica salvo e não afeta o valor de edição', async ({ page }) => {
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#budgets');
+  const summary = page.getByLabel('Resumo das metas por categoria');
+  await expect(summary.getByText('+ R$ 5.000,00')).toBeVisible();
+  const toggle = page.getByRole('button', { name: 'Ocultar valores' });
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(summary).not.toContainText('5.000,00');
+  await expect(summary.getByText('R$ •••••').first()).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('pf-hide-values'))).toBe('1');
+  // O formulário de edição mostra o número real para editar.
+  await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
+  await expect(page.getByRole('dialog', { name: 'Editar meta de Supermercado' }).getByLabel('Teto mensal')).toHaveValue('500,00');
+  await page.keyboard.press('Escape');
+  // Vale em outras telas e continua ao navegar.
+  await page.goto('/#transactions');
+  await expect(page.getByText('R$ •••••').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Ocultar valores' }).click();
+  await expect(page.getByRole('button', { name: 'Ocultar valores' })).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.evaluate(() => localStorage.getItem('pf-hide-values'))).toBe('0');
+});
+

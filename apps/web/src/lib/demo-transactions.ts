@@ -1,3 +1,4 @@
+import { HIDDEN_AMOUNT, valuesHidden } from './privacy.ts';
 export type TransactionType='income'|'expense'|'transfer';
 export type DemoTransaction={id:string;date:string;description:string;category:string;account:string;kind:TransactionType;amountCents:bigint};
 export const demoTransactions:readonly DemoTransaction[]=[
@@ -14,9 +15,14 @@ export const demoTransactions:readonly DemoTransaction[]=[
 {id:'d11',date:'2026-11-02',description:'Transferência reserva fictícia',category:'Movimentação própria',account:'Reserva exemplo',kind:'transfer',amountCents:25000n},
 {id:'d12',date:'2026-11-01',description:'Aluguel demonstrativo',category:'Moradia',account:'Conta exemplo',kind:'expense',amountCents:145000n}
 ];
-export function formatCentsBRL(cents:bigint):string{
+/** Valor em reais exato a partir de centavos, sempre visível (campos de edição). */
+export function formatCentsPlain(cents:bigint):string{
  const neg=cents<0n;const mag=neg?-cents:cents;const full=new Intl.NumberFormat('pt-BR',{useGrouping:true,maximumFractionDigits:0}).format(mag/100n);
  return `${neg?'-':''}R$ ${full},${String(mag%100n).padStart(2,'0')}`;
+}
+/** Valor para exibição: respeita “ocultar valores” (D-049). */
+export function formatCentsBRL(cents:bigint):string{
+ return valuesHidden()?HIDDEN_AMOUNT:formatCentsPlain(cents);
 }
 /** Data bancária `yyyy-MM-dd` → `dd/MM/yyyy`, sem `Date` para não deslocar o dia por fuso. */
 export function formatLocalDate(date:string):string{const [year,month,day]=date.split('-');return `${day}/${month}/${year}`;}

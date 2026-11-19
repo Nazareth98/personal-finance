@@ -18,3 +18,14 @@ const cols=[{key:'amount',header:'Valor',sortable:true,sortValue:(r:typeof rows[
 const sorted=sortRows(rows,{key:'amount',direction:'asc'},cols);
 assert.deepEqual(sorted.map(r=>r.id),['a','c','b']);assert.deepEqual(paginateRows(sorted,2,2).map(r=>r.id),['b']);
 });
+
+test('oculta valores na exibição sem afetar o valor de edição (D-049)', async () => {
+  const { setValuesHidden } = await import('./privacy.ts');
+  const { formatCentsPlain } = await import('./demo-transactions.ts');
+  setValuesHidden(true);
+  assert.equal(formatCentsBRL(123456n), 'R$ •••••');
+  assert.equal(formatCentsBRL(-5n), 'R$ •••••');
+  assert.equal(formatCentsPlain(123456n), 'R$ 1.234,56');
+  setValuesHidden(false);
+  assert.equal(formatCentsBRL(-123456n), '-R$ 1.234,56');
+});

@@ -87,3 +87,13 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - `Select` deixa a aparência nativa: mesmo recuo do input à esquerda e seta própria (máscara SVG com `--color-text-secondary`) com respiro à direita. No Android o nativo somava recuo e colava a seta na borda. Campo de data alinhado à esquerda.
 - “Gastos sem meta”: grade ícone | nome e valor | ação numa linha só; até 680 px o valor desce para baixo do nome, em tom secundário.
 
+## D-048 — Painel do login centralizado em telas grandes (19/11/2026)
+
+- Coluna de 560 px centralizada no painel da marca; recuo lateral cresce com a tela (48–240 px).
+
+## D-049 — Ocultar valores (19/11/2026)
+
+- Botão de olho “Ocultar valores” (`aria-pressed`) ao lado do menu da conta: no cabeçalho até 1000 px e no rodapé da sidebar no desktop; também no modo demonstração.
+- Estado global em `lib/privacy.ts`, salvo no aparelho (`localStorage` `pf-hide-values`). `formatCentsBRL` mostra “R$ •••••”; campos de edição usam `formatCentsPlain` e continuam com o número real.
+- Percentuais, sinais (+/−), cores de receita/despesa e o formato dos gráficos continuam visíveis — o objetivo é esconder os montantes de quem olha a tela.
+

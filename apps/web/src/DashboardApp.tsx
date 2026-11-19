@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { AccountsIcon, BrandMark, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
+import { useValuesHidden } from './hooks/useValuesHidden';
 import { AccountMenu } from './components/AccountMenu';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
@@ -79,6 +80,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const { theme, setPreference } = useTheme();
+  const [valuesHidden, setValuesHidden] = useValuesHidden();
   const ledger = useLedger(ledgerRepository);
   const connections = useConnections(connectionsRepository);
   const { canInstall, install, online } = usePwa();
@@ -137,6 +139,13 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </nav>
       <div className="sidebar-footer">
         <div className="app-bar__action" ref={setActionSlot} />
+        <div className="sidebar-account">
+        {/* Ocultar valores (D-049): olho aberto = valores à mostra; o estado vale para o app todo e fica salvo no aparelho. */}
+        <Button className="privacy-toggle" size="sm" variant="ghost" aria-pressed={valuesHidden}
+          aria-label="Ocultar valores" title={valuesHidden ? 'Mostrar valores' : 'Ocultar valores'}
+          onClick={() => setValuesHidden(!valuesHidden)}>
+          <Icon icon={valuesHidden ? HideIcon : ShowIcon} size="sm" />
+        </Button>
         {onSignOut
           ? <AccountMenu darkTheme={theme === 'dark'} onToggleTheme={() => setPreference(theme === 'light' ? 'dark' : 'light')}
             onSignOut={() => setConfirmingSignOut(true)} />
@@ -147,6 +156,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
               <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm" />
             </Button>
           </div>}
+        </div>
       </div>
     </aside>
     <main id="conteudo" className="main">

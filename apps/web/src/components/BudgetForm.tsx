@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react';
 import type { CategoryBudget } from '@personal-finance/domain';
 import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatCentsBRL } from '../lib/demo-transactions';
+import { formatCentsPlain } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
 
-const centsInput = (cents: bigint) => formatCentsBRL(cents).replace('R$ ', '');
+const centsInput = (cents: bigint) => formatCentsPlain(cents).replace('R$ ', '');
 
 export function formatBasisPoints(value: number | bigint) {
   const basisPoints = BigInt(value);

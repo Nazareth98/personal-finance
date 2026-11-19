@@ -2,14 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { ArchiveIcon, Button, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
 import type { FinancialAccount } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatCentsBRL } from '../lib/demo-transactions';
+import { formatCentsPlain } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
 
 const typeOptions = [
   { value: 'checking', label: 'Conta corrente' }, { value: 'savings', label: 'Reserva/poupança' },
   { value: 'investment', label: 'Investimento' }, { value: 'credit_card', label: 'Cartão de crédito' }
 ];
-const centsInput = (cents: bigint) => (cents < 0n ? '-' : '') + formatCentsBRL(cents < 0n ? -cents : cents).replace('R$ ', '');
+const centsInput = (cents: bigint) => (cents < 0n ? '-' : '') + formatCentsPlain(cents < 0n ? -cents : cents).replace('R$ ', '');
 
 /**
  * Cria ou edita uma conta (D-040). Com `account`, o tipo fica fixo e o diálogo também arquiva:
