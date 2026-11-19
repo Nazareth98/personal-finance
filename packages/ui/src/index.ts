@@ -25,6 +25,7 @@ export {
   Trash2 as DeleteIcon,
   Plus as PlusIcon,
   LogOut as LogOutIcon,
+  CircleUser as AccountIcon,
   Moon as MoonIcon,
   Sun as SunIcon,
   PanelLeftClose as SidebarCollapseIcon,

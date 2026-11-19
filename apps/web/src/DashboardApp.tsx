@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
+import { AccountMenu } from './components/AccountMenu';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
 import { OverviewPage } from './pages/OverviewPage';
 import { TransactionsPage } from './pages/TransactionsPage';
@@ -136,16 +137,16 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </nav>
       <div className="sidebar-footer">
         <div className="app-bar__action" ref={setActionSlot} />
-        <div className="sidebar-theme">
-          <Button className="theme-toggle" size="sm" variant="ghost"
-            aria-label={themeLabel} title={themeLabel}
-            onClick={() => setPreference(theme === 'light' ? 'dark' : 'light')}>
-            <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm" />
-          </Button>
-        </div>
-        {onSignOut && <Button className="sidebar-sign-out" size="sm" variant="danger" aria-label="Sair" title="Sair" onClick={() => setConfirmingSignOut(true)}>
-          <Icon icon={LogOutIcon} size="sm" /><span className="sidebar-sign-out__label">Sair</span>
-        </Button>}
+        {onSignOut
+          ? <AccountMenu darkTheme={theme === 'dark'} onToggleTheme={() => setPreference(theme === 'light' ? 'dark' : 'light')}
+            onSignOut={() => setConfirmingSignOut(true)} />
+          : <div className="sidebar-theme">
+            <Button className="theme-toggle" size="sm" variant="ghost"
+              aria-label={themeLabel} title={themeLabel}
+              onClick={() => setPreference(theme === 'light' ? 'dark' : 'light')}>
+              <Icon icon={theme === 'light' ? MoonIcon : SunIcon} size="sm" />
+            </Button>
+          </div>}
       </div>
     </aside>
     <main id="conteudo" className="main">
@@ -172,9 +173,6 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </button>
     </nav>
     <Dialog open={moreOpen} onClose={() => setMoreOpen(false)} title="Mais telas" className="more-sheet">
-      {/* Sair fica no topo da folha, longe da zona do polegar, e sempre pede confirmação (D-041). */}
-      {onSignOut && <Button variant="ghost" size="sm" className="more-sheet__sign-out" onClick={() => { setMoreOpen(false); setConfirmingSignOut(true); }}>
-        <Icon icon={LogOutIcon} size="sm"/>Sair</Button>}
       <div className="more-sheet__grid">
         {navigation.filter(item => !primaryMobile.includes(item.id)).map(item => <a key={item.id} href={`#${item.id}`}
           aria-current={page === item.id ? 'page' : undefined} className={page === item.id ? 'is-active' : undefined}

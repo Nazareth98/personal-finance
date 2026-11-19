@@ -229,13 +229,16 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
 
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
   await expect(page.getByText('owner@example.test')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Sair' }).click();
-  // Saída sempre pede confirmação e começa no Cancelar (D-041).
+  // Sair mora no menu da conta (D-042) e sempre pede confirmação, começando no Cancelar (D-041).
+  await page.getByRole('button', { name: 'Conta' }).click();
+  await page.getByRole('menu', { name: 'Conta' }).getByRole('menuitem', { name: 'Sair' }).click();
   const confirm = page.getByRole('dialog', { name: 'Sair do Personal Finance?' });
   await expect(confirm.getByRole('button', { name: 'Cancelar' })).toBeFocused();
   await confirm.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
-  await page.getByRole('button', { name: 'Sair' }).click();
+  await expect(page.getByRole('button', { name: 'Conta' })).toBeFocused();
+  await page.getByRole('button', { name: 'Conta' }).click();
+  await page.getByRole('menuitem', { name: 'Sair' }).click();
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
   await page.getByRole('button', { name: 'Mostrar senha' }).click();
@@ -874,14 +877,29 @@ test('inventário de telas para redesign', async ({ page }) => {
   }
 });
 
-test('barra inferior mostra pendências da revisão e a folha Mais permite sair', async ({ page }) => {
+test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o tema e sai', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockSupabase(page);
   await login(page);
   const navigation = page.getByRole('navigation', { name: 'Navegação principal' });
   await expect(navigation.getByRole('link', { name: 'Revisão 4 pendentes' })).toBeVisible();
   await navigation.getByRole('button', { name: 'Mais' }).click();
-  await page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' }).click();
+  await expect(page.getByRole('dialog', { name: 'Mais telas' }).getByRole('button', { name: 'Sair' })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  const account = page.getByRole('button', { name: 'Conta' });
+  await account.click();
+  const theme = page.getByRole('menuitemcheckbox', { name: 'Tema escuro' });
+  await expect(theme).toBeFocused();
+  const before = await theme.getAttribute('aria-checked');
+  await theme.click();
+  await expect(theme).toHaveAttribute('aria-checked', before === 'true' ? 'false' : 'true');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu', { name: 'Conta' })).toHaveCount(0);
+  await expect(account).toBeFocused();
+  await account.click();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitem', { name: 'Sair' })).toBeFocused();
+  await page.keyboard.press('Enter');
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
 });
