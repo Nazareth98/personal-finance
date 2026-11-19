@@ -40,7 +40,7 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
       <Checkbox label="Entendo que esta é apenas uma demonstração, sem gravação de dados."
         checked={draft.confirmedDemo} error={errors.confirmedDemo}
         onChange={e=>patch('confirmedDemo',e.target.checked)}/>
-      <div className="transaction-form__actions">
+      <div data-dialog-actions className="transaction-form__actions">
         <Button variant="secondary" onClick={onClose}>Cancelar</Button>
         <Button type="submit">Validar demonstração</Button>
       </div>

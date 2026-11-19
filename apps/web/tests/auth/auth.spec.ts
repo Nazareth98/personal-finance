@@ -294,7 +294,7 @@ test('registra transferência manual nas duas pontas pelo procedimento atômico'
   await page.getByLabel('Tipo').selectOption('transfer');
   await page.getByLabel('Conta de origem').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   await page.getByLabel('Conta de destino').selectOption('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
-  await page.getByRole('button', { name: 'Salvar movimentação' }).click();
+  await page.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Transferência conciliada nas duas contas.')).toBeVisible();
   expect(rpcCalls).toHaveLength(1);
   expect(rpcCalls[0].path).toContain('create_manual_transfer');
@@ -318,12 +318,12 @@ test('contas: grupos por tipo, edição e arquivamento sem perder lançamentos',
   await expect(edit.getByLabel('Tipo')).toBeDisabled();
   await expect(edit.getByLabel('Saldo inicial (R$)')).toHaveValue('1.000,00');
   await edit.getByLabel('Nome da conta').fill('Conta do dia a dia');
-  await edit.getByRole('button', { name: 'Salvar conta' }).click();
+  await edit.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Conta atualizada.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Editar conta Conta principal' }).click();
   await page.getByRole('dialog', { name: 'Editar Conta principal' }).getByRole('button', { name: 'Arquivar conta' }).click();
-  await page.getByRole('dialog', { name: 'Arquivar Conta principal?' }).getByRole('button', { name: 'Arquivar conta' }).click();
+  await page.getByRole('dialog', { name: 'Arquivar Conta principal?' }).getByRole('button', { name: 'Arquivar', exact: true }).click();
   await expect(page.getByText('Conta arquivada; os lançamentos continuam no livro.')).toBeVisible();
 
   expect(writes.map(write => write.path)).toEqual(['/rest/v1/rpc/update_financial_account', '/rest/v1/rpc/archive_financial_account']);
@@ -340,7 +340,7 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   await page.getByRole('button', { name: 'Nova conta' }).click();
   await page.getByLabel('Nome da conta').fill('Conta de testes');
   await page.getByLabel('Saldo inicial (R$)').fill('1.000,00');
-  await page.getByRole('button', { name: 'Cadastrar conta' }).click();
+  await page.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Conta cadastrada.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Nova movimentação' }).click();
@@ -351,7 +351,7 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   await transactionDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   await transactionDialog.getByLabel('Categoria').selectOption('groceries');
   await transactionDialog.getByLabel('Lançamento original').selectOption('22222222-2222-4222-8222-222222222222');
-  await transactionDialog.getByRole('button', { name: 'Salvar movimentação' }).click();
+  await transactionDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Ajuste vinculado ao lançamento original.')).toBeVisible();
   expect(writes.map(write => write.path)).toEqual(['/rest/v1/financial_accounts', '/rest/v1/rpc/create_manual_transaction']);
   expect(writes[1].body).toContain('22222222-2222-4222-8222-222222222222');
@@ -379,7 +379,7 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   await expect(create.getByLabel('Categoria').locator('option[value="groceries"]')).toHaveCount(0);
   await create.getByLabel('Categoria').selectOption('restaurants');
   await create.getByLabel('Percentual da receita').fill('12,50');
-  await create.getByRole('button', { name: 'Salvar meta' }).click();
+  await create.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Meta por categoria salva.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('set_category_budget');
   expect(writes.at(-1)?.body).toContain('restaurants');
@@ -390,7 +390,7 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   await expect(edit.getByLabel('Categoria')).toBeDisabled();
   await expect(edit.getByLabel('Percentual da receita')).toHaveValue('10');
   await edit.getByLabel('Percentual da receita').fill('15');
-  await edit.getByRole('button', { name: 'Salvar meta' }).click();
+  await edit.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Meta atualizada.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('set_category_budget');
   expect(writes.at(-1)?.body).toContain('groceries');
@@ -399,7 +399,7 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
   await page.getByRole('dialog', { name: 'Editar meta de Supermercado' }).getByRole('button', { name: 'Excluir meta' }).click();
   const confirm = page.getByRole('dialog', { name: 'Excluir meta de Supermercado?' });
-  await confirm.getByRole('button', { name: 'Excluir meta' }).click();
+  await confirm.getByRole('button', { name: 'Excluir', exact: true }).click();
   await expect(page.getByText('Meta excluída.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('delete_category_budget');
   expect(writes.at(-1)?.body).toContain('groceries');
@@ -427,7 +427,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await boxDialog.getByLabel('Nome da caixinha').fill('Viagem');
   await boxDialog.getByLabel('Saldo inicial (R$)').fill('100,00');
   await boxDialog.getByLabel('Meta (R$)').fill('2.000,00');
-  await boxDialog.getByRole('button', { name: 'Cadastrar caixinha' }).click();
+  await boxDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Caixinha cadastrada.')).toBeVisible();
 
   await behind.getByRole('button', { name: 'Aportar' }).click();
@@ -436,7 +436,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await movementDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
   await movementDialog.getByLabel('Descrição').fill('Aporte mensal');
   await movementDialog.getByLabel('Valor (R$)').fill('250,00');
-  await movementDialog.getByRole('button', { name: 'Salvar movimento' }).click();
+  await movementDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Movimento da caixinha registrado.')).toBeVisible();
 
   await behind.getByRole('button', { name: 'Movimentos · 0' }).click();
@@ -445,7 +445,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await drawer.getByRole('button', { name: 'Associar lançamento importado' }).click();
   const linkDialog = page.getByRole('dialog', { name: 'Associar lançamento importado' });
   await linkDialog.getByLabel('Lançamento importado').selectOption('88888888-2222-4888-8888-888888888888');
-  await linkDialog.getByRole('button', { name: 'Salvar movimento' }).click();
+  await linkDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Lançamento associado à caixinha.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Editar caixinha Reserva de emergência' }).click();
@@ -453,12 +453,12 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await expect(edit.getByLabel('Saldo inicial (R$)')).toHaveValue('1.000,00');
   await expect(edit.getByLabel('Meta (R$)')).toHaveValue('10.000,00');
   await edit.getByLabel('Meta (R$)').fill('12.000,00');
-  await edit.getByRole('button', { name: 'Salvar caixinha' }).click();
+  await edit.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Caixinha atualizada.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Editar caixinha Reserva de emergência' }).click();
   await page.getByRole('dialog', { name: 'Editar Reserva de emergência' }).getByRole('button', { name: 'Excluir caixinha' }).click();
-  await page.getByRole('dialog', { name: 'Excluir Reserva de emergência?' }).getByRole('button', { name: 'Excluir caixinha' }).click();
+  await page.getByRole('dialog', { name: 'Excluir Reserva de emergência?' }).getByRole('button', { name: 'Excluir', exact: true }).click();
   await expect(page.getByText('Caixinha excluída.')).toBeVisible();
 
   expect(writes.map(write => write.path)).toEqual([
@@ -507,7 +507,7 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await createDialog.getByRole('combobox', { name: /^Cor/ }).click();
   await createDialog.getByRole('option', { name: 'Âmbar' }).click();
   await createDialog.getByLabel('Despesa').check();
-  await createDialog.getByRole('button', { name: 'Salvar categoria' }).click();
+  await createDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Categoria criada.')).toBeVisible();
 
   const hobbies = page.getByRole('row', { name: /Hobbies/ });
@@ -527,7 +527,7 @@ test('cria, edita e arquiva categoria personalizada com identidade visual', asyn
   await expect(iconPicker).toBeFocused();
   await editDialog.getByRole('combobox', { name: /^Cor/ }).click();
   await editDialog.getByRole('option', { name: 'Azul' }).click();
-  await editDialog.getByRole('button', { name: 'Salvar categoria' }).click();
+  await editDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Categoria atualizada.')).toBeVisible();
 
   await hobbies.getByRole('button', { name: 'Arquivar Hobbies' }).click();
@@ -574,7 +574,7 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
   const cardDialog = page.getByRole('dialog', { name: 'Configurar cartão' });
   await cardDialog.getByLabel('Dia de fechamento').fill('4');
   await cardDialog.getByLabel('Dia de vencimento').fill('12');
-  await cardDialog.getByRole('button', { name: 'Salvar cartão' }).click();
+  await cardDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Calendário do cartão salvo.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Vincular pagamento' }).click();

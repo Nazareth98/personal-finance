@@ -53,7 +53,7 @@ function CategoryEditor({ category, open, onClose, ledger }: {
         options={[{ value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'neutral', label: 'Movimento neutro' }]}
         onChange={value => setApplicability(value as Category['applicability'])} />}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions"><Button variant="secondary" onClick={close}>Cancelar</Button><Button type="submit" loading={loading}>Salvar categoria</Button></div>
+      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={close}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
     </form>
   </Dialog>;
 }
@@ -91,7 +91,7 @@ function CategoryRemoval({ category, onClose, ledger }: { category: Category | n
         <Select label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histórico" options={replacements} onChange={event => setReplacement(event.target.value)} /></>
         : <FormMessage tone="hint">Esta categoria nunca foi utilizada e também pode ser excluída definitivamente.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button>
+      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button>
         {!category?.dependencyCount && <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm"/>Excluir definitivamente</Button>}
         <Button loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm"/>Arquivar</Button>
       </div>

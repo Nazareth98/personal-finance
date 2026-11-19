@@ -51,3 +51,11 @@ Não existe persistência, conexão a banco, autenticação, importação bancá
 ## Referência visual Figma
 
 Os componentes Input, Select, Checkbox, RadioGroup, Dialog e Toast possuem versões visuais editáveis na página `03 — Forms` do [arquivo Corporate UI](https://www.figma.com/design/OrPxvoVcl2Esk0iXoufxYr). Essas bases ainda não contêm todas as variantes e propriedades do React.
+
+## Diálogos de formulário (D-042)
+
+- A página ao fundo fica travada enquanto houver diálogo aberto (`html.ui-scroll-locked`, contador para diálogos empilhados).
+- Cabeçalho e ações ficam fixos; só o corpo rola. A barra de ações do formulário leva `data-dialog-actions` para ficar presa ao rodapé.
+- Até 680 px todo diálogo vira folha inferior, com as ações em colunas iguais.
+- Ações: secundária à esquerda, primária à direita; o botão principal usa só o verbo (“Salvar”, “Excluir”, “Arquivar”), porque o título já nomeia o objeto. Gatilhos dentro do formulário que abrem uma confirmação continuam nomeando o objeto (“Excluir meta”).
+

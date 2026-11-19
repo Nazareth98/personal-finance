@@ -3,12 +3,22 @@ import { Button } from './Button';
 import { X } from 'lucide-react';
 import { Icon } from './Icon';
 export type DialogProps={open:boolean;onClose:()=>void;title:string;description?:string;children:ReactNode;footer?:ReactNode;className?:string};
+/**
+ * Trava a rolagem da página enquanto houver ao menos um diálogo aberto (D-042). Contador global
+ * porque diálogos podem se empilhar (ex.: confirmação sobre a folha “Mais”).
+ */
+let openDialogs=0;
+function lockPageScroll(){
+  if(openDialogs++===0)document.documentElement.classList.add('ui-scroll-locked');
+  return ()=>{if(--openDialogs===0)document.documentElement.classList.remove('ui-scroll-locked');};
+}
 export function Dialog({open,onClose,title,description,children,footer,className}:DialogProps){
   const ref=useRef<HTMLDialogElement>(null),titleId=useId(),descriptionId=useId();
   useEffect(()=>{const dialog=ref.current;if(!dialog)return;
     if(open&&!dialog.open)dialog.showModal();
     else if(!open&&dialog.open)dialog.close();
   },[open]);
+  useEffect(()=>open?lockPageScroll():undefined,[open]);
   return <dialog ref={ref} className={['ui-dialog',className].filter(Boolean).join(' ')} aria-labelledby={titleId}
     aria-describedby={description?descriptionId:undefined}
     onClose={()=>{if(open)onClose()}}>

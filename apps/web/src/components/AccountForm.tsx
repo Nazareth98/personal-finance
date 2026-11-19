@@ -63,9 +63,9 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
       description="A conta sai desta tela, dos saldos e das listas de contas. Os lançamentos continuam em Transações, receitas e despesas. Se ela estiver conectada ao MeuPluggy, desconecte a instituição para parar de importar.">
       <div className="transaction-form">
         {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div className="transaction-form__actions">
+        <div data-dialog-actions className="transaction-form__actions">
           <Button variant="ghost" onClick={() => { setConfirmingArchive(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm" />Arquivar conta</Button>
+          <Button variant="danger" loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm" />Arquivar</Button>
         </div>
       </div>
     </Dialog>;
@@ -80,11 +80,11 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
         onChange={event => setType(event.target.value as FinancialAccount['type'])} />
       <Input label="Saldo inicial (R$)" inputMode="decimal" value={opening} required onChange={event => setOpening(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions budget-form__actions">
+      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
         {account && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingArchive(true); setError(''); }}>
           <Icon icon={ArchiveIcon} size="sm" />Arquivar conta</Button>}
         <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>{account ? 'Salvar conta' : 'Cadastrar conta'}</Button>
+        <Button type="submit" loading={loading}>Salvar</Button>
       </div>
     </form>
   </Dialog>;

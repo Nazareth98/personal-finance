@@ -87,7 +87,7 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
         ? <Select label="Lançamento importado" value={transactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => setTransactionId(event.target.value)} />
         : <FormMessage tone="hint">Nenhum lançamento importado e neutro é compatível com este tipo.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar movimento</Button></div>
+      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
     </form>
   </Dialog>;
 }

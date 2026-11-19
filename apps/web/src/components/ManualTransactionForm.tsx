@@ -77,7 +77,7 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
       {adjustment && <Select label="Lançamento original" value={draft.adjustedTransactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => patch('adjustedTransactionId', event.target.value)} />}
       <Input label="Data" type="date" value={draft.eventDate} required onChange={event => patch('eventDate', event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar movimentação</Button></div>
+      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
     </form>}
   </Dialog>;
 }

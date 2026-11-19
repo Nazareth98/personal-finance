@@ -60,14 +60,18 @@
 .ui-radio-group legend{margin-bottom:var(--spacing-2)}
 .ui-radio-options{display:flex;flex-wrap:wrap;gap:var(--spacing-4)}
 .ui-dialog{border:1px solid var(--color-border-default);border-radius:var(--radius-xl);padding:0;
-  background:var(--color-bg-surface);color:var(--color-text-primary);width:min(520px,calc(100vw - 32px));max-height:min(90vh,780px);overflow:auto;
+  background:var(--color-bg-surface);color:var(--color-text-primary);width:min(560px,calc(100vw - 32px));max-height:min(90vh,780px);max-height:min(90dvh,780px);overflow:hidden;
   box-shadow:var(--shadow-lg)}
+/* D-042: cabeçalho e ações fixos; só o corpo rola, sem arrastar a página ao fundo. */
+.ui-dialog[open]{display:flex;flex-direction:column}
+html.ui-scroll-locked{overflow:hidden}
+html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-dialog::backdrop{background:var(--overlay-backdrop,rgba(0,0,0,.58))}
-.ui-dialog__header{display:flex;align-items:start;justify-content:space-between;gap:var(--spacing-4);padding:var(--spacing-6) var(--spacing-6) var(--spacing-2)}
+.ui-dialog__header{flex:none;display:flex;align-items:start;justify-content:space-between;gap:var(--spacing-4);padding:var(--spacing-6) var(--spacing-6) var(--spacing-4);border-bottom:1px solid var(--color-border-default)}
 .ui-dialog__title{font-size:var(--font-size-lg);margin:0 0 var(--spacing-2)}
 .ui-dialog__description{font-size:var(--font-size-sm);color:var(--color-text-secondary);margin:0}
-.ui-dialog__body{padding:var(--spacing-4) var(--spacing-6)}
-.ui-dialog__footer{display:flex;gap:var(--spacing-2);justify-content:flex-end;padding:var(--spacing-4) var(--spacing-6);border-top:1px solid var(--color-border-default)}
+.ui-dialog__body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--spacing-4) var(--spacing-6)}
+.ui-dialog__footer{flex:none;display:flex;gap:var(--spacing-2);justify-content:flex-end;padding:var(--spacing-4) var(--spacing-6);border-top:1px solid var(--color-border-default)}
 .ui-toast-viewport{position:fixed;z-index:var(--z-toast);bottom:var(--spacing-6);right:var(--spacing-6);
   display:grid;gap:var(--spacing-2);width:min(380px,calc(100vw - 32px));pointer-events:none}
 .ui-toast{pointer-events:auto;display:flex;align-items:start;justify-content:space-between;gap:var(--spacing-4);
@@ -252,4 +256,16 @@
 .ui-input-wrap--leading>.ui-input{padding-left:calc(var(--spacing-3) + 16px + var(--spacing-2))}
 .ui-input-wrap--trailing>.ui-input{padding-right:calc(var(--control-height-lg) + var(--spacing-1))}
 .ui-input-wrap__trailing{position:absolute;right:2px;top:50%;transform:translateY(-50%);display:flex}
+/* Ações de formulário dentro do corpo ficam presas ao rodapé visível do diálogo. */
+.ui-dialog__body [data-dialog-actions]{position:sticky;bottom:calc(-1 * var(--spacing-4));z-index:1;margin:var(--spacing-2) calc(-1 * var(--spacing-6)) calc(-1 * var(--spacing-4));padding:var(--spacing-4) var(--spacing-6);background:var(--color-bg-surface);border-top:1px solid var(--color-border-default)}
+@keyframes ui-sheet-in{from{transform:translateY(100%)}to{transform:none}}
+/* Até 680 px todo diálogo vira folha inferior, com as ações em colunas iguais. */
+@media(max-width:680px){
+  .ui-dialog{width:100%;max-width:100%;margin:auto 0 0;max-height:92vh;max-height:92dvh;border-bottom:0;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  .ui-dialog[open]{animation:ui-sheet-in var(--motion-slow,320ms) var(--ease-enter,ease-out)}
+  .ui-dialog__header{padding:var(--spacing-4)}
+  .ui-dialog__body{padding:var(--spacing-4)}
+  .ui-dialog__body [data-dialog-actions]{margin-inline:calc(-1 * var(--spacing-4));padding:var(--spacing-3) var(--spacing-4) var(--spacing-4);display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+}
+@media(max-width:680px) and (prefers-reduced-motion:reduce){.ui-dialog[open]{animation:ui-fade-in var(--motion-instant,80ms) linear}}
 

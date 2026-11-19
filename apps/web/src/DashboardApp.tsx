@@ -185,7 +185,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
     </Dialog>
     <Dialog open={confirmingSignOut} onClose={() => setConfirmingSignOut(false)} title="Sair do Personal Finance?"
       description="Para voltar, você entra de novo com e-mail e senha. Nada é apagado." className="sign-out-dialog">
-      <div className="transaction-form__actions sign-out-dialog__actions">
+      <div data-dialog-actions className="transaction-form__actions sign-out-dialog__actions">
         <Button ref={cancelSignOut} variant="secondary" onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>
         <Button variant="danger" loading={signingOut} onClick={() => void signOut()}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>
       </div>

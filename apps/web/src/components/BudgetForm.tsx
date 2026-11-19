@@ -74,9 +74,9 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
       description="O teto deixa de ser acompanhado. Lançamentos e a categoria não mudam, e você pode definir a meta de novo depois.">
       <div className="transaction-form">
         {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div className="transaction-form__actions">
+        <div data-dialog-actions className="transaction-form__actions">
           <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />Excluir meta</Button>
+          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />Excluir</Button>
         </div>
       </div>
     </Dialog>;
@@ -89,11 +89,11 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
       <Input label="Percentual da receita" value={percentage} inputMode="decimal" placeholder="Ex.: 12,50" required
         hint="Use um valor entre 0,01% e 100%." onChange={event => setPercentage(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions budget-form__actions">
+      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
         {budget && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
           <Icon icon={DeleteIcon} size="sm" />Excluir meta</Button>}
         <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>Salvar meta</Button>
+        <Button type="submit" loading={loading}>Salvar</Button>
       </div>
     </form>
   </Dialog>;

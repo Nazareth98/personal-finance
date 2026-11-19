@@ -30,7 +30,7 @@ export function CardPaymentForm({ statement, onClose, ledger }: { statement: Car
       {options.length ? <Select label="Pagamento de fatura" value={transactionId} placeholder="Selecione" options={options} required onChange={event => setTransactionId(event.target.value)} />
         : <FormMessage tone="hint">Nenhum lançamento neutro de pagamento está disponível.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading} disabled={!options.length}>Vincular pagamento</Button></div>
+      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading} disabled={!options.length}>Vincular pagamento</Button></div>
     </form>
   </Dialog>;
 }

@@ -143,7 +143,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         </li>)}</ul>
       </section>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions">
+      <div data-dialog-actions className="transaction-form__actions">
         <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
         <Button type="submit" loading={loading}>Confirmar revisão</Button>
       </div>

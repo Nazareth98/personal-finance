@@ -71,9 +71,9 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
         : 'Ela não tem movimentos e será excluída definitivamente.'}>
       <div className="transaction-form">
         {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div className="transaction-form__actions">
+        <div data-dialog-actions className="transaction-form__actions">
           <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />{hasHistory ? 'Arquivar caixinha' : 'Excluir caixinha'}</Button>
+          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />{hasHistory ? 'Arquivar' : 'Excluir'}</Button>
         </div>
       </div>
     </Dialog>;
@@ -87,11 +87,11 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
       <Input label="Meta (R$)" inputMode="decimal" value={target} required onChange={event => setTarget(event.target.value)} />
       <Input label="Data-alvo (opcional)" type="date" value={targetDate} hint="Com data, a tela calcula quanto guardar por mês." onChange={event => setTargetDate(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="transaction-form__actions budget-form__actions">
+      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
         {box && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
           <Icon icon={DeleteIcon} size="sm" />Excluir caixinha</Button>}
         <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>{box ? 'Salvar caixinha' : 'Cadastrar caixinha'}</Button>
+        <Button type="submit" loading={loading}>Salvar</Button>
       </div>
     </form>
   </Dialog>;
