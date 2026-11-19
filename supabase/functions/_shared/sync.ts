@@ -105,8 +105,19 @@ async function accountInstitution(
   account: PluggyAccount, mappingId: string, catalog: { banks?: Promise<PluggyConnector[]> }
 ): Promise<string> {
   if (connectorId !== MEU_PLUGGY_CONNECTOR_ID) return fallbackName;
-  catalog.banks ??= pluggy.getBankConnectors().then(page => page.results).catch(() => []);
+  // Diagnóstico sem dados pessoais (D-056): tamanho do catálogo, código do erro e o banco casado por tipo de conta.
+  catalog.banks ??= pluggy.getBankConnectors()
+    .then(page => {
+      const banks = Array.isArray(page?.results) ? page.results : [];
+      console.info('pluggy_bank_catalog', { size: banks.length });
+      return banks;
+    })
+    .catch(error => {
+      console.warn('pluggy_bank_catalog_failed', { reason: error instanceof Error ? error.message.slice(0, 60) : 'unknown' });
+      return [];
+    });
   const bank = institutionFromAccountName(account.name ?? '', await catalog.banks);
+  console.info('pluggy_account_bank', { accountType: account.type ?? null, matchedConnectorId: bank?.id ?? null });
   if (!bank) return fallbackName;
   const stored = await database.rpc('internal_set_pluggy_account_institution', {
     p_mapping_id: mappingId, p_connector_id: bank.id, p_institution_name: bank.name.slice(0, 100)
