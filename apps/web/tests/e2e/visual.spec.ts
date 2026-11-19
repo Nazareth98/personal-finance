@@ -40,3 +40,15 @@ for(const {slug,title,navigationTitle=title} of templates){
     });
   });
 }
+
+test('modal Nova movimentação — snapshot (folha inferior no mobile)',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-18T12:00:00-03:00'));
+  await page.goto('/#overview');
+  await expect(page.getByRole('heading',{name:'Visão geral',level:1})).toBeVisible();
+  await page.getByRole('button',{name:/^Nova movimentação/}).filter({visible:true}).first().click();
+  const dialog=page.getByRole('dialog',{name:'Nova movimentação'});
+  await expect(dialog).toBeVisible();
+  await page.evaluate(()=>document.fonts.ready);
+  await expect(page).toHaveScreenshot('dialog-new-entry.png',{animations:'disabled',caret:'hide'});
+});
+

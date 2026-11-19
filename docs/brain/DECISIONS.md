@@ -49,3 +49,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 > D-042 concluída em 18/11/2026: “Sair” e o tema passaram para o menu da conta (`AccountMenu`, botão “Conta” com `menu`/`menuitemcheckbox`), no cabeçalho até 1000 px e no rodapé da sidebar no desktop. Substitui a posição no topo da folha “Mais” definida na D-041; a confirmação continua. Sem sessão (demonstração) segue o botão de tema avulso.
 
+## D-043 — Asterisco, paginação numerada e mês corrente como padrão (18/11/2026)
+
+- Campos obrigatórios voltam a ser marcados só com asterisco (pedido do usuário), fora do `<label>` e com `aria-hidden`; `required` anuncia.
+- `Pagination`: resumo “1–20 de 134” à esquerda; anterior/próxima com ícone e páginas numeradas (primeira, última, vizinhas e reticências) à direita; até 680 px vira “2 / 7” com botões de 44 px.
+- Visão geral e Orçamentos abrem no mês corrente, não no último mês com lançamento (parcelas futuras empurravam para frente). Testes autenticados fixam o relógio em 18/11/2026.
+- CI: rodadas com `[update visual baselines]` ficam num grupo de concorrência próprio e não são canceladas pelo push seguinte. Novo snapshot visual do modal “Nova movimentação” (folha inferior no mobile).
+

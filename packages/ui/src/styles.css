@@ -132,8 +132,6 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-metric-card__support--income{color:var(--color-finance-income)}
 .ui-metric-card__support--expense{color:var(--color-finance-expense)}
 .ui-metric-card__support--transfer{color:var(--color-finance-transfer)}
-.ui-pagination{display:flex;gap:var(--spacing-4);align-items:center;justify-content:space-between;flex-wrap:wrap;color:var(--color-text-secondary);font-size:var(--font-size-sm)}
-.ui-pagination__actions{display:flex;gap:var(--spacing-2)}
 
 /* Visualization primitives use semantic theme tokens, not hard-coded colors. */
 .ui-chart{margin:0;display:grid;gap:var(--spacing-4);min-width:0}
@@ -269,8 +267,8 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 }
 @media(max-width:680px) and (prefers-reduced-motion:reduce){.ui-dialog[open]{animation:ui-fade-in var(--motion-instant,80ms) linear}}
 /* D-042 campos: obrigatoriedade por extenso, erro com ícone, unidade fixa dentro do campo. */
-.ui-field__label-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--spacing-1)}
-.ui-field__required{color:var(--color-text-secondary);font-weight:400;font-size:var(--font-size-xs)}
+.ui-field__label-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px}
+.ui-field__required{color:var(--color-status-danger);font-weight:600}
 .ui-form-message--error{display:flex;align-items:flex-start;gap:var(--spacing-1)}
 .ui-form-message__icon{flex:none;margin-top:1px}
 .ui-input-wrap__affix{position:absolute;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);font:500 var(--font-size-sm)/1 var(--font-family-sans);pointer-events:none}
@@ -278,4 +276,23 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-input-wrap__affix--end{right:var(--spacing-3)}
 .ui-input-wrap--start-text>.ui-input{padding-left:calc(var(--spacing-3) + var(--ui-affix-start,3ch))}
 .ui-input-wrap--end-text>.ui-input{padding-right:calc(var(--spacing-3) + var(--ui-affix-end,2ch))}
+/* Paginação (D-043): resumo à esquerda, páginas numeradas à direita; no mobile vira “2 / 7”. */
+.ui-pagination{display:flex;gap:var(--spacing-4);align-items:center;justify-content:space-between;flex-wrap:wrap;padding:var(--spacing-3) var(--spacing-4);border-top:1px solid var(--color-border-default);color:var(--color-text-secondary);font:400 var(--font-size-sm)/1.4 var(--font-family-sans)}
+.ui-pagination__summary strong{color:var(--color-text-primary);font-weight:600;font-variant-numeric:tabular-nums}
+.ui-pagination__sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ui-pagination__actions{display:flex;align-items:center;gap:var(--spacing-1)}
+.ui-pagination__pages{display:flex;align-items:center;gap:2px;margin:0;padding:0;list-style:none}
+.ui-pagination__step,.ui-pagination__page{display:inline-flex;align-items:center;justify-content:center;gap:var(--spacing-1);min-width:var(--control-height-md);height:var(--control-height-md);padding:0 var(--spacing-2);border:0;border-radius:var(--radius-md);background:transparent;color:var(--color-text-secondary);font:500 var(--font-size-sm)/1 var(--font-family-sans);font-variant-numeric:tabular-nums;cursor:pointer;transition:background var(--motion-fast) var(--ease-standard),color var(--motion-fast) var(--ease-standard)}
+.ui-pagination__step:hover:not(:disabled),.ui-pagination__page:hover:not([aria-current]){background:var(--color-bg-subtle);color:var(--color-text-primary)}
+.ui-pagination__step:focus-visible,.ui-pagination__page:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+.ui-pagination__step:disabled{opacity:.4;cursor:not-allowed}
+.ui-pagination__page[aria-current="page"]{background:var(--color-action-primary);color:var(--color-text-on-action);font-weight:600;cursor:default}
+.ui-pagination__gap{min-width:24px;text-align:center;color:var(--color-text-secondary)}
+.ui-pagination__compact{display:none;min-width:56px;text-align:center;color:var(--color-text-primary);font-weight:600;font-variant-numeric:tabular-nums}
+@media(max-width:680px){
+  .ui-pagination{padding-inline:var(--spacing-3)}
+  .ui-pagination__pages,.ui-pagination__step-label{display:none}
+  .ui-pagination__compact{display:inline}
+  .ui-pagination__step{width:var(--control-height-lg);height:var(--control-height-lg);border:1px solid var(--color-border-default)}
+}
 

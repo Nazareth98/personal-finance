@@ -35,6 +35,8 @@ function session(email: string) {
 }
 
 async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; body: string | null }[] = []) {
+  // Os dados de teste são de nov/2026 e as telas abrem no mês corrente: o relógio fica fixo.
+  await page.clock.setFixedTime(new Date('2026-11-18T12:00:00-03:00'));
   const confirmedCategories = new Map<string, string>();
   const semanticOverrides = new Map<string, Record<string, unknown>>();
   await page.route('http://127.0.0.1:54321/**', async (route: Route) => {

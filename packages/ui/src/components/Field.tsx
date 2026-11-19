@@ -1,7 +1,7 @@
 import { useId, type ReactNode } from 'react';
 import { FormMessage } from './FormMessage';
-/** Marca visual de obrigatoriedade (D-042). O leitor de tela já anuncia pelo atributo `required`. */
-export function RequiredMark(){return <span className="ui-field__required" aria-hidden="true">(obrigatório)</span>;}
+/** Marca visual de obrigatoriedade: só o asterisco (D-043). O leitor de tela já anuncia pelo atributo `required`. */
+export function RequiredMark(){return <span className="ui-field__required" aria-hidden="true">*</span>;}
 export type FieldProps={label:string;htmlFor:string;hint?:string;error?:string;required?:boolean;children:ReactNode;className?:string};
 export function Field({label,htmlFor,hint,error,required,children,className=''}:FieldProps){
   return <div className={['ui-field',className].filter(Boolean).join(' ')}>

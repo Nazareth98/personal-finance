@@ -62,7 +62,7 @@ Os componentes Input, Select, Checkbox, RadioGroup, Dialog e Toast possuem vers�
 ## Campos (D-042)
 
 - Altura padrão 44 px (`controlHeight.lg`).
-- Obrigatório escrito por extenso, “(obrigatório)”, ao lado do rótulo e fora do `<label>`; o atributo `required` anuncia para leitor de tela.
+- Obrigatório marcado só com asterisco (D-043), ao lado do rótulo e fora do `<label>`; o atributo `required` anuncia para leitor de tela.
 - Erro sempre com ícone de alerta, além da cor.
 - Valores monetários: rótulo sem unidade e prefixo fixo `startText="R$"`; percentuais com `endText="%"`. A unidade entra na descrição acessível.
 

@@ -103,9 +103,8 @@ export function OverviewPage({ ledger, headerAction }: PageProps) {
   const [params, setParams] = useHashParams();
   if (ledger) {
     const data = ledger.data;
-    const latestPeriod = data?.transactions.reduce((latest, row) => row.competence > latest ? row.competence : latest, '') ?? '';
     const requested = params.get('period') ?? '';
-    const period = /^\d{4}-(0[1-9]|1[0-2])$/.test(requested) ? requested : latestPeriod || currentCompetence();
+    const period = /^\d{4}-(0[1-9]|1[0-2])$/.test(requested) ? requested : currentCompetence();
     const transactions = data?.transactions ?? [];
     const totals = ledgerTotals(transactions.filter(row => row.competence === period));
     // Patrimônio ao fim do período: lançamentos de competências futuras ainda não aconteceram.

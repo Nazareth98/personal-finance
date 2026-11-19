@@ -73,11 +73,11 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
 
 function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerAction: PageProps['headerAction'] }) {
   const data = ledger.data;
-  const latestMonth = (data?.transactions ?? []).reduce((latest, row) => row.competence > latest ? row.competence : latest, '');
   const [kind, setKind] = useState<PeriodKind>('month');
   const [month, setMonth] = useState('');
   const [form, setForm] = useState<{ budget?: CategoryBudget; categoryId?: string } | null>(null);
-  const selectedMonth = month || latestMonth || localToday().slice(0, 7);
+  // Abre no mês corrente, não no último mês com lançamento (parcelas futuras empurravam para frente).
+  const selectedMonth = month || localToday().slice(0, 7);
   const period = kind === 'year' ? selectedMonth.slice(0, 4) : selectedMonth;
   const panels = buildBudgetPanels({
     budgets: data?.budgets ?? [], categories: data?.categories ?? [], transactions: data?.transactions ?? [], period, today: localToday()

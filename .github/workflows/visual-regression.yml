@@ -6,7 +6,8 @@ on:
   pull_request:
 
 concurrency:
-  group: browser-${{ github.workflow }}-${{ github.ref }}
+  # Rodadas com [update visual baselines] ficam num grupo próprio: um push seguinte não as cancela.
+  group: browser-${{ github.workflow }}-${{ github.ref }}-${{ contains(github.event.head_commit.message, '[update visual baselines]') && 'baseline' || 'check' }}
   cancel-in-progress: true
 
 permissions:
