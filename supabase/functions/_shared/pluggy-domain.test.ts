@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, sanitizedDescription } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, ledgerSemantics, sanitizedDescription, isStatementCarryover } from './pluggy-domain.ts';
 
 test('converte valores Pluggy em centavos exatos', () => {
   assert.equal(centsFromPluggy(-42.9), -4290n);
@@ -53,3 +53,13 @@ test('normaliza compras, estornos e pagamentos de cartão para o domínio', () =
     amountCents: -10000n, nature: 'card_payment', reporting: 'neutral'
   });
 });
+
+test('linha informativa da fatura anterior fica neutra e fora da fatura (D-050)', () => {
+  const carryover = { id: 'c', description: 'TOTAL DA FATURA ANTERIOR', amount: 2827, date: '2026-09-07', type: 'DEBIT' } as PluggyTransaction;
+  assert.equal(isStatementCarryover(carryover), true);
+  assert.deepEqual(cardLedgerSemantics(carryover), { amountCents: -282700n, nature: 'adjustment', reporting: 'neutral' });
+  assert.equal(isStatementCarryover({ ...carryover, description: 'Saldo anterior da fatura' }), true);
+  assert.equal(isStatementCarryover({ ...carryover, description: 'MERCADO TOTAL' }), false);
+  assert.equal(cardLedgerSemantics({ ...carryover, description: 'MERCADO TOTAL' }).nature, 'expense');
+});
+

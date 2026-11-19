@@ -19,7 +19,7 @@ type ConnectionRow = {
 type CardConfig = { id: string; closingDay: number; dueDay: number };
 type CardLedgerItem = {
   externalKey: string; externalTransactionId: string; description: string; amountCents: bigint; competence: string;
-  nature: 'expense' | 'refund' | 'card_payment'; installmentNumber?: number; totalInstallments?: number;
+  nature: 'expense' | 'refund' | 'card_payment' | 'adjustment'; installmentNumber?: number; totalInstallments?: number;
   groupKey?: string; originalTransactionId?: string; providerBillId?: string;
 };
 type IncomeCandidate = { externalKey: string; description: string; institutionName: string };
@@ -184,7 +184,9 @@ function transactionRows(
         const competence = cardCompetence(eventDate, card);
         ledger.push({ owner_id: connection.owner_id, account_id: accountId, category_id: null, description,
           amount_cents: semantics.amountCents.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence,
-          classification_status: nature === 'card_payment' ? 'automatic' : 'uncategorized', external_key: externalKey });
+          classification_status: nature === 'card_payment' || nature === 'adjustment' ? 'automatic' : 'uncategorized', external_key: externalKey });
+        // Linha informativa (D-050): sem entrada na fatura, sem sugestão de categoria.
+        if (nature === 'adjustment') continue;
         cardItems.push({ externalKey, externalTransactionId: transaction.id, description, amountCents: semantics.amountCents, competence, nature,
           ...(metadata?.installmentNumber ? { installmentNumber: metadata.installmentNumber } : {}),
           ...(metadata?.totalInstallments ? { totalInstallments: metadata.totalInstallments } : {}),
@@ -409,6 +411,7 @@ async function persistTransactions(
   if (mapped.card) await persistCardArtifacts(database, connection.owner_id, mapped.card, rows.cardItems);
   await persistIncomeRecognition(database, connection.owner_id, rows.incomeCandidates);
   await persistClassifications(database, connection.owner_id, rows.candidates, rules);
+  // D-050: o casamento de pagamento de fatura roda no banco (gatilho após inserir lançamentos e itens de fatura).
   return { imported, skipped: rows.skipped };
 }
 
@@ -438,7 +441,7 @@ export async function synchronizeTransactionUpdates(
   const connection = connectionResult.data as ConnectionRow;
   const item = await pluggy.getItem(connection.item_id);
   if ((item.status ?? '').toUpperCase().includes('LOGIN')) throw new Error('pluggy_login_required');
-  const institutionName = item.connector?.name?.trim() || 'InstituiÃ§Ã£o conectada';
+  const institutionName = item.connector?.name?.trim() || 'Instituição conectada';
   const account = await findAccount(pluggy, connection.item_id, externalAccountId);
   const mapped = await ensureAccount(database, connection, account, institutionName);
   const rules = await loadClassificationRules(database, ownerId);

@@ -150,7 +150,9 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         const neutralCategory = semantics?.nature === 'own_transfer' ? 'transfers'
           : semantics?.nature === 'savings_contribution' || semantics?.nature === 'savings_withdrawal' ? 'savings'
             : undefined;
-        const effectiveCategory = semantics?.nature === 'card_payment'
+        // Pagamento de fatura e linha informativa da fatura (D-050) não têm categoria.
+        const uncategorizedSemantics = semantics?.nature === 'card_payment' || semantics?.nature === 'adjustment';
+        const effectiveCategory = uncategorizedSemantics
           ? undefined
           : neutralCategory ?? classification?.categoryId ?? row.category_id ?? undefined;
         return applyTransactionSemantics({
@@ -158,7 +160,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         ...(effectiveCategory ? { categoryId: effectiveCategory } : {}),
         nature: row.nature, reporting: row.reporting, source: row.source, eventDate: row.event_date,
         competence: row.competence,
-        classificationStatus: neutralCategory || semantics?.nature === 'card_payment' ? 'confirmed' : classification?.status ?? row.classification_status,
+        classificationStatus: neutralCategory || uncategorizedSemantics ? 'confirmed' : classification?.status ?? row.classification_status,
         ...(row.external_key ? { externalKey: row.external_key } : {})
       }, semantics ? { nature: semantics.nature, reporting: semantics.reporting } : undefined); }),
       links: ((linksResult.data ?? []) as LinkRow[])

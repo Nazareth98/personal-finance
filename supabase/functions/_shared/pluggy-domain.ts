@@ -93,13 +93,24 @@ export function ledgerSemantics(transaction: PluggyTransaction): {
     : { nature: 'expense', reporting: 'expense', categoryId: null, classificationStatus: 'uncategorized' };
 }
 
+/**
+ * Linha informativa do extrato do cartão (Caixa: “TOTAL DA FATURA ANTERIOR”) que repete o total já
+ * cobrado na fatura anterior. Não é compra nem pagamento (D-050): entra neutra e fora da fatura.
+ */
+export function isStatementCarryover(transaction: PluggyTransaction): boolean {
+  return /\b(?:total da fatura anterior|saldo (?:da )?fatura anterior|saldo anterior da fatura)\b/.test(normalizedEvidence(transaction.description ?? ''));
+}
+
 export function cardLedgerSemantics(transaction: PluggyTransaction): {
   amountCents: bigint;
-  nature: 'expense' | 'refund' | 'card_payment';
+  nature: 'expense' | 'refund' | 'card_payment' | 'adjustment';
   reporting: 'expense' | 'neutral';
 } {
   const amount = centsFromPluggy(transaction.amount);
   if (amount === 0n) throw new RangeError('Pluggy transaction cannot be zero');
+  if (isStatementCarryover(transaction)) {
+    return { amountCents: amount < 0n ? amount : -amount, nature: 'adjustment', reporting: 'neutral' };
+  }
   if (ledgerSemantics(transaction).nature === 'card_payment') {
     return { amountCents: amount < 0n ? amount : -amount, nature: 'card_payment', reporting: 'neutral' };
   }

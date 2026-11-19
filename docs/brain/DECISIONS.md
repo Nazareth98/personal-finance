@@ -97,3 +97,12 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Estado global em `lib/privacy.ts`, salvo no aparelho (`localStorage` `pf-hide-values`). `formatCentsBRL` mostra “R$ •••••”; campos de edição usam `formatCentsPlain` e continuam com o número real.
 - Percentuais, sinais (+/−), cores de receita/despesa e o formato dos gráficos continuam visíveis — o objetivo é esconder os montantes de quem olha a tela.
 
+## D-050 — Linha informativa da fatura e casamento automático de pagamento (19/11/2026)
+
+- Problema: na Caixa, “TOTAL DA FATURA ANTERIOR” (cartão) e “PAGAMENTO DE BOLETO” (conta) entravam como despesa, somando-se às compras — cada fatura contava três vezes.
+- “TOTAL DA FATURA ANTERIOR” (e variações de saldo anterior) no cartão é `adjustment` neutro e não entra na fatura. Na sincronização pela regra `isStatementCarryover`; nos já gravados por override automático.
+- Pagamento: débito na conta com “boleto/fatura/cartão”, do MESMO banco (mesma conexão MeuPluggy) do cartão, vira `card_payment` da fatura quando há uma única evidência — valor igual a uma linha “TOTAL DA FATURA ANTERIOR” próxima ou ao valor em aberto de fatura com vencimento entre −12 e +20 dias. Ambíguo fica para a Revisão.
+- Lançamentos importados são imutáveis: as correções usam `transaction_semantic_overrides` com `reason` `auto_statement_carryover` / `auto_card_payment_match` (reversíveis; nunca sobre decisão do proprietário nem lançamento confirmado).
+- Roda no banco (`internal_match_card_payments`, só `service_role`) por gatilho após inserir lançamentos e itens de fatura — independe da versão publicada das Edge Functions.
+- Aplicado em 19/11/2026: 8 linhas informativas neutralizadas e 4 pagamentos vinculados.
+

@@ -17,15 +17,19 @@ export type TransactionClassification = {
   evidence: { kind: string; label: string; weightBasisPoints: number }[];
 };
 
+/** Naturezas que o proprietário confirma na Revisão. */
+export type ReviewableNature = Extract<TransactionContract['nature'], 'income' | 'expense' | 'own_transfer' | 'card_payment' | 'savings_contribution' | 'savings_withdrawal'>;
 export type TransactionSemanticOverride = {
   id: string;
   transactionId: string;
-  nature: Extract<TransactionContract['nature'], 'income' | 'expense' | 'own_transfer' | 'card_payment' | 'savings_contribution' | 'savings_withdrawal'>;
+  /** `adjustment` só vem de regra automática (linha informativa da fatura, D-050). */
+  nature: ReviewableNature | 'adjustment';
   reporting: TransactionContract['reporting'];
   counterpartTransactionId?: string;
   statementId?: string;
   savingsBoxId?: string;
-  reason: 'owner_confirmation';
+  /** Automáticos (D-050) são reversíveis e nunca substituem uma decisão do proprietário. */
+  reason: 'owner_confirmation' | 'auto_statement_carryover' | 'auto_card_payment_match';
   semanticVersion: 'semantics-v1';
   updatedAt: string;
 };
@@ -35,7 +39,7 @@ export type ReviewHistoryEntry = {
   id: string;
   transactionId: string;
   type: 'semantics' | 'classification';
-  nature?: TransactionSemanticOverride['nature'];
+  nature?: ReviewableNature;
   categoryId?: string;
   supersededAt: string;
 };

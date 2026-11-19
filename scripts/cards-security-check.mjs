@@ -25,3 +25,24 @@ assert.match(ledger, /\.order\('event_date',[\s\S]*\.order\('id'\)[\s\S]*\.range
 assert.doesNotMatch(migration, /grant (insert|update|delete|all).*card_statements.*authenticated/i, 'tabelas derivadas não devem aceitar escrita direta do cliente');
 
 console.log('Card statements/installments security checks passed.');
+
+// D-050: casamento automático de pagamento de fatura e linha informativa “TOTAL DA FATURA ANTERIOR”.
+{
+  const { readFile: read } = await import('node:fs/promises');
+  const matching = await read('supabase/migrations/20261119110000_statement_carryover_and_payment_matching.sql', 'utf8');
+  const trigger = await read('supabase/migrations/20261119113000_match_card_payments_trigger.sql', 'utf8');
+  const { default: check } = await import('node:assert/strict');
+  check.match(matching, /security definer set search_path = public, pg_temp/i);
+  check.match(matching, /revoke all on function public\.internal_match_card_payments\(uuid\) from public, anon, authenticated/i);
+  check.match(matching, /grant execute on function public\.internal_match_card_payments\(uuid\) to service_role/i);
+  check.doesNotMatch(matching, /grant execute on function public\.internal_match_card_payments\(uuid\) to (anon|authenticated)/i);
+  // Nunca sobrepõe decisão do proprietário nem lançamento confirmado.
+  check.match(matching, /not exists \(select 1 from public\.transaction_semantic_overrides o where o\.transaction_id = t\.id\)/i);
+  check.match(matching, /classification_status <> 'confirmed'/i);
+  // Mesmo banco: conta e cartão na mesma conexão MeuPluggy.
+  check.match(matching, /cpa\.connection_id = candidate\.connection_id/i);
+  check.match(matching, /chosen_count <> 1/i);
+  check.match(trigger, /pg_trigger_depth\(\) > 1/i);
+  check.match(trigger, /revoke all on function private\.match_card_payments_after_insert\(\) from public, anon, authenticated/i);
+  console.log('✓ Casamento de pagamento de fatura restrito ao backend, ao mesmo banco e sem sobrepor decisões.');
+}
