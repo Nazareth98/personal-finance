@@ -66,3 +66,11 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Formulário: título “Entrar”; “Esqueci minha senha” vira link abaixo da senha; botão principal em `lg` (44 px); entrada em ~700 ms, e a troca login ↔ recuperação reanima só cabeçalho e formulário.
 - Substitui a composição de login da D-041 (linha decorativa e chips).
 
+## D-045 — Marca “Balanço arredondado” (19/11/2026)
+
+- Escolhida pelo usuário entre quatro conceitos (canvas “Personal Finance — propostas de logo”): duas metades de um círculo, o que entrou e o que saiu, desencontradas; quando as contas fecham, se alinham.
+- Geometria (grade 64): círculo r 23, vão de 4 no eixo, metade esquerda sobe 3 e a direita desce 3 em tinta de 45% (55% sobre o azul), cantos do corte com raio 6.
+- `BrandMark` em `packages/ui` (SVG em `currentColor`, decorativo). `animated`: as metades alternam como pratos de balança — é a animação do carregamento; com movimento reduzido só a tinta pulsa.
+- Ícones do PWA regerados do mesmo desenho: `icon.svg`/192/512 (quadrado arredondado), `icon-maskable` (fundo inteiro, marca em 50%, dentro da zona segura) e `apple-touch-icon.png` 180 px. Cache do service worker em `v2` para os aparelhos buscarem os ícones novos.
+- Substitui o ícone de carteira e o `BrandIcon` (Gem) na barra lateral, no carregamento e na tela de configuração.
+

@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <script>
       // Apply the theme before CSS/React paints to prevent a Light-to-Dark flash.
       (() => {
@@ -27,9 +27,12 @@
   </head>
   <body><div id="root"><!-- Mesma marcação de BootSplash (D-044): o React substitui ao montar. -->
     <main class="boot-splash" aria-busy="true">
-      <img class="boot-splash__icon" src="/icons/icon.svg" alt="" width="72" height="72" />
+      <span class="boot-splash__icon"><svg class="ui-brand-mark ui-brand-mark--animated" width="48" height="48" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <defs><clipPath id="pf-boot"><circle cx="32" cy="32" r="23" /></clipPath></defs>
+        <g class="ui-brand-mark__in" transform="translate(0 -3)"><rect x="9" y="9" width="21" height="46" rx="6" fill="currentColor" clip-path="url(#pf-boot)" /></g>
+        <g class="ui-brand-mark__out" transform="translate(0 3)"><rect x="34" y="9" width="21" height="46" rx="6" fill="currentColor" fill-opacity="0.45" clip-path="url(#pf-boot)" /></g>
+      </svg></span>
       <span class="boot-splash__name">Personal Finance</span>
-      <span class="boot-splash__bar" aria-hidden="true"></span>
       <p class="boot-splash__status" role="status">Carregando…</p>
     </main>
   </div><script type="module" src="/src/main.tsx"></script></body>

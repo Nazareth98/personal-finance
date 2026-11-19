@@ -302,4 +302,12 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-pagination__size select{height:var(--control-height-md);padding:0 var(--spacing-6) 0 var(--spacing-2);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background-color:var(--color-bg-surface);color:var(--color-text-primary);font:500 var(--font-size-sm)/1 var(--font-family-sans);font-variant-numeric:tabular-nums}
 .ui-pagination__size select:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
 @media(max-width:680px){.ui-pagination{gap:var(--spacing-3)}.ui-pagination__actions{flex:1 0 100%;justify-content:space-between}}
+/* Marca (D-045): no carregamento as metades alternam como pratos de balança. */
+@keyframes ui-brand-in{0%,100%{transform:translateY(-3px)}50%{transform:translateY(3px)}}
+@keyframes ui-brand-out{0%,100%{transform:translateY(3px)}50%{transform:translateY(-3px)}}
+.ui-brand-mark{display:block;flex:none}
+.ui-brand-mark--animated .ui-brand-mark__in{animation:ui-brand-in 1.6s var(--ease-standard,ease-in-out) infinite}
+.ui-brand-mark--animated .ui-brand-mark__out{animation:ui-brand-out 1.6s var(--ease-standard,ease-in-out) infinite}
+@media (prefers-reduced-motion: reduce){.ui-brand-mark--animated .ui-brand-mark__in,.ui-brand-mark--animated .ui-brand-mark__out{animation:ui-brand-pulse 1.6s ease-in-out infinite alternate}}
+@keyframes ui-brand-pulse{from{opacity:1}to{opacity:.55}}
 

@@ -1,4 +1,4 @@
-import { BrandIcon, Card, Icon } from '@personal-finance/ui';
+import { BrandMark, Card } from '@personal-finance/ui';
 import { AuthGate } from './auth/AuthGate';
 import { createSupabaseClient, SupabaseAuthGateway } from './auth/supabase-auth';
 import { DashboardApp } from './DashboardApp';
@@ -16,7 +16,7 @@ export default function App() {
 
   if (!authGateway) return <main className="auth-page">
     <Card className="auth-card">
-      <Icon icon={BrandIcon} size="lg" className="auth-brand" />
+      <BrandMark size={40} className="brand-mark" />
       <h1>Configuração necessária</h1>
       <p className="auth-copy">Defina a URL e a chave pública do Supabase para habilitar o acesso.</p>
     </Card>

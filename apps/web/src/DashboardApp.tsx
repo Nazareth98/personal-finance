@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { AccountsIcon, BrandIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, BrandMark, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { AccountMenu } from './components/AccountMenu';
 import { TransactionDemoForm } from './components/TransactionDemoForm';
@@ -113,7 +113,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
     <aside className={`sidebar${sidebarCollapsed ? ' is-collapsed' : ''}`}>
       <div className="sidebar-header">
         <a className="brand" href="#overview" aria-label="Personal Finance Controle pessoal — início">
-          <span className="brand-symbol"><Icon icon={BrandIcon} size="lg" className="brand-mark"/></span>
+          <span className="brand-symbol"><BrandMark size={28} className="brand-mark"/></span>
           <span className="brand-copy"><strong>Personal Finance</strong>{' '}<small>Controle pessoal</small></span>
         </a>
         {/* Até 1000 px o título da aba ocupa o lugar da marca; o h1 continua na página para leitores de tela. */}

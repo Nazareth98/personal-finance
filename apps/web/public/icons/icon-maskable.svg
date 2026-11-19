@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#1D4ED8"/>
-  <rect x="112" y="112" width="288" height="288" rx="72" fill="#FFF"/>
-  <path d="M160 166h192v48H160zm0 66h192v118H160z" fill="#1D4ED8"/>
-  <path d="M194 270h124v32H194z" fill="#FFF"/>
-  <circle cx="210" cy="326" r="15" fill="#FFF"/>
-  <circle cx="302" cy="326" r="15" fill="#FFF"/>
+  <!-- Balanço arredondado (D-045): metades de um círculo r 23 (grade 64), vão 4, desencontro ±3. -->
+  <rect width="512" height="512" fill="#2563EB"/>
+  <defs><clipPath id="in"><circle cx="32" cy="29" r="23"/></clipPath><clipPath id="out"><circle cx="32" cy="35" r="23"/></clipPath></defs>
+  <g transform="translate(128 128) scale(4)">
+    <rect x="9" y="6" width="21" height="46" rx="6" fill="#FFF" clip-path="url(#in)"/>
+    <rect x="34" y="12" width="21" height="46" rx="6" fill="#FFF" fill-opacity="0.55" clip-path="url(#out)"/>
+  </g>
 </svg>
