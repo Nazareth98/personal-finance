@@ -50,4 +50,4 @@ Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge F
 
 ## Implementação futura
 
-A sincronização manual permanece como operação vigente. Em incremento futuro, configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy, registrar `transactions/created`, `transactions/updated` e `transactions/deleted` e validar entrega, autenticação e retentativas. O código e a inbox durável já estão preparados; sem o secret, a função responde `503 webhook_not_configured`.
+A sincronização manual permanece, e o app dispara a mesma sincronização ao abrir quando a última tentativa passou de 6 h (D-061; registrada como `manual`). Em incremento futuro, configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy, registrar `transactions/created`, `transactions/updated` e `transactions/deleted` e validar entrega, autenticação e retentativas. O código e a inbox durável já estão preparados; sem o secret, a função responde `503 webhook_not_configured`.

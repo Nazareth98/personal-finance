@@ -174,3 +174,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Agora a revisão (pendências e histórico) mostra “Aplicar a”: “Só este lançamento” mantém o comportamento acima e diz isso; “Este e os iguais (N)” confirma todos na categoria escolhida, com a lista do que muda e o botão com a contagem. Os confirmados em outra categoria só entram marcando a caixa.
 - RPC `confirm_transaction_classifications(uuid[], text)`: até 200 itens, delega à confirmação individual para cada um (mesmas validações, alias e histórico de versões) numa única transação. Critério de “igual” no front em `similarTransactions`, o mesmo do alias no banco.
 - Vínculos (transferência, fatura, caixinha) continuam um a um, porque dependem do par.
+
+## D-061 — Sincronizar ao abrir, com limite (19/11/2026)
+
+- Ao abrir o app e ao voltar à aba, sincroniza em segundo plano as conexões prontas ou com erro cuja última tentativa passou de 6 h (`connectionsDue`); uma por vez, sem timer. Conta a tentativa, não o sucesso, para que uma falha não repita a cada abertura. Login pendente e atualização em curso ficam de fora.
+- Enquanto roda, aviso “Atualizando contas…” no topo; se falhar, aviso com link para Conexões. O livro é atualizado sem voltar ao carregamento (`ledger.refresh`). O botão “Sincronizar agora” em Conexões continua.
+- Por que não a cada X minutos: o MeuPluggy atualiza poucas vezes por dia, cada sincronização custa chamadas da Pluggy e execuções da Edge Function, e o webhook já cobre mudanças. Se o webhook falhar com frequência, a evolução é um agendamento no servidor.
+- Fora do protótipo: o selo “Atualizado há X” permanente no topo (a data continua em Conexões).

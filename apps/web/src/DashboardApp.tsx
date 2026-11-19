@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, SunIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, StatusAlertIcon, SunIcon, SyncIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { useValuesHidden } from './hooks/useValuesHidden';
 import { AccountMenu } from './components/AccountMenu';
@@ -83,6 +83,20 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   const [valuesHidden, setValuesHidden] = useValuesHidden();
   const ledger = useLedger(ledgerRepository);
   const connections = useConnections(connectionsRepository);
+  const [syncFailed, setSyncFailed] = useState(false);
+  // D-061: ao abrir e ao voltar à aba, sincroniza em segundo plano o que está há mais de 6 h sem tentativa; sem timer.
+  useEffect(() => {
+    if (!connectionsRepository || !ledgerRepository || connections.status !== 'success') return;
+    const run = () => void connections.syncStale().then(result => {
+      if (result === 'none') return;
+      setSyncFailed(result === 'failed');
+      void ledger.refresh();
+    });
+    run();
+    const onVisible = () => { if (document.visibilityState === 'visible') run(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [connections.status]);
   const { canInstall, install, online } = usePwa();
   const data = ledgerRepository ? ledger.data : undefined;
   const pendingReviews = data ? pendingReviewCount(data.transactions, data) : 0;
@@ -166,6 +180,9 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       {!ledgerRepository && <p className="sample-warning" role="note">
         Valores e instituições fictícios. Esta demonstração não consulta contas, não envia dados e não salva transações.
       </p>}
+      {connections.autoSyncing && <p className="sync-status" role="status"><Icon icon={SyncIcon} size="sm" className="sync-status__spin" />Atualizando contas…</p>}
+      {!connections.autoSyncing && syncFailed && page !== 'connections' && <p className="sync-status sync-status--failed" role="status">
+        <Icon icon={StatusAlertIcon} size="sm" />Não foi possível atualizar as contas automaticamente. <a href="#connections">Ver conexões</a></p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
       <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined}
         headerAction={canInstall ? <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button> : undefined} />

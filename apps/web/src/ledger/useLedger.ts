@@ -6,6 +6,8 @@ export type LedgerState = {
   status: 'idle' | 'loading' | 'success' | 'error';
   error: string;
   reload: () => Promise<void>;
+  /** Recarrega sem voltar ao estado de carregamento; se falhar, mantém o que está na tela (sincronização em segundo plano). */
+  refresh: () => Promise<void>;
   createAccount: (draft: AccountDraft) => Promise<void>;
   updateAccount: (accountId: string, update: AccountUpdate) => Promise<void>;
   archiveAccount: (accountId: string) => Promise<void>;
@@ -47,6 +49,11 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   }, [repository]);
 
   useEffect(() => { void reload(); }, [reload]);
+
+  const refresh = useCallback(async () => {
+    if (!repository) return;
+    try { setData(await repository.load()); } catch { /* mantém os dados atuais */ }
+  }, [repository]);
 
   async function updateAccount(accountId: string, update: AccountUpdate) {
     if (!repository) throw new Error('ledger repository missing');
@@ -146,7 +153,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   }
 
   return {
-    data, status, error, reload, createAccount, updateAccount, archiveAccount,
+    data, status, error, reload, refresh, createAccount, updateAccount, archiveAccount,
     createCategory: draft => mutateCategory(() => repository!.createCategory(draft)),
     updateCategory: (categoryId, update) => mutateCategory(() => repository!.updateCategory(categoryId, update)),
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),

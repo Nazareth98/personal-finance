@@ -174,7 +174,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname === '/rest/v1/pluggy_connections') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
-        { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_source_updated_at: '2026-11-13T12:00:00Z', last_attempt_at: '2026-11-14T12:00:00Z', last_success_at: '2026-11-14T12:00:00Z', last_error: null }
+        { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_source_updated_at: '2026-11-13T12:00:00Z', last_attempt_at: '2026-11-18T13:00:00Z', last_success_at: '2026-11-18T13:00:00Z', last_error: null }
       ]) });
       return;
     }
@@ -650,6 +650,41 @@ test('exibe estado da fonte e solicita sincronização sem enviar credenciais', 
   const syncCall = writes.find(write => write.path === '/functions/v1/pluggy-sync');
   expect(syncCall?.body).toContain('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
   expect(syncCall?.body).not.toMatch(/client|secret|api.?key/i);
+});
+
+test('sincroniza ao abrir a conexão sem tentativa há mais de 6 h e avisa se falhar (D-061)', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  // Registrada depois do mock, esta rota tem prioridade: a conexão foi tentada há 4 dias.
+  await page.route('http://127.0.0.1:54321/rest/v1/pluggy_connections*', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify([{ id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', institution_name: 'Banco Sintético', status: 'ready', last_source_updated_at: '2026-11-13T12:00:00Z', last_attempt_at: '2026-11-14T12:00:00Z', last_success_at: '2026-11-14T12:00:00Z', last_error: null }])
+  }));
+  let release: () => void = () => {};
+  const held = new Promise<void>(resolve => { release = resolve; });
+  await page.route('http://127.0.0.1:54321/functions/v1/pluggy-sync', async route => {
+    writes.push({ path: '/functions/v1/pluggy-sync', body: route.request().postData() });
+    await held;
+    await route.fulfill({ status: 502, contentType: 'application/json', body: JSON.stringify({ error: 'pluggy_request_500' }) });
+  });
+  await login(page);
+  await expect(page.getByRole('status').filter({ hasText: 'Atualizando contas…' })).toBeVisible();
+  release();
+  await expect(page.getByRole('status').filter({ hasText: 'Não foi possível atualizar as contas automaticamente.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ver conexões' })).toHaveAttribute('href', '#connections');
+  const calls = writes.filter(write => write.path === '/functions/v1/pluggy-sync');
+  expect(calls).toHaveLength(1);
+  expect(calls[0]?.body).toContain('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
+});
+
+test('não sincroniza ao abrir quando a última tentativa é recente (D-061)', async ({ page }) => {
+  const writes: { path: string; body: string | null }[] = [];
+  await mockSupabase(page, true, writes);
+  await login(page);
+  await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await page.waitForTimeout(300);
+  expect(writes.some(write => write.path === '/functions/v1/pluggy-sync')).toBe(false);
 });
 
 test('avisa quando não consegue iniciar uma conexão bancária', async ({ page }) => {

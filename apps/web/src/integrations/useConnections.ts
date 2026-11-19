@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ConnectionsData, ConnectionsRepository } from './contracts';
+import { connectionsDue } from '../lib/auto-sync.ts';
 
 export type ConnectionsState = {
   data: ConnectionsData | null;
@@ -8,6 +9,9 @@ export type ConnectionsState = {
   reload: () => Promise<void>;
   connect: () => Promise<void>;
   sync: (connectionId: string) => Promise<void>;
+  /** D-061: sincroniza em segundo plano as conexões vencidas; diz se algo rodou e se alguma falhou. */
+  syncStale: () => Promise<'none' | 'synced' | 'failed'>;
+  autoSyncing: boolean;
 };
 
 type PluggySuccess = { item?: { id?: string }; itemId?: string; id?: string };
@@ -52,6 +56,11 @@ export function useConnections(repository?: ConnectionsRepository): ConnectionsS
   const [data, setData] = useState<ConnectionsData | null>(null);
   const [status, setStatus] = useState<ConnectionsState['status']>(repository ? 'loading' : 'idle');
   const [error, setError] = useState('');
+  const [autoSyncing, setAutoSyncing] = useState(false);
+  // Ref: quem chama syncStale num evento (voltar à aba) precisa ver os dados mais recentes, não os da montagem.
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const autoSyncRunning = useRef(false);
 
   const reload = useCallback(async () => {
     if (!repository) return;
@@ -90,5 +99,21 @@ export function useConnections(repository?: ConnectionsRepository): ConnectionsS
     catch { setError('A sincronização falhou. A próxima tentativa retomará os dados sem duplicar lançamentos.'); throw new Error('sync failed'); }
   }
 
-  return { data, status, error, reload, connect, sync };
+  async function syncStale(): Promise<'none' | 'synced' | 'failed'> {
+    const due = repository && dataRef.current ? connectionsDue(dataRef.current.connections, Date.now()) : [];
+    if (!repository || !due.length || autoSyncRunning.current) return 'none';
+    autoSyncRunning.current = true;
+    setAutoSyncing(true);
+    let failed = false;
+    // Uma conexão por vez; o servidor também recusa uma segunda sincronização ativa.
+    for (const connection of due) {
+      try { await repository.syncConnection(connection.id); } catch { failed = true; }
+    }
+    try { setData(await repository.load()); } catch { /* a lista anterior continua na tela */ }
+    autoSyncRunning.current = false;
+    setAutoSyncing(false);
+    return failed ? 'failed' : 'synced';
+  }
+
+  return { data, status, error, reload, connect, sync, syncStale, autoSyncing };
 }
