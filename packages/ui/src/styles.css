@@ -103,16 +103,16 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
 .ui-table-sort:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px;border-radius:var(--radius-sm)}
 .ui-table tbody tr:hover td{background:var(--color-bg-subtle)}
 /* Lista compacta: o DataTable a renderiza no lugar da tabela abaixo de 680 px quando as colunas declaram papel mobile. */
-.ui-table-list{display:grid}
+.ui-table-list{display:grid;grid-template-columns:minmax(0,1fr);min-width:0}
 .ui-table-list>.ui-field{padding:var(--spacing-3) var(--spacing-4);border-bottom:1px solid var(--color-border-default)}
 .ui-table-list ul{margin:0;padding:0;list-style:none}
-.ui-table-list__item{display:grid;gap:var(--spacing-2);padding:var(--spacing-3) var(--spacing-4);border-bottom:1px solid var(--color-border-default);font:400 var(--font-size-sm)/1.4 var(--font-family-sans);color:var(--color-text-primary)}
+.ui-table-list__item{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:var(--spacing-2);padding:var(--spacing-3) var(--spacing-4);border-bottom:1px solid var(--color-border-default);font:400 var(--font-size-sm)/1.4 var(--font-family-sans);color:var(--color-text-primary)}
 .ui-table-list__item:last-child{border-bottom:0}
 .ui-table-list__top{display:flex;justify-content:space-between;gap:var(--spacing-3)}
-.ui-table-list__main{display:grid;gap:var(--spacing-1);min-width:0}
+.ui-table-list__main{display:grid;gap:var(--spacing-1);min-width:0;flex:1 1 10rem;overflow-wrap:anywhere}
 .ui-table-list__detail{color:var(--color-text-secondary);font-size:var(--font-size-xs)}
 .ui-table-list__detail>span+span::before{content:' · '}
-.ui-table-list__value{display:grid;justify-items:end;align-content:start;gap:var(--spacing-1);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ui-table-list__value{flex:none;display:grid;justify-items:end;align-content:start;gap:var(--spacing-1);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ui-table-list__fields{display:grid;gap:var(--spacing-1);margin:0}
 .ui-table-list__fields>div{display:flex;justify-content:space-between;gap:var(--spacing-3)}
 .ui-table-list__fields dt{color:var(--color-text-secondary)}
@@ -295,4 +295,11 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
   .ui-pagination__compact{display:inline}
   .ui-pagination__step{width:var(--control-height-lg);height:var(--control-height-lg);border:1px solid var(--color-border-default)}
 }
+/* Com fonte ampliada (acessibilidade do Android) a linha fica estreita: valor desce para baixo do título em vez de vazar. */
+.ui-table-list__top{flex-wrap:wrap}
+.ui-pagination__summary{margin-right:auto}
+.ui-pagination__size{display:inline-flex;align-items:center;gap:var(--spacing-2)}
+.ui-pagination__size select{height:var(--control-height-md);padding:0 var(--spacing-6) 0 var(--spacing-2);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background-color:var(--color-bg-surface);color:var(--color-text-primary);font:500 var(--font-size-sm)/1 var(--font-family-sans);font-variant-numeric:tabular-nums}
+.ui-pagination__size select:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+@media(max-width:680px){.ui-pagination{gap:var(--spacing-3)}.ui-pagination__actions{flex:1 0 100%;justify-content:space-between}}
 

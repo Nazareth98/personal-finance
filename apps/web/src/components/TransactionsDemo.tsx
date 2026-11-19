@@ -1,8 +1,9 @@
+import { usePageSize } from '../hooks/usePageSize';
 import {useMemo,useState} from 'react';
 import {Badge,Button,Card,DataTable,EmptyState,Input,MetricCard,Pagination,Select,DataState,TransactionsIcon,type DataStatus,sortRows,paginateRows,type DataTableColumn,type SortState} from '@personal-finance/ui';
 import {demoTransactions,filterTransactions,formatCentsBRL,formatLocalDate,transactionKindLabel,totalsFromTransactions,type DemoTransaction,type TransactionType} from '../lib/demo-transactions';
+const DEMO_PAGE_SIZES=[5,10,20] as const;
 
-const PAGE_SIZE=5;
 const columns:DataTableColumn<DemoTransaction>[]=[
 {key:'date',header:'Data',sortable:true,sortValue:r=>r.date,cell:r=>formatLocalDate(r.date)},
 {key:'description',header:'Descrição',headerIcon:TransactionsIcon,iconTone:'transfer',sortable:true,sortValue:r=>r.description,cell:r=><strong>{r.description}</strong>},
@@ -16,9 +17,10 @@ const categories=[{value:'all',label:'Todas as categorias'},...Array.from(new Se
 export function TransactionsDemo(){
 const [query,setQuery]=useState(''),[kind,setKind]=useState<'all'|TransactionType>('all'),[category,setCategory]=useState('all');
 const [sort,setSort]=useState<SortState>({key:'date',direction:'desc'}),[page,setPage]=useState(1),[status,setStatus]=useState<DataStatus>('success');
+const [pageSize,setPageSize]=usePageSize('demo-transactions',5,DEMO_PAGE_SIZES);
 const filtered=useMemo(()=>filterTransactions(demoTransactions,{query,kind,category}),[query,kind,category]);
 const rows=useMemo(()=>sortRows(filtered,sort,columns),[filtered,sort]);
-const currentPage=Math.min(page,Math.max(1,Math.ceil(rows.length/PAGE_SIZE)));
+const currentPage=Math.min(page,Math.max(1,Math.ceil(rows.length/pageSize)));
 const totals=useMemo(()=>totalsFromTransactions(filtered),[filtered]);
 return <section className="transactions-demo" aria-labelledby="transactions-title">
 <div className="section-heading"><div><h2 id="transactions-title">Movimentações demonstrativas</h2>
@@ -38,11 +40,11 @@ onChange={e=>{setKind(e.target.value as 'all'|TransactionType);setPage(1)}}/>
 <Card className="transactions-table-card"><DataState status={status} kind="table" rows={5} columns={5}
   label="Carregando movimentações demonstrativas" errorTitle="Erro ao carregar movimentações"
   errorDescription="Não foi possível exibir as transações demonstrativas." onRetry={()=>setStatus('success')}>
-{rows.length?<DataTable ariaLabel="Tabela de transações fictícias" columns={columns} rows={paginateRows(rows,currentPage,PAGE_SIZE)}
+{rows.length?<DataTable ariaLabel="Tabela de transações fictícias" columns={columns} rows={paginateRows(rows,currentPage,pageSize)}
 getRowKey={row=>row.id} sort={sort} onSortChange={setSort}/>:
 <EmptyState title="Nenhuma movimentação encontrada" description="Altere a busca ou redefina os filtros."
 action={<Button variant="secondary" onClick={()=>{setQuery('');setKind('all');setCategory('all');setPage(1)}}>Limpar filtros</Button>}/>}
-<Pagination page={currentPage} pageSize={PAGE_SIZE} totalItems={rows.length} onPageChange={setPage}/>
+<Pagination page={currentPage} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} pageSizeOptions={DEMO_PAGE_SIZES} onPageSizeChange={size=>{setPageSize(size);setPage(1);}}/>
 </DataState></Card>
 </section>;
 }

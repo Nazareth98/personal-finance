@@ -952,3 +952,20 @@ test('tabelas viram lista compacta no mobile com ordenação e ações', async (
   const scan = await new AxeBuilder({ page }).include('.review-panel').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(scan.violations).toEqual([]);
 });
+
+test('itens por página das transações ficam salvos no navegador e a lista cabe em tela estreita', async ({ page }) => {
+  await page.setViewportSize({ width: 300, height: 800 });
+  await mockSupabase(page);
+  await login(page);
+  await page.goto('/#transactions');
+  const pagination = page.getByRole('navigation', { name: 'Paginação' });
+  await pagination.getByLabel('Por página').selectOption('20');
+  await expect(pagination).toContainText('de');
+  await page.reload();
+  await expect(page.getByRole('navigation', { name: 'Paginação' }).getByLabel('Por página')).toHaveValue('20');
+  expect(await page.evaluate(() => localStorage.getItem('pf-page-size:transactions'))).toBe('20');
+  // Lista de cards não pode ficar mais larga que a tela (fonte ampliada no Android estreita a área útil).
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  const overflow = await page.locator('.ui-table-list__item').evaluateAll(items => items.filter(item => item.scrollWidth > item.clientWidth + 1).length);
+  expect(overflow).toBe(0);
+});

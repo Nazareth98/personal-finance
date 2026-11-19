@@ -1,3 +1,4 @@
+import { usePageSize } from '../hooks/usePageSize';
 import { useMemo, useState } from 'react';
 import { ledgerTotals, type TransactionContract } from '@personal-finance/domain';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, Pagination, Select, TransactionsIcon, paginateRows, sortRows, type DataTableColumn, type SortState } from '@personal-finance/ui';
@@ -7,7 +8,6 @@ import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-t
 import { matchesTransactionFilters, readTransactionFilters, transactionFilterKeys, type TransactionFilters } from '../lib/transaction-filters';
 import { TransactionFilterFields, natureLabels } from './TransactionFilterFields';
 
-const PAGE_SIZE = 10;
 const tone = (row: TransactionContract) => row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer';
 
 export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
@@ -16,6 +16,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const period = params.get('period') ?? '';
   const [sort, setSort] = useState<SortState>({ key: 'date', direction: 'desc' });
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize, pageSizeOptions] = usePageSize('transactions', 10);
   const data = ledger.data;
   const accounts = new Map((data?.accounts ?? []).map(account => [account.id, account.name]));
   const categories = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
@@ -35,7 +36,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const filtered = (data?.transactions ?? []).filter(row => matchesTransactionFilters(row, filters)
     && (!period || (period.length === 4 ? row.competence.startsWith(`${period}-`) : row.competence === period)));
   const rows = sortRows(filtered, sort, columns);
-  const currentPage = Math.min(page, Math.max(1, Math.ceil(rows.length / PAGE_SIZE)));
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(rows.length / pageSize)));
   const totals = ledgerTotals(filtered);
   const active = Boolean(period) || transactionFilterKeys.some(key => filters[key]);
   const change = (key: keyof TransactionFilters | 'period', value: string) => { setParams({ [key]: value }); setPage(1); };
@@ -53,7 +54,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
       <div><span className="muted">Resultado</span><strong>{net}</strong><span className="muted">Receitas menos despesas</span></div>
     </section>
     <Card className="transactions-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={5} columns={6} label="Carregando livro financeiro" errorTitle="Erro ao carregar lançamentos" errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
-      {rows.length ? <><DataTable ariaLabel="Livro financeiro" columns={columns} rows={paginateRows(rows, currentPage, PAGE_SIZE)} getRowKey={row => row.id} sort={sort} onSortChange={setSort} /><Pagination page={currentPage} pageSize={PAGE_SIZE} totalItems={rows.length} onPageChange={setPage} /></>
+      {rows.length ? <><DataTable ariaLabel="Livro financeiro" columns={columns} rows={paginateRows(rows, currentPage, pageSize)} getRowKey={row => row.id} sort={sort} onSortChange={setSort} /><Pagination page={currentPage} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} pageSizeOptions={pageSizeOptions} onPageSizeChange={size => { setPageSize(size); setPage(1); }} /></>
         : <EmptyState title="Nenhuma movimentação encontrada" description="Cadastre uma movimentação ou altere os filtros." action={active ? <Button variant="secondary" onClick={clear}>Limpar filtros</Button> : undefined} />}
     </DataState></Card>
   </section>;

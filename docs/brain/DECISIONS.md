@@ -55,4 +55,5 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - `Pagination`: resumo “1–20 de 134” à esquerda; anterior/próxima com ícone e páginas numeradas (primeira, última, vizinhas e reticências) à direita; até 680 px vira “2 / 7” com botões de 44 px.
 - Visão geral e Orçamentos abrem no mês corrente, não no último mês com lançamento (parcelas futuras empurravam para frente). Testes autenticados fixam o relógio em 18/11/2026.
 - CI: rodadas com `[update visual baselines]` ficam num grupo de concorrência próprio e não são canceladas pelo push seguinte. Novo snapshot visual do modal “Nova movimentação” (folha inferior no mobile).
+- Complemento (18/11/2026): seletor “Por página” na paginação (Transações 10/20/50/100, Revisão idem, demo 5/10/20), salvo em `localStorage` (`pf-page-size:<tabela>`, valor fora da lista volta ao padrão). A lista em cards da tabela passa a encolher (`minmax(0,1fr)`, quebra de texto) e os totais de Transações viram linhas compactas por container query em `em` — com a fonte ampliada do Android o conteúdo vazava para a direita.
 

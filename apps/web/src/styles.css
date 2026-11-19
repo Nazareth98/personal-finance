@@ -352,13 +352,13 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 
 /* Ledger transactions: search + period visible, compact totals strip that never wraps values. */
 .transaction-filters__bar>.ledger-period{flex:0 1 220px;min-width:0}
-.ledger-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface)}
-.ledger-totals>div{display:grid;gap:var(--spacing-1);min-width:0;padding:var(--spacing-3) var(--spacing-4);container-type:inline-size}
-.ledger-totals>div+div{border-left:1px solid var(--color-border-default)}
+.ledger-transactions{container:ledger/inline-size}
+.ledger-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-border-default)}
+.ledger-totals>div{display:grid;gap:var(--spacing-1);min-width:0;padding:var(--spacing-3) var(--spacing-4);background:var(--color-bg-surface)}
 .ledger-totals span{font-size:var(--font-size-xs)}
 .ledger-totals>div>span:first-child{font-size:var(--font-size-sm)}
-/* Fonte acompanha a largura da coluna; se nem 12px couber, rola em vez de quebrar ou cortar dígitos. */
-.ledger-totals strong{font-size:clamp(12px,10cqi,20px);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+/* Em em: com a fonte ampliada do Android o limite cresce junto e os totais viram linhas antes de cortar dígitos. */
+.ledger-totals strong{font-size:var(--font-size-base);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
 .ledger-description{display:grid;gap:2px;min-width:0}
 .ledger-description__title{display:flex;align-items:center;gap:var(--spacing-2);flex-wrap:wrap}
 .ledger-transactions .ui-table-list__detail{display:flex;flex-wrap:wrap;align-items:center;row-gap:var(--spacing-1)}
@@ -366,7 +366,6 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .ledger-transactions .ui-table-list__detail>span+span::before{content:none}
 .ledger-transactions .ui-table-list__detail>span:not(:last-child)::after{content:"·";margin:0 .35em}
 @media (max-width: 680px) {
-  .ledger-totals>div{padding:var(--spacing-2)}
   .ledger-totals>div>span:last-child{display:none}
   .transaction-filters__bar>.ledger-period{order:2;grid-column:1/-1}
 }
@@ -562,5 +561,10 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .account-menu__trigger{width:var(--control-height-md);padding:0;justify-content:center}
   .account-menu__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .account-menu__list{left:auto;right:0;bottom:auto;top:calc(100% + var(--spacing-2))}
+}
+@container ledger (max-width: 34em){
+  .ledger-totals{grid-template-columns:minmax(0,1fr)}
+  .ledger-totals>div{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--spacing-1) var(--spacing-3);padding:var(--spacing-2) var(--spacing-3)}
+  .ledger-totals>div>span:last-child{display:none}
 }
 

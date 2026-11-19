@@ -1,3 +1,4 @@
+import { usePageSize } from '../hooks/usePageSize';
 import { useState } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, Pagination, ReviewIcon, Select, Tabs, sortRows, useToast, type DataTableColumn, type SortState } from '@personal-finance/ui';
@@ -11,7 +12,6 @@ import { TransactionFilterFields, natureLabels } from '../components/Transaction
 import type { PageProps } from './PageProps';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
-const pageSize = 20;
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
 const groups: { reason: ReviewReason; title: string; description: string }[] = [
   { reason: 'links', title: 'Vincular', description: 'Sem o outro lado, o valor contaria duas vezes.' },
@@ -32,6 +32,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const [params, setParams] = useHashParams();
   const [sort, setSort] = useState<SortState>({ key: 'date', direction: 'desc' });
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize, pageSizeOptions] = usePageSize('review', 20);
   const { notify } = useToast();
   if (!ledger) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">CATEGORIZAÇÃO</p><h1>Revisão de categorias</h1>
@@ -154,7 +155,8 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
                 })}</ul>
               </Card>;
             })}
-        {filtered.length > pageSize && <Pagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage}/>}
+        {filtered.length > pageSizeOptions[0]! && <Pagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage}
+          pageSizeOptions={pageSizeOptions} onPageSizeChange={size => { setPageSize(size); setPage(1); }}/>}
       </DataState>
     </Tabs>
     <ClassificationReviewForm transaction={selected} onClose={() => setSelected(null)} ledger={ledger}/>

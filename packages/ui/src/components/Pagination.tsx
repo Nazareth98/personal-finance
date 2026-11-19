@@ -1,7 +1,12 @@
+import { useId } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Icon } from './Icon';
 
-export type PaginationProps = { page: number; pageSize: number; totalItems: number; onPageChange: (page: number) => void };
+export type PaginationProps = {
+  page: number; pageSize: number; totalItems: number; onPageChange: (page: number) => void;
+  /** Com as duas props, mostra o seletor “Por página”. Quem chama decide onde guardar a escolha. */
+  pageSizeOptions?: readonly number[]; onPageSizeChange?: (pageSize: number) => void;
+};
 
 /** Páginas visíveis: primeira, última e vizinhas da atual; o resto vira reticências (D-043). */
 export function pageItems(current: number, pages: number): (number | 'gap')[] {
@@ -13,7 +18,8 @@ export function pageItems(current: number, pages: number): (number | 'gap')[] {
   return items;
 }
 
-export function Pagination({ page, pageSize, totalItems, onPageChange }: PaginationProps) {
+export function Pagination({ page, pageSize, totalItems, onPageChange, pageSizeOptions, onPageSizeChange }: PaginationProps) {
+  const sizeId = useId();
   const pages = Math.max(1, Math.ceil(totalItems / pageSize)), current = Math.min(Math.max(1, page), pages);
   const start = totalItems === 0 ? 0 : (current - 1) * pageSize + 1, end = Math.min(totalItems, current * pageSize);
   const count = new Intl.NumberFormat('pt-BR');
@@ -22,6 +28,12 @@ export function Pagination({ page, pageSize, totalItems, onPageChange }: Paginat
       <strong>{count.format(start)}–{count.format(end)}</strong> de {count.format(totalItems)}
       <span className="ui-pagination__sr"> registros · Página {current} de {pages}</span>
     </span>
+    {pageSizeOptions && onPageSizeChange && <span className="ui-pagination__size">
+      <label htmlFor={sizeId}>Por página</label>
+      <select id={sizeId} value={pageSize} onChange={event => onPageSizeChange(Number(event.target.value))}>
+        {pageSizeOptions.map(option => <option key={option} value={option}>{option}</option>)}
+      </select>
+    </span>}
     <div className="ui-pagination__actions">
       <button type="button" className="ui-pagination__step" aria-label="Página anterior" disabled={current <= 1} onClick={() => onPageChange(current - 1)}>
         <Icon icon={ChevronLeft} size="sm" /><span className="ui-pagination__step-label">Anterior</span>
