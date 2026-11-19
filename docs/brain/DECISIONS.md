@@ -188,3 +188,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - O nome do titular fica em `profiles.holder_name`, editado em Conta → “Nome do titular” (RPC `set_holder_name`, só o dono). Exige nome e sobrenome, para não casar Pix de parentes.
 - `internal_match_self_transfers` (service_role, gatilho por instrução após importar e ao salvar o nome): Pix com nome e sobrenome do titular e par em conta conectada (não cartão, mesmo valor oposto, até 3 dias) → transferência própria vinculada; sem par (conta fora do app, ex.: Nubank, a pedido do dono) → `adjustment` neutro. Motivo `auto_self_transfer`. Nunca sobrescreve override, vínculo, caixinha ou fatura.
 - O dono ainda pode corrigir pela Revisão (override do dono substitui o automático).
+
+## D-063 — Pix pago com cartão de crédito (19/11/2026)
+
+- O Itaú lança na conta corrente o “Pix enviado com cartão” (saída) e o “Crédito liberado para Pix <cartão>” (entrada) no mesmo dia; quem paga é o cartão, que registra a cobrança com tarifa. Antes, o gasto contava duas vezes e o crédito virava receita extraordinária (2 casos em 19/11: R$ 62,49 a mais de cada lado).
+- `internal_match_card_funded_pix` (service_role, gatilho por instrução após importar e uma vez na migration): na mesma conta não cartão, saída “pix enviado com cartao…” e entrada “credito liberado para pix…” de mesmo valor, até 1 dia → os dois `adjustment` neutros, motivo `auto_card_funded_pix`. A cobrança no cartão continua sendo a despesa. Nunca sobrescreve decisão existente.

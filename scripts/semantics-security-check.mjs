@@ -75,3 +75,16 @@ console.log('✓ Overlay semântico, vínculos atômicos, imutabilidade, grants 
   assert.ok(/not exists \(select 1 from public\.transaction_semantic_overrides where transaction_id = c\.id\)/.test(selfSql), 'não sobrescreve decisão existente');
   console.log('✓ Pix para o próprio titular: nome definido só pelo dono, casamento interno sem sobrescrever decisões.');
 }
+
+// D-063: Pix pago com cartão — par neutro só na mesma conta, interno e sem sobrescrever decisões.
+{
+  const cardPixSql = await readFile('supabase/migrations/20261119190000_card_funded_pix.sql', 'utf8');
+  assert.ok(cardPixSql.includes("'auto_card_funded_pix'"));
+  assert.ok(cardPixSql.includes("'auto_self_transfer'"), 'mantém o motivo da D-062 na restrição');
+  assert.ok(cardPixSql.includes('c.account_id = debit.account_id and c.amount_cents = -debit.amount_cents'));
+  assert.ok(cardPixSql.includes('revoke all on function public.internal_match_card_funded_pix(uuid) from public, anon, authenticated;'));
+  assert.ok(cardPixSql.includes('grant execute on function public.internal_match_card_funded_pix(uuid) to service_role;'));
+  assert.ok(cardPixSql.includes('if pg_trigger_depth() > 1 then return null; end if;'));
+  assert.ok(cardPixSql.includes('not exists (select 1 from public.transaction_semantic_overrides where transaction_id = c.id)'));
+  console.log('✓ Pix pago com cartão: par da conta corrente neutralizado internamente, sem sobrescrever decisões.');
+}
