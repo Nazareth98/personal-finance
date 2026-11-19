@@ -268,4 +268,14 @@ html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
   .ui-dialog__body [data-dialog-actions]{margin-inline:calc(-1 * var(--spacing-4));padding:var(--spacing-3) var(--spacing-4) var(--spacing-4);display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 }
 @media(max-width:680px) and (prefers-reduced-motion:reduce){.ui-dialog[open]{animation:ui-fade-in var(--motion-instant,80ms) linear}}
+/* D-042 campos: obrigatoriedade por extenso, erro com ícone, unidade fixa dentro do campo. */
+.ui-field__label-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--spacing-1)}
+.ui-field__required{color:var(--color-text-secondary);font-weight:400;font-size:var(--font-size-xs)}
+.ui-form-message--error{display:flex;align-items:flex-start;gap:var(--spacing-1)}
+.ui-form-message__icon{flex:none;margin-top:1px}
+.ui-input-wrap__affix{position:absolute;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);font:500 var(--font-size-sm)/1 var(--font-family-sans);pointer-events:none}
+.ui-input-wrap__affix--start{left:var(--spacing-3)}
+.ui-input-wrap__affix--end{right:var(--spacing-3)}
+.ui-input-wrap--start-text>.ui-input{padding-left:calc(var(--spacing-3) + var(--ui-affix-start,3ch))}
+.ui-input-wrap--end-text>.ui-input{padding-right:calc(var(--spacing-3) + var(--ui-affix-end,2ch))}
 

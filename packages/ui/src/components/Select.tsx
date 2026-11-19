@@ -1,5 +1,5 @@
 import type { SelectHTMLAttributes } from 'react';
-import { useFieldIds } from './Field';
+import { RequiredMark, useFieldIds } from './Field';
 import { FormMessage } from './FormMessage';
 export type SelectOption={value:string;label:string;disabled?:boolean};
 export type SelectProps=Omit<SelectHTMLAttributes<HTMLSelectElement>,'children'>&{
@@ -8,7 +8,7 @@ export type SelectProps=Omit<SelectHTMLAttributes<HTMLSelectElement>,'children'>
 export function Select({id,label,options,placeholder,hint,error,required,className='','aria-describedby':describedBy,...props}:SelectProps){
   const {controlId,hintId,errorId,description}=useFieldIds(id,hint,error,describedBy);
   return <div className="ui-field">
-    <label htmlFor={controlId} className="ui-field__label">{label}{required?<span aria-hidden="true"> *</span>:null}</label>
+    <div className="ui-field__label-row"><label htmlFor={controlId} className="ui-field__label">{label}</label>{required ? <RequiredMark /> : null}</div>
     <select {...props} id={controlId} required={required} aria-invalid={Boolean(error)} aria-describedby={description}
       className={['ui-input','ui-select',className].filter(Boolean).join(' ')}>
       {placeholder?<option value="" disabled>{placeholder}</option>:null}

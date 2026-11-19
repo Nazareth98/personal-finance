@@ -83,8 +83,8 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
     description="O saldo é reconstruído pelo valor inicial e pelos movimentos vinculados.">
     <form className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome da caixinha" value={name} maxLength={80} required onChange={event => setName(event.target.value)} />
-      <Input label="Saldo inicial (R$)" inputMode="decimal" value={openingBalance} required onChange={event => setOpeningBalance(event.target.value)} />
-      <Input label="Meta (R$)" inputMode="decimal" value={target} required onChange={event => setTarget(event.target.value)} />
+      <Input label="Saldo inicial" startText="R$" inputMode="decimal" value={openingBalance} required onChange={event => setOpeningBalance(event.target.value)} />
+      <Input label="Meta" startText="R$" inputMode="decimal" value={target} required onChange={event => setTarget(event.target.value)} />
       <Input label="Data-alvo (opcional)" type="date" value={targetDate} hint="Com data, a tela calcula quanto guardar por mês." onChange={event => setTargetDate(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div data-dialog-actions className="transaction-form__actions budget-form__actions">

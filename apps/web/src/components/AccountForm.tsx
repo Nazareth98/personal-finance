@@ -78,7 +78,7 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
       <Select label="Tipo" value={type} options={typeOptions} disabled={Boolean(account)}
         hint={account ? 'O tipo não muda depois de criada a conta.' : undefined}
         onChange={event => setType(event.target.value as FinancialAccount['type'])} />
-      <Input label="Saldo inicial (R$)" inputMode="decimal" value={opening} required onChange={event => setOpening(event.target.value)} />
+      <Input label="Saldo inicial" startText="R$" inputMode="decimal" value={opening} required onChange={event => setOpening(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div data-dialog-actions className="transaction-form__actions budget-form__actions">
         {account && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingArchive(true); setError(''); }}>

@@ -66,7 +66,7 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
   return <Dialog open={open} onClose={onClose} title="Nova movimentação" description="Registre lançamentos manuais sem alterar dados importados.">
     {!accountOptions.length ? <FormMessage tone="error">Cadastre uma conta antes de lançar movimentações.</FormMessage> : <form onSubmit={submit} noValidate className="transaction-form">
       <Input label="Descrição" value={draft.description} maxLength={120} required onChange={event => patch('description', event.target.value)} />
-      <Input label="Valor (R$)" inputMode="decimal" placeholder="123,45" value={draft.amount} required onChange={event => patch('amount', event.target.value)} />
+      <Input label="Valor" startText="R$" inputMode="decimal" placeholder="123,45" value={draft.amount} required onChange={event => patch('amount', event.target.value)} />
       <Select label="Tipo" value={draft.kind} options={[
         { value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'transfer', label: 'Transferência própria' },
         { value: 'adjustment_expense', label: 'Ajuste de despesa' }, { value: 'adjustment_income', label: 'Ajuste de receita' }

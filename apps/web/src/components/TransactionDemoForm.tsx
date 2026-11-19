@@ -29,7 +29,7 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
       <Input label="Descrição" placeholder="Ex.: Mercado demonstrativo" value={draft.description}
         maxLength={121} required error={errors.description}
         onChange={e=>patch('description',e.target.value)}/>
-      <Input label="Valor (R$)" inputMode="decimal" placeholder="123,45" value={draft.amount}
+      <Input label="Valor" startText="R$" inputMode="decimal" placeholder="123,45" value={draft.amount}
         required error={errors.amount} onChange={e=>patch('amount',e.target.value)}/>
       <RadioGroup legend="Tipo de movimentação" name="kind" value={draft.kind} required error={errors.kind}
         options={[{value:'income',label:'Receita'},{value:'expense',label:'Despesa'},{value:'transfer',label:'Transferência'}]}

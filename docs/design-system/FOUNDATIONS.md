@@ -19,7 +19,7 @@ Valores financeiros positivos e negativos devem ser identificados por **texto/si
 - Tipografia: Inter Variable auto-hospedada, eixo de peso contínuo 100–900 e fallback de sistema; 12, 14, 16, 18, 24, 32px.
 - Espaçamento: 4, 8, 12, 16, 24, 32, 48px.
 - Raios: 4, 8, 12, 16px.
-- Alturas de controles: 32, 36, 40px.
+- Alturas de controles: 32, 36, 44px (44px em campos, D-042).
 - Disposição: conteúdo fluido; cards em grid, tabelas densas com suporte responsivo; números tabulares e BRL pt-BR.
 - Temas: Light default e Dark via `html[data-theme="dark"]`, mantendo o mesmo conjunto de nomes semânticos.
 

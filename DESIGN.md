@@ -110,7 +110,7 @@ Use Inter Variable para interface, dados e valores. A escala de 12 a 32 px cobre
 
 ## Layout
 
-Use a escala de 4 px do frontmatter. Páginas seguem os templates documentados para shell, cabeçalho, conteúdo e estados responsivos; controles usam alturas existentes de 32, 36 ou 40 px.
+Use a escala de 4 px do frontmatter. Páginas seguem os templates documentados para shell, cabeçalho, conteúdo e estados responsivos; controles usam alturas existentes de 32, 36 ou 44 px (44 px é o padrão de campos e alvos de toque).
 
 ## Elevation & Depth
 

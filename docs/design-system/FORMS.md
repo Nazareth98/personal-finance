@@ -59,3 +59,10 @@ Os componentes Input, Select, Checkbox, RadioGroup, Dialog e Toast possuem vers�
 - Até 680 px todo diálogo vira folha inferior, com as ações em colunas iguais.
 - Ações: secundária à esquerda, primária à direita; o botão principal usa só o verbo (“Salvar”, “Excluir”, “Arquivar”), porque o título já nomeia o objeto. Gatilhos dentro do formulário que abrem uma confirmação continuam nomeando o objeto (“Excluir meta”).
 
+## Campos (D-042)
+
+- Altura padrão 44 px (`controlHeight.lg`).
+- Obrigatório escrito por extenso, “(obrigatório)”, ao lado do rótulo e fora do `<label>`; o atributo `required` anuncia para leitor de tela.
+- Erro sempre com ícone de alerta, além da cor.
+- Valores monetários: rótulo sem unidade e prefixo fixo `startText="R$"`; percentuais com `endText="%"`. A unidade entra na descrição acessível.
+

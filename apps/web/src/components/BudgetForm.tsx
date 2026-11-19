@@ -86,7 +86,7 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
     <form className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Categoria" value={categoryId} placeholder="Selecione" options={options} required disabled={Boolean(budget)}
         onChange={event => setCategoryId(event.target.value)} />
-      <Input label="Percentual da receita" value={percentage} inputMode="decimal" placeholder="Ex.: 12,50" required
+      <Input label="Percentual da receita" endText="%" value={percentage} inputMode="decimal" placeholder="Ex.: 12,50" required
         hint="Use um valor entre 0,01% e 100%." onChange={event => setPercentage(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div data-dialog-actions className="transaction-form__actions budget-form__actions">

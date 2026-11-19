@@ -81,7 +81,7 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
       {mode === 'manual' ? <>
         <Select label="Conta" value={accountId} placeholder="Selecione" options={accountOptions} required onChange={event => setAccountId(event.target.value)} />
         <Input label="Descrição" value={description} maxLength={120} required onChange={event => setDescription(event.target.value)} />
-        <Input label="Valor (R$)" inputMode="decimal" value={amount} required onChange={event => setAmount(event.target.value)} />
+        <Input label="Valor" startText="R$" inputMode="decimal" value={amount} required onChange={event => setAmount(event.target.value)} />
         <Input label="Data" type="date" value={eventDate} required onChange={event => setEventDate(event.target.value)} />
       </> : transactionOptions.length
         ? <Select label="Lançamento importado" value={transactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => setTransactionId(event.target.value)} />

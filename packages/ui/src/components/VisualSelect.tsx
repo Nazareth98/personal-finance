@@ -2,7 +2,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { FormMessage } from './FormMessage';
 import { Icon } from './Icon';
-import { useFieldIds } from './Field';
+import { RequiredMark, useFieldIds } from './Field';
 
 export type VisualSelectOption = { value: string; label: string; visual: ReactNode; disabled?: boolean };
 export type VisualSelectProps = {
@@ -69,7 +69,7 @@ export function VisualSelect({ label, value, options, onChange, disabled, requir
   }
 
   return <div className="ui-field ui-visual-select" ref={rootRef}>
-    <span className="ui-field__label" id={labelId}>{label}{required ? <span aria-hidden="true"> *</span> : null}</span>
+    <div className="ui-field__label-row"><span className="ui-field__label" id={labelId}>{label}</span>{required ? <RequiredMark /> : null}</div>
     <button ref={triggerRef} id={controlId} type="button" role="combobox" aria-labelledby={`${labelId} ${controlId}`}
       aria-controls={listboxId} aria-expanded={open} aria-haspopup="listbox" aria-describedby={description}
       aria-invalid={Boolean(error)} disabled={disabled} className="ui-input ui-visual-select__trigger"

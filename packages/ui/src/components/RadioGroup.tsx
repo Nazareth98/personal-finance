@@ -1,3 +1,4 @@
+import { RequiredMark } from './Field';
 import { useId, type FieldsetHTMLAttributes } from 'react';
 import { FormMessage } from './FormMessage';
 export type RadioOption={value:string;label:string;disabled?:boolean};
@@ -9,7 +10,7 @@ export function RadioGroup({legend,name,options,value,defaultValue,onChange,hint
   const generated=useId(),hintId=hint?`${generated}-hint`:undefined,errorId=error?`${generated}-error`:undefined;
   return <fieldset {...props} className={['ui-radio-group',className].filter(Boolean).join(' ')}
     aria-invalid={Boolean(error)} aria-describedby={[hintId,errorId].filter(Boolean).join(' ')||undefined}>
-    <legend className="ui-field__label">{legend}{required?<span aria-hidden="true"> *</span>:null}</legend>
+    <legend className="ui-field__label">{legend}{required ? <RequiredMark /> : null}</legend>
     <div className="ui-radio-options">{options.map(o=><label key={o.value} className="ui-control-option">
       <input type="radio" name={name} value={o.value}
         checked={value===undefined?undefined:value===o.value}
