@@ -25,5 +25,12 @@
     </script>
     <title>Personal Finance — Corporate UI</title>
   </head>
-  <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
+  <body><div id="root"><!-- Mesma marcação de BootSplash (D-044): o React substitui ao montar. -->
+    <main class="boot-splash" aria-busy="true">
+      <img class="boot-splash__icon" src="/icons/icon.svg" alt="" width="72" height="72" />
+      <span class="boot-splash__name">Personal Finance</span>
+      <span class="boot-splash__bar" aria-hidden="true"></span>
+      <p class="boot-splash__status" role="status">Carregando…</p>
+    </main>
+  </div><script type="module" src="/src/main.tsx"></script></body>
 </html>

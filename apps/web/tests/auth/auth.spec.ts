@@ -222,7 +222,7 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await mockSupabase(page);
   await page.goto('/#overview');
 
-  await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Navegação principal' })).toHaveCount(0);
 
   await page.getByLabel('E-mail').fill('owner@example.test');
@@ -242,7 +242,7 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   await page.getByRole('button', { name: 'Conta' }).click();
   await page.getByRole('menuitem', { name: 'Sair' }).click();
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
-  await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Mostrar senha' }).click();
   await expect(page.getByLabel('Senha', { exact: true })).toHaveAttribute('type', 'text');
 });
@@ -903,7 +903,7 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await expect(page.getByRole('menuitem', { name: 'Sair' })).toBeFocused();
   await page.keyboard.press('Enter');
   await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
-  await expect(page.getByRole('heading', { name: 'Acesse suas finanças' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
 });
 
 test('no mobile o título e a ação principal sobem para o cabeçalho do app', async ({ page }) => {

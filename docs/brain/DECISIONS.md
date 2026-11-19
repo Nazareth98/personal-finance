@@ -57,3 +57,12 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - CI: rodadas com `[update visual baselines]` ficam num grupo de concorrência próprio e não são canceladas pelo push seguinte. Novo snapshot visual do modal “Nova movimentação” (folha inferior no mobile).
 - Complemento (18/11/2026): seletor “Por página” na paginação (Transações 10/20/50/100, Revisão idem, demo 5/10/20), salvo em `localStorage` (`pf-page-size:<tabela>`, valor fora da lista volta ao padrão). A lista em cards da tabela passa a encolher (`minmax(0,1fr)`, quebra de texto) e os totais de Transações viram linhas compactas por container query em `em` — com a fonte ampliada do Android o conteúdo vazava para a direita.
 
+## D-044 — Login e carregamento refeitos (18/11/2026)
+
+- Marca única: o ícone do app (`/icons/icon.svg`, o mesmo da tela inicial do celular) com o nome “Personal Finance”, no carregamento e no login.
+- Carregamento (`BootSplash`): ícone, nome e barra indeterminada; texto de status só aparece após ~1 s. A mesma marcação está no `index.html`, então não há tela branca antes do JavaScript nem pulo até a verificação da sessão.
+- Login desktop: painel na cor da ação primária (azul profundo no escuro) com ilustração sem valores — contas, cartões e caixinhas ligadas a um livro reconciliado. Texto do painel em `--color-text-on-action` pleno, por contraste.
+- Login celular: marca com nome no topo, formulário logo em seguida, rodapé no fim da tela; sem gráfico decorativo.
+- Formulário: título “Entrar”; “Esqueci minha senha” vira link abaixo da senha; botão principal em `lg` (44 px); entrada em ~700 ms, e a troca login ↔ recuperação reanima só cabeçalho e formulário.
+- Substitui a composição de login da D-041 (linha decorativa e chips).
+

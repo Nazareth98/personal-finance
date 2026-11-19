@@ -199,50 +199,90 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 /* Accessible text accent distinct from action button fill in Dark mode. */
 .navigation a.is-active,.eyebrow,.brand-mark{color:var(--color-text-accent)}
 
-.auth-page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--color-bg-canvas)}
-.auth-hero{display:flex;flex-direction:column;justify-content:center;gap:var(--spacing-6);padding:var(--spacing-12);background:var(--color-bg-subtle);border-right:1px solid var(--color-border-default)}
-.auth-hero__copy{display:grid;gap:var(--spacing-2);max-width:440px}
-.auth-hero__title{margin:0;font-size:var(--font-size-2xl);font-weight:700;line-height:1.2;color:var(--color-text-primary)}
-.auth-hero__chart,.auth-card__chart{padding:var(--spacing-4);border:1px solid var(--color-border-default);border-radius:var(--radius-xl);background:var(--color-bg-surface)}
-.auth-hero__chart{max-width:440px}
-.auth-hero__chips{display:flex;flex-wrap:wrap;gap:var(--spacing-3);margin:0;padding:0;list-style:none}
-.auth-hero__chips li{display:inline-flex;align-items:center;gap:var(--spacing-2);padding:var(--spacing-3) var(--spacing-4);border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface);color:var(--color-text-primary);font-size:var(--font-size-sm);font-weight:600}
-.auth-hero__chips svg{color:var(--color-text-accent)}
-.auth-chart{display:block;width:100%;height:auto}
-.auth-chart__axis{stroke:var(--color-chart-grid)}
-.auth-chart__line{stroke:var(--color-action-primary);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
+/* ---------- Login e carregamento (D-044) ---------- */
+.auth-page{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:var(--color-bg-canvas)}
+.auth-brand{display:inline-flex;align-items:center;gap:var(--spacing-3);font:700 var(--font-size-base)/1 var(--font-family-sans);letter-spacing:-.01em}
+.auth-brand img{display:block;width:40px;height:40px;border-radius:10px}
+/* Painel da marca: superfície da ação primária; tudo dentro deriva de --color-text-on-action. */
+.auth-hero{--hero-ink:var(--color-text-on-action);--hero-soft:color-mix(in srgb,var(--hero-ink) 72%,transparent);--hero-line:color-mix(in srgb,var(--hero-ink) 22%,transparent);--hero-fill:color-mix(in srgb,var(--hero-ink) 12%,transparent);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:var(--spacing-8);padding:var(--spacing-8) var(--spacing-12);background:var(--color-action-primary);color:var(--hero-ink)}
+.auth-hero::before{content:"";position:absolute;inset:auto -20% -45% auto;width:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,var(--hero-fill),transparent);pointer-events:none}
+.auth-hero .auth-brand img{box-shadow:0 0 0 1px var(--hero-line)}
+/* No escuro o azul cheio ofusca: o painel vira um azul profundo, mantendo o tom da marca. */
+[data-theme="dark"] .auth-hero{background:color-mix(in srgb,var(--color-action-primary) 30%,var(--color-bg-canvas))}
+[data-theme="dark"] .auth-flow__tile{background:var(--color-action-primary);color:var(--color-text-on-action)}
+.auth-hero__body{position:relative;display:grid;gap:var(--spacing-4);max-width:480px}
+.auth-hero__title{margin:0;font:700 clamp(28px,3vw,40px)/1.12 var(--font-family-sans);letter-spacing:-.02em}
+.auth-hero__copy{margin:0 0 var(--spacing-6);color:var(--hero-ink);font-size:var(--font-size-base);line-height:1.55}
+.auth-hero__foot{position:relative;display:inline-flex;align-items:center;gap:var(--spacing-2);margin:0;color:var(--hero-ink);font-size:var(--font-size-sm)}
+/* Ilustração: três origens ligadas a um livro. */
+.auth-flow{display:grid;grid-template-columns:minmax(0,1fr) 56px minmax(0,1.15fr);align-items:center}
+.auth-flow__sources{display:grid;gap:var(--spacing-3);margin:0;padding:0;list-style:none}
+.auth-flow__source{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:var(--spacing-3);row-gap:6px;align-items:center;padding:var(--spacing-3);border:1px solid var(--hero-line);border-radius:var(--radius-lg);background:var(--hero-fill)}
+.auth-flow__tile{grid-row:1/3;display:grid;place-items:center;width:32px;height:32px;border-radius:var(--radius-md);background:var(--hero-ink);color:var(--color-action-primary)}
+.auth-flow__label{font:600 var(--font-size-sm)/1 var(--font-family-sans)}
+.auth-flow__bar{height:6px;width:70%;border-radius:3px;background:var(--hero-line)}
+.auth-flow__links{width:100%;height:180px;overflow:visible}
+.auth-flow__links path{fill:none;stroke:var(--hero-soft);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:0;vector-effect:non-scaling-stroke}
+.auth-flow__ledger{display:grid;gap:var(--spacing-3);padding:var(--spacing-4);border-radius:var(--radius-xl);background:var(--color-bg-surface);color:var(--color-text-primary);box-shadow:var(--shadow-lg)}
+.auth-flow__ledger-head{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2);padding-bottom:var(--spacing-2);border-bottom:1px solid var(--color-border-default);font-size:var(--font-size-sm)}
+.auth-flow__ok{display:inline-flex;align-items:center;gap:4px;color:var(--color-status-success);font:600 var(--font-size-xs)/1 var(--font-family-sans)}
+.auth-flow__row{display:grid;grid-template-columns:10px minmax(0,1fr) 40px;align-items:center;gap:var(--spacing-2)}
+.auth-flow__row>span{height:6px;border-radius:3px;background:var(--color-bg-subtle)}
+.auth-flow__row>span:first-child{width:10px;height:10px;border-radius:50%;background:var(--color-chart-category-1)}
+.auth-flow__row:nth-child(3)>span:first-child{background:var(--color-chart-category-2)}
+.auth-flow__row:nth-child(4)>span:first-child{background:var(--color-chart-category-3)}
+.auth-flow__row:nth-child(5)>span:first-child{background:var(--color-chart-category-4)}
+.auth-flow__row:nth-child(odd)>span:nth-child(2){width:72%}
+/* Formulário */
 .auth-panel{display:grid;place-items:center;padding:var(--spacing-12) var(--spacing-6)}
-.auth-card{width:min(100%,380px);display:flex;flex-direction:column;gap:var(--spacing-4)}
-.auth-card h1{margin:0;font-size:var(--font-size-2xl);line-height:1.2}
-.auth-mark{width:56px;height:56px;display:grid;place-items:center;border-radius:var(--radius-xl);background:var(--color-bg-surface);border:1px solid var(--color-border-default);color:var(--color-text-accent)}
-.auth-mark--compact,.auth-card__chart{display:none}
+.auth-card{width:min(100%,380px);display:flex;flex-direction:column;gap:var(--spacing-6)}
+.auth-card__brand{display:none}
+.auth-card__header{display:grid;gap:var(--spacing-2)}
+.auth-card h1{margin:0;font:700 var(--font-size-2xl)/1.15 var(--font-family-sans);letter-spacing:-.02em}
 .auth-copy{margin:0;color:var(--color-text-secondary);font-size:var(--font-size-sm);line-height:1.6}
-.auth-footnote{margin:var(--spacing-2) 0 0;color:var(--color-text-secondary);font-size:var(--font-size-xs);text-align:center}
 .auth-form{display:flex;flex-direction:column;gap:var(--spacing-4)}
-.auth-form>.ui-button{width:100%}
+.auth-form>.ui-button{width:100%;margin-top:var(--spacing-2)}
+.auth-password{display:grid;gap:var(--spacing-2)}
+.auth-link{justify-self:center;align-self:center;min-height:32px;padding:0 var(--spacing-1);border:0;background:none;color:var(--color-text-accent);font:600 var(--font-size-sm)/1 var(--font-family-sans);cursor:pointer;border-radius:var(--radius-sm)}
+.auth-link--end{justify-self:end}
+.auth-link:hover{text-decoration:underline;text-underline-offset:3px}
+.auth-link:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
 .auth-reveal.ui-button{width:36px;min-width:36px;padding:0;justify-content:center}
+.auth-footnote{display:inline-flex;align-items:center;justify-content:center;gap:var(--spacing-2);margin:0;padding-top:var(--spacing-4);border-top:1px solid var(--color-border-default);color:var(--color-text-secondary);font-size:var(--font-size-xs)}
 @media (max-width: 1000px) {
   .auth-page{grid-template-columns:minmax(0,1fr)}
   .auth-hero{display:none}
-  .auth-panel{place-items:start center;padding:var(--spacing-12) var(--spacing-6) var(--spacing-8)}
-  .auth-mark--compact,.auth-card__chart{display:grid}
-  .auth-card{gap:var(--spacing-5,20px)}
+  .auth-panel{place-items:stretch center;padding:var(--spacing-6) var(--spacing-6) calc(var(--spacing-6) + env(safe-area-inset-bottom))}
+  .auth-card{min-height:100%;gap:var(--spacing-6)}
+  .auth-card__brand{display:block;margin-bottom:var(--spacing-8)}
+  .auth-footnote{margin-top:auto}
 }
-/* Entrada do login (D-041): ~1,2 s no total; com movimento reduzido vira fade curto. */
-@keyframes pf-pop-in{0%{opacity:0;transform:scale(.6) rotate(-12deg)}70%{opacity:1;transform:scale(1.06) rotate(2deg)}100%{opacity:1;transform:none}}
+/* Carregamento: centralizado, ícone do app como no lançamento nativo. */
+.boot-splash{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--spacing-3);padding:var(--spacing-6);background:var(--color-bg-canvas);color:var(--color-text-primary)}
+.boot-splash__icon{display:block;width:72px;height:72px;border-radius:18px;box-shadow:0 10px 28px color-mix(in srgb,var(--color-action-primary) 32%,transparent);animation:pf-splash-in 420ms var(--ease-enter) both}
+.boot-splash__name{margin-top:var(--spacing-2);font:700 var(--font-size-base)/1 var(--font-family-sans);letter-spacing:-.01em;animation:pf-fade-in var(--motion-slow) 120ms var(--ease-enter) both}
+.boot-splash__bar{position:relative;overflow:hidden;width:120px;height:3px;margin-top:var(--spacing-3);border-radius:2px;background:var(--color-bg-subtle)}
+.boot-splash__bar::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;border-radius:2px;background:var(--color-action-primary);animation:pf-splash-bar 1.1s var(--ease-standard) infinite}
+.boot-splash__status{margin:0;min-height:1.4em;color:var(--color-text-secondary);font-size:var(--font-size-xs);animation:pf-fade-in var(--motion-base) 1s both}
+@keyframes pf-splash-in{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+@keyframes pf-splash-bar{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+/* Entrada do login (D-044): ~700 ms; trocas login ↔ recuperação repetem só cabeçalho e formulário. */
 @keyframes pf-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-.auth-enter .auth-mark{animation:pf-pop-in 600ms var(--ease-standard) both}
-.auth-enter .auth-chart__line{animation:pf-draw 1100ms 250ms var(--ease-standard) both}
-.auth-enter .auth-step,.auth-enter .auth-card>h1,.auth-enter .auth-card>.auth-copy,.auth-enter .auth-form>*{animation:pf-rise-in var(--motion-slow) var(--ease-enter) both}
-.auth-enter .auth-hero__copy{animation-delay:300ms}.auth-enter .auth-hero__chart{animation-delay:380ms}
-.auth-enter .auth-hero__chips li:nth-child(1){animation-delay:900ms}.auth-enter .auth-hero__chips li:nth-child(2){animation-delay:1000ms}.auth-enter .auth-hero__chips li:nth-child(3){animation-delay:1100ms}
-.auth-enter .auth-card__chart{animation-delay:240ms}.auth-enter .auth-card>h1{animation-delay:300ms}.auth-enter .auth-card>.auth-copy{animation-delay:360ms}
-.auth-enter .auth-form>:nth-child(1){animation-delay:420ms}.auth-enter .auth-form>:nth-child(2){animation-delay:490ms}.auth-enter .auth-form>:nth-child(3){animation-delay:560ms}.auth-enter .auth-form>:nth-child(n+4){animation-delay:620ms}
-.auth-enter .auth-footnote{animation-delay:800ms}
+.auth-enter .auth-step,.auth-enter .auth-form>*,.auth-enter .auth-flow__source,.auth-enter .auth-flow__ledger{animation:pf-rise-in var(--motion-slow) var(--ease-enter) both}
+.auth-enter .auth-flow__links path{animation:pf-draw 600ms var(--ease-standard) both}
+.auth-enter .auth-hero__copy{animation-delay:60ms}
+.auth-enter .auth-flow__source:nth-child(1){animation-delay:140ms}.auth-enter .auth-flow__source:nth-child(2){animation-delay:200ms}.auth-enter .auth-flow__source:nth-child(3){animation-delay:260ms}
+.auth-enter .auth-flow__links path{animation-delay:340ms}.auth-enter .auth-flow__ledger{animation-delay:460ms}
+.auth-enter .auth-card__header{animation-delay:40ms}
+.auth-enter .auth-form>:nth-child(1){animation-delay:100ms}.auth-enter .auth-form>:nth-child(2){animation-delay:150ms}.auth-enter .auth-form>:nth-child(n+3){animation-delay:200ms}
+.auth-enter .auth-footnote{animation-delay:260ms}
 @media (prefers-reduced-motion: reduce) {
-  .auth-enter .auth-mark,.auth-enter .auth-step,.auth-enter .auth-card>h1,.auth-enter .auth-card>.auth-copy,.auth-enter .auth-form>*{animation:pf-fade-in var(--motion-instant) linear both}
-  .auth-enter .auth-chart__line{animation:none}
+  .auth-enter .auth-step,.auth-enter .auth-form>*,.auth-enter .auth-flow__source,.auth-enter .auth-flow__ledger,.boot-splash__icon,.boot-splash__name{animation:pf-fade-in var(--motion-instant) linear both}
+  .auth-enter .auth-flow__links path{animation:none}
+  .boot-splash__bar::after{animation:pf-splash-pulse 1.6s ease-in-out infinite alternate;width:100%;transform:none}
 }
+@keyframes pf-splash-pulse{from{opacity:.25}to{opacity:.8}}
 
 /* Async feedback controls must wrap without expanding mobile layouts. */
 .section-heading{flex-wrap:wrap;gap:var(--spacing-3);align-items:center}
