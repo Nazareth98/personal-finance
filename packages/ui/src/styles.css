@@ -76,8 +76,8 @@
   box-shadow:var(--shadow-lg)}
 /* D-042: cabeçalho e ações fixos; só o corpo rola, sem arrastar a página ao fundo. */
 .ui-dialog[open]{display:flex;flex-direction:column}
-html.ui-scroll-locked{overflow:hidden}
-html.ui-scroll-locked body{overflow:hidden;overscroll-behavior:none}
+/* Só no html: overflow no body o tornava o contêiner do sticky e a sidebar subia junto com a página rolada. */
+html.ui-scroll-locked{overflow:hidden;overscroll-behavior:none;scrollbar-gutter:stable}
 .ui-dialog::backdrop{background:var(--overlay-backdrop,rgba(0,0,0,.58))}
 .ui-dialog__header{flex:none;display:flex;align-items:start;justify-content:space-between;gap:var(--spacing-4);padding:var(--spacing-6) var(--spacing-6) var(--spacing-4);border-bottom:1px solid var(--color-border-default)}
 .ui-dialog__title{font-size:var(--font-size-lg);margin:0 0 var(--spacing-2)}

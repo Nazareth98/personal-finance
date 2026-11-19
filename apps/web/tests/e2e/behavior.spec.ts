@@ -175,3 +175,18 @@ test('gráfico destaca o período por mouse e teclado e liga a tabela de valores
   await table.locator('tbody tr').nth(2).hover();
   await expect(plot.locator(':scope > *').nth(2)).toHaveClass(/is-active/);
 });
+
+test('abrir diálogo com a página rolada não desloca a sidebar fixa',async ({page},testInfo)=>{
+  test.skip(!testInfo.project.name.startsWith('desktop'),'sidebar fixa só no desktop');
+  await page.setViewportSize({width:1280,height:600});
+  await page.goto('/#overview');
+  await page.evaluate(()=>window.scrollTo(0,400));
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+  const sidebar=page.locator('.sidebar');
+  const before=await sidebar.boundingBox();
+  await page.getByRole('button',{name:/^Nova movimentação/}).first().click();
+  await expect(page.getByRole('dialog',{name:/Nova movimentação/})).toBeVisible();
+  expect(await page.evaluate(()=>getComputedStyle(document.body).overflowY)).toBe('visible');
+  expect((await sidebar.boundingBox())?.y).toBe(before?.y);
+  expect(await page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+});
