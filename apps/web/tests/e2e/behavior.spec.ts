@@ -132,3 +132,18 @@ test('barra inferior segue a ordem de uso diário',async ({page},testInfo)=>{
   await page.goto('/#overview');
   await expect(page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link')).toHaveText(['Visão geral','Transações','Revisão','Cartões']);
 });
+
+test('diálogo rola só o corpo; cabeçalho e ações ficam fixos',async ({page})=>{
+  await page.setViewportSize({width:page.viewportSize()!.width,height:420});
+  await page.goto('/#overview');
+  await page.getByRole('button',{name:/^Nova movimentação/}).first().click();
+  const dialog=page.getByRole('dialog',{name:/Nova movimentação/});
+  const body=dialog.locator('.ui-dialog__body');
+  const submit=dialog.getByRole('button',{name:'Validar demonstração'});
+  expect(await body.evaluate(element=>element.scrollHeight>element.clientHeight)).toBe(true);
+  await expect(dialog.locator('.ui-dialog__footer')).toContainText('Validar demonstração');
+  const before=await submit.boundingBox();
+  await body.evaluate(element=>{element.scrollTop=element.scrollHeight;});
+  expect(await submit.boundingBox()).toEqual(before);
+  expect(await dialog.evaluate(element=>element.scrollHeight<=element.clientHeight+1)).toBe(true);
+});

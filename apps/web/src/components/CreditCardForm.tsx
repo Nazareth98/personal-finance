@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Button, Dialog, FormMessage, Input, useToast } from '@personal-finance/ui';
 import type { FinancialAccount } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
@@ -11,6 +11,7 @@ export function CreditCardForm({ account, onClose, ledger }: { account: Financia
   const [limit, setLimit] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
 
   useEffect(() => {
@@ -39,13 +40,12 @@ export function CreditCardForm({ account, onClose, ledger }: { account: Financia
     finally { setLoading(false); }
   }
 
-  return <Dialog open={Boolean(account)} onClose={onClose} title="Configurar cartão" description={account ? `Defina o ciclo de ${account.name}.` : undefined}>
-    <form className="transaction-form" noValidate onSubmit={submit}>
+  return <Dialog open={Boolean(account)} onClose={onClose} title="Configurar cartão" description={account ? `Defina o ciclo de ${account.name}.` : undefined}
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>Salvar</Button></>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Dia de fechamento" inputMode="numeric" value={closingDay} required onChange={event => setClosingDay(event.target.value)} />
       <Input label="Dia de vencimento" inputMode="numeric" value={dueDay} required onChange={event => setDueDay(event.target.value)} />
       <Input label="Limite" startText="R$" inputMode="decimal" value={limit} hint="Opcional; não altera o saldo do livro." onChange={event => setLimit(event.target.value)} />
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
-    </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }

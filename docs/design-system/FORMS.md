@@ -55,7 +55,8 @@ Os componentes Input, Select, Checkbox, RadioGroup, Dialog e Toast possuem vers�
 ## Diálogos de formulário (D-042)
 
 - A página ao fundo fica travada enquanto houver diálogo aberto (`html.ui-scroll-locked`, contador para diálogos empilhados).
-- Cabeçalho e ações ficam fixos; só o corpo rola. A barra de ações do formulário leva `data-dialog-actions` para ficar presa ao rodapé.
+- Cabeçalho e rodapé ficam fixos; só o corpo rola (D-057). As ações vão na prop `footer` do `Dialog`; o envio fica ligado ao formulário por `form={formId}` (`useId`), então Enter continua enviando.
+- Confirmação: o título só nomeia a ação (“Sair da conta”, “Excluir meta”); a pergunta vai no corpo com `.ui-dialog__question` (“Excluir meta de Supermercado?”) e a consequência logo abaixo.
 - Até 680 px todo diálogo vira folha inferior, com as ações em colunas iguais.
 - Ações: secundária à esquerda, primária à direita; o botão principal usa só o verbo (“Salvar”, “Excluir”, “Arquivar”), porque o título já nomeia o objeto. Gatilhos dentro do formulário que abrem uma confirmação continuam nomeando o objeto (“Excluir meta”).
 

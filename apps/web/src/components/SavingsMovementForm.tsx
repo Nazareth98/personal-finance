@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-finance/ui';
 import type { SavingsBox, SavingsMovement } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
@@ -27,6 +27,7 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
   const [transactionId, setTransactionId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
   const linked = new Set((ledger.data?.savingsMovements ?? []).map(movement => movement.transactionId));
   const eligibleTransactions = (ledger.data?.transactions ?? []).filter(transaction =>
@@ -74,8 +75,9 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
   }));
   const title = mode === 'link' ? 'Associar lançamento importado' : type === 'withdrawal' ? 'Registrar resgate' : 'Registrar aporte';
 
-  return <Dialog open={Boolean(box)} onClose={onClose} title={title} description={box ? `Caixinha: ${box.name}` : undefined}>
-    <form className="transaction-form" noValidate onSubmit={submit}>
+  return <Dialog open={Boolean(box)} onClose={onClose} title={title} description={box ? `Caixinha: ${box.name}` : undefined}
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>Salvar</Button></>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Tipo de movimento" value={type} options={[{ value: 'contribution', label: 'Aporte' }, { value: 'withdrawal', label: 'Resgate' }]}
         onChange={event => { setType(event.target.value as MovementType); setTransactionId(''); setError(''); }} />
       {mode === 'manual' ? <>
@@ -86,8 +88,6 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
       </> : transactionOptions.length
         ? <Select label="Lançamento importado" value={transactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => setTransactionId(event.target.value)} />
         : <FormMessage tone="hint">Nenhum lançamento importado e neutro é compatível com este tipo.</FormMessage>}
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
-    </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }

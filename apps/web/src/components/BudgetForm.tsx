@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import type { CategoryBudget } from '@personal-finance/domain';
 import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
@@ -26,6 +26,7 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
   const categories = ledger.data?.categories ?? [];
   const budgeted = new Set((ledger.data?.budgets ?? []).map(item => item.categoryId));
@@ -73,31 +74,28 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
   }
 
   if (confirmingDelete) {
-    return <Dialog open={open} onClose={onClose} title={`Excluir meta de ${categoryName}?`}
-      description="O teto deixa de ser acompanhado. Lançamentos e a categoria não mudam, e você pode definir a meta de novo depois.">
-      <div className="transaction-form">
-        {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div data-dialog-actions className="transaction-form__actions">
-          <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />Excluir</Button>
-        </div>
-      </div>
+    return <Dialog open={open} onClose={onClose} title="Excluir meta" footer={<>
+      <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
+      <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />Excluir</Button>
+    </>}>
+      <p className="ui-dialog__question">Excluir meta de {categoryName}?</p>
+      <p className="muted">O teto deixa de ser acompanhado. Lançamentos e a categoria não mudam, e você pode definir a meta de novo depois.</p>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
     </Dialog>;
   }
 
-  return <Dialog open={open} onClose={onClose} title={title} description="Teto fixo em reais por mês. Não depende da receita do período.">
-    <form className="transaction-form" noValidate onSubmit={submit}>
+  return <Dialog open={open} onClose={onClose} title={title} description="Teto fixo em reais por mês. Não depende da receita do período." footer={<>
+    {budget && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
+      <Icon icon={DeleteIcon} size="sm" />Excluir meta</Button>}
+    <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+    <Button type="submit" form={formId} loading={loading}>Salvar</Button>
+  </>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Categoria" value={categoryId} placeholder="Selecione" options={options} required disabled={Boolean(budget)}
         onChange={event => setCategoryId(event.target.value)} />
       <Input label="Teto mensal" startText="R$" value={limit} inputMode="decimal" placeholder="Ex.: 800,00" required
         hint="Quanto você aceita gastar por mês nesta categoria. Na visão anual, vale 12 vezes." onChange={event => setLimit(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
-        {budget && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
-          <Icon icon={DeleteIcon} size="sm" />Excluir meta</Button>}
-        <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>Salvar</Button>
-      </div>
     </form>
   </Dialog>;
 }

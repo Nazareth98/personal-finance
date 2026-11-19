@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { parseBrlCents } from '../lib/transaction-validation';
@@ -17,6 +17,7 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
   const [draft, setDraft] = useState<Draft>(blank);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
   const data = ledger.data;
   const transfer = draft.kind === 'transfer';
@@ -63,8 +64,9 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
     value: transaction.id, label: `${formatLocalDate(transaction.eventDate)} · ${transaction.description} · ${formatCentsBRL(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents)}`
   }));
 
-  return <Dialog open={open} onClose={onClose} title="Nova movimentação" description="Registre lançamentos manuais sem alterar dados importados.">
-    {!accountOptions.length ? <FormMessage tone="error">Cadastre uma conta antes de lançar movimentações.</FormMessage> : <form onSubmit={submit} noValidate className="transaction-form">
+  return <Dialog open={open} onClose={onClose} title="Nova movimentação" description="Registre lançamentos manuais sem alterar dados importados."
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button>{accountOptions.length > 0 && <Button type="submit" form={formId} loading={loading}>Salvar</Button>}</>}>
+    {!accountOptions.length ? <FormMessage tone="error">Cadastre uma conta antes de lançar movimentações.</FormMessage> : <form id={formId} onSubmit={submit} noValidate className="transaction-form">
       <Input label="Descrição" value={draft.description} maxLength={120} required onChange={event => patch('description', event.target.value)} />
       <Input label="Valor" startText="R$" inputMode="decimal" placeholder="123,45" value={draft.amount} required onChange={event => patch('amount', event.target.value)} />
       <Select label="Tipo" value={draft.kind} options={[
@@ -76,8 +78,6 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
       {!transfer && <Select label="Categoria" value={draft.categoryId} placeholder="Selecione" options={categoryOptions} required onChange={event => patch('categoryId', event.target.value)} />}
       {adjustment && <Select label="Lançamento original" value={draft.adjustedTransactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => patch('adjustedTransactionId', event.target.value)} />}
       <Input label="Data" type="date" value={draft.eventDate} required onChange={event => patch('eventDate', event.target.value)} />
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
-    </form>}
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>}
   </Dialog>;
 }

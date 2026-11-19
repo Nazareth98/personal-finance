@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useId, useMemo, useState, type FormEvent } from 'react';
 import type { Category, CategoryColorKey, CategoryIconKey } from '@personal-finance/domain';
 import { ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon, EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, RadioGroup, Select, StatusOkIcon, useToast, VisualSelect, type DataTableColumn } from '@personal-finance/ui';
 import { CategoryIdentity, CategoryIdentityIcon, categoryColors, categoryIcons } from '../components/CategoryIdentity';
@@ -21,6 +21,7 @@ function CategoryEditor({ category, open, onClose, ledger }: {
   const [colorKey, setColorKey] = useState<CategoryColorKey>(category?.colorKey ?? 'chart-category-1');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
 
   function close() { setError(''); onClose(); }
@@ -39,8 +40,9 @@ function CategoryEditor({ category, open, onClose, ledger }: {
   }
 
   return <Dialog open={open} onClose={close} title={category ? 'Editar categoria' : 'Nova categoria'}
-    description={category ? 'Nome, ícone e cor também aparecem no histórico.' : 'A aplicabilidade restringe onde a categoria pode ser selecionada.'}>
-    <form className="transaction-form" noValidate onSubmit={submit}>
+    description={category ? 'Nome, ícone e cor também aparecem no histórico.' : 'A aplicabilidade restringe onde a categoria pode ser selecionada.'}
+    footer={<><Button variant="secondary" onClick={close}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>Salvar</Button></>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome" value={name} maxLength={60} required onChange={event => setName(event.target.value)} />
       <div className="category-visual-fields">
         <VisualSelect label="Ícone" value={iconKey} onChange={value => setIconKey(value as CategoryIconKey)}
@@ -52,9 +54,7 @@ function CategoryEditor({ category, open, onClose, ledger }: {
       {!category && <RadioGroup legend="Aplica-se a" name="category-applicability" value={applicability} required
         options={[{ value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'neutral', label: 'Movimento neutro' }]}
         onChange={value => setApplicability(value as Category['applicability'])} />}
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={close}>Cancelar</Button><Button type="submit" loading={loading}>Salvar</Button></div>
-    </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }
 
@@ -85,17 +85,15 @@ function CategoryRemoval({ category, onClose, ledger }: { category: Category | n
   }
 
   return <Dialog open={Boolean(category)} onClose={onClose} title="Arquivar ou excluir categoria"
-    description={category ? `“${category.name}” deixará de aparecer em novos formulários.` : undefined}>
+    description={category ? `“${category.name}” deixará de aparecer em novos formulários.` : undefined}
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button>
+      {!category?.dependencyCount && <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm"/>Excluir definitivamente</Button>}
+      <Button loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm"/>Arquivar</Button></>}>
     <div className="transaction-form">
       {category?.dependencyCount ? <><FormMessage tone="hint">Há {category.dependencyCount.toLocaleString('pt-BR')} referência(s). Você pode preservá-las ou reatribuir os usos atuais antes de arquivar.</FormMessage>
         <Select label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histórico" options={replacements} onChange={event => setReplacement(event.target.value)} /></>
         : <FormMessage tone="hint">Esta categoria nunca foi utilizada e também pode ser excluída definitivamente.</FormMessage>}
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        {!category?.dependencyCount && <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm"/>Excluir definitivamente</Button>}
-        <Button loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm"/>Arquivar</Button>
-      </div>
-    </div>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </div>
   </Dialog>;
 }
 

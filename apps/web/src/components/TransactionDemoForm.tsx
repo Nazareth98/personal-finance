@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { Button, Checkbox, Dialog, Input, RadioGroup, Select, useToast } from '@personal-finance/ui';
 import { validateTransactionDraft, type TransactionDraft, type TransactionErrors } from '../lib/transaction-validation';
 
@@ -8,6 +8,7 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
   const [draft,setDraft] = useState<TransactionDraft>(blank);
   const [errors,setErrors] = useState<TransactionErrors>({});
   const {notify} = useToast();
+  const formId = useId();
   function patch<K extends keyof TransactionDraft>(key:K,value:TransactionDraft[K]){
     setDraft(current=>({...current,[key]:value}));
     setErrors(current=>({...current,[key]:undefined}));
@@ -24,8 +25,9 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
     setDraft(blank);setErrors({});onClose();
   }
   return <Dialog open={open} onClose={onClose} title="Nova movimentação — demonstração"
-    description="Experimente os componentes. Este formulário não armazena ou envia dados.">
-    <form onSubmit={submit} noValidate className="transaction-form">
+    description="Experimente os componentes. Este formulário não armazena ou envia dados."
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId}>Validar demonstração</Button></>}>
+    <form id={formId} onSubmit={submit} noValidate className="transaction-form">
       <Input label="Descrição" placeholder="Ex.: Mercado demonstrativo" value={draft.description}
         maxLength={121} required error={errors.description}
         onChange={e=>patch('description',e.target.value)}/>
@@ -39,11 +41,6 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
         onChange={e=>patch('account',e.target.value)}/>
       <Checkbox label="Entendo que esta é apenas uma demonstração, sem gravação de dados."
         checked={draft.confirmedDemo} error={errors.confirmedDemo}
-        onChange={e=>patch('confirmedDemo',e.target.checked)}/>
-      <div data-dialog-actions className="transaction-form__actions">
-        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        <Button type="submit">Validar demonstração</Button>
-      </div>
-    </form>
+        onChange={e=>patch('confirmedDemo',e.target.checked)}/>    </form>
   </Dialog>;
 }

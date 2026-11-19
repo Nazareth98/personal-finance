@@ -234,14 +234,14 @@ test('protege a aplicação, autentica o proprietário e encerra a sessão', asy
   // Sair mora no menu da conta (D-042) e sempre pede confirmação, começando no Cancelar (D-041).
   await page.getByRole('button', { name: 'Menu da conta' }).click();
   await page.getByRole('menu', { name: 'Menu da conta' }).getByRole('menuitem', { name: 'Sair' }).click();
-  const confirm = page.getByRole('dialog', { name: 'Sair do Personal Finance?' });
+  const confirm = page.getByRole('dialog', { name: 'Sair da conta' });
   await expect(confirm.getByRole('button', { name: 'Cancelar' })).toBeFocused();
   await confirm.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Menu da conta' })).toBeFocused();
   await page.getByRole('button', { name: 'Menu da conta' }).click();
   await page.getByRole('menuitem', { name: 'Sair' }).click();
-  await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('dialog', { name: 'Sair da conta' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Mostrar senha' }).click();
   await expect(page.getByLabel('Senha', { exact: true })).toHaveAttribute('type', 'text');
@@ -337,7 +337,7 @@ test('contas: grupos por tipo, edição e arquivamento sem perder lançamentos',
 
   await page.getByRole('button', { name: 'Editar conta Conta principal' }).click();
   await page.getByRole('dialog', { name: 'Editar Conta principal' }).getByRole('button', { name: 'Arquivar conta' }).click();
-  await page.getByRole('dialog', { name: 'Arquivar Conta principal?' }).getByRole('button', { name: 'Arquivar', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Arquivar conta' }).getByRole('button', { name: 'Arquivar', exact: true }).click();
   await expect(page.getByText('Conta arquivada; os lançamentos continuam no livro.')).toBeVisible();
 
   expect(writes.map(write => write.path)).toEqual(['/rest/v1/rpc/update_financial_account', '/rest/v1/rpc/archive_financial_account']);
@@ -413,7 +413,7 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
 
   await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
   await page.getByRole('dialog', { name: 'Editar meta de Supermercado' }).getByRole('button', { name: 'Excluir meta' }).click();
-  const confirm = page.getByRole('dialog', { name: 'Excluir meta de Supermercado?' });
+  const confirm = page.getByRole('dialog', { name: 'Excluir meta' });
   await confirm.getByRole('button', { name: 'Excluir', exact: true }).click();
   await expect(page.getByText('Meta excluída.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('delete_category_budget');
@@ -473,7 +473,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
 
   await page.getByRole('button', { name: 'Editar caixinha Reserva de emergência' }).click();
   await page.getByRole('dialog', { name: 'Editar Reserva de emergência' }).getByRole('button', { name: 'Excluir caixinha' }).click();
-  await page.getByRole('dialog', { name: 'Excluir Reserva de emergência?' }).getByRole('button', { name: 'Excluir', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Excluir caixinha' }).getByRole('button', { name: 'Excluir', exact: true }).click();
   await expect(page.getByText('Caixinha excluída.')).toBeVisible();
 
   expect(writes.map(write => write.path)).toEqual([
@@ -924,7 +924,7 @@ test('barra inferior mostra pendências e o menu da conta no cabeçalho troca o 
   await page.keyboard.press('ArrowDown');
   await expect(page.getByRole('menuitem', { name: 'Sair' })).toBeFocused();
   await page.keyboard.press('Enter');
-  await page.getByRole('dialog', { name: 'Sair do Personal Finance?' }).getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('dialog', { name: 'Sair da conta' }).getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
 });
 

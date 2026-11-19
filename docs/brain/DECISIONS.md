@@ -147,3 +147,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - A Pluggy não informa o banco por conta. Na sincronização, para conexões MeuPluggy, o backend lê o catálogo de bancos (`GET /connectors?countries=BR&types=PERSONAL_BANK`) e casa a primeira palavra própria do nome do banco com o nome da conta (`institutionFromAccountName`); mais de um banco possível → nenhum.
 - O conector e o nome do banco ficam em `private.pluggy_accounts` (gravados só pelo `service_role`); `get_account_institutions` os prefere ao da conexão. Falha no catálogo não interrompe a importação.
 - Limite: salário já importado não é reconhecido de novo; o catálogo é lido só na primeira página.
+
+## D-057 — Diálogo: rodapé de verdade e pergunta no corpo (19/11/2026)
+
+- Problema: as ações ficavam dentro do corpo com `position: sticky` (`data-dialog-actions`), então o rodapé rolava junto; na confirmação de saída a pergunta era o título.
+- Todos os diálogos usam a prop `footer` do `Dialog`; o botão de envio aponta para o formulário com `form`. `data-dialog-actions` e `.transaction-form__actions` saíram.
+- Confirmações (sair, arquivar conta, excluir meta, excluir caixinha): título curto com a ação, pergunta em `.ui-dialog__question` e consequência no corpo. Substitui a regra do README do design system de pôr a pergunta no título.
+- Protótipos no canvas “Personal Finance — melhorias de UI” (etapa 1 de 5).

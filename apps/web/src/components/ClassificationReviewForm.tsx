@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
 import { Button, Dialog, FormMessage, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
@@ -32,6 +32,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   const [relationId, setRelationId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
   const data = ledger.data;
   const semanticOverride = data?.semanticOverrides.find(item => item.transactionId === transaction?.id);
@@ -153,8 +154,9 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   }
 
   return <Dialog open={Boolean(transaction)} onClose={onClose} title="Revisar lançamento"
-    description={transaction ? `Defina o efeito financeiro de “${transaction.description}”. O registro importado não será alterado.` : undefined}>
-    <form className="transaction-form" noValidate onSubmit={submit}>
+    description={transaction ? `Defina o efeito financeiro de “${transaction.description}”. O registro importado não será alterado.` : undefined}
+    footer={<><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>Confirmar revisão</Button></>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Natureza financeira" value={nature} options={natureOptions} required
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
       {(nature === 'income' || nature === 'expense') && <Select label="Categoria confirmada" value={categoryId}
@@ -172,11 +174,6 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
             : `Categoria: ${item.categoryId ? categoryNames.get(item.categoryId) ?? 'Categoria removida' : 'Sem categoria'}`}
         </li>)}</ul>
       </section>}
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions">
-        <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>Confirmar revisão</Button>
-      </div>
-    </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }

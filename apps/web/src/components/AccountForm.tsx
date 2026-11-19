@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { ArchiveIcon, Button, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
 import type { FinancialAccount } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
@@ -22,6 +22,7 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
   const [confirmingArchive, setConfirmingArchive] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
 
   async function submit(event: FormEvent) {
@@ -59,33 +60,30 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
   }
 
   if (account && confirmingArchive) {
-    return <Dialog open={open} onClose={onClose} title={`Arquivar ${account.name}?`}
-      description="A conta sai desta tela, dos saldos e das listas de contas. Os lançamentos continuam em Transações, receitas e despesas. Se ela estiver conectada ao MeuPluggy, desconecte a instituição para parar de importar.">
-      <div className="transaction-form">
-        {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div data-dialog-actions className="transaction-form__actions">
-          <Button variant="ghost" onClick={() => { setConfirmingArchive(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm" />Arquivar</Button>
-        </div>
-      </div>
+    return <Dialog open={open} onClose={onClose} title="Arquivar conta" footer={<>
+      <Button variant="ghost" onClick={() => { setConfirmingArchive(false); setError(''); }}>Voltar</Button>
+      <Button variant="danger" loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm" />Arquivar</Button>
+    </>}>
+      <p className="ui-dialog__question">Arquivar {account.name}?</p>
+      <p className="muted">A conta sai desta tela, dos saldos e das listas de contas. Os lançamentos continuam em Transações, receitas e despesas. Se ela estiver conectada ao MeuPluggy, desconecte a instituição para parar de importar.</p>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
     </Dialog>;
   }
 
   return <Dialog open={open} onClose={onClose} title={account ? `Editar ${account.name}` : 'Nova conta'}
-    description="O saldo inicial serve como ponto de partida do livro financeiro.">
-    <form onSubmit={submit} noValidate className="transaction-form">
+    description="O saldo inicial serve como ponto de partida do livro financeiro." footer={<>
+      {account && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingArchive(true); setError(''); }}>
+        <Icon icon={ArchiveIcon} size="sm" />Arquivar conta</Button>}
+      <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+      <Button type="submit" form={formId} loading={loading}>Salvar</Button>
+    </>}>
+    <form id={formId} onSubmit={submit} noValidate className="transaction-form">
       <Input label="Nome da conta" value={name} maxLength={80} required onChange={event => setName(event.target.value)} />
       <Select label="Tipo" value={type} options={typeOptions} disabled={Boolean(account)}
         hint={account ? 'O tipo não muda depois de criada a conta.' : undefined}
         onChange={event => setType(event.target.value as FinancialAccount['type'])} />
       <Input label="Saldo inicial" startText="R$" inputMode="decimal" value={opening} required onChange={event => setOpening(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
-        {account && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingArchive(true); setError(''); }}>
-          <Icon icon={ArchiveIcon} size="sm" />Arquivar conta</Button>}
-        <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>Salvar</Button>
-      </div>
     </form>
   </Dialog>;
 }

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { Button, Dialog, FormMessage, Select, useToast } from '@personal-finance/ui';
 import type { CardStatement } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
@@ -8,6 +8,7 @@ export function CardPaymentForm({ statement, onClose, ledger }: { statement: Car
   const [transactionId, setTransactionId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
   const linked = new Set((ledger.data?.cardStatementEntries ?? []).filter(entry => entry.type === 'payment').map(entry => entry.transactionId));
   const options = (ledger.data?.transactions ?? []).filter(transaction => transaction.nature === 'card_payment' && !linked.has(transaction.id))
@@ -25,12 +26,11 @@ export function CardPaymentForm({ statement, onClose, ledger }: { statement: Car
     finally { setLoading(false); }
   }
 
-  return <Dialog open={Boolean(statement)} onClose={onClose} title="Vincular pagamento" description="O pagamento liquida a fatura e permanece neutro nos relatórios.">
-    <form className="transaction-form" noValidate onSubmit={submit}>
+  return <Dialog open={Boolean(statement)} onClose={onClose} title="Vincular pagamento" description="O pagamento liquida a fatura e permanece neutro nos relatórios."
+    footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading} disabled={!options.length}>Vincular pagamento</Button></>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       {options.length ? <Select label="Pagamento de fatura" value={transactionId} placeholder="Selecione" options={options} required onChange={event => setTransactionId(event.target.value)} />
         : <FormMessage tone="hint">Nenhum lançamento neutro de pagamento está disponível.</FormMessage>}
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions"><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" loading={loading} disabled={!options.length}>Vincular pagamento</Button></div>
-    </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }

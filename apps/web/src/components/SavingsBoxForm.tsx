@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import type { SavingsBox } from '@personal-finance/domain';
 import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
@@ -22,6 +22,7 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formId = useId();
   const { notify } = useToast();
 
   async function submit(event: FormEvent) {
@@ -65,34 +66,31 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
   }
 
   if (box && confirmingDelete) {
-    return <Dialog open={open} onClose={onClose} title={`Excluir ${box.name}?`}
-      description={hasHistory
+    return <Dialog open={open} onClose={onClose} title="Excluir caixinha" footer={<>
+      <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
+      <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />{hasHistory ? 'Arquivar' : 'Excluir'}</Button>
+    </>}>
+      <p className="ui-dialog__question">Excluir {box.name}?</p>
+      <p className="muted">{hasHistory
         ? 'Ela tem movimentos, então será arquivada: sai desta tela e das previsões, mas aportes e resgates continuam no livro.'
-        : 'Ela não tem movimentos e será excluída definitivamente.'}>
-      <div className="transaction-form">
-        {error && <FormMessage tone="error">{error}</FormMessage>}
-        <div data-dialog-actions className="transaction-form__actions">
-          <Button variant="ghost" onClick={() => { setConfirmingDelete(false); setError(''); }}>Voltar</Button>
-          <Button variant="danger" loading={loading} onClick={() => void remove()}><Icon icon={DeleteIcon} size="sm" />{hasHistory ? 'Arquivar' : 'Excluir'}</Button>
-        </div>
-      </div>
+        : 'Ela não tem movimentos e será excluída definitivamente.'}</p>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
     </Dialog>;
   }
 
   return <Dialog open={open} onClose={onClose} title={box ? `Editar ${box.name}` : 'Nova caixinha'}
-    description="O saldo é reconstruído pelo valor inicial e pelos movimentos vinculados.">
-    <form className="transaction-form" noValidate onSubmit={submit}>
+    description="O saldo é reconstruído pelo valor inicial e pelos movimentos vinculados." footer={<>
+      {box && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
+        <Icon icon={DeleteIcon} size="sm" />Excluir caixinha</Button>}
+      <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+      <Button type="submit" form={formId} loading={loading}>Salvar</Button>
+    </>}>
+    <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Nome da caixinha" value={name} maxLength={80} required onChange={event => setName(event.target.value)} />
       <Input label="Saldo inicial" startText="R$" inputMode="decimal" value={openingBalance} required onChange={event => setOpeningBalance(event.target.value)} />
       <Input label="Meta" startText="R$" inputMode="decimal" value={target} required onChange={event => setTarget(event.target.value)} />
       <Input label="Data-alvo (opcional)" type="date" value={targetDate} hint="Com data, a tela calcula quanto guardar por mês." onChange={event => setTargetDate(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div data-dialog-actions className="transaction-form__actions budget-form__actions">
-        {box && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
-          <Icon icon={DeleteIcon} size="sm" />Excluir caixinha</Button>}
-        <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" loading={loading}>Salvar</Button>
-      </div>
     </form>
   </Dialog>;
 }
