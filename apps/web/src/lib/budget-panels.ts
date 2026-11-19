@@ -21,7 +21,8 @@ export type UnbudgetedSpend = { categoryId: string; category?: Category; name: s
 
 export type BudgetPanels = {
   incomeCents: bigint;
-  committedBasisPoints: number;
+  /** Soma dos tetos sobre a receita do período, em pontos-base; `null` sem receita confirmada. */
+  committedShareBasisPoints: bigint | null;
   totalLimitCents: bigint;
   totalUsedCents: bigint;
   groups: BudgetGroup[];
@@ -84,10 +85,11 @@ export function buildBudgetPanels({ budgets, categories, transactions, period, t
     .map(([categoryId, spentCents]) => ({ categoryId, category: byId.get(categoryId), name: byId.get(categoryId)?.name ?? 'Categoria indisponível', spentCents }))
     .sort((a, b) => Number(b.spentCents - a.spentCents) || a.name.localeCompare(b.name, 'pt-BR'));
 
+  const totalLimitCents = cards.reduce((total, card) => total + card.progress.limitCents, 0n);
   return {
     incomeCents,
-    committedBasisPoints: budgets.reduce((total, budget) => total + budget.percentageBasisPoints, 0),
-    totalLimitCents: cards.reduce((total, card) => total + card.progress.limitCents, 0n),
+    committedShareBasisPoints: incomeCents > 0n ? totalLimitCents * 10000n / incomeCents : null,
+    totalLimitCents,
     totalUsedCents: cards.reduce((total, card) => total + card.progress.usedCents, 0n),
     groups,
     unbudgeted,

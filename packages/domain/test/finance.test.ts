@@ -37,8 +37,8 @@ test('rejeita sinal incompatível com o efeito financeiro', () => {
   assert.throws(() => validateTransaction({ ...base, nature: 'own_transfer' }), RangeError);
 });
 
-test('recalcula a meta mensal sobre toda receita confirmada sem carregar saldo', () => {
-  const budget: CategoryBudget = { id: 'b1', categoryId: 'groceries', percentageBasisPoints: 1000 };
+test('meta mensal por valor fixo, sem carregar saldo nem depender da receita', () => {
+  const budget: CategoryBudget = { id: 'b1', categoryId: 'groceries', monthlyLimitCents: 60000n };
   const transactions: TransactionContract[] = [
     { ...base, id: 'salary', amountCents: 500000n, nature: 'income', reporting: 'income', categoryId: 'salary' },
     { ...base, id: 'extra', amountCents: 100000n, nature: 'income', reporting: 'income', categoryId: 'extraordinary_income' },
@@ -54,11 +54,11 @@ test('recalcula a meta mensal sobre toda receita confirmada sem carregar saldo',
     usageBasisPoints: 8333n,
     status: 'approaching'
   });
-  assert.equal(categoryBudgetProgress(budget, [...transactions, { ...transactions[0], id: 'raise', amountCents: 200000n }], '2026-11').limitCents, 80000n);
+  assert.equal(categoryBudgetProgress(budget, [...transactions, { ...transactions[0], id: 'raise', amountCents: 200000n }], '2026-11').limitCents, 60000n);
 });
 
 test('acompanha meta anual e sinaliza estouro com centavos exatos', () => {
-  const budget: CategoryBudget = { id: 'b1', categoryId: 'groceries', percentageBasisPoints: 500 };
+  const budget: CategoryBudget = { id: 'b1', categoryId: 'groceries', monthlyLimitCents: 3333n };
   const transactions: TransactionContract[] = [
     { ...base, id: 'income-nov', amountCents: 500001n, nature: 'income', reporting: 'income' },
     { ...base, id: 'income-oct', amountCents: 300000n, nature: 'income', reporting: 'income', competence: '2026-10' },
@@ -67,26 +67,27 @@ test('acompanha meta anual e sinaliza estouro com centavos exatos', () => {
   ];
   const progress = categoryBudgetProgress(budget, transactions, '2026');
 
-  assert.equal(progress.limitCents, 40000n);
+  assert.equal(progress.limitCents, 39996n);
   assert.equal(progress.usedCents, 45001n);
-  assert.equal(progress.remainingCents, -5001n);
+  assert.equal(progress.remainingCents, -5005n);
   assert.equal(progress.status, 'exceeded');
 });
 
-test('rejeita percentual e período inválidos na meta', () => {
-  assert.throws(() => categoryBudgetProgress({ id: 'b', categoryId: 'c', percentageBasisPoints: 0 }, [], '2026-11'), RangeError);
-  assert.throws(() => categoryBudgetProgress({ id: 'b', categoryId: 'c', percentageBasisPoints: 100 }, [], '11/2026'), RangeError);
+test('rejeita valor e período inválidos na meta', () => {
+  assert.throws(() => categoryBudgetProgress({ id: 'b', categoryId: 'c', monthlyLimitCents: 0n }, [], '2026-11'), RangeError);
+  assert.throws(() => categoryBudgetProgress({ id: 'b', categoryId: 'c', monthlyLimitCents: -1n }, [], '2026-11'), RangeError);
+  assert.throws(() => categoryBudgetProgress({ id: 'b', categoryId: 'c', monthlyLimitCents: 100n }, [], '11/2026'), RangeError);
 });
 
-test('alerta gasto sem receita confirmada no período', () => {
+test('teto vale mesmo sem receita confirmada no período', () => {
   const progress = categoryBudgetProgress(
-    { id: 'b', categoryId: 'groceries', percentageBasisPoints: 1000 },
+    { id: 'b', categoryId: 'groceries', monthlyLimitCents: 20000n },
     [{ ...base, categoryId: 'groceries' }],
     '2026-11'
   );
-  assert.equal(progress.limitCents, 0n);
-  assert.equal(progress.status, 'exceeded');
-  assert.equal(progress.usageBasisPoints, 10001n);
+  assert.equal(progress.incomeCents, 0n);
+  assert.equal(progress.limitCents, 20000n);
+  assert.equal(progress.status, 'within');
 });
 
 test('reconstrói saldo e progresso da caixinha somente pelos movimentos vinculados', () => {

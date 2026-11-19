@@ -21,10 +21,10 @@ const transactions = [
 ];
 
 test('separa personalizadas, estruturais e arquivadas, com gasto do mês, meta e uso recente', () => {
-  const panels = buildCategoryPanels({ categories, budgets: [{ id: 'b', categoryId: 'food', percentageBasisPoints: 1500 }], transactions, month: '2026-11', filter: 'all', query: '' });
+  const panels = buildCategoryPanels({ categories, budgets: [{ id: 'b', categoryId: 'food', monthlyLimitCents: 150000n }], transactions, month: '2026-11', filter: 'all', query: '' });
   assert.deepEqual(panels.custom.map(row => row.category.name), ['Hobbies']);
-  assert.deepEqual(panels.system.map(row => [row.category.name, row.monthCents, row.budgetBasisPoints, row.idle]),
-    [['Salário', 500000n, undefined, false], ['Alimentação', 25000n, 1500, false], ['Moradia', 0n, undefined, true]]);
+  assert.deepEqual(panels.system.map(row => [row.category.name, row.monthCents, row.budgetCents, row.idle]),
+    [['Salário', 500000n, undefined, false], ['Alimentação', 25000n, 150000n, false], ['Moradia', 0n, undefined, true]]);
   assert.deepEqual(panels.archived.map(row => row.category.name), ['Antiga']);
   // Hobbies usou em jun (dentro de jun–nov); Moradia só em mai (fora). Arquivadas não contam.
   assert.deepEqual([panels.activeCount, panels.customCount, panels.budgetedCount, panels.expenseCents, panels.idleCount], [4, 1, 1, 25000n, 1]);

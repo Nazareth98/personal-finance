@@ -6,7 +6,7 @@ export type CategoryRowView = {
   category: Category;
   /** Valor da competência: despesas positivas, receitas positivas, neutros pelo módulo. Só confirmados e automáticos. */
   monthCents: bigint;
-  budgetBasisPoints?: number;
+  budgetCents?: bigint;
   /** Sem lançamento confirmado ou automático nas seis competências até a atual. */
   idle: boolean;
 };
@@ -43,9 +43,9 @@ export function buildCategoryPanels({ categories, budgets, transactions, month, 
     monthTotals.set(row.categoryId, (monthTotals.get(row.categoryId) ?? 0n) + magnitude);
     if (row.reporting === 'expense') expenseCents -= row.amountCents;
   }
-  const budgetBy = new Map(budgets.map(budget => [budget.categoryId, budget.percentageBasisPoints]));
+  const budgetBy = new Map(budgets.map(budget => [budget.categoryId, budget.monthlyLimitCents]));
   const view = (category: Category): CategoryRowView => ({
-    category, monthCents: monthTotals.get(category.id) ?? 0n, budgetBasisPoints: budgetBy.get(category.id), idle: !recent.has(category.id)
+    category, monthCents: monthTotals.get(category.id) ?? 0n, budgetCents: budgetBy.get(category.id), idle: !recent.has(category.id)
   });
   const normalized = query.trim().toLocaleLowerCase('pt-BR');
   const visible = categories.filter(category => (filter === 'all' || category.applicability === filter)

@@ -10,7 +10,7 @@ type TransactionRow = {
   source_deleted_at: string | null;
 };
 type LinkRow = { id: string; source_transaction_id: string; target_transaction_id: string; link_type: TransactionLink['type'] };
-type BudgetRow = { id: string; category_id: string; percentage_basis_points: number };
+type BudgetRow = { id: string; category_id: string; monthly_limit_cents: string | number };
 type CategoryRow = { id: string; name: string; category_type: 'system' | 'custom'; applicability: 'income' | 'expense' | 'neutral'; icon_key: Category['iconKey']; color_key: Category['colorKey']; sort_order: number; archived_at: string | null };
 type CategoryUsageRow = { category_id: string; dependency_count: number | string };
 type SavingsBoxRow = { id: string; name: string; opening_balance_cents: string | number; target_cents: string | number; target_date: string | null };
@@ -70,7 +70,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.rpc('get_category_usage'),
       this.loadTransactions(),
       this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
-      this.client.from('category_budgets').select('id,category_id,percentage_basis_points').order('created_at'),
+      this.client.from('category_budgets').select('id,category_id,monthly_limit_cents').order('created_at'),
       this.client.from('savings_boxes').select('id,name,opening_balance_cents,target_cents,target_date').is('archived_at', null).order('created_at'),
       this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false }),
       this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false }),
@@ -133,7 +133,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         dependencyCount: categoryUsage.get(row.id) ?? 0
       })),
       budgets: ((budgetsResult.data ?? []) as BudgetRow[]).map((row): CategoryBudget => ({
-        id: row.id, categoryId: row.category_id, percentageBasisPoints: row.percentage_basis_points
+        id: row.id, categoryId: row.category_id, monthlyLimitCents: BigInt(row.monthly_limit_cents)
       })),
       savingsBoxes: ((savingsBoxesResult.data ?? []) as SavingsBoxRow[]).map((row): SavingsBox => ({
         id: row.id, name: row.name, openingBalanceCents: BigInt(row.opening_balance_cents), targetCents: BigInt(row.target_cents),
@@ -263,7 +263,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
   async saveCategoryBudget(draft: CategoryBudgetDraft): Promise<void> {
     const { error } = await this.client.rpc('set_category_budget', {
       p_category_id: draft.categoryId,
-      p_percentage_basis_points: draft.percentageBasisPoints
+      p_monthly_limit_cents: draft.monthlyLimitCents.toString()
     });
     if (error) throw error;
   }

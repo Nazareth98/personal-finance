@@ -105,7 +105,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
     }
     if (url.pathname === '/rest/v1/category_budgets') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
-        { id: '77777777-2222-4777-8777-777777777777', category_id: 'groceries', percentage_basis_points: 1000 }
+        { id: '77777777-2222-4777-8777-777777777777', category_id: 'groceries', monthly_limit_cents: '50000' }
       ]) });
       return;
     }
@@ -371,7 +371,8 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
 
   const summary = page.getByLabel('Resumo das metas por categoria');
   await expect(summary.getByText('+ R$ 5.000,00')).toBeVisible();
-  await expect(summary.getByText('10%', { exact: true })).toBeVisible();
+  await expect(summary.getByText('10% da receita · R$ 4.500,00 livre')).toBeVisible();
+  await expect(page.getByText('Teto de R$ 500,00 por mês')).toBeVisible();
   const within = page.getByRole('region', { name: /Dentro do teto/ });
   await expect(within.getByRole('heading', { name: 'Supermercado' })).toBeVisible();
   await expect(within.getByText('R$ 100,00 de R$ 500,00')).toBeVisible();
@@ -383,23 +384,23 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
   const create = page.getByRole('dialog', { name: 'Definir meta' });
   await expect(create.getByLabel('Categoria').locator('option[value="groceries"]')).toHaveCount(0);
   await create.getByLabel('Categoria').selectOption('restaurants');
-  await create.getByLabel('Percentual da receita').fill('12,50');
+  await create.getByLabel('Teto mensal').fill('1.250,50');
   await create.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Meta por categoria salva.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('set_category_budget');
   expect(writes.at(-1)?.body).toContain('restaurants');
-  expect(writes.at(-1)?.body).toContain('1250');
+  expect(writes.at(-1)?.body).toContain('"p_monthly_limit_cents":"125050"');
 
   await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
   const edit = page.getByRole('dialog', { name: 'Editar meta de Supermercado' });
   await expect(edit.getByLabel('Categoria')).toBeDisabled();
-  await expect(edit.getByLabel('Percentual da receita')).toHaveValue('10');
-  await edit.getByLabel('Percentual da receita').fill('15');
+  await expect(edit.getByLabel('Teto mensal')).toHaveValue('500,00');
+  await edit.getByLabel('Teto mensal').fill('750');
   await edit.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Meta atualizada.')).toBeVisible();
   expect(writes.at(-1)?.path).toContain('set_category_budget');
   expect(writes.at(-1)?.body).toContain('groceries');
-  expect(writes.at(-1)?.body).toContain('1500');
+  expect(writes.at(-1)?.body).toContain('"p_monthly_limit_cents":"75000"');
 
   await page.getByRole('button', { name: 'Editar meta de Supermercado' }).click();
   await page.getByRole('dialog', { name: 'Editar meta de Supermercado' }).getByRole('button', { name: 'Excluir meta' }).click();

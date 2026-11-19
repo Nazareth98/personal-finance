@@ -20,7 +20,7 @@ test('receita extraordinária altera realizado e meta, mas não a média futura'
   ];
   const forecast = buildSixMonthForecast({ transactions, budgets: [], installments: [], savingsBoxes: [], savingsMovements: [], startCompetence: '2026-11' });
   assert.equal(forecast[0].recurringIncomeCents, 600000n);
-  assert.equal(categoryBudgetProgress({ id: 'budget', categoryId: 'groceries', percentageBasisPoints: 1000 }, transactions, '2026-10').incomeCents, 1800000n);
+  assert.equal(categoryBudgetProgress({ id: 'budget', categoryId: 'groceries', monthlyLimitCents: 10000n }, transactions, '2026-10').incomeCents, 1800000n);
 });
 
 test('combina base recorrente, maior envelope de metas, parcelas e aporte planejado', () => {
@@ -30,7 +30,7 @@ test('combina base recorrente, maior envelope de metas, parcelas e aporte planej
     transactions.push(transaction(`market-${index}`, month, -100000n, 'groceries', 'expense'));
   }
   const forecast = buildSixMonthForecast({
-    transactions, budgets: [{ id: 'budget', categoryId: 'groceries', percentageBasisPoints: 3000 }],
+    transactions, budgets: [{ id: 'budget', categoryId: 'groceries', monthlyLimitCents: 150000n }],
     installments: [{ id: 'future', cardId: 'card', statementId: 'statement', description: 'Notebook', number: 2, total: 2, amountCents: 50000n, dueCompetence: '2026-11', status: 'projected' }],
     savingsBoxes: [{ id: 'box', name: 'Reserva', openingBalanceCents: 0n, targetCents: 120000n, targetDate: '2027-04-30' }],
     savingsMovements: [], startCompetence: '2026-11'

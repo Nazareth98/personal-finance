@@ -22,15 +22,15 @@ const transactions = [
   tx('gift', -7000n, { competence: '2026-10' })
 ];
 const budgets = [
-  { id: 'b1', categoryId: 'fun', percentageBasisPoints: 500 },
-  { id: 'b2', categoryId: 'food', percentageBasisPoints: 1500 },
-  { id: 'b3', categoryId: 'home', percentageBasisPoints: 3000 }
+  { id: 'b1', categoryId: 'fun', monthlyLimitCents: 60000n },
+  { id: 'b2', categoryId: 'food', monthlyLimitCents: 180000n },
+  { id: 'b3', categoryId: 'home', monthlyLimitCents: 360000n }
 ];
 
 test('agrupa metas por situação, do estouro para a folga, e soma o comprometido', () => {
   const panels = buildBudgetPanels({ budgets, categories, transactions, period: '2026-11', today: '2026-11-18' });
   assert.equal(panels.incomeCents, 1200000n);
-  assert.equal(panels.committedBasisPoints, 5000);
+  assert.equal(panels.committedShareBasisPoints, 5000n);
   assert.equal(panels.totalLimitCents, 600000n);
   assert.equal(panels.totalUsedCents, 556000n);
   assert.deepEqual(panels.groups.map(group => [group.status, group.items.map(item => item.name)]), [

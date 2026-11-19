@@ -78,8 +78,7 @@ export function buildSixMonthForecast(input: SixMonthForecastInput): ForecastMon
   const recurringIncomeCents = recurringIncomeTotal / 6n;
   const postedInstallmentTransactions = new Set(input.installments.flatMap(item => item.status === 'posted' && item.transactionId ? [item.transactionId] : []));
   const recurringExpenseCents = recurringExpenseAverage(input.transactions, historyPeriods, postedInstallmentTransactions);
-  const budgetEnvelopeCents = input.budgets.reduce((sum, budget) =>
-    sum + recurringIncomeCents * BigInt(budget.percentageBasisPoints) / 10000n, 0n);
+  const budgetEnvelopeCents = input.budgets.reduce((sum, budget) => sum + budget.monthlyLimitCents, 0n);
   const plannedSpendingCents = recurringExpenseCents > budgetEnvelopeCents ? recurringExpenseCents : budgetEnvelopeCents;
   const savingsPlans = input.savingsBoxes.flatMap(box => {
     if (!box.targetDate) return [];

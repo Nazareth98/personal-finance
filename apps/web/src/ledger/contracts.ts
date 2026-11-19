@@ -59,7 +59,7 @@ export type LedgerData = {
 
 export type AccountDraft = Pick<FinancialAccount, 'name' | 'type' | 'openingBalanceCents'>;
 export type AccountUpdate = Pick<FinancialAccount, 'name' | 'openingBalanceCents'>;
-export type CategoryBudgetDraft = Pick<CategoryBudget, 'categoryId' | 'percentageBasisPoints'>;
+export type CategoryBudgetDraft = Pick<CategoryBudget, 'categoryId' | 'monthlyLimitCents'>;
 export type CategoryDraft = Pick<Category, 'name' | 'applicability' | 'iconKey' | 'colorKey'>;
 export type CategoryUpdate = Pick<Category, 'name' | 'iconKey' | 'colorKey'>;
 export type CategoryArchiveDraft = { categoryId: string; replacementCategoryId?: string };

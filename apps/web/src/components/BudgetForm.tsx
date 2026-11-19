@@ -2,7 +2,10 @@ import { useState, type FormEvent } from 'react';
 import type { CategoryBudget } from '@personal-finance/domain';
 import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
-import { parsePercentageBasisPoints } from '../lib/budget-validation';
+import { formatCentsBRL } from '../lib/demo-transactions';
+import { parseBrlCents } from '../lib/transaction-validation';
+
+const centsInput = (cents: bigint) => formatCentsBRL(cents).replace('R$ ', '');
 
 export function formatBasisPoints(value: number | bigint) {
   const basisPoints = BigInt(value);
@@ -19,7 +22,7 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
   budget?: CategoryBudget; initialCategoryId?: string;
 }) {
   const [categoryId, setCategoryId] = useState(budget?.categoryId ?? initialCategoryId);
-  const [percentage, setPercentage] = useState(budget ? formatBasisPoints(budget.percentageBasisPoints).replace('%', '') : '');
+  const [limit, setLimit] = useState(budget ? centsInput(budget.monthlyLimitCents) : '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,15 +39,15 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const percentageBasisPoints = parsePercentageBasisPoints(percentage);
-    if (!categoryId || percentageBasisPoints === null) {
-      setError('Selecione uma categoria e informe um percentual entre 0,01% e 100%.');
+    const monthlyLimitCents = parseBrlCents(limit);
+    if (!categoryId || monthlyLimitCents === null || monthlyLimitCents <= 0n) {
+      setError('Selecione uma categoria e informe um teto mensal maior que zero.');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      await ledger.saveBudget({ categoryId, percentageBasisPoints });
+      await ledger.saveBudget({ categoryId, monthlyLimitCents });
       notify({ message: budget ? 'Meta atualizada.' : 'Meta por categoria salva.', tone: 'success' });
       onClose();
     } catch {
@@ -82,12 +85,12 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
     </Dialog>;
   }
 
-  return <Dialog open={open} onClose={onClose} title={title} description="O teto é recalculado sobre toda receita confirmada do período.">
+  return <Dialog open={open} onClose={onClose} title={title} description="Teto fixo em reais por mês. Não depende da receita do período.">
     <form className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Categoria" value={categoryId} placeholder="Selecione" options={options} required disabled={Boolean(budget)}
         onChange={event => setCategoryId(event.target.value)} />
-      <Input label="Percentual da receita" endText="%" value={percentage} inputMode="decimal" placeholder="Ex.: 12,50" required
-        hint="Use um valor entre 0,01% e 100%." onChange={event => setPercentage(event.target.value)} />
+      <Input label="Teto mensal" startText="R$" value={limit} inputMode="decimal" placeholder="Ex.: 800,00" required
+        hint="Quanto você aceita gastar por mês nesta categoria. Na visão anual, vale 12 vezes." onChange={event => setLimit(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div data-dialog-actions className="transaction-form__actions budget-form__actions">
         {budget && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>

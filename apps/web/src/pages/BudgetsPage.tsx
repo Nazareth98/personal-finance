@@ -58,7 +58,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
     <div className="budget-card__top">
       {category ? <CategoryIdentityIcon iconKey={category.iconKey} colorKey={category.colorKey} /> : null}
       <div className="budget-card__title"><h3>{name}</h3>
-        <span className="muted">{formatBasisPoints(budget.percentageBasisPoints)} da receita · teto {formatCentsBRL(progress.limitCents)}</span></div>
+        <span className="muted">{progress.limitCents === budget.monthlyLimitCents ? `Teto de ${formatCentsBRL(budget.monthlyLimitCents)} por mês` : `Teto de ${formatCentsBRL(progress.limitCents)} no ano · ${formatCentsBRL(budget.monthlyLimitCents)} por mês`}</span></div>
       <Button variant="ghost" size="sm" aria-label={`Editar meta de ${name}`} onClick={onEdit}><Icon icon={EditIcon} size="sm" /></Button>
     </div>
     <div className="budget-card__result"><span className="muted">{exceeded ? 'Excedente' : 'Disponível'}</span>
@@ -83,17 +83,18 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
     budgets: data?.budgets ?? [], categories: data?.categories ?? [], transactions: data?.transactions ?? [], period, today: localToday()
   });
   const transactionsLink = kind === 'month' ? `#transactions?period=${selectedMonth}` : '#transactions';
-  const free = 10000 - panels.committedBasisPoints;
+  const freeCents = panels.incomeCents - panels.totalLimitCents;
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
-      <p className="muted">Tetos por categoria calculados sobre toda receita confirmada do período.</p></div>
+      <p className="muted">Tetos mensais em reais por categoria; na visão anual, cada teto vale 12 vezes.</p></div>
       <div className="template-heading__actions"><PageAction label="Definir meta" shortLabel="Meta" onClick={() => setForm({})} />{headerAction}</div></div>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
-      <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Base de todos os tetos</span></div>
-      <div><span className="muted">Comprometido em tetos</span><strong>{formatBasisPoints(panels.committedBasisPoints)}</strong>
-        <span className="muted">{formatCentsBRL(panels.totalLimitCents)} · {free > 0 ? `${formatBasisPoints(free)} livre` : 'sem folga'}</span></div>
+      <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Referência do período</span></div>
+      <div><span className="muted">Total em tetos</span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>
+        <span className="muted">{panels.committedShareBasisPoints === null ? 'Sem receita confirmada no período'
+          : `${formatBasisPoints(panels.committedShareBasisPoints)} da receita · ${freeCents > 0n ? `${formatCentsBRL(freeCents)} livre` : 'sem folga'}`}</span></div>
       <div><span className="muted">Gasto nas metas</span><strong>{panels.totalUsedCents > 0n ? '− ' : ''}{formatCentsBRL(panels.totalUsedCents)}</strong><span className="muted">Somente categorias com meta</span></div>
       <div><span className="muted">Gastos sem meta</span><strong>{panels.unbudgetedTotalCents > 0n ? '− ' : ''}{formatCentsBRL(panels.unbudgetedTotalCents)}</strong>
         <span className="muted">{panels.unbudgeted.length === 1 ? '1 categoria' : `${panels.unbudgeted.length} categorias`}</span></div>

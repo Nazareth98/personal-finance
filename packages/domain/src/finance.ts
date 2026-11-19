@@ -49,7 +49,8 @@ export type Category = {
 export type CategoryBudget = {
   id: string;
   categoryId: string;
-  percentageBasisPoints: number;
+  /** Teto mensal em centavos (D-046). Num período anual, o teto é 12 × este valor. */
+  monthlyLimitCents: bigint;
 };
 
 export type CategoryBudgetProgress = {
@@ -140,8 +141,8 @@ export function categoryBudgetProgress(
   transactions: readonly TransactionContract[],
   period: string
 ): CategoryBudgetProgress {
-  if (!Number.isInteger(budget.percentageBasisPoints) || budget.percentageBasisPoints < 1 || budget.percentageBasisPoints > 10000) {
-    throw new RangeError('O percentual da meta deve estar entre 0,01% e 100%.');
+  if (typeof budget.monthlyLimitCents !== 'bigint' || budget.monthlyLimitCents <= 0n) {
+    throw new RangeError('O valor da meta deve ser maior que zero.');
   }
   if (!/^\d{4}(-(0[1-9]|1[0-2]))?$/.test(period)) throw new RangeError('Período inválido.');
 
@@ -155,7 +156,7 @@ export function categoryBudgetProgress(
     transaction.reporting === 'expense' && transaction.categoryId === budget.categoryId
       ? total - transaction.amountCents
       : total, 0n);
-  const limitCents = incomeCents * BigInt(budget.percentageBasisPoints) / 10000n;
+  const limitCents = budget.monthlyLimitCents * (period.length === 4 ? 12n : 1n);
   const remainingCents = limitCents - usedCents;
   const usageBasisPoints = limitCents > 0n ? usedCents * 10000n / limitCents : usedCents > 0n ? 10001n : 0n;
   const status = usedCents > limitCents

@@ -106,10 +106,6 @@ const filterOptions: { value: CategoryFilter; label: string }[] = [
 ];
 const STRUCTURAL_PREVIEW = 6;
 
-function formatPercent(basisPoints: number) {
-  const decimals = basisPoints % 100;
-  return `${Math.trunc(basisPoints / 100)}${decimals ? `,${String(decimals).padStart(2, '0')}` : ''}%`;
-}
 
 export function CategoriesPage({ ledger, headerAction }: PageProps) {
   const [query, setQuery] = useState('');
@@ -133,7 +129,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
       cell: row => row.monthCents > 0n
         ? <a href={`#transactions?period=${month}&category=${row.category.id}`}>{row.category.applicability === 'income' ? '+ ' : row.category.applicability === 'expense' ? '− ' : ''}{formatCentsBRL(row.monthCents)}</a>
         : <span className="muted" title={row.idle ? 'Sem lançamentos nas últimas 6 competências' : undefined}>{row.idle ? 'Sem uso' : '—'}</span> },
-    { mobile: 'detail', key: 'budget', header: 'Meta', cell: row => row.budgetBasisPoints ? <Badge tone="transfer">Meta {formatPercent(row.budgetBasisPoints)}</Badge> : <span className="muted">—</span> },
+    { mobile: 'detail', key: 'budget', header: 'Meta', cell: row => row.budgetCents ? <Badge tone="transfer">Meta {formatCentsBRL(row.budgetCents)}</Badge> : <span className="muted">—</span> },
     { mobile: 'footer', key: 'actions', header: 'Ações', align: 'end', cell: row => {
       const category = row.category;
       if (kind === 'system') return <span className="muted">Protegida</span>;

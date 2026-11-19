@@ -22,4 +22,15 @@ assert.match(deletion, /grant execute on function public\.delete_category_budget
 assert.doesNotMatch(deletion, /grant (insert|update|delete).*category_budgets/i);
 assert.doesNotMatch(deletion, /to anon/i);
 
-console.log('✓ Metas por categoria, exclusão, grants e RLS validados estaticamente.');
+const amounts = await readFile('supabase/migrations/20261119100000_budget_amounts.sql', 'utf8');
+assert.match(amounts, /drop column percentage_basis_points/i);
+assert.match(amounts, /monthly_limit_cents bigint not null check \(monthly_limit_cents > 0/i);
+assert.match(amounts, /drop function public\.set_category_budget\(text, integer\)/i);
+assert.match(amounts, /security definer set search_path = public, pg_temp/i);
+assert.match(amounts, /where id = p_category_id and applicability = 'expense'/i);
+assert.match(amounts, /revoke all on function public\.set_category_budget\(text, bigint\) from public, anon/i);
+assert.match(amounts, /grant execute on function public\.set_category_budget\(text, bigint\) to authenticated/i);
+assert.doesNotMatch(amounts, /grant (insert|update|delete).*category_budgets/i);
+assert.doesNotMatch(amounts, /to anon/i);
+
+console.log('✓ Metas por categoria (valor mensal), exclusão, grants e RLS validados estaticamente.');

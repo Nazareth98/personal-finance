@@ -74,3 +74,11 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Ícones do PWA regerados do mesmo desenho: `icon.svg`/192/512 (quadrado arredondado), `icon-maskable` (fundo inteiro, marca em 50%, dentro da zona segura) e `apple-touch-icon.png` 180 px. Cache do service worker em `v2` para os aparelhos buscarem os ícones novos.
 - Substitui o ícone de carteira e o `BrandIcon` (Gem) na barra lateral, no carregamento e na tela de configuração.
 
+## D-046 — Metas por valor mensal, não por percentual (19/11/2026)
+
+- Regra de negócio nova, pedida pelo proprietário: cada meta é um teto mensal em reais (`category_budgets.monthly_limit_cents`, bigint > 0). Na visão anual o teto vale 12 ×. O teto não depende mais da receita do período.
+- As metas em percentual foram apagadas na migração `budget_amounts` (escolha do proprietário: apagar e recadastrar); a coluna `percentage_basis_points` e `set_category_budget(text, integer)` saíram. Nova `set_category_budget(text, bigint)`, security definer, só `authenticated`.
+- Orçamentos: resumo mostra “Total em tetos” em R$ e quanto isso representa da receita confirmada, com a folga em R$; cada card diz “Teto de R$ X por mês”. Categorias mostram “Meta R$ X”.
+- Previsão de 6 meses: o envelope de metas passa a ser a soma dos tetos mensais.
+- Aplicada no Supabase em 19/11/2026 (versão remota 20261119095640).
+
