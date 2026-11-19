@@ -5,7 +5,8 @@
 - **Foundations**: cores, tipografia, espaçamento, raios, alturas e contraste.
 - **Primitives**: Button, Card, Badge.
 - **Icons**: `Icon` + catálogo semântico curado de `lucide-react`.
-- **Forms**: Input, Select, VisualSelect, Checkbox, RadioGroup, Field, FormMessage, Dialog, ToastProvider/useToast.
+- **Forms**: Input (`startText`/`endText` para R$ e %), Select (aparência própria), VisualSelect (com `description`, `aside`, `badge`, `group` e `placeholder` para opções ricas, ex.: fatura paga), Checkbox, RadioGroup, Field, FormMessage, Dialog (folha inferior até 680 px), ToastProvider/useToast.
+- **Brand e identidade**: BrandMark (marca Balanço, `animated` no carregamento) e LogoAvatar (logo de instituição com monograma de reserva).
 - **Navigation**: Tabs (abas WAI-ARIA com foco itinerante por setas, Home e End; o conteúdo da aba vem do chamador).
 - **Data display (próxima etapa)**: DataTable, EmptyState, Skeleton, MetricCard, Progress, ChartLegend.
 - **Patterns**: filtros, validação e confirmação de ações, formulários de lançamento, revisão de importações.
@@ -25,7 +26,7 @@ Todos os componentes estão em **Beta** até a execução de testes de interaç�
 | Finanças | Valores em centavos, semântica textual de receita/despesa/transferência |
 | Documentação | Stories, props tipadas, restrições de uso e exemplos fictícios |
 
-Ver [documentação de formulários](FORMS.md) e [governança](GOVERNANCE.md).
+Ver [documentação de formulários](FORMS.md) e [governança](GOVERNANCE.md). Referência navegável com tokens e prévias: artefato Design System “Personal Finance” (claude.ai).
 O contrato de ícones está em [ICONS.md](ICONS.md).
 
 ## Critérios de estabilização

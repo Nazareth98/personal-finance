@@ -8,7 +8,7 @@
 - **Transferência própria:** movimenta patrimônio, sem afetar renda ou consumo.
 - **Pagamento de fatura:** liquida dívida, sem criar novo consumo.
 - **Aporte/resgate:** movimenta patrimônio entre conta e caixinha.
-- **Ajuste:** corrige juros, diferença ou erro sem alterar o registro importado.
+- **Ajuste:** corrige juros, diferença ou erro sem alterar o registro importado. Também classifica a linha informativa do extrato do cartão que repete o total da fatura anterior (“TOTAL DA FATURA ANTERIOR”): neutra e fora da fatura.
 
 ## Competência
 
@@ -26,9 +26,13 @@ Vincular os dois lados por valor, proximidade de data, contas e descrição norm
 
 ## Metas
 
-`teto = receita confirmada do período × percentual da categoria`.
+`teto mensal = valor em reais definido para a categoria` (D-046); na visão anual, `teto = 12 × teto mensal`.
 
-Toda receita recebida, inclusive extraordinária, entra na base do período. O saldo de meta não acumula. A visualização mostra gasto, teto em reais e percentual consumido nos recortes mensal e anual.
+O teto não depende da receita do período. O saldo de meta não acumula. A visualização mostra gasto, teto em reais e percentual consumido nos recortes mensal e anual; o resumo informa quanto a soma dos tetos representa da receita confirmada.
+
+## Pagamento de fatura
+
+A fatura leva o mês do vencimento: pagamento em 15/10 de compras de 09/09 a 08/10 quita a fatura que vence em 15/10. Um débito na conta só vira pagamento automaticamente quando é do mesmo banco do cartão (mesma conexão MeuPluggy), menciona boleto/fatura/cartão e há uma única fatura com evidência — valor igual ao em aberto ou à linha “TOTAL DA FATURA ANTERIOR” próxima, vencimento entre −12 e +20 dias. Ambiguidade fica para a Revisão (D-050).
 
 ## Caixinhas
 
@@ -40,7 +44,7 @@ Um resgate identificado não é receita extraordinária: deve receber natureza `
 
 Usar os seis meses anteriores de receitas recorrentes, despesas recorrentes, parcelas futuras, metas e aportes planejados. Receita extraordinária permanece no realizado, mas é excluída da média futura.
 
-Salário e outras receitas recorrentes exigem categoria automática ou confirmada. Despesa só forma base recorrente quando seu grupo aparece em pelo menos duas das seis competências. O gasto planejado usa o maior valor entre essa base e os tetos, evitando somar duas estimativas do mesmo consumo. Parcelas realizadas não voltam à média; somente parcelas projetadas entram como compromisso futuro. O aporte é derivado do saldo atual, meta e prazo da caixinha.
+Salário e outras receitas recorrentes exigem categoria automática ou confirmada. Despesa só forma base recorrente quando seu grupo aparece em pelo menos duas das seis competências. O gasto planejado usa o maior valor entre essa base e a soma dos tetos mensais, evitando somar duas estimativas do mesmo consumo. Parcelas realizadas não voltam à média; somente parcelas projetadas entram como compromisso futuro. O aporte é derivado do saldo atual, meta e prazo da caixinha.
 
 ## Categorização
 

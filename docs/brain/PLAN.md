@@ -37,8 +37,7 @@ Aceite: todos os totais são derivados do livro, com dinheiro em centavos exatos
 
 ## Etapa 3 — metas por categoria
 
-- percentual por categoria;
-- teto em reais sobre receita confirmada;
+- teto mensal em reais por categoria (D-046; antes percentual da receita);
 - acompanhamento mensal e anual;
 - alertas de aproximação e estouro;
 - sem acumulação entre períodos.

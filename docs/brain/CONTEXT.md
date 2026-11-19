@@ -7,7 +7,7 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 ## Resultado esperado
 
 - acompanhar receitas, gastos, cartões e parcelamentos;
-- definir tetos percentuais de gasto por categoria;
+- definir tetos mensais de gasto em reais por categoria;
 - acompanhar caixinhas reais com aportes e resgates;
 - importar todo o histórico disponível e categorizar lançamentos;
 - projetar orçamento usando os seis meses anteriores;
@@ -25,7 +25,10 @@ Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimenta�
 - Compra no cartão pertence ao mês de vencimento da fatura. Pagamento de fatura não é nova despesa.
 - Transferências próprias têm os dois lados vinculados e não alteram receita ou consumo.
 - Ajustes manuais são lançamentos separados; o dado importado permanece imutável.
-- Metas são tetos por categoria calculados sobre toda receita confirmada do período e não acumulam.
+- Metas são tetos mensais em reais por categoria (12× na visão anual), independentes da receita, e não acumulam (D-046).
+- Linha informativa do cartão (“TOTAL DA FATURA ANTERIOR”) é ajuste neutro fora da fatura; pagamento na conta só é vinculado automaticamente a uma fatura do mesmo banco com evidência única (D-050).
+- Correções automáticas usam overrides reversíveis e nunca sobrepõem decisão do proprietário nem lançamento confirmado.
+- “Ocultar valores” é preferência do aparelho: mascara a exibição, não altera dados (D-049).
 - Previsão usa seis meses de receitas recorrentes; extraordinárias não entram na média.
 - Categorização: 90–100% automática, 70–89% revisão, abaixo de 70% sem categoria.
 - Categorias estruturais são protegidas; categorias personalizadas pertencem ao proprietário, têm aplicabilidade financeira explícita, ícone Lucide e cor semântica versionados, e são arquivadas quando possuem histórico.

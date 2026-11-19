@@ -41,6 +41,9 @@ O manifesto, instalação, fallback offline e fronteiras de cache estão em [`..
 - Item proxy acompanha a atualização do MeuPluggy e não deve depender de `PATCH` manual.
 - Webhook registra `eventId`, responde rapidamente e agenda processamento idempotente.
 - O botão “Sincronizar agora” busca o dado mais recente disponível; não promete nova coleta bancária.
+- Casamento de pagamento de fatura e neutralização da linha informativa rodam no banco (`internal_match_card_payments`, só `service_role`) por gatilho após inserir lançamentos e itens de fatura — independem da versão publicada das Edge Functions (D-050).
+- `get_account_institutions()` expõe ao dono conta → id do conector e nome da instituição; a logo vem do CDN do Pluggy pelo id, com monograma de reserva (D-052).
+- Edge Functions são publicadas manualmente (`supabase functions deploy`); o deploy da Vercel não as atualiza.
 
 ## Segurança
 
@@ -49,6 +52,7 @@ O manifesto, instalação, fallback offline e fronteiras de cache estão em [`..
 - Nenhum secret ou Service Role no bundle web.
 - Logs sem descrição, valor ou identificador bancário real.
 - Cache PWA apenas para assets e shell; dados financeiros exigem sessão e rede.
+- Lançamentos importados são imutáveis por gatilho; toda correção (manual ou automática) é override em `transaction_semantic_overrides` com `reason` explícito.
 - Fixtures da integração são sintéticas e não reversíveis para dados reais.
 
 ## Hospedagem e limite aceito

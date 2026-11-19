@@ -1,22 +1,22 @@
 # Status atual
 
-Atualizado em: 18/11/2026.
+Atualizado em: 19/11/2026.
 
 ## Situação
 
 - Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines foram regenerados no CI Linux em 18/11/2026, inclusive após a nova navegação mobile.
 - No modo autenticado, visão geral, contas, cartões/faturas, transações e relatórios consomem o livro Supabase; o modo de teste visual preserva fixtures sintéticas.
 - Contas, categorias genéricas, lançamentos manuais, transferências conciliadas e ajustes vinculados estão implementados com centavos exatos.
-- Metas percentuais por categoria, tetos mensais/anuais e alertas de aproximação ou estouro estão implementados sobre receitas confirmadas.
+- Metas por teto mensal em reais por categoria (anual = 12×), com alertas de aproximação ou estouro (D-046; as metas percentuais foram apagadas em 19/11/2026 para recadastro).
 - Caixinhas com saldo reconstruível, aportes/resgates neutros e associação manual de lançamentos importados estão implementadas.
 - MeuPluggy implementado com Connect Token no backend, conexões e execuções persistidas, importação completa/incremental idempotente, staging privado e retomada após falha. O suporte ao webhook está implementado, mas sua integração operacional foi adiada; por enquanto, a sincronização é iniciada manualmente pela aplicação.
 - Categorização `rules-v1` implementada como overlay imutável, com normalização, evidências de estabelecimento/alias/token/conta/natureza, faixas 90/70, explicação versionada e aprendizado somente após confirmação.
 - Gestão de categorias da Etapa 11.1 publicada: categorias estruturais protegidas, todas com ícone e cor semântica; personalizadas têm aplicabilidade e identidade visual editáveis, busca, criação, ordenação, arquivamento, reatribuição e exclusão somente sem dependências.
 - Modelo de cartões implementado com fechamento, vencimento, limite, faturas, entradas de compra/estorno/pagamento e parcelas futuras separadas do realizado. O replay foi concluído nas conexões Caixa e Itaú; o frontend passou a paginar o livro completo para não separar entradas de fatura de seus lançamentos após o limite de 1.000 linhas do Data API.
 - Receitas recorrentes e extraordinárias separadas pelo overlay de categoria; salário Itaú reconhecido por instituição e descrição. A previsão combina média móvel de seis meses, base recorrente, tetos, parcelas futuras e aporte necessário para metas.
-- PWA instalável com manifesto e ícones, fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
+- PWA instalável com manifesto e ícones da marca Balanço (D-045, cache do service worker `v2`), fallback offline sem dados financeiros, cache restrito a assets estáticos e layout validado a partir de 320 px.
 - Vercel é a hospedagem oficial e está configurada para o monorepo com build validado, saída `apps/web/dist`, headers de PWA e bloqueio de deploy sem variáveis públicas do Supabase. O projeto remoto `personal-finance` está vinculado, usa Node 22.x e possui URL/chave pública do Supabase em Production e Preview. GitHub Actions usa Node 22.12, lockfile congelado e valida fluxos autenticados/PWA.
-- O projeto Supabase novo está vinculado: 17 migrations foram aplicadas, todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
+- O projeto Supabase novo está vinculado: 25 migrations aplicadas até 19/11/2026 (última: `account_institutions`), todas as tabelas públicas estão com RLS, as três Edge Functions MeuPluggy estão ativas, o Auth remoto bloqueia cadastro público com senha mínima de 12 caracteres e o único proprietário está provisionado em `public.profiles`.
 - Plano funcional e regras centrais documentados no brain.
 - Arquivo Figma conectado, mas a leitura automatizada ainda não foi validada nesta sessão.
 
@@ -28,10 +28,18 @@ Próximas entregas, nesta ordem (D-042, uma por sessão; cada uma termina com pu
 
 1. ✅ **Fatura recolhida** (18/11/2026) — `CardsPage`: lista de lançamentos de cada aba começa recolhida num botão “Lançamentos · N” (`aria-expanded`, seta que gira, animação `motion-base`), expandida mostra os 6 mais recentes e “Ver os N em Transações”; “Vincular pagamento” alinhado ao centro da linha do pendente. Ajustar o fluxo autenticado de cartões.
 2. ✅ **Modal** (18/11/2026) — `packages/ui` `Dialog`: travar a rolagem do `body` enquanto houver diálogo aberto; cabeçalho e rodapé fixos, só o corpo rola (`max-height` com `dvh`); até 1000 px todo diálogo vira folha inferior (como “Mais”); ações no rodapé com primária à direita. Trocar rótulos principais por verbo só (“Salvar meta/caixinha/conta/movimento/movimentação” → “Salvar”) e atualizar os testes que usam esses nomes.
-3. ✅ **Campos** (18/11/2026) — `controlHeight.lg` = 44 (tokens, `DESIGN.md`, filtro e botões de formulário); `Input`/`Select` com “(obrigatório)” por extenso no lugar de `*`, erro com ícone substituindo a ajuda; novo campo de dinheiro com prefixo “R$” e sufixo “%” alinhados à direita (usar em meta, caixinha, conta e movimentação). Baselines visuais mudam (`[update visual baselines]`).
-4. ✅ **Sair no menu da conta** — ícone de pessoa no cabeçalho mobile (no lugar do botão de tema) abrindo menu com “Tema escuro” e “Sair”; no desktop o mesmo menu no rodapé da sidebar; remover “Sair” da folha “Mais”; manter a confirmação com foco em Cancelar. Ajustar os dois testes de saída.
+3. ✅ **Campos** (18/11/2026) — `controlHeight.lg` = 44 (tokens, `DESIGN.md`, filtro e botões de formulário); `Input`/`Select` com obrigatório marcado (depois revertido para só `*`, D-043), erro com ícone substituindo a ajuda; novo campo de dinheiro com prefixo “R$” e sufixo “%” alinhados à direita (usar em meta, caixinha, conta e movimentação). Baselines visuais mudam (`[update visual baselines]`).
+4. ✅ **Sair no menu da conta** (18/11/2026; gatilho “Menu da conta”) — ícone de pessoa no cabeçalho mobile (no lugar do botão de tema) abrindo menu com “Tema escuro” e “Sair”; no desktop o mesmo menu no rodapé da sidebar; remover “Sair” da folha “Mais”; manter a confirmação com foco em Cancelar. Ajustar os dois testes de saída.
 
-Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034) [Revisão](https://claude.ai/artifact/54jdzfr3GMPkSGTzBTkWnw) (D-035) [Transações](https://claude.ai/artifact/NtjPcPGSx2c6ccrsTVgcxK) (D-036) [Orçamentos](https://claude.ai/artifact/VuDnEwqDrX9Y5J4ddzDp2N) (D-037) [Caixinhas](https://claude.ai/artifact/71Per6YnRhXGCexHeh6ARA) (D-039) e [Contas, Categorias, Conexões e Relatórios](https://claude.ai/artifact/Uc6BX7BmaDSBhSQaSqYzef) (D-040). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados; o conector Supabase recusou escrita nesta sessão, então migrations foram aplicadas pelo SQL Editor.
+Entregas após a D-042, todas na `main` (detalhes em `DECISIONS.md`):
+
+- 18/11: obrigatório só com `*`, paginação numerada com “Por página” salvo, telas no mês corrente, listas que cabem com fonte ampliada, CI que não cancela a atualização de baselines (D-043); login e carregamento refeitos (D-044).
+- 19/11: marca Balanço e ícones do PWA (D-045); metas em reais (D-046); select próprio e “Gastos sem meta” (D-047); painel do login centralizado em telas grandes (D-048); ocultar valores (D-049); linha informativa da fatura e casamento automático de pagamento — 8 neutralizadas e 4 pagamentos vinculados (D-050); seletor de fatura rico (D-051); logo dos bancos (D-052).
+- Design system compilado no artefato “Personal Finance” (tokens, brand book, decisões e prévias de 10 componentes); canvas “Personal Finance — propostas de logo”.
+
+Próximos passos sugeridos: na Revisão, “aplicar a todas parecidas”; triagem guiada de “Outros gastos”; sugestão de teto pela média de 3 meses; formatar valor ao sair do campo.
+
+Canvas do Claude Design são privados da conta que os criou; ao trocar de conta, compartilhe-os antes. Concluídos: [navegação mobile](https://claude.ai/artifact/XV5bQd2rdGtAVvTV7HQfKs) (D-031) [tabelas no mobile](https://claude.ai/artifact/LLS4gyaYo2qtUERr55awJY) (D-032) [Visão geral](https://claude.ai/artifact/Aab9hJSiL77oFKD6vvceR2) (D-033) [Cartões e faturas](https://claude.ai/artifact/H98wPSWZtPb2hnEujF4uUT) (D-034) [Revisão](https://claude.ai/artifact/54jdzfr3GMPkSGTzBTkWnw) (D-035) [Transações](https://claude.ai/artifact/NtjPcPGSx2c6ccrsTVgcxK) (D-036) [Orçamentos](https://claude.ai/artifact/VuDnEwqDrX9Y5J4ddzDp2N) (D-037) [Caixinhas](https://claude.ai/artifact/71Per6YnRhXGCexHeh6ARA) (D-039) e [Contas, Categorias, Conexões e Relatórios](https://claude.ai/artifact/Uc6BX7BmaDSBhSQaSqYzef) (D-040). Conectores do claude.ai (Supabase, Vercel, GitHub, Figma) também precisam ser reconectados ao trocar de conta; em 18–19/11 o conector Supabase aplicou as migrations diretamente.
 
 ## Última validação
 
@@ -99,6 +107,9 @@ Canvas do Claude Design são privados da conta que os criou; ao trocar de conta,
 
 ## Implementações futuras
 
+- publicar as Edge Functions `pluggy-sync` e `pluggy-webhook` com a regra `isStatementCarryover` e a correção do nome de instituição sem acentos corrompidos (o gatilho do banco já cobre o efeito); depois guardar `imageUrl`/`primaryColor` do conector e copiar a logo localmente (D-052).
+- ativar no Supabase Auth a proteção contra senhas vazadas (aviso do advisor de segurança).
+- typecheck local: este ambiente não tem `node_modules` do app; antes de push, rodar a checagem parcial com stubs ou `pnpm check` com Node 22.
 - integrar operacionalmente o webhook MeuPluggy: definir `PLUGGY_WEBHOOK_SECRET`, registrar pela API os eventos `transactions/created`, `transactions/updated` e `transactions/deleted` e executar o smoke autenticado. O código permanece preparado, mas isso não bloqueia a Etapa 11.
 
 ## Regra de atualização
