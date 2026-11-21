@@ -29,6 +29,8 @@ Todos os componentes estão em **Beta** até a execução de testes de interaç�
 Ver [documentação de formulários](FORMS.md) e [governança](GOVERNANCE.md). Referência navegável com tokens e prévias: artefato Design System [“Personal Finance”](https://claude.ai/code/artifact/422c7a7d-24cf-4798-ad56-ca768d5df031) (compartilhado de outra organização; editar exige acesso de escrita).
 O contrato de ícones está em [ICONS.md](ICONS.md).
 
+`InfoTip` (D-067) explica um rótulo em uma ou duas frases: botão “i” de 24 px com nome “O que é …”, abre ao tocar (não depende de hover), fecha com Esc ou toque fora e se desloca para caber na tela. `MetricCard` aceita `info` para usá-lo. Ajuda longa vai no painel “Ajuda desta tela”, não em InfoTip.
+
 ## Critérios de estabilização
 
 1. API pública revisada e sem estilos hard-coded.

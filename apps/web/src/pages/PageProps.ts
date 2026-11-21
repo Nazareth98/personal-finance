@@ -6,4 +6,6 @@ export type PageProps = {
   ledger?: LedgerState;
   connections?: ConnectionsState;
   headerAction?: ReactNode;
+  /** Conteúdo logo abaixo do título (ex.: Primeiros passos na Visão geral, D-067). */
+  intro?: ReactNode;
 };

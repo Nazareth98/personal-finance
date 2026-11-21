@@ -43,7 +43,10 @@ export {
   Lock as LockIcon,
   Eye as ShowIcon,
   EyeOff as HideIcon,
-  ChevronDown as ChevronDownIcon
+  ChevronDown as ChevronDownIcon,
+  CircleHelp as HelpIcon,
+  BookOpen as GlossaryIcon,
+  ListChecks as FirstStepsIcon
 } from 'lucide-react';
 export {
   House as CategoryHomeIcon,
@@ -87,6 +90,8 @@ export {
   Ticket as CategoryEventIcon,
   Bike as CategoryBikeIcon
 } from 'lucide-react';
+export { InfoTip } from './components/InfoTip';
+export type { InfoTipProps } from './components/InfoTip';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';
 export { Badge } from './components/Badge';

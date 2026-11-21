@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { addCompetenceMonths, type CategoryBudget } from '@personal-finance/domain';
-import { Badge, Button, Card, EditIcon, EmptyState, Icon, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, type LucideIcon } from '@personal-finance/ui';
+import { Badge, Button, Card, EditIcon, EmptyState, Icon, InfoTip, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, type LucideIcon } from '@personal-finance/ui';
 import { BudgetForm, formatBasisPoints } from '../components/BudgetForm';
 import { CategoryIdentityIcon } from '../components/CategoryIdentity';
 import type { LedgerState } from '../ledger/useLedger';
@@ -92,7 +92,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Referência do período</span></div>
-      <div><span className="muted">Total em tetos</span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>
+      <div><span className="muted summary-strip__label">Total em tetos<InfoTip label="Total em tetos" text="Soma dos tetos mensais das categorias com meta. Ao lado, quanto isso representa da receita do mês." /></span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>
         <span className="muted">{panels.committedShareBasisPoints === null ? 'Sem receita confirmada no período'
           : `${formatBasisPoints(panels.committedShareBasisPoints)} da receita · ${freeCents > 0n ? `${formatCentsBRL(freeCents)} livre` : 'sem folga'}`}</span></div>
       <div><span className="muted">Gasto nas metas</span><strong>{panels.totalUsedCents > 0n ? '− ' : ''}{formatCentsBRL(panels.totalUsedCents)}</strong><span className="muted">Somente categorias com meta</span></div>

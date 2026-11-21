@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, StatusAlertIcon, SunIcon, SyncIcon, TransactionsIcon, type LucideIcon } from '@personal-finance/ui';
+import { HelpPanel } from './components/HelpPanel';
+import { FirstSteps } from './components/FirstSteps';
+import { GlossaryPage } from './pages/GlossaryPage';
+import { buildFirstSteps } from './lib/first-steps';
+import { AccountsIcon, BrandMark, HideIcon, ShowIcon, BudgetsIcon, Button, CardsIcon, CategoriesIcon, ConnectionsIcon, DashboardIcon, Dialog, Icon, LogOutIcon, MoonIcon, MoreIcon, PlusIcon, ReportsIcon, ReviewIcon, SavingsIcon, SidebarCollapseIcon, SidebarExpandIcon, StatusAlertIcon, SunIcon, SyncIcon, TransactionsIcon, GlossaryIcon, HelpIcon, type LucideIcon } from '@personal-finance/ui';
 import { useTheme } from './hooks/useTheme';
 import { useValuesHidden } from './hooks/useValuesHidden';
 import { AccountMenu } from './components/AccountMenu';
@@ -25,7 +29,7 @@ import { PageActionSlotContext } from './components/PageAction';
 import { pendingReviewCount } from './lib/review-queue';
 import type { PageProps } from './pages/PageProps';
 
-export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'categories' | 'connections' | 'review' | 'reports';
+export type PageId = 'overview' | 'transactions' | 'accounts' | 'cards' | 'budgets' | 'savings' | 'categories' | 'connections' | 'review' | 'reports' | 'glossary';
 /** Telas de uso diário que ficam na barra inferior; as demais vão para “Mais”. */
 const primaryMobile: readonly PageId[] = ['overview', 'transactions', 'review', 'cards'];
 const navigation: { id: PageId; title: string; shortTitle?: string; icon: LucideIcon }[] = [
@@ -38,7 +42,8 @@ const navigation: { id: PageId; title: string; shortTitle?: string; icon: Lucide
   { id: 'categories', title: 'Categorias', icon: CategoriesIcon },
   { id: 'connections', title: 'Conexões', icon: ConnectionsIcon },
   { id: 'review', title: 'Revisão', icon: ReviewIcon },
-  { id: 'reports', title: 'Relatórios', icon: ReportsIcon }
+  { id: 'reports', title: 'Relatórios', icon: ReportsIcon },
+  { id: 'glossary', title: 'Como funciona', icon: GlossaryIcon }
 ];
 
 function getPage(): PageId {
@@ -56,8 +61,12 @@ const pages: Record<PageId, ComponentType<PageProps>> = {
   categories: CategoriesPage,
   connections: ConnectionsPage,
   review: ReviewPage,
-  reports: ReportsPage
+  reports: ReportsPage,
+  glossary: GlossaryPage
 };
+
+const firstStepsKey = 'pf:first-steps-dismissed';
+function readDismissed(): boolean { try { return localStorage.getItem(firstStepsKey) === '1'; } catch { return false; } }
 
 type DashboardAppProps = {
   onSignOut?: () => Promise<void>;
@@ -81,6 +90,12 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   }, [confirmingSignOut]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [firstStepsDismissed, setFirstStepsDismissed] = useState(readDismissed);
+  const dismissFirstSteps = (value: boolean) => {
+    setFirstStepsDismissed(value);
+    try { if (value) localStorage.setItem(firstStepsKey, '1'); else localStorage.removeItem(firstStepsKey); } catch { /* sem armazenamento: vale só nesta sessão */ }
+  };
   const { theme, setPreference } = useTheme();
   const [valuesHidden, setValuesHidden] = useValuesHidden();
   const ledger = useLedger(ledgerRepository);
@@ -105,6 +120,8 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   // O nome acessível vem do conteúdo visível (“Revisão 4 pendentes”), como exige a WCAG 2.5.3.
   const badge = (id: PageId) => id === 'review' && pendingReviews > 0
     ? <span className="navigation__badge">{pendingReviews > 99 ? '99+' : pendingReviews}<span className="ui-sr-only"> pendente{pendingReviews === 1 ? '' : 's'}</span></span> : null;
+  const firstSteps = data && connections.data && !firstStepsDismissed ? buildFirstSteps(data, connections.data, pendingReviews) : null;
+  const showFirstSteps = () => { dismissFirstSteps(false); window.location.hash = '#overview'; };
   const themeLabel = theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro';
 
   useEffect(() => {
@@ -187,7 +204,13 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
         <Icon icon={StatusAlertIcon} size="sm" />Não foi possível atualizar as contas automaticamente. <a href="#connections">Ver conexões</a></p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
       <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined}
-        headerAction={canInstall ? <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button> : undefined} />
+        intro={page === 'overview' && firstSteps ? <FirstSteps steps={firstSteps} onDismiss={() => dismissFirstSteps(true)}
+          {...(ledgerRepository ? { onEditHolder: () => setHolderOpen(true) } : {})} /> : undefined}
+        headerAction={<>
+          {page !== 'glossary' && <Button className="help-toggle" size="sm" variant="ghost" aria-label="Ajuda desta tela" title="Ajuda desta tela"
+            aria-haspopup="dialog" onClick={() => setHelpOpen(true)}><Icon icon={HelpIcon} size="sm" /></Button>}
+          {canInstall && <Button size="sm" variant="secondary" onClick={() => void install()}>Instalar app</Button>}
+        </>} />
     </main>
     <Button className="fab-new-entry" aria-label={newEntryLabel} title={newEntryLabel} onClick={() => setFormOpen(true)}>
       <Icon icon={PlusIcon}/>
@@ -212,6 +235,8 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
         </a>)}
       </div>
     </Dialog>
+    {page !== 'glossary' && <HelpPanel page={page} open={helpOpen} onClose={() => setHelpOpen(false)}
+      {...(ledgerRepository && connectionsRepository ? { onShowFirstSteps: showFirstSteps } : {})} />}
     <Dialog open={confirmingSignOut} onClose={() => setConfirmingSignOut(false)} title="Sair da conta"
       footer={<>
         <Button ref={cancelSignOut} variant="secondary" onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>

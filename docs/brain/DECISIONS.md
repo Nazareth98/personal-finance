@@ -211,3 +211,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - A segunda usuária monta a própria instância a partir de um fork, com Supabase e Vercel nas contas dela; os dados ficam só lá.
 - `fork-sync.yml` roda apenas em forks e traz a `main` original todo dia (API `merge-upstream`, com `SYNC_TOKEN` clássico de escopos `repo` e `workflow`); o push publica backend e app da cópia. Validações pesadas pulam forks.
 - Descartado: tudo nas contas do dono (sem defasagem, mas o dono teria acesso administrativo aos dados dela).
+
+## D-067 — Ajuda dentro do app: primeiros passos, ajuda por tela e glossário (21/11/2026)
+
+- Para quem não acompanhou o desenvolvimento: botão “Ajuda desta tela” (?) no cabeçalho de toda tela abre o que ela mostra, como calcula, o que dá para fazer e os termos, com link para o glossário. Textos em `apps/web/src/lib/help-content.ts` (fonte única).
+- “Como funciona” é uma tela do menu com o glossário pesquisável; `#glossary?termo=<slug>` destaca o termo.
+- “Primeiros passos” na Visão geral (só no modo autenticado): 7 passos que se marcam sozinhos pelos dados (`lib/first-steps.ts`), sem estado novo no banco; dispensar fica salvo no aparelho e o painel de ajuda reabre.
+- `InfoTip` em `packages/ui` para rótulos que confundem (Resultado, Total em tetos, Pendente em faturas, Saldo nas caixinhas).

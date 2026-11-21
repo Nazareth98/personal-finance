@@ -98,7 +98,7 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
   </div>;
 }
 
-export function OverviewPage({ ledger, headerAction }: PageProps) {
+export function OverviewPage({ ledger, headerAction, intro }: PageProps) {
   const [chartStatus,setChartStatus]=useState<DataStatus>('success');
   const [params, setParams] = useHashParams();
   if (ledger) {
@@ -121,12 +121,14 @@ export function OverviewPage({ ledger, headerAction }: PageProps) {
       installments: data?.cardInstallments ?? [], months: competenceWindow(addCompetenceMonths(period, 6), 9), period });
     return <div className="template-page">
       <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><div className="template-heading__actions"><PeriodNavigator period={period} onChange={next => setParams({ period: next })} />{headerAction}</div></div>
+      {intro}
       <div className="template-metrics" aria-label="Indicadores do livro financeiro">
         <MetricCard label="Patrimônio em contas" value={formatCentsBRL(balance)} supportingText={balanceDelta.text} supportingTone={balanceDelta.tone} />
         <MetricCard label="Receitas do período" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText={incomeDelta.text} supportingTone={incomeDelta.tone} />
         <MetricCard label="Despesas do período" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText={expenseDelta.text} supportingTone={expenseDelta.tone} />
         <MetricCard label="Resultado do período" value={`${totals.netCents > 0n ? '+ ' : ''}${formatCentsBRL(totals.netCents)}`}
-          valueTone={totals.netCents > 0n ? 'positive' : totals.netCents < 0n ? 'negative' : 'neutral'} supportingText="Receitas menos despesas" />
+          valueTone={totals.netCents > 0n ? 'positive' : totals.netCents < 0n ? 'negative' : 'neutral'} supportingText="Receitas menos despesas"
+          info="Receitas menos despesas do mês. Transferências entre suas contas, pagamentos de fatura, aportes e resgates ficam de fora." />
       </div>
       <AttentionPanel review={reviewAttention(transactions, data ?? { semanticOverrides: [], links: [], savingsMovements: [], cardStatementEntries: [] })}
         nextCommitment={nextCardCommitment(commitments, period)} budgets={budgetAttention(budgets)} />

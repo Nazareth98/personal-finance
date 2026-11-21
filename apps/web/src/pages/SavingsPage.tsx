@@ -39,7 +39,8 @@ function DemoSavings({ boxes, movements, ledger, headerAction }: { boxes: Saving
       <p className="muted">Aportes e resgates permanecem neutros em renda e consumo.</p></div>
       <div className="template-heading__actions">{ledger ? <Button variant="secondary" onClick={() => setBoxOpen(true)}>Nova caixinha</Button> : <Badge>Dados fictícios</Badge>}{headerAction}</div></div>
     <div className="template-metrics" aria-label="Resumo das caixinhas">
-      <MetricCard label="Saldo nas caixinhas" value={formatCentsBRL(totalBalance)} supportingText="Saldo inicial mais movimentos" />
+      <MetricCard label="Saldo nas caixinhas" value={formatCentsBRL(totalBalance)} supportingText="Saldo inicial mais movimentos"
+        info="Saldo inicial + aportes − resgates. Aporte e resgate não são receita nem gasto: o dinheiro só muda de lugar." />
       <MetricCard label="Metas cadastradas" value={formatCentsBRL(totalTarget)} supportingText={`${boxes.length} caixinha${boxes.length === 1 ? '' : 's'}`} />
       <MetricCard label="Movimentos vinculados" value={String(movements.length)} supportingText="Aportes e resgates rastreáveis" />
     </div>

@@ -100,7 +100,8 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     return <div className="template-page">
       <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras entram na competência do vencimento; pagamentos não viram uma nova despesa.</p></div><div className="template-heading__actions">{headerAction}</div></div>
       <div className="template-metrics">
-        <MetricCard label="Pendente em faturas" value={formatCentsBRL(totalOpen)} supportingText="Compras menos estornos e pagamentos"/>
+        <MetricCard label="Pendente em faturas" value={formatCentsBRL(totalOpen)} supportingText="Compras menos estornos e pagamentos"
+          info="O que ainda falta pagar nas faturas abertas. A linha “Total da fatura anterior” do banco é só informativa e não entra na conta."/>
         <MetricCard label="Próxima fatura" value={formatCentsBRL(next?.openCents ?? 0n)} supportingText={next ? `${formatCompetence(next.competence)} · vence em ${formatLocalDate(next.statement!.dueDate)}` : 'Nenhuma fatura pendente'}/>
         <MetricCard label="Parcelas futuras" value={formatCentsBRL(totalProjected)} supportingText={lastProjected ? `${projected.length} ${projected.length === 1 ? 'parcela' : 'parcelas'} até ${formatCompetence(lastProjected)} · fora do realizado` : 'Nenhuma parcela prevista'}/>
       </div>

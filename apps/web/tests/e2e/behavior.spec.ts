@@ -28,6 +28,7 @@ test('navegação entre dez templates funciona com histórico hash',async ({page
     {slug:'connections',title:'Conexões bancárias',navigationTitle:'Conexões'},
     {slug:'review',title:'Revisão de categorias',navigationTitle:'Revisão'},
     {slug:'reports',title:'Relatórios'},
+    {slug:'glossary',title:'Como funciona'},
   ]){
     const link=page.getByRole('navigation',{name:'Navegação principal'}).getByRole('link',{name:new RegExp(navigationTitle,'i')});
     if(await link.count())await link.click();
@@ -189,4 +190,25 @@ test('abrir diálogo com a página rolada não desloca a sidebar fixa',async ({p
   expect(await page.evaluate(()=>getComputedStyle(document.body).overflowY)).toBe('visible');
   expect((await sidebar.boundingBox())?.y).toBe(before?.y);
   expect(await page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+});
+
+test('ajuda da tela abre, leva ao termo no glossário e o “i” explica o rótulo',async ({page})=>{
+  await page.goto('/#budgets');
+  await page.getByRole('button',{name:'Ajuda desta tela'}).click();
+  const help=page.getByRole('dialog',{name:'Sobre Orçamentos'});
+  await expect(help).toBeVisible();
+  await expect(help.getByRole('heading',{name:'Como calculamos'})).toBeVisible();
+  await help.getByRole('link',{name:'Folga'}).click();
+  await expect(page).toHaveURL(/#glossary\?termo=folga$/);
+  await expect(page.getByRole('heading',{name:'Como funciona',level:1})).toBeVisible();
+  await expect(page.locator('#termo-folga')).toHaveClass(/is-target/);
+  await page.getByLabel('Buscar termo').fill('caixinha');
+  await expect(page.locator('.glossary dt')).toHaveText(['Aporte e resgate','Caixinha']);
+  await page.goto('/#savings');
+  const info=page.getByRole('button',{name:'O que é Saldo nas caixinhas'});
+  await info.click();
+  await expect(info).toHaveAttribute('aria-expanded','true');
+  await expect(page.locator('.ui-infotip__bubble')).toContainText('o dinheiro só muda de lugar');
+  await page.keyboard.press('Escape');
+  await expect(info).toHaveAttribute('aria-expanded','false');
 });
