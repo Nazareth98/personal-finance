@@ -16,7 +16,7 @@ export function FirstSteps({ steps, onDismiss, onEditHolder }: Props) {
   return <section className="first-steps" aria-labelledby="first-steps-title">
     <div className="first-steps__head">
       <div>
-        <p className="eyebrow">Primeiros passos · {doneCount} de {steps.length}</p>
+        <p className="first-steps__eyebrow">Primeiros passos · {doneCount} de {steps.length}</p>
         <h2 id="first-steps-title">Vamos deixar tudo pronto</h2>
         <p className="muted">Siga na ordem: cada passo se marca sozinho quando os dados aparecem.</p>
       </div>

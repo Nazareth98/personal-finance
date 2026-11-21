@@ -343,6 +343,35 @@ const evidenceLabels = {
   account: 'Conta associada', nature: 'Natureza financeira'
 } as const;
 
+/**
+ * O banco recusa (trigger) categoria cuja aplicabilidade não bate com o efeito do lançamento — inclusive
+ * depois de uma correção semântica (Pix próprio, pagamento de fatura). Como a trigger roda antes do
+ * ON CONFLICT, uma única sugestão incompatível derrubava a sincronização inteira; aqui ela é descartada.
+ */
+async function compatibleClassifications<T extends { transaction_id: string; category_id: string }>(
+  database: SupabaseClient, ownerId: string, rows: T[]
+): Promise<T[]> {
+  if (!rows.length) return rows;
+  const ids = rows.map(row => row.transaction_id);
+  const [transactions, overrides, categories] = await Promise.all([
+    selectInChunks(database, 'transactions', 'id,reporting', ownerId, 'id', ids),
+    selectInChunks(database, 'transaction_semantic_overrides', 'transaction_id,effective_reporting', ownerId, 'transaction_id', ids),
+    database.from('categories').select('id,applicability,owner_id,category_type,archived_at')
+      .in('id', [...new Set(rows.map(row => row.category_id))])
+  ]);
+  if (categories.error) throw categories.error;
+  const reporting = new Map(transactions.map(row => [String(row.id), String(row.reporting)]));
+  for (const row of overrides) if (row.effective_reporting) reporting.set(String(row.transaction_id), String(row.effective_reporting));
+  const applicability = new Map((categories.data ?? [])
+    .filter(row => !row.archived_at && (row.category_type === 'system' || row.owner_id === ownerId))
+    .map(row => [String(row.id), String(row.applicability)]));
+  return rows.filter(row => {
+    const effect = reporting.get(row.transaction_id);
+    const expected = effect === 'income' ? 'income' : effect === 'expense' ? 'expense' : 'neutral';
+    return applicability.get(row.category_id) === expected;
+  });
+}
+
 async function persistClassifications(
   database: SupabaseClient,
   ownerId: string,
@@ -370,9 +399,10 @@ async function persistClassifications(
       }
     }];
   });
-  if (!rows.length) return;
+  const compatible = await compatibleClassifications(database, ownerId, rows);
+  if (!compatible.length) return;
   const stored = await database.from('transaction_classifications')
-    .upsert(rows, { onConflict: 'transaction_id', ignoreDuplicates: true });
+    .upsert(compatible, { onConflict: 'transaction_id', ignoreDuplicates: true });
   if (stored.error) throw stored.error;
 }
 
@@ -394,8 +424,9 @@ async function persistIncomeRecognition(database: SupabaseClient, ownerId: strin
       status: 'automatic', classifier_version: 'income-v1', explanation: { evidence: [{ kind: 'alias',
         value: 'itau:salary-description', weightBasisPoints: 9500, label: 'Descrição de salário em conta Itaú' }] } }];
   });
-  if (!rows.length) return;
-  const stored = await database.from('transaction_classifications').upsert(rows, { onConflict: 'transaction_id', ignoreDuplicates: true });
+  const compatible = await compatibleClassifications(database, ownerId, rows);
+  if (!compatible.length) return;
+  const stored = await database.from('transaction_classifications').upsert(compatible, { onConflict: 'transaction_id', ignoreDuplicates: true });
   if (stored.error) throw stored.error;
 }
 

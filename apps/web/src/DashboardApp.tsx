@@ -201,7 +201,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       </p>}
       {connections.autoSyncing && <p className="sync-status" role="status"><Icon icon={SyncIcon} size="sm" className="sync-status__spin" />Atualizando contas…</p>}
       {!connections.autoSyncing && syncFailed && page !== 'connections' && <p className="sync-status sync-status--failed" role="status">
-        <Icon icon={StatusAlertIcon} size="sm" />Não foi possível atualizar as contas automaticamente. <a href="#connections">Ver conexões</a></p>}
+        <Icon icon={StatusAlertIcon} size="sm" /><span>Não foi possível atualizar as contas automaticamente. <a href="#connections">Ver conexões</a></span></p>}
       {ledgerRepository && ledger.status === 'error' && <div className="sample-warning" role="alert">{ledger.error} <Button size="sm" variant="ghost" onClick={() => void ledger.reload()}>Tentar novamente</Button></div>}
       <CurrentPage ledger={ledgerRepository ? ledger : undefined} connections={connectionsRepository ? connections : undefined}
         intro={page === 'overview' && firstSteps ? <FirstSteps steps={firstSteps} onDismiss={() => dismissFirstSteps(true)}
