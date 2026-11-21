@@ -30,6 +30,8 @@ test('revisão concluída só com lançamentos e fila vazia', () => {
   const ledger = { ...empty, transactions: [{ id: 't' }] } as unknown as LedgerData;
   assert.equal(buildFirstSteps(ledger, noConnections, 3).find(step => step.id === 'review')?.done, false);
   assert.equal(buildFirstSteps(ledger, noConnections, 0).find(step => step.id === 'review')?.done, true);
+  const reviewed = { ...ledger, reviewHistory: [{ id: 'h' }] } as unknown as LedgerData;
+  assert.equal(buildFirstSteps(reviewed, noConnections, 5).find(step => step.id === 'review')?.done, true, 'já revisou um: passo feito mesmo com fila');
 });
 
 test('todo termo citado nas telas existe no glossário e tem âncora única', () => {

@@ -16,8 +16,10 @@ export function buildFirstSteps(ledger: LedgerData, connections: ConnectionsData
       href: '#overview', cta: 'Informar nome', done: Boolean(ledger.holderName) },
     { id: 'banks', title: 'Conectar seus bancos', description: 'Em Conexões, toque em “Conectar instituição” e autorize cada banco do MeuPluggy.',
       href: '#connections', cta: 'Conectar banco', done: hasBanks },
-    { id: 'review', title: 'Revisar os lançamentos', description: 'Confirme categorias e pagamentos de fatura que o app não conseguiu decidir sozinho.',
-      href: '#review', cta: 'Abrir Revisão', done: ledger.transactions.length > 0 && pendingReviews === 0 },
+    { id: 'review', title: 'Revisar os lançamentos', description: 'Confirme pelo menos um lançamento que o app não conseguiu decidir sozinho, para ver como funciona.',
+      href: '#review', cta: 'Abrir Revisão',
+      // Basta já ter revisado algo: a fila sempre recebe itens novos e não deve prender o passo (D-067).
+      done: ledger.reviewHistory.length > 0 || (ledger.transactions.length > 0 && pendingReviews === 0) },
     { id: 'cards', title: 'Conferir os cartões', description: 'Dia de fechamento e de vencimento de cada cartão, para a fatura cair no mês certo.',
       href: '#cards', cta: 'Abrir Cartões', done: cardAccounts.length > 0 && cardAccounts.every(account => configured.has(account.id)) },
     { id: 'savings', title: 'Criar caixinhas', description: 'Reservas com saldo, objetivo e prazo. Aportes e resgates não contam como gasto.',
