@@ -29,10 +29,10 @@ console.log('Card statements/installments security checks passed.');
 // D-050: casamento automático de pagamento de fatura e linha informativa “TOTAL DA FATURA ANTERIOR”.
 {
   const { readFile: read } = await import('node:fs/promises');
-  const trigger = await read('supabase/migrations/20261119113000_match_card_payments_trigger.sql', 'utf8');
+  const trigger = await read('supabase/migrations/20261119111005_match_card_payments_trigger.sql', 'utf8');
   const { default: check } = await import('node:assert/strict');
   // A versão vigente da função é a da D-054; as anteriores continuam no histórico.
-  for (const file of ['20261119110000_statement_carryover_and_payment_matching.sql', '20261119130000_card_payment_mirror.sql', '20261119140000_card_bill_statements.sql']) {
+  for (const file of ['20261119110906_statement_carryover_and_payment_matching.sql', '20261119130000_card_payment_mirror.sql', '20261119140000_card_bill_statements.sql']) {
   const matching = await read(`supabase/migrations/${file}`, 'utf8');
   check.match(matching, /security definer set search_path = public, pg_temp/i);
   check.match(matching, /revoke all on function public\.internal_match_card_payments\(uuid\) from public, anon, authenticated/i);

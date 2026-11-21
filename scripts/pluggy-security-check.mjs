@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const migration = await readFile('supabase/migrations/202611140001_meupluggy.sql', 'utf8');
 const conflictMigration = await readFile('supabase/migrations/20261116165312_fix_transactions_external_key_conflict.sql', 'utf8');
-const providerIdMigration = await readFile('supabase/migrations/20261117150000_pluggy_provider_id.sql', 'utf8');
+const providerIdMigration = await readFile('supabase/migrations/20261117174411_pluggy_provider_id.sql', 'utf8');
 const lifecycleMigration = await readFile('supabase/migrations/20261118105626_pluggy_transaction_lifecycle.sql', 'utf8');
 const sync = await readFile('supabase/functions/_shared/sync.ts', 'utf8');
 const syncEntry = await readFile('supabase/functions/pluggy-sync/index.ts', 'utf8');
@@ -69,7 +69,7 @@ console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de se
 {
   const { readFile: read } = await import('node:fs/promises');
   const { default: check } = await import('node:assert/strict');
-  const sql = await read('supabase/migrations/20261119120000_account_institutions.sql', 'utf8');
+  const sql = await read('supabase/migrations/20261119111409_account_institutions.sql', 'utf8');
   check.match(sql, /stable security definer set search_path = public, pg_temp/i);
   check.match(sql, /where pa\.owner_id = \(select auth\.uid\(\)\)/i);
   check.match(sql, /revoke all on function public\.get_account_institutions\(\) from public, anon/i);
@@ -88,7 +88,7 @@ console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de se
 {
   const { readFile: read } = await import('node:fs/promises');
   const { default: check } = await import('node:assert/strict');
-  const sql = await read('supabase/migrations/20261121120000_pluggy_credentials_vault.sql', 'utf8');
+  const sql = await read('supabase/migrations/20261121115153_pluggy_credentials_vault.sql', 'utf8');
   const fn = await read('supabase/functions/pluggy-credentials/index.ts', 'utf8');
   check.match(sql, /create table private\.pluggy_credentials/i);
   check.match(sql, /vault\.create_secret\(/i);

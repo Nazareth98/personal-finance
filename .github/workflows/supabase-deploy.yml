@@ -1,0 +1,76 @@
+name: Supabase — publicar backend
+
+# D-065: aplica migrations e publica as Edge Functions em cada instância (um Supabase por pessoa).
+# Cada instância é um GitHub Environment com:
+#   - variável  SUPABASE_PROJECT_REF   (identificador público do projeto)
+#   - secret    SUPABASE_ACCESS_TOKEN  (token pessoal da conta Supabase dona do projeto)
+#   - secret    SUPABASE_DB_PASSWORD   (senha do banco daquele projeto)
+# A variável de repositório SUPABASE_ENVIRONMENTS lista os environments, em JSON: ["principal","esposa"].
+# Sem ela, o workflow não faz nada. Passo a passo em docs/architecture/NEW_INSTANCE.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/functions/**'
+      - 'supabase/config.toml'
+      - 'packages/domain/src/**'
+      - '.github/workflows/supabase-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.list.outputs.environments }}
+    steps:
+      - id: list
+        env:
+          ENVIRONMENTS: ${{ vars.SUPABASE_ENVIRONMENTS }}
+        run: |
+          value="${ENVIRONMENTS:-[]}"
+          echo "environments=$value" >> "$GITHUB_OUTPUT"
+          if [ "$value" = "[]" ]; then echo "::notice::SUPABASE_ENVIRONMENTS não definida; nada a publicar."; fi
+
+  deploy:
+    needs: plan
+    if: needs.plan.outputs.environments != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(needs.plan.outputs.environments) }}
+    environment: ${{ matrix.environment }}
+    concurrency:
+      group: supabase-deploy-${{ matrix.environment }}
+      cancel-in-progress: false
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Conferir configuração do environment
+        run: |
+          missing=""
+          [ -n "$PROJECT_REF" ] || missing="$missing SUPABASE_PROJECT_REF"
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -n "$SUPABASE_DB_PASSWORD" ] || missing="$missing SUPABASE_DB_PASSWORD"
+          if [ -n "$missing" ]; then echo "::error::Faltando no environment ${{ matrix.environment }}:$missing"; exit 1; fi
+      - name: Vincular projeto
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: Migrations pendentes
+        run: supabase db push --dry-run --password "$SUPABASE_DB_PASSWORD"
+      - name: Aplicar migrations
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+      - name: Publicar Edge Functions
+        # Sem nome, publica todas as pastas de supabase/functions; verify_jwt de cada uma vem do config.toml.
+        run: supabase functions deploy --project-ref "$PROJECT_REF"

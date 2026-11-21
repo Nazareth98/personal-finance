@@ -21,6 +21,8 @@ pnpm build
 
 ## Supabase
 
+Para publicar por CI e montar a instância de outra pessoa, siga [`NEW_INSTANCE.md`](NEW_INSTANCE.md). O roteiro manual abaixo continua válido.
+
 Antes do primeiro uso real, aplicar migrations em ordem, publicar as três Edge Functions MeuPluggy e configurar os secrets exclusivamente no backend. Em seguida, validar RLS com o usuário proprietário e atualizar as URLs autorizadas do Auth para o domínio final.
 
 ### Projeto novo — caminho das pedras
@@ -50,6 +52,8 @@ Antes do primeiro uso real, aplicar migrations em ordem, publicar as três Edge 
    - `PLUGGY_CLIENT_ID`;
    - `PLUGGY_CLIENT_SECRET`;
    - `PLUGGY_WEBHOOK_SECRET`.
+
+   Desde D-064 as chaves `PLUGGY_CLIENT_*` podem ser informadas no próprio app (Conexões → Conectar ao Pluggy); os secrets acima viram reserva.
 
    `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` são fornecidos pelo ambiente das Edge Functions; não os duplique como secrets manuais.
 8. **Publicar as funções** no projeto vinculado:

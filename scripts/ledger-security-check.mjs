@@ -12,7 +12,7 @@ assert.match(sql, /revoke all .* from anon, authenticated/i);
 assert.doesNotMatch(sql, /grant .* to anon/i);
 assert.doesNotMatch(sql, /grant (insert|update|delete).*transactions/i);
 assert.match(sql, /grant execute .* to authenticated/i);
-const accounts = await readFile('supabase/migrations/20261118210000_account_management.sql', 'utf8');
+const accounts = await readFile('supabase/migrations/20261118202048_account_management.sql', 'utf8');
 assert.equal((accounts.match(/security definer set search_path = public, pg_temp/gi) ?? []).length, 2);
 assert.equal((accounts.match(/owner_id = current_owner and archived_at is null/gi) ?? []).length, 2);
 assert.match(accounts, /set archived_at = now\(\)/i);

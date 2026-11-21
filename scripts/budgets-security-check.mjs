@@ -14,7 +14,7 @@ assert.match(sql, /security definer set search_path = public, pg_temp/i);
 assert.match(sql, /grant execute on function public\.set_category_budget\(text, integer\) to authenticated/i);
 assert.match(sql, /owner_id = \(select auth\.uid\(\)\)/i);
 
-const deletion = await readFile('supabase/migrations/20261118190000_delete_category_budget.sql', 'utf8');
+const deletion = await readFile('supabase/migrations/20261118194011_delete_category_budget.sql', 'utf8');
 assert.match(deletion, /security definer set search_path = public, pg_temp/i);
 assert.match(deletion, /where owner_id = current_owner and category_id = p_category_id/i);
 assert.match(deletion, /revoke all on function public\.delete_category_budget\(text\) from public, anon/i);
@@ -22,7 +22,7 @@ assert.match(deletion, /grant execute on function public\.delete_category_budget
 assert.doesNotMatch(deletion, /grant (insert|update|delete).*category_budgets/i);
 assert.doesNotMatch(deletion, /to anon/i);
 
-const amounts = await readFile('supabase/migrations/20261119100000_budget_amounts.sql', 'utf8');
+const amounts = await readFile('supabase/migrations/20261119095640_budget_amounts.sql', 'utf8');
 assert.match(amounts, /drop column percentage_basis_points/i);
 assert.match(amounts, /monthly_limit_cents bigint not null check \(monthly_limit_cents > 0/i);
 assert.match(amounts, /drop function public\.set_category_budget\(text, integer\)/i);

@@ -17,7 +17,7 @@ assert.match(sql, /'neutral', 'manual'/i);
 assert.match(sql, /grant execute on function public\.create_savings_movement/i);
 assert.match(sql, /grant execute on function public\.link_savings_movement/i);
 
-const management = await readFile('supabase/migrations/20261118200000_savings_box_management.sql', 'utf8');
+const management = await readFile('supabase/migrations/20261118195938_savings_box_management.sql', 'utf8');
 assert.match(management, /create unique index savings_boxes_owner_active_name on public\.savings_boxes \(owner_id, name\) where archived_at is null/i);
 assert.match(management, /owner_id = current_owner and archived_at is null for update/i);
 assert.match(management, /balance would be negative/i);

@@ -199,3 +199,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Cada instância (uma por pessoa; a segunda será um clone do projeto) precisa das próprias chaves do Pluggy. Pedir que uma pessoa leiga configure secrets no Supabase não é viável; o card “Conectar ao Pluggy” em Conexões recebe Client ID e Client Secret.
 - A Edge Function `pluggy-credentials` testa as chaves (`POST /auth`) e só então grava: Client ID em `private.pluggy_credentials`, Client Secret no Supabase Vault. `internal_get/set_pluggy_credentials` são só `service_role`; o app vê apenas `get_pluggy_credentials_status()` (configurado, 4 últimos caracteres do Client ID, data do teste). O segredo nunca volta ao navegador.
 - As funções do Pluggy leem primeiro o Vault e, sem chaves lá, as variáveis `PLUGGY_CLIENT_ID/SECRET` — instâncias antigas seguem funcionando. Com bancos conectados e sem chaves no app, o card mostra “Chaves do Pluggy no servidor”.
+
+## D-065 — Uma instância por pessoa, backend publicado pelo GitHub Actions (21/11/2026)
+
+- A segunda usuária terá Supabase, Vercel e MeuPluggy próprios; o código é o mesmo. O workflow `supabase-deploy.yml` aplica migrations e publica todas as Edge Functions em cada GitHub Environment listado em `SUPABASE_ENVIRONMENTS` (ref, Access Token e senha do banco por environment). Sem a variável, não faz nada.
+- Os nomes dos arquivos de migration foram alinhados às versões registradas no projeto principal (12 renomeados), para `db push` não tentar reaplicar o que já existe. Novas migrations aplicadas pelo MCP precisam ter o arquivo renomeado para a versão gravada, ou ser aplicadas pelo workflow.
+- Roteiro em [`NEW_INSTANCE.md`](../architecture/NEW_INSTANCE.md).

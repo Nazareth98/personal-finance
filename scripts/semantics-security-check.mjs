@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const migration = await readFile('supabase/migrations/20261116185031_transaction_semantic_overrides.sql', 'utf8');
-const indexes = await readFile('supabase/migrations/20261117104611_index_transaction_semantic_overrides.sql', 'utf8');
-const effectiveClassification = await readFile('supabase/migrations/20261117110113_classification_uses_effective_semantics.sql', 'utf8');
+const migration = await readFile('supabase/migrations/20261116185536_transaction_semantic_overrides.sql', 'utf8');
+const indexes = await readFile('supabase/migrations/20261117104733_index_transaction_semantic_overrides.sql', 'utf8');
+const effectiveClassification = await readFile('supabase/migrations/20261117110518_classification_uses_effective_semantics.sql', 'utf8');
 const developmentReset = await readFile('supabase/admin/reset_development_data.sql', 'utf8');
 const repository = await readFile('apps/web/src/ledger/supabase-ledger.ts', 'utf8');
 
