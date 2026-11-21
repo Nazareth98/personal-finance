@@ -150,7 +150,7 @@ export function AuthGate({ gateway, children }: AuthGateProps) {
 }
 
 function Brand() {
-  return <span className="auth-brand"><img src="/icons/icon.svg" alt="" width={40} height={40} /><span>Personal Finance</span></span>;
+  return <span className="auth-brand"><img src="/icons/icon.svg" alt="" width={40} height={40} /><span>Balanço</span></span>;
 }
 
 /**

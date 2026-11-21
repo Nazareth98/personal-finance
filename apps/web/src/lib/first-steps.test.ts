@@ -43,3 +43,9 @@ test('todo termo citado nas telas existe no glossário e tem âncora única', ()
 test('negrito vira partes sem HTML', () => {
   assert.deepEqual(richParts('**Saldo** = a + b'), [{ text: 'Saldo', strong: true }, { text: ' = a + b', strong: false }]);
 });
+
+test('toda natureza escolhível tem explicação em linguagem simples', async () => {
+  const { natureHints } = await import('./help-content.ts');
+  for (const nature of ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal', 'adjustment', 'transfer', 'adjustment_expense', 'adjustment_income'])
+    assert.ok(natureHints[nature]?.length > 20, nature);
+});

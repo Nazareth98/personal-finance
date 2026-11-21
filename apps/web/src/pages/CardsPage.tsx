@@ -46,7 +46,7 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { pa
       {share && <progress className={`budget-progress ${share.basisPoints > 10000 ? 'budget-progress--exceeded' : ''}`} max={10000} value={Math.min(share.basisPoints, 10000)} aria-label={`Limite comprometido: ${share.label}`} />}
       <p className="muted card-panel__note">Faturas em aberto {formatCentsBRL(openCents)} + parcelas futuras {formatCentsBRL(panel.committedCents - openCents)}{share && limit !== undefined ? ` · disponível ${formatCentsBRL(limit - panel.committedCents)}` : ''}</p>
     </div>}
-    {card && !active && <EmptyState title="Nenhuma fatura ainda" description="Faturas surgem quando compras deste cartão são sincronizadas." />}
+    {card && !active && <EmptyState title="Nenhuma fatura ainda" description="As faturas aparecem quando as primeiras compras deste cartão chegarem do banco." />}
     {active && <Tabs label={`Faturas do ${account.name}`} className="card-tabs" panelClassName="card-statement" selectedId={active.competence} onSelect={id => { setSelected(id); setLinesOpen(false); }}
       items={panel.tabs.map(tab => ({ id: tab.competence, className: `card-tab--${tab.status}`,
         label: <><strong>{formatCompetence(tab.competence)}</strong><span>{tabStatusLabels[tab.status]} · <span className="card-tab__value">{formatCentsBRL(tabValue(tab))}</span></span></> }))}>
@@ -98,7 +98,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
     const lastProjected = projected.map(item => item.dueCompetence).sort().at(-1);
     const totalProjected = projected.reduce((sum, installment) => sum + installment.amountCents, 0n);
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras entram na competência do vencimento; pagamentos não viram uma nova despesa.</p></div><div className="template-heading__actions">{headerAction}</div></div>
+      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Cada compra conta no mês em que a fatura vence. Pagar a fatura não conta como gasto de novo.</p></div><div className="template-heading__actions">{headerAction}</div></div>
       <div className="template-metrics">
         <MetricCard label="Pendente em faturas" value={formatCentsBRL(totalOpen)} supportingText="Compras menos estornos e pagamentos"
           info="O que ainda falta pagar nas faturas abertas. A linha “Total da fatura anterior” do banco é só informativa e não entra na conta."/>
@@ -107,7 +107,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
       </div>
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={3} columns={4} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {panels.length ? panels.map(panel => <CardPanelView key={panel.account.id} panel={panel} institutions={ledger.data?.institutions} onConfigure={() => setSelectedCard(panel.account)} onLinkPayment={setSelectedStatement}/>)
-          : <Card><EmptyState title="Nenhum cartão cadastrado" description="Cadastre uma conta do tipo cartão de crédito para começar."/></Card>}
+          : <Card><EmptyState title="Seus cartões aparecem aqui" description="Conecte o banco do cartão: faturas, compras e parcelas chegam na sincronização." action={<a className="ui-button ui-button--primary ui-button--md" href="#connections">Conectar banco</a>}/></Card>}
       </DataState>
       <CreditCardForm account={selectedCard} onClose={() => setSelectedCard(null)} ledger={ledger}/>
       <CardPaymentForm statement={selectedStatement} onClose={() => setSelectedStatement(null)} ledger={ledger}/>
@@ -115,5 +115,5 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
   }
   const billed = demoInvoices.reduce((sum, item) => sum + item.purchasesCents, 0n);
   const paid = demoInvoices.reduce((sum, item) => sum + item.paymentsCents, 0n);
-  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras, pagamentos e faturas sem contabilizar o pagamento como novo consumo.</p></div><div className="template-heading__actions"><Badge>Dados fictícios</Badge>{headerAction}</div></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
+  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras, pagamentos e faturas. Pagar a fatura não conta como gasto de novo.</p></div><div className="template-heading__actions"><Badge>Dados fictícios</Badge>{headerAction}</div></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
 }

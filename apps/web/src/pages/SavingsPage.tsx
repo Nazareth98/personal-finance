@@ -36,7 +36,7 @@ function DemoSavings({ boxes, movements, ledger, headerAction }: { boxes: Saving
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO PATRIMONIAL</p><h1>Caixinhas</h1>
-      <p className="muted">Aportes e resgates permanecem neutros em renda e consumo.</p></div>
+      <p className="muted">Dinheiro guardado com objetivo. Guardar ou tirar de uma caixinha não conta como receita nem gasto.</p></div>
       <div className="template-heading__actions">{ledger ? <Button variant="secondary" onClick={() => setBoxOpen(true)}>Nova caixinha</Button> : <Badge>Dados fictícios</Badge>}{headerAction}</div></div>
     <div className="template-metrics" aria-label="Resumo das caixinhas">
       <MetricCard label="Saldo nas caixinhas" value={formatCentsBRL(totalBalance)} supportingText="Saldo inicial mais movimentos"
@@ -45,7 +45,7 @@ function DemoSavings({ boxes, movements, ledger, headerAction }: { boxes: Saving
       <MetricCard label="Movimentos vinculados" value={String(movements.length)} supportingText="Aportes e resgates rastreáveis" />
     </div>
     {items.length === 0
-      ? <EmptyState title="Nenhuma caixinha cadastrada" description="Cadastre a primeira caixinha para acompanhar saldo e progresso." action={ledger ? <Button onClick={() => setBoxOpen(true)}>Criar caixinha</Button> : undefined} />
+      ? <EmptyState title="Nenhuma caixinha ainda" description="Crie uma caixinha para cada objetivo, como reserva de emergência ou viagem, e acompanhe quanto falta." action={ledger ? <Button onClick={() => setBoxOpen(true)}>Criar caixinha</Button> : undefined} />
       : <div className="template-grid">{items.map(({ box, progress }) => {
         const visualPercent = Number(progress.progressBasisPoints > 10000n ? 10000n : progress.progressBasisPoints) / 100;
         const boxMovements = movements.filter(movement => movement.savingsBoxId === box.id);
@@ -137,7 +137,7 @@ function RealSavings({ ledger, headerAction }: { ledger: LedgerState; headerActi
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO PATRIMONIAL</p><h1>Caixinhas</h1>
-      <p className="muted">Aportes e resgates permanecem neutros em renda e consumo.</p></div>
+      <p className="muted">Dinheiro guardado com objetivo. Guardar ou tirar de uma caixinha não conta como receita nem gasto.</p></div>
       <div className="template-heading__actions"><PageAction label="Nova caixinha" shortLabel="Caixinha" onClick={() => setDialog({ kind: 'box' })} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das caixinhas">
       <div><span className="muted">Saldo nas caixinhas</span><strong>{formatCentsBRL(panels.totalBalanceCents)}</strong>
@@ -151,7 +151,7 @@ function RealSavings({ ledger, headerAction }: { ledger: LedgerState; headerActi
         <span className={missingThisMonth > 0n ? 'status-tone--approaching' : 'muted'}>{missingThisMonth > 0n ? `Faltam ${formatCentsBRL(missingThisMonth)} no mês` : 'Plano do mês cumprido'}</span></div>
     </section>
     {panels.groups.length === 0
-      ? <EmptyState title="Nenhuma caixinha cadastrada" description="Cadastre a primeira caixinha para acompanhar saldo e progresso."
+      ? <EmptyState title="Nenhuma caixinha ainda" description="Crie uma caixinha para cada objetivo, como reserva de emergência ou viagem, e acompanhe quanto falta."
         action={<Button onClick={() => setDialog({ kind: 'box' })}>Criar caixinha</Button>} />
       : panels.groups.map(group => {
         const copy = statusCopy[group.status];

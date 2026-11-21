@@ -2,7 +2,7 @@
 
 ## Produto
 
-Gerenciador pessoal de finanças para um único usuário. Deve reduzir alimentação manual, consolidar conta corrente e cartão de Nubank, Caixa e Itaú via MeuPluggy, permitir ajustes manuais e oferecer visão mensal e anual confiável.
+Balanço: gerenciador pessoal de finanças com um único usuário por instância; qualquer pessoa pode fazer fork e montar a sua seguindo [`COMECE_AQUI.md`](../COMECE_AQUI.md) (D-068). Deve reduzir alimentação manual, consolidar contas correntes e cartões de qualquer banco disponível no MeuPluggy (contas e cartões nascem da sincronização), permitir ajustes manuais e oferecer visão mensal e anual confiável.
 
 ## Resultado esperado
 

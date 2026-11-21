@@ -3,6 +3,7 @@ import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-
 import type { LedgerState } from '../ledger/useLedger';
 import { parseBrlCents } from '../lib/transaction-validation';
 import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
+import { natureHints } from '../lib/help-content';
 
 type Kind = 'income' | 'expense' | 'transfer' | 'adjustment_income' | 'adjustment_expense';
 type Draft = { description: string; amount: string; kind: Kind; accountId: string; targetAccountId: string; categoryId: string; adjustedTransactionId: string; eventDate: string };
@@ -70,9 +71,9 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
       <Input label="Descrição" value={draft.description} maxLength={120} required onChange={event => patch('description', event.target.value)} />
       <Input label="Valor" startText="R$" inputMode="decimal" placeholder="123,45" value={draft.amount} required onChange={event => patch('amount', event.target.value)} />
       <Select label="Tipo" value={draft.kind} options={[
-        { value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'transfer', label: 'Transferência própria' },
+        { value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'transfer', label: 'Transferência entre minhas contas' },
         { value: 'adjustment_expense', label: 'Ajuste de despesa' }, { value: 'adjustment_income', label: 'Ajuste de receita' }
-      ]} onChange={event => { patch('kind', event.target.value as Kind); patch('categoryId', ''); }} />
+      ]} hint={natureHints[draft.kind]} onChange={event => { patch('kind', event.target.value as Kind); patch('categoryId', ''); }} />
       <Select label={transfer ? 'Conta de origem' : 'Conta'} value={draft.accountId} placeholder="Selecione" options={accountOptions} required onChange={event => patch('accountId', event.target.value)} />
       {transfer && <Select label="Conta de destino" value={draft.targetAccountId} placeholder="Selecione" options={accountOptions.filter(option => option.value !== draft.accountId)} required onChange={event => patch('targetAccountId', event.target.value)} />}
       {!transfer && <Select label="Categoria" value={draft.categoryId} placeholder="Selecione" options={categoryOptions} required onChange={event => patch('categoryId', event.target.value)} />}

@@ -9,7 +9,7 @@ test.beforeEach(async ({page},info)=>{
 for(const {route,button,feedback,name} of [
   {route:'overview',button:'Simular loading do gráfico',feedback:'Carregando fluxo de caixa',name:'chart-loading'},
   {route:'overview',button:'Simular erro do gráfico',feedback:'Erro ao carregar o fluxo de caixa',name:'chart-error'},
-  {route:'transactions',button:'Simular loading',feedback:'Carregando movimentações demonstrativas',name:'table-loading'},
+  {route:'transactions',button:'Simular loading',feedback:'Carregando lançamentos de exemplo',name:'table-loading'},
   {route:'transactions',button:'Simular erro na tabela',feedback:'Erro ao carregar movimentações',name:'table-error'},
 ]){
   test(`estado visual ${name}`,async ({page})=>{

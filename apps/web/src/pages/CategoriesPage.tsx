@@ -117,7 +117,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
     categories: ledger?.data?.categories ?? [], budgets: ledger?.data?.budgets ?? [], transactions: ledger?.data?.transactions ?? [], month, filter, query
   }), [ledger?.data, month, filter, query]);
 
-  if (!ledger) return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">A gestão de categorias fica disponível no modo autenticado.</p></div><div className="template-heading__actions">{headerAction}</div></div></div>;
+  if (!ledger) return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">No modo de exemplo as categorias não podem ser alteradas.</p></div><div className="template-heading__actions">{headerAction}</div></div></div>;
 
   const custom = panels.custom.map(row => row.category);
   const columns = (kind: 'custom' | 'system' | 'archived'): DataTableColumn<CategoryRowView>[] => [
@@ -126,7 +126,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
     { mobile: 'value', key: 'month', header: `Em ${formatCompetence(month)}`, align: 'end', sortable: true, sortValue: row => row.monthCents,
       cell: row => row.monthCents > 0n
         ? <a href={`#transactions?period=${month}&category=${row.category.id}`}>{row.category.applicability === 'income' ? '+ ' : row.category.applicability === 'expense' ? '− ' : ''}{formatCentsBRL(row.monthCents)}</a>
-        : <span className="muted" title={row.idle ? 'Sem lançamentos nas últimas 6 competências' : undefined}>{row.idle ? 'Sem uso' : '—'}</span> },
+        : <span className="muted" title={row.idle ? 'Sem lançamentos nos últimos 6 meses' : undefined}>{row.idle ? 'Sem uso' : '—'}</span> },
     { mobile: 'detail', key: 'budget', header: 'Meta', cell: row => row.budgetCents ? <Badge tone="transfer">Meta {formatCentsBRL(row.budgetCents)}</Badge> : <span className="muted">—</span> },
     { mobile: 'footer', key: 'actions', header: 'Ações', align: 'end', cell: row => {
       const category = row.category;
@@ -145,7 +145,7 @@ export function CategoriesPage({ ledger, headerAction }: PageProps) {
   const empty = panels.custom.length + panels.system.length + panels.archived.length === 0;
 
   return <div className="template-page">
-    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Gerencie categorias sem perder lançamentos, metas, regras ou histórico.</p></div>
+    <div className="template-heading"><div><p className="eyebrow">ORGANIZAÇÃO</p><h1>Categorias</h1><p className="muted">Crie, renomeie e organize categorias. Nada se perde: lançamentos e metas acompanham a mudança.</p></div>
       <div className="template-heading__actions"><PageAction label="Nova categoria" shortLabel="Categoria" onClick={() => { setSelected(null); setEditorOpen(true); }} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das categorias">
       <div><span className="muted">Ativas</span><strong>{panels.activeCount}</strong><span className="muted">{panels.activeCount - panels.customCount} estruturais · {panels.customCount} personalizadas</span></div>

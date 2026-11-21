@@ -8,7 +8,7 @@ import { BrandMark } from '@personal-finance/ui';
 export function BootSplash({ label = 'Verificando acesso…' }: { label?: string }) {
   return <main className="boot-splash" aria-busy="true">
     <span className="boot-splash__icon"><BrandMark size={48} animated /></span>
-    <span className="boot-splash__name">Personal Finance</span>
+    <span className="boot-splash__name">Balanço</span>
     <p className="boot-splash__status" role="status">{label}</p>
   </main>;
 }

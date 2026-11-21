@@ -28,7 +28,7 @@ export function TransactionDemoForm({open,onClose}:{open:boolean;onClose:()=>voi
     description="Experimente os componentes. Este formulário não armazena ou envia dados."
     footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId}>Validar demonstração</Button></>}>
     <form id={formId} onSubmit={submit} noValidate className="transaction-form">
-      <Input label="Descrição" placeholder="Ex.: Mercado demonstrativo" value={draft.description}
+      <Input label="Descrição" placeholder="Ex.: Mercado" value={draft.description}
         maxLength={121} required error={errors.description}
         onChange={e=>patch('description',e.target.value)}/>
       <Input label="Valor" startText="R$" inputMode="decimal" placeholder="123,45" value={draft.amount}

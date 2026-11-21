@@ -71,7 +71,7 @@ export function AccountForm({ open, onClose, ledger, account }: { open: boolean;
   }
 
   return <Dialog open={open} onClose={onClose} title={account ? `Editar ${account.name}` : 'Nova conta'}
-    description="O saldo inicial serve como ponto de partida do livro financeiro." footer={<>
+    description="O saldo inicial é o ponto de partida: a partir dele o app soma o que entra e tira o que sai." footer={<>
       {account && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingArchive(true); setError(''); }}>
         <Icon icon={ArchiveIcon} size="sm" />Arquivar conta</Button>}
       <Button variant="ghost" onClick={onClose}>Cancelar</Button>

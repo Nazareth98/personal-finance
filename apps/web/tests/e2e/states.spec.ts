@@ -24,7 +24,7 @@ test('tabela: loading e erro preservam filtros; retry restaura resultados',async
   await query.fill('mercado');
   await expect(page.getByRole('table',{name:'Tabela de transações fictícias'})).toBeVisible();
   await page.getByRole('button',{name:'Simular loading'}).click();
-  const loading=page.getByRole('status',{name:'Carregando movimentações demonstrativas'});
+  const loading=page.getByRole('status',{name:'Carregando lançamentos de exemplo'});
   await expect(loading).toHaveAttribute('aria-busy','true');
   await expect(page.getByRole('table',{name:'Tabela de transações fictícias'})).toHaveCount(0);
   await page.getByRole('button',{name:'Simular erro na tabela'}).click();

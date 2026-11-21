@@ -32,8 +32,8 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
   const { notify } = useToast();
   if (!connections) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
-      <p className="muted">Nubank, Caixa e Itaú serão conectados exclusivamente pelo MeuPluggy no ambiente autenticado.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
-    <Card><EmptyState title="Nenhuma conexão no modo demonstrativo" description="Credenciais e dados bancários nunca são carregados nesta visualização." /></Card>
+      <p className="muted">No modo de exemplo nenhum banco é conectado. Depois de entrar, seus bancos chegam pelo MeuPluggy.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
+    <Card><EmptyState title="Nenhum banco no modo de exemplo" description="Nenhuma senha ou dado bancário é usado aqui." /></Card>
   </div>;
 
   const rows = connections.data?.connections ?? [];
@@ -60,7 +60,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
         : 'Execução em andamento.';
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">AUTOMAÇÃO</p><h1>Conexões bancárias</h1>
-      <p className="muted">O MeuPluggy atualiza a fonte; “Sincronizar agora” busca o dado mais recente já disponível.</p></div>
+      <p className="muted">O app busca as novidades sozinho ao abrir. “Sincronizar agora” busca na hora.</p></div>
       <div className="template-heading__actions"><PageAction label="Conectar instituição" shortLabel="Conectar" loading={connecting} onClick={() => void connect()} />{headerAction}</div></div>
     {connections.error && connections.status !== 'error' && <p className="sample-warning" role="alert">{connections.error}</p>}
     {connections.status === 'success' && <PluggyKeysCard credentials={credentials} hasConnections={rows.length > 0}
@@ -78,7 +78,7 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
     </section>
     <DataState status={connections.status === 'idle' ? 'loading' : connections.status} kind="table" rows={3} columns={3} errorDescription={connections.error} onRetry={() => void connections.reload()}>
       {rows.length === 0
-        ? <EmptyState title="Nenhuma instituição conectada" description="Conecte Nubank, Caixa ou Itaú para importar o histórico disponível." action={<Button onClick={() => void connect()}>Conectar instituição</Button>} />
+        ? <EmptyState title="Nenhuma instituição conectada" description="Conecte os bancos que você autorizou no MeuPluggy. Contas, cartões e o histórico disponível chegam sozinhos." action={<Button onClick={() => void connect()}>Conectar instituição</Button>} />
         : panels.groups.map(group => {
           const copy = groupCopy[group.kind];
           return <section key={group.kind} className="status-group" aria-labelledby={`connections-group-${group.kind}`}>

@@ -38,7 +38,7 @@ function ForecastReport({ forecast, extraordinaryIncome, realizedIncome, periodC
   const tight = month && month.netCents >= 0n && month.recurringIncomeCents > 0n && month.netCents * 100n < month.recurringIncomeCents * 5n;
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1>
-      <p className="muted">Seis meses à frente, só com receitas recorrentes; extraordinárias não entram na média.</p></div>
+      <p className="muted">Uma estimativa dos próximos seis meses, com base no que se repete todo mês. Entradas fora do comum não entram.</p></div>
       <div className="template-heading__actions">{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo da previsão">
       <div><span className="muted">Receita recorrente média</span><strong className="transaction-amount--income">{signed(first?.recurringIncomeCents ?? 0n)}</strong>
@@ -98,7 +98,7 @@ export function ReportsPage({ ledger, headerAction }: PageProps) {
   const totals=monthlyReport(demoTransactions);
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1>
-      <p className="muted">Composição de despesas e resultado do período com dados de demonstração.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
+      <p className="muted">Para onde foi o dinheiro e o resultado do mês, com dados de exemplo.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
     <div className="template-metrics">
       <MetricCard label="Receitas" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText="Entradas fictícias"/>
       <MetricCard label="Despesas" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText="Consumo fictício"/>
@@ -108,7 +108,7 @@ export function ReportsPage({ ledger, headerAction }: PageProps) {
       <Card><h2>Fluxo de caixa por mês</h2><p className="muted">Receitas e despesas ilustrativas de seis meses.</p>
         <CashFlowChart data={demoCashFlow} formatValue={formatCentsBRL}/>
       </Card>
-      <Card><h2>Evolução do resultado acumulado</h2><p className="muted">Saldo acumulado demonstrativo, sem transferências internas.</p>
+      <Card><h2>Evolução do resultado acumulado</h2><p className="muted">Saldo acumulado de exemplo, sem transferências entre contas.</p>
         <TrendLineChart data={demoNetTrend} formatValue={formatCentsBRL}/>
       </Card>
     </div>

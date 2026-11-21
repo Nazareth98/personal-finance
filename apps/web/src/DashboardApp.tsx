@@ -149,9 +149,9 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
   return <PageActionSlotContext.Provider value={actionSlot}><div className={`app-shell${sidebarCollapsed ? ' app-shell--sidebar-collapsed' : ''}`}>
     <aside className={`sidebar${sidebarCollapsed ? ' is-collapsed' : ''}`}>
       <div className="sidebar-header">
-        <a className="brand" href="#overview" aria-label="Personal Finance Controle pessoal — início">
+        <a className="brand" href="#overview" aria-label="Balanço, finanças pessoais — início">
           <span className="brand-symbol"><BrandMark size={28} className="brand-mark"/></span>
-          <span className="brand-copy"><strong>Personal Finance</strong>{' '}<small>Controle pessoal</small></span>
+          <span className="brand-copy"><strong>Balanço</strong>{' '}<small>Finanças pessoais</small></span>
         </a>
         {/* Até 1000 px o título da aba ocupa o lugar da marca; o h1 continua na página para leitores de tela. */}
         <p className="app-bar__title" aria-hidden="true">{pageTitle}</p>
@@ -242,7 +242,7 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
         <Button ref={cancelSignOut} variant="secondary" onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>
         <Button variant="danger" loading={signingOut} onClick={() => void signOut()}><Icon icon={LogOutIcon} size="sm"/>Sair</Button>
       </>}>
-      <p className="ui-dialog__question">Deseja sair do Personal Finance?</p>
+      <p className="ui-dialog__question">Deseja sair do Balanço?</p>
       <p className="muted">Para voltar, você entra de novo com e-mail e senha. Nada é apagado.</p>
     </Dialog>
     {ledgerRepository && <HolderNameForm open={holderOpen} onClose={() => setHolderOpen(false)} ledger={ledger} />}

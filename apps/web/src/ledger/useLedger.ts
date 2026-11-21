@@ -44,7 +44,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
       setData(await repository.load());
       setStatus('success');
     } catch {
-      setError('Não foi possível carregar o livro financeiro.');
+      setError('Não foi possível carregar seus lançamentos.');
       setStatus('error');
     }
   }, [repository]);

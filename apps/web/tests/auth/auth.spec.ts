@@ -300,14 +300,14 @@ test('nega sessão autenticada sem perfil proprietário', async ({ page }) => {
 test('deriva o resumo do livro sem contar a transferência como receita ou despesa', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  const indicators = page.getByLabel('Indicadores do livro financeiro');
+  const indicators = page.getByLabel('Indicadores do mês');
   await expect(indicators.getByText('R$ 5.000,00', { exact: true })).toBeVisible();
   await expect(indicators.getByText('R$ 230,00', { exact: true })).toBeVisible();
   await expect(indicators.getByText('+ R$ 230,00 vs. out/2026')).toBeVisible();
   await expect(indicators.getByText('+ R$ 4.770,00', { exact: true })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Precisa de atenção' })).toContainText('4 lançamentos para revisar');
   await page.getByRole('link', { name: /Transações/ }).click();
-  await expect(page.getByRole('table', { name: 'Livro financeiro' })).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Lançamentos' })).toBeVisible();
   await page.getByLabel('Período', { exact: true }).selectOption('2026');
   await expect(page.getByText('Mercado', { exact: true })).toBeVisible();
 });
@@ -866,7 +866,7 @@ test('revisa novamente preservando versões e registra o outro lado da transfer�
 test('navega por período na visão geral e mantém o mês na URL', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
-  const indicators = page.getByLabel('Indicadores do livro financeiro');
+  const indicators = page.getByLabel('Indicadores do mês');
   const navigator = page.getByRole('group', { name: 'Período da visão geral' });
   await expect(navigator).toContainText('nov/2026');
   await expect(indicators.getByText('R$ 5.000,00', { exact: true })).toBeVisible();
@@ -885,7 +885,7 @@ test('busca e filtra transações com estado na URL', async ({ page }) => {
   await mockSupabase(page);
   await login(page);
   await page.goto('/#transactions');
-  const table = page.getByRole('table', { name: 'Livro financeiro' });
+  const table = page.getByRole('table', { name: 'Lançamentos' });
   await expect(table.getByRole('row').filter({ hasText: 'Receita mensal' })).toContainText('Manual');
   await expect(table).not.toContainText('Importado');
   await page.getByRole('searchbox', { name: 'Pesquisar descrição' }).fill('SALARIO');
@@ -1071,8 +1071,8 @@ test('tabelas viram lista compacta no mobile com ordenação e ações', async (
   await mockSupabase(page);
   await login(page);
   await page.goto('/#transactions');
-  await expect(page.getByRole('table', { name: 'Livro financeiro' })).toHaveCount(0);
-  const list = page.getByRole('region', { name: 'Livro financeiro' });
+  await expect(page.getByRole('table', { name: 'Lançamentos' })).toHaveCount(0);
+  const list = page.getByRole('region', { name: 'Lançamentos' });
   const items = list.getByRole('listitem');
   await expect(items.first()).toContainText('Pagamento da fatura');
   await list.getByLabel('Ordenar por').selectOption('amount:desc');

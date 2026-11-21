@@ -87,11 +87,11 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
-      <p className="muted">Tetos mensais em reais por categoria; na visão anual, cada teto vale 12 vezes.</p></div>
+      <p className="muted">Quanto você quer gastar por mês em cada categoria. Na visão do ano, cada teto vale 12 vezes.</p></div>
       <div className="template-heading__actions"><PageAction label="Definir meta" shortLabel="Meta" onClick={() => setForm({})} />{headerAction}</div></div>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
-      <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Referência do período</span></div>
+      <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Entrou no período</span></div>
       <div><span className="muted summary-strip__label">Total em tetos<InfoTip label="Total em tetos" text="Soma dos tetos mensais das categorias com meta. Ao lado, quanto isso representa da receita do mês." /></span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>
         <span className="muted">{panels.committedShareBasisPoints === null ? 'Sem receita confirmada no período'
           : `${formatBasisPoints(panels.committedShareBasisPoints)} da receita · ${freeCents > 0n ? `${formatCentsBRL(freeCents)} livre` : 'sem folga'}`}</span></div>
@@ -100,7 +100,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
         <span className="muted">{panels.unbudgeted.length === 1 ? '1 categoria' : `${panels.unbudgeted.length} categorias`}</span></div>
     </section>
     {panels.groups.length === 0
-      ? <EmptyState title="Nenhuma meta definida" description="Defina um percentual para acompanhar o teto de uma categoria." action={<Button onClick={() => setForm({})}>Definir primeira meta</Button>} />
+      ? <EmptyState title="Nenhuma meta definida" description="Escolha uma categoria e o valor máximo por mês." action={<Button onClick={() => setForm({})}>Definir primeira meta</Button>} />
       : panels.groups.map(group => {
         const copy = statusCopy[group.status];
         return <section key={group.status} className="status-group" aria-labelledby={`status-group-${group.status}`}>
@@ -134,7 +134,7 @@ export function BudgetsPage({ ledger, headerAction }: PageProps) {
   const used=demoBudgets.reduce((sum,item)=>sum+item.usedCents,0n);
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
-      <p className="muted">Acompanhe limites e excedentes por categoria, usando valores fictícios.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
+      <p className="muted">Quanto você quer gastar por mês em cada categoria, com valores de exemplo.</p></div><div className="template-heading__actions"><Badge>Novembro 2026</Badge>{headerAction}</div></div>
     <div className="template-metrics">
       <MetricCard label="Limite total fictício" value={formatCentsBRL(limit)}/>
       <MetricCard label="Consumo ilustrativo" value={formatCentsBRL(used)} tone="expense"/>

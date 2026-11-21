@@ -75,7 +75,7 @@ function RealAccounts({ ledger, headerAction }: { ledger: LedgerState; headerAct
   const nonCards = (data?.accounts ?? []).filter(account => account.type !== 'credit_card').length;
   const cards = (data?.accounts ?? []).length - nonCards;
   return <div className="template-page">
-    <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1><p className="muted">Saldos reconstruídos pelo saldo inicial e pelos lançamentos.</p></div>
+    <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1><p className="muted">Saldo de cada conta, calculado a partir do que o banco enviou.</p></div>
       <div className="template-heading__actions"><PageAction label="Nova conta" shortLabel="Conta" onClick={() => setForm({})} />{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo das contas">
       <div><span className="muted">Disponível em contas</span><strong>{signedBRL(panels.availableCents)}</strong><span className="muted">{nonCards === 1 ? '1 conta' : `${nonCards} contas`}, sem cartões</span></div>
@@ -85,7 +85,7 @@ function RealAccounts({ ledger, headerAction }: { ledger: LedgerState; headerAct
     </section>
     <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={4} columns={3} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
       {panels.groups.length === 0
-        ? <EmptyState title="Nenhuma conta cadastrada" description="Cadastre a primeira conta para iniciar o livro financeiro." action={<Button onClick={() => setForm({})}>Cadastrar conta</Button>} />
+        ? <EmptyState title="Suas contas aparecem aqui" description="Conecte um banco e as contas correntes e cartões chegam sozinhos na primeira sincronização." action={<a className="ui-button ui-button--primary ui-button--md" href="#connections">Conectar banco</a>} />
         : panels.groups.map(group => {
           const copy = kindCopy[group.kind];
           return <section key={group.kind} className="status-group" aria-labelledby={`accounts-group-${group.kind}`}>
@@ -104,7 +104,7 @@ export function AccountsPage({ ledger, headerAction }: PageProps) {
     <div className="template-heading"><div><p className="eyebrow">PATRIMÔNIO</p><h1>Contas</h1>
       <p className="muted">Visão separada dos saldos ilustrativos; transferências internas não são receita.</p></div><div className="template-heading__actions"><Badge>3 contas fictícias</Badge>{headerAction}</div></div>
     <div className="template-metrics"><MetricCard label="Saldo total ilustrativo" value={formatCentsBRL(accountsBalance(demoAccounts))}
-      supportingText="Agrega apenas os saldos demonstrativos"/></div>
+      supportingText="Soma dos saldos de exemplo"/></div>
     <Card className="template-table-card"><DataTable ariaLabel="Contas de demonstração"
       columns={columns} rows={demoAccounts} getRowKey={a=>a.id}/></Card>
   </div>;

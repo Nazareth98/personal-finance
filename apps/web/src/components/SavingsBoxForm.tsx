@@ -79,7 +79,7 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
   }
 
   return <Dialog open={open} onClose={onClose} title={box ? `Editar ${box.name}` : 'Nova caixinha'}
-    description="O saldo é reconstruído pelo valor inicial e pelos movimentos vinculados." footer={<>
+    description="O saldo começa no valor inicial e muda a cada vez que você guarda ou tira dinheiro." footer={<>
       {box && <Button variant="ghost" className="budget-form__delete" onClick={() => { setConfirmingDelete(true); setError(''); }}>
         <Icon icon={DeleteIcon} size="sm" />Excluir caixinha</Button>}
       <Button variant="ghost" onClick={onClose}>Cancelar</Button>

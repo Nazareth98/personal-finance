@@ -36,8 +36,8 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const { notify } = useToast();
   if (!ledger) return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">CATEGORIZAÇÃO</p><h1>Revisão de categorias</h1>
-      <p className="muted">Sugestões explicáveis aparecem aqui somente no ambiente autenticado.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
-    <Card><EmptyState title="Nenhuma classificação demonstrativa" description="Descrições e evidências bancárias reais nunca entram nos baselines visuais."/></Card>
+      <p className="muted">Depois de entrar, o que o app não conseguiu decidir sozinho aparece aqui.</p></div><div className="template-heading__actions"><Badge>Modo demonstrativo</Badge>{headerAction}</div></div>
+    <Card><EmptyState title="Nada para revisar no modo de exemplo" description="Com seus bancos conectados, as dúvidas sobre categorias aparecem aqui."/></Card>
   </div>;
 
   const view = params.get('view') === 'history' ? 'history' : 'pending';
@@ -105,11 +105,11 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
       <button key={label} type="button" className="review-reason" aria-pressed={reason === value} onClick={() => change('reason', value ?? '')}>{label} {count}</button>)}
   </div>;
   const emptyTitle = active || reason ? 'Nenhum lançamento corresponde aos filtros' : view === 'pending' ? 'Tudo revisado' : 'Nenhum item no histórico';
-  const emptyDescription = active || reason ? 'Altere ou limpe os filtros para ver outros lançamentos.' : view === 'pending' ? 'Novas pendências aparecerão após importações ou sugestões.' : 'Altere o filtro para consultar outras decisões.';
+  const emptyDescription = active || reason ? 'Altere ou limpe os filtros para ver outros lançamentos.' : view === 'pending' ? 'Quando chegarem lançamentos que o app não souber classificar, eles aparecem aqui.' : 'Altere o filtro para consultar outras decisões.';
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">REVISÃO</p><h1>Revisão de categorias</h1>
-      <p className="muted">Resolva somente o que exige decisão. Confirmações continuam disponíveis no histórico para correção.</p></div>
+      <p className="muted">Só o que o app não conseguiu decidir sozinho. Mudou de ideia? Corrija pelo histórico.</p></div>
       <div className="template-heading__actions">{headerAction}</div></div>
     <Tabs label="Visualização da revisão" className="review-view-tabs" panelClassName="review-panel" selectedId={view}
       onSelect={id => change('view', id === 'history' ? 'history' : '')}

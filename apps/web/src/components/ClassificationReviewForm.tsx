@@ -7,6 +7,7 @@ import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } fro
 import { statementChoices } from '../lib/statement-choices';
 import { MAX_BULK_CONFIRMATIONS, similarTransactions } from '../lib/similar-transactions';
 import { InstitutionLogo } from './InstitutionLogo';
+import { natureHints } from '../lib/help-content';
 
 type ReviewNature = SemanticConfirmation['nature'];
 
@@ -171,7 +172,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     description={transaction ? `Defina o efeito financeiro de “${transaction.description}”. O registro importado não será alterado.` : undefined}
     footer={<><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button type="submit" form={formId} loading={loading}>{bulk ? `Confirmar em ${bulkTargets.length + 1} lançamentos` : 'Confirmar revisão'}</Button></>}>
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
-      <Select label="Natureza financeira" value={nature} options={natureOptions} required
+      <Select label="Natureza financeira" value={nature} options={natureOptions} required hint={natureHints[nature] ?? 'O que aconteceu com esse dinheiro?'}
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
       {(nature === 'income' || nature === 'expense') && <Select label="Categoria confirmada" value={categoryId}
         placeholder="Selecione" options={categoryOptions} required onChange={event => setCategoryId(event.target.value)} />}

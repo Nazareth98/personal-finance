@@ -26,10 +26,9 @@ A pessoa faz um fork e configura nele um único environment (`producao`, com `SU
 
 - Precisa do secret de repositório `SYNC_TOKEN` no fork: token clássico da dona com escopos `repo` e `workflow`. O `GITHUB_TOKEN` não pode atualizar arquivos de workflow nem disparar outros workflows.
 - O fork não pode ter commits próprios; havendo, a sincronização falha com conflito e avisa por e-mail.
-- A pessoa precisa continuar colaboradora do repositório original: remover o acesso apaga o fork de um repositório privado.
 - Os workflows de validação (design system e regressão visual) não rodam em forks.
 
-O guia visual para a pessoa (sem jargão, com botões de copiar) é o artifact “Guia: seu app de finanças”.
+O guia para quem não é técnico está em [`docs/COMECE_AQUI.md`](../COMECE_AQUI.md); há também uma versão visual interativa (artifact “Guia: seu app de finanças”).
 
 O histórico de migrations do projeto principal foi alinhado aos nomes dos arquivos em 21/11/2026; um projeto novo recebe todas em ordem.
 

@@ -1,4 +1,4 @@
-# Instruções para agentes — Personal Finance
+# Instruções para agentes — Balanço
 
 ## Leitura obrigatória e econômica
 
@@ -32,7 +32,7 @@ Ao terminar uma mudança relevante:
 - Dinheiro no domínio usa `bigint` em centavos; nunca ponto flutuante.
 - Receita, despesa, transferência própria, pagamento de fatura, aporte e resgate são naturezas distintas.
 - Dados bancários, credenciais, CPF, salários, faturas e logs reais nunca entram em commits, fixtures, screenshots ou prompts.
-- Cadastro público permanece desativado; o produto é para um único usuário.
+- Cadastro público permanece desativado; cada instância tem um único usuário. O código serve a qualquer pessoa que faça fork: nada específico de uma pessoa ou banco entra em textos da interface.
 - API Key do MeuPluggy existe somente no backend.
 - Componentes genéricos ficam em `packages/ui`; funcionalidades financeiras ficam em `apps/web`.
 - Tokens pertencem a `packages/tokens/src/themes.json`; não use cores hex inline em componentes.

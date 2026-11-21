@@ -82,7 +82,7 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
     <Card><h2>Resultado acumulado</h2><p className="muted">Soma de receitas menos despesas desde o início da janela.</p>
       {chartState(<TrendLineChart data={cumulativeResultSeries(flow)} formatValue={formatCentsBRL} title="Resultado acumulado por mês" collapsibleDetails />, 'line')}</Card>
     <Card><h2>Metas do período</h2><p className="muted">Orçado versus realizado em {formatCompetence(period)}.</p>
-      {budgets.length === 0 ? <EmptyState title="Nenhuma meta definida" description="Defina tetos por categoria para acompanhá-los aqui." action={<a href="#budgets">Definir metas</a>} />
+      {budgets.length === 0 ? <EmptyState title="Nenhuma meta ainda" description="Defina quanto quer gastar por mês em cada categoria e acompanhe aqui." action={<a href="#budgets">Definir metas</a>} />
         : <ul className="overview-budgets" aria-label="Orçado versus realizado por categoria">{budgets.map(({ budget, category, progress }) => {
           const label = progress.status === 'exceeded' ? 'Acima do teto' : progress.status === 'approaching' ? 'Próximo do teto' : 'Dentro do teto';
           return <li key={budget.id}>
@@ -93,7 +93,7 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
           </li>;
         })}</ul>}</Card>
     <Card><h2>Compromissos de cartão</h2><p className="muted">Faturas por vencimento e parcelas futuras já assumidas.</p>
-      {(data?.creditCards.length ?? 0) === 0 ? <EmptyState title="Nenhum cartão configurado" description="Configure um cartão para acompanhar faturas e parcelas." />
+      {(data?.creditCards.length ?? 0) === 0 ? <EmptyState title="Nenhum cartão ainda" description="Quando o banco do cartão estiver conectado, as faturas e parcelas futuras aparecem aqui." action={<a href="#connections">Conectar banco</a>} />
         : chartState(<ColumnChart data={commitments} formatValue={formatCentsBRL} title="Compromissos de cartão por mês" valueLabel="Fatura" collapsibleDetails />, 'bars')}</Card>
   </div>;
 }
@@ -120,9 +120,9 @@ export function OverviewPage({ ledger, headerAction, intro }: PageProps) {
     const commitments = cardCommitmentSeries({ statements: data?.cardStatements ?? [], entries: data?.cardStatementEntries ?? [], transactions,
       installments: data?.cardInstallments ?? [], months: competenceWindow(addCompetenceMonths(period, 6), 9), period });
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Resumo derivado do livro financeiro, sem contar transferências como renda ou consumo.</p></div><div className="template-heading__actions"><PeriodNavigator period={period} onChange={next => setParams({ period: next })} />{headerAction}</div></div>
+      <div className="template-heading"><div><p className="eyebrow">PAINEL FINANCEIRO</p><h1>Visão geral</h1><p className="muted">Como está o mês. Dinheiro movido entre suas próprias contas não conta como receita nem gasto.</p></div><div className="template-heading__actions"><PeriodNavigator period={period} onChange={next => setParams({ period: next })} />{headerAction}</div></div>
       {intro}
-      <div className="template-metrics" aria-label="Indicadores do livro financeiro">
+      <div className="template-metrics" aria-label="Indicadores do mês">
         <MetricCard label="Patrimônio em contas" value={formatCentsBRL(balance)} supportingText={balanceDelta.text} supportingTone={balanceDelta.tone} />
         <MetricCard label="Receitas do período" value={formatCentsBRL(totals.incomeCents)} tone="income" supportingText={incomeDelta.text} supportingTone={incomeDelta.tone} />
         <MetricCard label="Despesas do período" value={formatCentsBRL(totals.expenseCents)} tone="expense" supportingText={expenseDelta.text} supportingTone={expenseDelta.tone} />
@@ -144,26 +144,26 @@ export function OverviewPage({ ledger, headerAction, intro }: PageProps) {
       <div className="template-heading__actions"><Badge>Novembro 2026 · Demo</Badge>{headerAction}</div>
     </div>
     <div className="template-metrics" aria-label="Indicadores financeiros fictícios">
-      <MetricCard label="Patrimônio em contas" value={formatCentsBRL(accountsBalance(demoAccounts))} supportingText="Saldos demonstrativos; não é fluxo mensal"/>
+      <MetricCard label="Patrimônio em contas" value={formatCentsBRL(accountsBalance(demoAccounts))} supportingText="Saldos de exemplo"/>
       <MetricCard label="Receitas do período" value={formatCentsBRL(report.incomeCents)} valueTone="positive" supportingText="Exclui transferências próprias" tone="income"/>
-      <MetricCard label="Despesas do período" value={formatCentsBRL(report.expenseCents)} valueTone="negative" supportingText="Consumo demonstrativo" tone="expense"/>
-      <MetricCard label="Faturas em aberto" value={formatCentsBRL(openInvoices)} supportingText="Obrigação separada do consumo"/>
+      <MetricCard label="Despesas do período" value={formatCentsBRL(report.expenseCents)} valueTone="negative" supportingText="Gastos de exemplo" tone="expense"/>
+      <MetricCard label="Faturas em aberto" value={formatCentsBRL(openInvoices)} supportingText="O que falta pagar nos cartões"/>
     </div>
     <div className="template-grid">
       <Card><h2>Acompanhamento</h2><p className="muted">Alertas de exemplo para orientar as próximas decisões.</p>
         <div className="summary-row"><span>Orçamentos acima do limite</span><strong>{budgetWarnings}</strong></div>
         <div className="summary-row"><span>Contas acompanhadas</span><strong>{demoAccounts.length}</strong></div>
-        <div className="summary-row"><span>Faturas demonstrativas</span><strong>{demoInvoices.length}</strong></div>
+        <div className="summary-row"><span>Faturas de exemplo</span><strong>{demoInvoices.length}</strong></div>
       </Card>
       <Card><h2>Resumo do mês</h2><p className="muted">Receitas menos despesas, sem movimentos patrimoniais.</p>
         <strong className="template-highlight">{formatCentsBRL(report.netCents)}</strong>
         <p className="muted">Saldo operacional do período fictício, não saldo bancário.</p>
       </Card>
     </div>
-    <Card><div className="section-heading"><div><h2>Fluxo de caixa</h2><p className="muted">Comparativo mensal demonstrativo de receitas e despesas.</p></div><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus(s=>s==='loading'?'success':'loading')}>{chartStatus==='loading'?'Exibir gráfico':'Simular loading do gráfico'}</button><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus('error')}>Simular erro do gráfico</button></div>
+    <Card><div className="section-heading"><div><h2>Fluxo de caixa</h2><p className="muted">Receitas e despesas por mês, com dados de exemplo.</p></div><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus(s=>s==='loading'?'success':'loading')}>{chartStatus==='loading'?'Exibir gráfico':'Simular loading do gráfico'}</button><button className="chart-demo-toggle" type="button" onClick={()=>setChartStatus('error')}>Simular erro do gráfico</button></div>
       <DataState kind="chart" chartKind="bars" label="Carregando fluxo de caixa" status={chartStatus}
         errorTitle="Erro ao carregar o fluxo de caixa"
-        errorDescription="Não foi possível exibir os dados demonstrativos."
+        errorDescription="Não foi possível exibir os dados de exemplo."
         onRetry={()=>setChartStatus('success')}>
         <CashFlowChart data={demoCashFlow} formatValue={formatCentsBRL}/>
       </DataState>

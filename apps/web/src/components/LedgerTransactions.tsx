@@ -54,9 +54,10 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
       <div><span className="muted">Despesas</span><strong className="transaction-amount--expense">− {formatCentsBRL(totals.expenseCents)}</strong><span className="muted">Inclui ajustes de despesa</span></div>
       <div><span className="muted">Resultado</span><strong>{net}</strong><span className="muted">Receitas menos despesas</span></div>
     </section>
-    <Card className="transactions-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={5} columns={6} label="Carregando livro financeiro" errorTitle="Erro ao carregar lançamentos" errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
-      {rows.length ? <><DataTable ariaLabel="Livro financeiro" columns={columns} rows={paginateRows(rows, currentPage, pageSize)} getRowKey={row => row.id} sort={sort} onSortChange={setSort} /><Pagination page={currentPage} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} pageSizeOptions={pageSizeOptions} onPageSizeChange={size => { setPageSize(size); setPage(1); }} /></>
-        : <EmptyState title="Nenhuma movimentação encontrada" description="Cadastre uma movimentação ou altere os filtros." action={active ? <Button variant="secondary" onClick={clear}>Limpar filtros</Button> : undefined} />}
+    <Card className="transactions-table-card"><DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={5} columns={6} label="Carregando lançamentos" errorTitle="Erro ao carregar lançamentos" errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
+      {rows.length ? <><DataTable ariaLabel="Lançamentos" columns={columns} rows={paginateRows(rows, currentPage, pageSize)} getRowKey={row => row.id} sort={sort} onSortChange={setSort} /><Pagination page={currentPage} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} pageSizeOptions={pageSizeOptions} onPageSizeChange={size => { setPageSize(size); setPage(1); }} /></>
+        : <EmptyState title={active ? 'Nada com esses filtros' : 'Nenhum lançamento neste período'} description={active ? 'Limpe os filtros para ver todos os lançamentos.' : 'Os lançamentos chegam pela conexão com o banco. Escolha outro mês ou confira Conexões.'}
+          action={active ? <Button variant="secondary" onClick={clear}>Limpar filtros</Button> : <a href="#connections">Abrir Conexões</a>} />}
     </DataState></Card>
   </section>;
 }

@@ -1,7 +1,7 @@
 {
-  "name": "Personal Finance",
-  "short_name": "Finance",
-  "description": "Gerenciador financeiro pessoal com contas, cartões, metas e previsão.",
+  "name": "Balanço",
+  "short_name": "Balanço",
+  "description": "Suas contas, cartões, metas e caixinhas num só lugar, com os dados do seu banco.",
   "lang": "pt-BR",
   "start_url": "/#overview",
   "scope": "/",

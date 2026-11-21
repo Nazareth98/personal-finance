@@ -106,3 +106,17 @@ export function termSlug(term: string): string {
 export function richParts(text: string): { text: string; strong: boolean }[] {
   return text.split('**').map((part, index) => ({ text: part, strong: index % 2 === 1 })).filter(part => part.text);
 }
+
+/** D-067: o que cada escolha de natureza quer dizer, mostrado abaixo do campo enquanto a pessoa decide. */
+export const natureHints: Record<string, string> = {
+  income: 'Dinheiro que entrou e é seu: salário, venda, reembolso.',
+  expense: 'Dinheiro gasto com algo: compra, conta, serviço.',
+  own_transfer: 'Você só moveu dinheiro entre suas próprias contas. Não é receita nem gasto.',
+  card_payment: 'Você pagou a fatura do cartão. As compras já contaram na fatura, então isto não é gasto de novo.',
+  savings_contribution: 'Você guardou dinheiro numa caixinha. Não é gasto: o dinheiro continua seu.',
+  savings_withdrawal: 'Você tirou dinheiro de uma caixinha. Não é receita: o dinheiro já era seu.',
+  adjustment: 'Corrige uma diferença sem mudar o que veio do banco.',
+  transfer: 'Você só moveu dinheiro entre suas próprias contas. Não é receita nem gasto.',
+  adjustment_expense: 'Corrige um gasto que ficou registrado a mais ou a menos.',
+  adjustment_income: 'Corrige uma receita que ficou registrada a mais ou a menos.'
+};

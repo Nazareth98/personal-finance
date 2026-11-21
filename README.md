@@ -1,10 +1,20 @@
-# Personal Finance — Corporate UI
+# Balanço
 
-Base inicial de um gerenciador de finanças pessoais com **React + TypeScript**, biblioteca visual **Corporate UI** e design tokens Light/Dark.
+Suas contas, cartões, metas e caixinhas num só lugar, com os dados que o seu banco envia pelo [MeuPluggy](https://meu.pluggy.ai). Feito para uso pessoal: cada pessoa tem a própria instância, com os próprios dados, nas próprias contas gratuitas.
 
-> Este é um novo scaffold após o reset da branch `main`. Nenhum dado financeiro pessoal é incluído. A implementação anterior continua disponível no histórico Git.
+- **Visão geral** do mês, sem contar duas vezes o dinheiro que só mudou de conta.
+- **Cartões e faturas** no mês do vencimento, com parcelas futuras.
+- **Metas** em reais por categoria e **caixinhas** com objetivo e prazo.
+- **Revisão** só do que o app não conseguiu decidir sozinho.
+- Ajuda em cada tela, glossário e “Primeiros passos” dentro do app.
 
-## Iniciar
+## Quero o meu
+
+Não precisa programar. Siga o guia passo a passo: [**Comece aqui**](docs/COMECE_AQUI.md). Leva cerca de uma hora e usa só planos gratuitos (GitHub, Supabase, Vercel e MeuPluggy). Sua cópia se atualiza sozinha todo dia.
+
+Para quem administra: o roteiro técnico está em [`docs/architecture/NEW_INSTANCE.md`](docs/architecture/NEW_INSTANCE.md).
+
+## Desenvolvimento
 
 Requisitos: Node.js 22.x (22.12+) e pnpm 10+. Outras versões majors não são suportadas, mesmo que funcionem.
 
@@ -26,13 +36,13 @@ O backend é versionado em `supabase/`. O cadastro público permanece desativado
 
 ## Estrutura
 
-- `apps/web`: demonstração React de dashboard financeiro (dados fictícios).
+- `apps/web`: o app (sem Supabase configurado, abre em modo de exemplo com dados fictícios).
 - `packages/tokens`: fonte de verdade dos tokens semânticos e geração de CSS.
 - `packages/ui`: componentes reutilizáveis React.
 - `docs/brain`: contexto enxuto, regras de domínio, arquitetura e plano do produto.
 - `docs/design-system`: contratos de foundations, componentes e vínculo Figma.
 - `docs/architecture`: decisões e próximos incrementos.
-- `AGENTS.md`: instruções para Codex.
+- `AGENTS.md`: instruções para agentes de código.
 
 ## Contexto do produto
 

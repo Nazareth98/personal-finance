@@ -23,7 +23,7 @@ const rows=useMemo(()=>sortRows(filtered,sort,columns),[filtered,sort]);
 const currentPage=Math.min(page,Math.max(1,Math.ceil(rows.length/pageSize)));
 const totals=useMemo(()=>totalsFromTransactions(filtered),[filtered]);
 return <section className="transactions-demo" aria-labelledby="transactions-title">
-<div className="section-heading"><div><h2 id="transactions-title">Movimentações demonstrativas</h2>
+<div className="section-heading"><div><h2 id="transactions-title">Lançamentos de exemplo</h2>
 <p className="muted">Pesquisa, filtros e paginação locais; nenhum dado real.</p></div>
 <Button variant="secondary" onClick={()=>setStatus(s=>s==='loading'?'success':'loading')}>{status==='loading'?'Exibir dados':'Simular loading'}</Button>
 <Button variant="secondary" onClick={()=>setStatus('error')}>Simular erro na tabela</Button></div>
@@ -34,12 +34,12 @@ onChange={e=>{setKind(e.target.value as 'all'|TransactionType);setPage(1)}}/>
 <Select label="Categoria" value={category} options={categories} onChange={e=>{setCategory(e.target.value);setPage(1)}}/>
 </div><div className="transactions-metrics" aria-label="Totais dos registros filtrados">
 <MetricCard label="Receitas filtradas" value={formatCentsBRL(totals.income)} supportingText="Exclui transferências próprias" tone="income"/>
-<MetricCard label="Despesas filtradas" value={formatCentsBRL(totals.expense)} supportingText="Consumo demonstrativo" tone="expense"/>
+<MetricCard label="Despesas filtradas" value={formatCentsBRL(totals.expense)} supportingText="Gastos de exemplo" tone="expense"/>
 <MetricCard label="Resultado" value={formatCentsBRL(totals.income-totals.expense)} supportingText="Entradas menos despesas"/>
 </div>
 <Card className="transactions-table-card"><DataState status={status} kind="table" rows={5} columns={5}
-  label="Carregando movimentações demonstrativas" errorTitle="Erro ao carregar movimentações"
-  errorDescription="Não foi possível exibir as transações demonstrativas." onRetry={()=>setStatus('success')}>
+  label="Carregando lançamentos de exemplo" errorTitle="Erro ao carregar movimentações"
+  errorDescription="Não foi possível exibir os lançamentos de exemplo." onRetry={()=>setStatus('success')}>
 {rows.length?<DataTable ariaLabel="Tabela de transações fictícias" columns={columns} rows={paginateRows(rows,currentPage,pageSize)}
 getRowKey={row=>row.id} sort={sort} onSortChange={setSort}/>:
 <EmptyState title="Nenhuma movimentação encontrada" description="Altere a busca ou redefina os filtros."
