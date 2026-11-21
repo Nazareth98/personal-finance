@@ -27,11 +27,11 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 .navigation__label { overflow: hidden; text-overflow: ellipsis; }
 .sidebar-footer { margin-top: auto; padding-top: var(--spacing-4); border-top: 1px solid var(--color-border-default); display: grid; gap: var(--spacing-3); }
 .sidebar-footer { grid-template-columns:1fr auto;align-items:center; }
-.theme-toggle.ui-button,.privacy-toggle.ui-button { width:32px;min-width:32px;min-height:32px;padding:0;color:var(--color-text-secondary); }
+.theme-toggle.ui-button,.privacy-toggle.ui-button,.help-toggle--bar.ui-button { width:32px;min-width:32px;min-height:32px;padding:0;color:var(--color-text-secondary); }
 .sidebar-account{display:flex;align-items:center;gap:var(--spacing-1);min-width:0}
 .sidebar-account>.account-menu{flex:1;min-width:0}
 .privacy-toggle.ui-button[aria-pressed="true"]{color:var(--color-text-accent)}
-.theme-toggle.ui-button:hover:not(:disabled),.privacy-toggle.ui-button:hover:not(:disabled) { color:var(--color-text-accent); }
+.theme-toggle.ui-button:hover:not(:disabled),.privacy-toggle.ui-button:hover:not(:disabled),.help-toggle--bar.ui-button:hover:not(:disabled) { color:var(--color-text-accent); }
 .main { max-width: 1460px; width: 100%; margin: 0 auto; padding: 42px; }
 .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .eyebrow { color: var(--color-action-primary); font-size: 11px; font-weight: 800; letter-spacing: .12em; margin-bottom: 10px; }
@@ -583,10 +583,10 @@ h2 { font-size: 18px; margin-bottom: 6px; }
   .page-action--bar.ui-button{border-radius:999px;padding-inline:var(--spacing-3);gap:var(--spacing-1)}
   .template-heading{gap:0}
   .template-heading>div:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .template-heading__actions>.page-action{display:none}
+  .template-heading__actions>.page-action,.template-heading__actions>.help-toggle{display:none}
   .template-heading__actions:empty{display:none}
   /* Sem ação visível, o bloco sai do fluxo (o h1 continua acessível) e não deixa espaço no topo. */
-  .template-heading:not(:has(.template-heading__actions > :not(.page-action))){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .template-heading:not(:has(.template-heading__actions > :not(.page-action):not(.help-toggle))){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .main{padding-top:var(--spacing-4)}
 }
 .template-page>.ledger-transactions{margin-top:0}
@@ -672,6 +672,8 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 
 /* D-067: ajuda por tela, primeiros passos e glossário */
 .help-toggle{min-width:32px;padding-inline:var(--spacing-2)}
+.help-toggle--bar.ui-button{display:none}
+@media (max-width: 1000px){.help-toggle--bar.ui-button{display:inline-flex}}
 .help-panel__body{display:grid;gap:var(--spacing-6)}
 .help-panel__body section{display:grid;gap:var(--spacing-2)}
 .help-panel__body h3{margin:0;font-size:var(--font-size-sm);font-weight:700}

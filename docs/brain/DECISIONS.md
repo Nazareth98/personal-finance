@@ -225,3 +225,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - O repositório é público e qualquer pessoa pode fazer fork e montar a própria instância pelo guia [`COMECE_AQUI.md`](../COMECE_AQUI.md); o README virou porta de entrada.
 - Textos da interface não citam bancos nem pessoas específicas e evitam jargão (“livro financeiro”, “competência”, “demonstrativo”). Contas e cartões nascem da sincronização: os estados vazios de Contas, Cartões e Visão geral levam a Conexões.
 - Campos de natureza (Revisão e Nova movimentação) explicam a opção escolhida logo abaixo (`natureHints`).
+
+## D-069 — Migrations aplicadas pelo MCP só em ASCII (21/11/2026)
+
+- O rótulo “Correção confirmada” aparecia corrompido (CorreÃ§Ã£o): uma função aplicada pelo MCP do Supabase teve os acentos convertidos errado. A migration `20261121160302_fix_review_label_encoding` corrige a função e 756 rótulos gravados; em instância nova não faz nada.
+- Regra: SQL enviado pelo MCP usa só ASCII nos textos que vão para o banco (`chr()`/`U&''`); comentários podem ter acento. O workflow de publicação (D-065) não tem esse problema.

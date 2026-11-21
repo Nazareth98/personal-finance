@@ -175,6 +175,9 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
       <div className="sidebar-footer">
         <div className="app-bar__action" ref={setActionSlot} />
         <div className="sidebar-account">
+        {/* Até 1000 px a ajuda sobe para o cabeçalho do app, ao lado de ocultar valores (D-067). */}
+        {page !== 'glossary' && <Button className="help-toggle help-toggle--bar" size="sm" variant="ghost" aria-label="Ajuda desta tela" title="Ajuda desta tela"
+          aria-haspopup="dialog" onClick={() => setHelpOpen(true)}><Icon icon={HelpIcon} size="sm" /></Button>}
         {/* Ocultar valores (D-049): olho aberto = valores à mostra; o estado vale para o app todo e fica salvo no aparelho. */}
         <Button className="privacy-toggle" size="sm" variant="ghost" aria-pressed={valuesHidden}
           aria-label="Ocultar valores" title={valuesHidden ? 'Mostrar valores' : 'Ocultar valores'}
