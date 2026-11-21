@@ -205,3 +205,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - A segunda usuária terá Supabase, Vercel e MeuPluggy próprios; o código é o mesmo. O workflow `supabase-deploy.yml` aplica migrations e publica todas as Edge Functions em cada GitHub Environment listado em `SUPABASE_ENVIRONMENTS` (ref, Access Token e senha do banco por environment). Sem a variável, não faz nada.
 - Os nomes dos arquivos de migration foram alinhados às versões registradas no projeto principal (12 renomeados), para `db push` não tentar reaplicar o que já existe. Novas migrations aplicadas pelo MCP precisam ter o arquivo renomeado para a versão gravada, ou ser aplicadas pelo workflow.
 - Roteiro em [`NEW_INSTANCE.md`](../architecture/NEW_INSTANCE.md).
+
+## D-066 — Fork da segunda instância com sincronização diária (21/11/2026)
+
+- A segunda usuária monta a própria instância a partir de um fork, com Supabase e Vercel nas contas dela; os dados ficam só lá.
+- `fork-sync.yml` roda apenas em forks e traz a `main` original todo dia (API `merge-upstream`, com `SYNC_TOKEN` clássico de escopos `repo` e `workflow`); o push publica backend e app da cópia. Validações pesadas pulam forks.
+- Descartado: tudo nas contas do dono (sem defasagem, mas o dono teria acesso administrativo aos dados dela).

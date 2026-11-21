@@ -20,7 +20,16 @@ O workflow [`supabase-deploy.yml`](../../.github/workflows/supabase-deploy.yml) 
 2. Em Settings → Secrets and variables → Actions → Variables, defina `SUPABASE_ENVIRONMENTS` com todos os environments, em JSON: `["principal","esposa"]`.
 3. Em Actions → **Supabase — publicar backend** → Run workflow. Daí em diante, todo push na `main` que mude `supabase/` ou `packages/domain` publica nas instâncias.
 
-Se a instância for um fork em vez do mesmo repositório, faça o mesmo no fork com um único environment.
+### Instância em fork (caso da segunda usuária)
+
+A pessoa faz um fork e configura nele um único environment (`producao`, com `SUPABASE_ENVIRONMENTS = ["producao"]`). O workflow [`fork-sync.yml`](../../.github/workflows/fork-sync.yml) roda só em forks, todo dia às 06:17 de Brasília: chama `merge-upstream` na `main`, e o push resultante dispara a publicação do backend e o deploy da Vercel da cópia (D-066).
+
+- Precisa do secret de repositório `SYNC_TOKEN` no fork: token clássico da dona com escopos `repo` e `workflow`. O `GITHUB_TOKEN` não pode atualizar arquivos de workflow nem disparar outros workflows.
+- O fork não pode ter commits próprios; havendo, a sincronização falha com conflito e avisa por e-mail.
+- A pessoa precisa continuar colaboradora do repositório original: remover o acesso apaga o fork de um repositório privado.
+- Os workflows de validação (design system e regressão visual) não rodam em forks.
+
+O guia visual para a pessoa (sem jargão, com botões de copiar) é o artifact “Guia: seu app de finanças”.
 
 O histórico de migrations do projeto principal foi alinhado aos nomes dos arquivos em 21/11/2026; um projeto novo recebe todas em ordem.
 
