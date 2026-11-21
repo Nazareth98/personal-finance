@@ -6,6 +6,7 @@ import type { ConnectionsState } from '../integrations/useConnections';
 import { formatDateTime } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
 import { PageAction } from '../components/PageAction';
+import { PluggyKeysCard } from '../components/PluggyKeysCard';
 
 const statusLabels: Record<PluggyConnection['status'], string> = {
   pending: 'Pendente', updating: 'Atualizando', ready: 'Atualizada', error: 'Com erro', login_required: 'Reconexão necessária'
@@ -36,10 +37,14 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
   </div>;
 
   const rows = connections.data?.connections ?? [];
+  const credentials = connections.data?.credentials;
+  const keysMissing = connections.status === 'success' && !credentials?.configured && rows.length === 0;
   async function connect() {
     setConnecting(true);
     try { await connections?.connect(); }
-    catch { notify({ message: 'Não foi possível concluir a conexão. Tente novamente.', tone: 'error' }); }
+    catch {
+      notify({ message: keysMissing ? 'Conecte ao Pluggy primeiro: informe as chaves no card acima.' : 'Não foi possível concluir a conexão. Tente novamente.', tone: 'error' });
+    }
     finally { setConnecting(false); }
   }
   async function sync(id: string) {
@@ -58,6 +63,11 @@ export function ConnectionsPage({ connections, headerAction }: PageProps) {
       <p className="muted">O MeuPluggy atualiza a fonte; “Sincronizar agora” busca o dado mais recente já disponível.</p></div>
       <div className="template-heading__actions"><PageAction label="Conectar instituição" shortLabel="Conectar" loading={connecting} onClick={() => void connect()} />{headerAction}</div></div>
     {connections.error && connections.status !== 'error' && <p className="sample-warning" role="alert">{connections.error}</p>}
+    {connections.status === 'success' && <PluggyKeysCard credentials={credentials} hasConnections={rows.length > 0}
+      onSave={async (clientId, clientSecret) => {
+        await connections.saveCredentials(clientId, clientSecret);
+        notify({ message: 'Chaves testadas e salvas. Agora conecte seus bancos.', tone: 'success' });
+      }} />}
     <section className="summary-strip" aria-label="Resumo das conexões">
       <div><span className="muted">Instituições</span><strong>{panels.total}</strong><span className="muted">Pelo MeuPluggy</span></div>
       <div><span className="muted">Atualizadas</span><strong>{panels.readyCount}</strong><span className="muted">Prontas para importar</span></div>

@@ -37,6 +37,7 @@ O manifesto, instalação, fallback offline e fronteiras de cache estão em [`..
 ## MeuPluggy
 
 - API Key somente em secret do backend; Connect Token é o único token permitido no cliente.
+- Client ID/Secret informados no app ficam no Vault (`private.pluggy_credentials` + `vault.secrets`), testados antes de gravar; `_shared/credentials.ts` lê o Vault e cai para as variáveis de ambiente (D-064).
 - Persistir `itemId`; contas pessoais MeuPluggy podem não permitir listar todos os Items.
 - Item proxy acompanha a atualização do MeuPluggy e não deve depender de `PATCH` manual.
 - Webhook registra `eventId`, responde rapidamente e agenda processamento idempotente.

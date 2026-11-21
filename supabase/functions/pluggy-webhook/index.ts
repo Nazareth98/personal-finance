@@ -2,6 +2,7 @@ import { PluggyClient } from '../_shared/pluggy-client.ts';
 import { transactionWebhook, webhookItemId } from '../_shared/pluggy-webhook.ts';
 import { json, safeError } from '../_shared/http.ts';
 import { serviceClient } from '../_shared/supabase.ts';
+import { pluggyCredentials } from '../_shared/credentials.ts';
 import { synchronizeConnection, synchronizeTransactionUpdates } from '../_shared/sync.ts';
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
@@ -60,9 +61,7 @@ async function processEvent(
       return;
     }
     await database.rpc('internal_update_webhook_event', { p_provider_event_id: eventId, p_status: 'processing', p_last_error: null });
-    const clientId = Deno.env.get('PLUGGY_CLIENT_ID');
-    const clientSecret = Deno.env.get('PLUGGY_CLIENT_SECRET');
-    if (!clientId || !clientSecret) throw new Error('pluggy_not_configured');
+    const { clientId, clientSecret } = await pluggyCredentials(database, connection.data.owner_id);
     const transactionEvent = transactionWebhook(payload);
     if (eventType === 'transactions/deleted') {
       if (!transactionEvent) throw new Error('pluggy_webhook_invalid_transactions');

@@ -83,3 +83,24 @@ console.log('✓ MeuPluggy: isolamento, staging, idempotência e fronteira de se
   check.doesNotMatch(bank, /item_id|external_account_id|api_key|credential/i);
   console.log('✓ Instituição por conta exposta só ao dono, sem identificadores do provedor.');
 }
+
+// D-064: chaves do Pluggy no Vault — segredo só no backend.
+{
+  const { readFile: read } = await import('node:fs/promises');
+  const { default: check } = await import('node:assert/strict');
+  const sql = await read('supabase/migrations/20261121120000_pluggy_credentials_vault.sql', 'utf8');
+  const fn = await read('supabase/functions/pluggy-credentials/index.ts', 'utf8');
+  check.match(sql, /create table private\.pluggy_credentials/i);
+  check.match(sql, /vault\.create_secret\(/i);
+  check.match(sql, /revoke all on table private\.pluggy_credentials from public, anon, authenticated/i);
+  check.match(sql, /revoke all on function public\.internal_get_pluggy_credentials\(uuid\) from public, anon, authenticated/i);
+  check.match(sql, /grant execute on function public\.internal_get_pluggy_credentials\(uuid\) to service_role/i);
+  check.doesNotMatch(sql, /grant execute on function public\.internal_(get|set)_pluggy_credentials[^;]*to (anon|authenticated)/i);
+  // O status visível ao app expõe só os 4 últimos caracteres do Client ID.
+  check.match(sql, /right\(c\.client_id, 4\)/i);
+  check.doesNotMatch(sql.split('get_pluggy_credentials_status')[1] ?? '', /decrypted_secret/i);
+  // A função testa antes de gravar e nunca devolve o segredo.
+  check.ok(fn.indexOf('await verifyPluggy(') < fn.indexOf('internal_set_pluggy_credentials'));
+  check.doesNotMatch(fn, /json\(\{[^}]*clientSecret/);
+  console.log('✓ Chaves do Pluggy: segredo no Vault, testado antes de gravar e nunca devolvido ao navegador.');
+}

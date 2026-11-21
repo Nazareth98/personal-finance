@@ -197,6 +197,10 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
         ]) });
         return;
       }
+      if (url.pathname.endsWith('/get_pluggy_credentials_status')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ configured: true, client_id_suffix: 'ab12', tested_at: '2026-11-18T12:00:00Z' }]) });
+        return;
+      }
       if (url.pathname.endsWith('/get_account_institutions')) {
         await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
         return;

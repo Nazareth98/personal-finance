@@ -2,6 +2,7 @@ import { PluggyClient } from '../_shared/pluggy-client.ts';
 import { corsHeaders, json, safeError } from '../_shared/http.ts';
 import { requireOwner, serviceClient } from '../_shared/supabase.ts';
 import { synchronizeConnection, type SyncTrigger } from '../_shared/sync.ts';
+import { pluggyCredentials } from '../_shared/credentials.ts';
 
 type RequestBody = { connectionId?: string; itemId?: string };
 
@@ -12,11 +13,9 @@ Deno.serve(async request => {
     const { ownerId } = await requireOwner(request);
     const body = await request.json() as RequestBody;
     if (!body.connectionId && !body.itemId) return json({ error: 'connection_or_item_required' }, 400);
-    const clientId = Deno.env.get('PLUGGY_CLIENT_ID');
-    const clientSecret = Deno.env.get('PLUGGY_CLIENT_SECRET');
-    if (!clientId || !clientSecret) throw new Error('pluggy_not_configured');
-    const pluggy = new PluggyClient(clientId, clientSecret);
     const database = serviceClient();
+    const { clientId, clientSecret } = await pluggyCredentials(database, ownerId);
+    const pluggy = new PluggyClient(clientId, clientSecret);
     let connectionId = body.connectionId;
     let trigger: SyncTrigger = 'manual';
 

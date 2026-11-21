@@ -12,6 +12,8 @@ export type ConnectionsState = {
   /** D-061: sincroniza em segundo plano as conexões vencidas; diz se algo rodou e se alguma falhou. */
   syncStale: () => Promise<'none' | 'synced' | 'failed'>;
   autoSyncing: boolean;
+  /** D-064: testa e guarda as chaves do Pluggy; atualiza o status sem recarregar a tela. */
+  saveCredentials: (clientId: string, clientSecret: string) => Promise<void>;
 };
 
 type PluggySuccess = { item?: { id?: string }; itemId?: string; id?: string };
@@ -115,5 +117,11 @@ export function useConnections(repository?: ConnectionsRepository): ConnectionsS
     return failed ? 'failed' : 'synced';
   }
 
-  return { data, status, error, reload, connect, sync, syncStale, autoSyncing };
+  async function saveCredentials(clientId: string, clientSecret: string): Promise<void> {
+    if (!repository) throw new Error('unavailable');
+    const credentials = await repository.saveCredentials(clientId, clientSecret);
+    setData(current => current ? { ...current, credentials } : current);
+  }
+
+  return { data, status, error, reload, connect, sync, syncStale, autoSyncing, saveCredentials };
 }

@@ -193,3 +193,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - O Itaú lança na conta corrente o “Pix enviado com cartão” (saída) e o “Crédito liberado para Pix <cartão>” (entrada) no mesmo dia; quem paga é o cartão, que registra a cobrança com tarifa. Antes, o gasto contava duas vezes e o crédito virava receita extraordinária (2 casos em 19/11: R$ 62,49 a mais de cada lado).
 - `internal_match_card_funded_pix` (service_role, gatilho por instrução após importar e uma vez na migration): na mesma conta não cartão, saída “pix enviado com cartao…” e entrada “credito liberado para pix…” de mesmo valor, até 1 dia → os dois `adjustment` neutros, motivo `auto_card_funded_pix`. A cobrança no cartão continua sendo a despesa. Nunca sobrescreve decisão existente.
+
+## D-064 — Chaves do Pluggy informadas no app (21/11/2026)
+
+- Cada instância (uma por pessoa; a segunda será um clone do projeto) precisa das próprias chaves do Pluggy. Pedir que uma pessoa leiga configure secrets no Supabase não é viável; o card “Conectar ao Pluggy” em Conexões recebe Client ID e Client Secret.
+- A Edge Function `pluggy-credentials` testa as chaves (`POST /auth`) e só então grava: Client ID em `private.pluggy_credentials`, Client Secret no Supabase Vault. `internal_get/set_pluggy_credentials` são só `service_role`; o app vê apenas `get_pluggy_credentials_status()` (configurado, 4 últimos caracteres do Client ID, data do teste). O segredo nunca volta ao navegador.
+- As funções do Pluggy leem primeiro o Vault e, sem chaves lá, as variáveis `PLUGGY_CLIENT_ID/SECRET` — instâncias antigas seguem funcionando. Com bancos conectados e sem chaves no app, o card mostra “Chaves do Pluggy no servidor”.
