@@ -37,7 +37,7 @@ assert.match(sync, /ignoreDuplicates: true/g);
 assert.match(sync, /accountType === 'credit_card'/);
 assert.match(sync, /last_source_updated_at: item\.lastUpdatedAt/);
 assert.match(sync, /transactionCursor: page\.next/);
-assert.match(sync, /mapped\.type === 'credit_card' \? undefined : incrementalFrom/);
+assert.match(sync, /mapped\.type === 'credit_card' \|\| !connection\.times_backfilled_at \? undefined : incrementalFrom/);
 assert.match(sync, /provider_id: transaction\.providerId\?\.slice\(0, 200\) \?\? null/);
 assert.match(sync, /getTransactionsByIds/);
 assert.match(sync, /synchronizeTransactionUpdates/);

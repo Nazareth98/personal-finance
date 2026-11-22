@@ -3,13 +3,15 @@ import { useState } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
 import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, Pagination, ReviewIcon, Select, Tabs, sortRows, useToast, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { TransactionClassification } from '../ledger/contracts';
-import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
+import { formatCentsBRL } from '../lib/demo-transactions';
 import { reviewReason, reviewResolution, reviewableTransactions, suggestedCategoryId, type ReviewReason } from '../lib/review-queue';
 import { matchesTransactionFilters, readTransactionFilters, type TransactionFilters } from '../lib/transaction-filters';
 import { useHashParams } from '../hooks/useHashParams';
 import { ClassificationReviewForm } from '../components/ClassificationReviewForm';
 import { TransactionFilterFields, natureLabels } from '../components/TransactionFilterFields';
 import type { PageProps } from './PageProps';
+import { eventSortKey } from '../lib/transaction-time';
+import { DateTime } from '../components/DateTime';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
@@ -63,7 +65,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     ? `${confidenceLabel(classification.confidenceBasisPoints)} · ${classification.evidence.map(item => item.label).join(' · ')}` : '';
 
   const columns: DataTableColumn<TransactionContract>[] = [
-    { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => row.eventDate, cell: row => formatLocalDate(row.eventDate) },
+    { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => eventSortKey(row), cell: row => <DateTime row={row} /> },
     { mobile: 'primary', key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', sortable: true, sortValue: row => row.description, cell: row => {
       const detail = evidence(classifications.get(row.id));
       return <><strong>{row.description}</strong><br/><span className="muted">{accounts.get(row.accountId) ?? 'Conta'}{detail ? ` · ${detail}` : ''}</span></>;
@@ -79,7 +81,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const reasonCounts = { links: matching.filter(row => view === 'pending' && reasonOf(row) === 'links').length, categories: 0 };
   reasonCounts.categories = view === 'pending' ? matching.length - reasonCounts.links : 0;
   const filtered = view === 'pending'
-    ? matching.filter(row => !reason || reasonOf(row) === reason).sort((a, b) => b.eventDate.localeCompare(a.eventDate) || a.id.localeCompare(b.id))
+    ? matching.filter(row => !reason || reasonOf(row) === reason).sort((a, b) => eventSortKey(b).localeCompare(eventSortKey(a)) || a.id.localeCompare(b.id))
     : sortRows(matching, sort, columns);
   const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / pageSize)));
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -138,7 +140,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
                   const classification = classifications.get(row.id);
                   const suggestion = group.reason === 'categories' ? suggestedCategoryId(row, classification?.categoryId) : undefined;
                   return <li key={row.id} className={`review-item review-item--${group.reason}`}>
-                    <span className="muted review-item__date">{formatLocalDate(row.eventDate)}</span>
+                    <span className="muted review-item__date"><DateTime row={row} /></span>
                     <span className="review-item__main"><strong>{row.description}</strong>
                       <span className="muted">{accounts.get(row.accountId) ?? 'Conta'} · <span className="review-item__nature">{natureLabels[row.nature]}</span></span></span>
                     {group.reason === 'categories' && <span className="review-item__suggestion">{suggestion

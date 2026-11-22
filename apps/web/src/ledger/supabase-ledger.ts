@@ -6,7 +6,7 @@ type AccountRow = { id: string; name: string; account_type: FinancialAccount['ty
 type TransactionRow = {
   id: string; account_id: string; category_id: string | null; description: string; amount_cents: string | number;
   nature: TransactionContract['nature']; reporting: TransactionContract['reporting']; source: TransactionContract['source'];
-  event_date: string; competence: string; classification_status: TransactionContract['classificationStatus']; external_key: string | null;
+  event_date: string; competence: string; classification_status: TransactionContract['classificationStatus']; external_key: string | null; occurred_at?: string | null;
   source_deleted_at: string | null;
 };
 type LinkRow = { id: string; source_transaction_id: string; target_transaction_id: string; link_type: TransactionLink['type'] };
@@ -70,7 +70,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     const rows: TransactionRow[] = [];
     for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
       const result = await this.client.from('transactions')
-        .select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key,source_deleted_at')
+        .select('id,account_id,category_id,description,amount_cents,nature,reporting,source,event_date,competence,classification_status,external_key,source_deleted_at,occurred_at')
         .order('event_date', { ascending: false }).order('id')
         .range(from, from + SUPABASE_PAGE_SIZE - 1);
       if (result.error) throw result.error;
@@ -186,7 +186,8 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         nature: row.nature, reporting: row.reporting, source: row.source, eventDate: row.event_date,
         competence: row.competence,
         classificationStatus: neutralCategory || uncategorizedSemantics ? 'confirmed' : classification?.status ?? row.classification_status,
-        ...(row.external_key ? { externalKey: row.external_key } : {})
+        ...(row.external_key ? { externalKey: row.external_key } : {}),
+        ...(row.occurred_at ? { occurredAt: row.occurred_at } : {})
       }, semantics ? { nature: semantics.nature, reporting: semantics.reporting } : undefined); }),
       links: ((linksResult.data ?? []) as LinkRow[])
         .filter(row => activeTransactionIds.has(row.source_transaction_id) && activeTransactionIds.has(row.target_transaction_id))

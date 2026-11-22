@@ -256,3 +256,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - A cobrança vira transferência própria (neutra) e o app cria sozinho, no cartão e na mesma competência, “Juros do Pix no crédito” (despesa em Tarifas e juros) com a diferença entre cobrança e valor recebido, mais um ajuste neutro de mesmo valor e sinal oposto para o saldo do cartão continuar igual ao do banco. A fatura não muda.
 - Casa a entrada “Valor adicionado na conta por cartão de crédito” cuja saída leva o nome do titular com a cobrança do cartão do mesmo dia (até 1 dia), de valor entre 100% e 150% do recebido. Roda a cada importação; aplicado aos 3 casos do histórico.
 - Pix no crédito para outra pessoa continua como está: a cobrança no cartão é o gasto, já com juros.
+
+## D-074 — Hora do lançamento (22/11/2026)
+
+- A Pluggy manda data e hora (UTC). `transactions.occurred_at` guarda o instante; Transações e Revisão mostram “22/11/2026 · 14:32” em horário de Brasília e ordenam pela hora dentro do dia. Sem hora (meia-noite UTC ou de Brasília), só a data.
+- Lançamento importado segue imutável: só o backend preenche `occurred_at`, e só quando ainda está vazio. Cada conexão faz uma sincronização completa uma vez (`times_backfilled_at`) para preencher o histórico.

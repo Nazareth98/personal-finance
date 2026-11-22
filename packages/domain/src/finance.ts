@@ -105,6 +105,8 @@ export type TransactionContract = {
   competence: string;
   classificationStatus: ClassificationStatus;
   externalKey?: string;
+  /** Instante (ISO, UTC) quando o banco informa a hora (D-074). */
+  occurredAt?: string;
 };
 
 export type EffectiveTransactionSemantics = Pick<TransactionContract, 'nature' | 'reporting'>;

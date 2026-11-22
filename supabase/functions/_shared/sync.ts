@@ -14,6 +14,7 @@ type ConnectionRow = {
   owner_id: string;
   item_id: string;
   last_success_at: string | null;
+  times_backfilled_at?: string | null;
 };
 
 type CardConfig = { id: string; closingDay: number; dueDay: number };
@@ -28,6 +29,12 @@ function dateOnly(value: string): string {
   const date = value.slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('pluggy_transaction_invalid_date');
   return date;
+}
+
+/** D-074: instante completo da Pluggy (UTC). Sem hora válida, nada: a tela só mostra a data. */
+function occurredAt(value: string): string | null {
+  const instant = new Date(value);
+  return /T\d{2}:\d{2}/.test(value) && !Number.isNaN(instant.getTime()) ? instant.toISOString() : null;
 }
 
 function incrementalFrom(lastSuccess: string | null): string | undefined {
@@ -200,7 +207,7 @@ function transactionRows(
         const { nature, reporting } = semantics;
         const competence = cardCompetence(eventDate, card);
         ledger.push({ owner_id: connection.owner_id, account_id: accountId, category_id: null, description,
-          amount_cents: semantics.amountCents.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence,
+          amount_cents: semantics.amountCents.toString(), nature, reporting, source: 'pluggy', event_date: eventDate, competence, occurred_at: occurredAt(transaction.date),
           classification_status: nature === 'adjustment' ? 'automatic' : 'uncategorized', external_key: externalKey });
         // Linha informativa (D-050): sem entrada na fatura, sem sugestão de categoria.
         if (nature === 'adjustment') continue;
@@ -224,6 +231,7 @@ function transactionRows(
         reporting: semantics.reporting,
         source: 'pluggy',
         event_date: eventDate,
+        occurred_at: occurredAt(transaction.date),
         competence: eventDate.slice(0, 7),
         classification_status: semantics.classificationStatus,
         external_key: externalKey
@@ -460,6 +468,12 @@ async function persistTransactions(
     const ledgerInsert = await database.from('transactions')
       .upsert(rows.ledger, { onConflict: 'owner_id,external_key', ignoreDuplicates: true });
     if (ledgerInsert.error) throw ledgerInsert.error;
+    // Já existentes não mudam no upsert acima; a hora entra à parte e só onde ainda falta.
+    const times = rows.ledger.filter(row => row.occurred_at).map(row => ({ external_key: row.external_key, occurred_at: row.occurred_at }));
+    if (times.length) {
+      const stored = await database.rpc('internal_set_transaction_times', { p_owner: connection.owner_id, p_rows: times });
+      if (stored.error) throw stored.error;
+    }
   }
   if (mapped.card) await persistCardArtifacts(database, connection.owner_id, mapped.card, rows.cardItems);
   await persistIncomeRecognition(database, connection.owner_id, rows.incomeCandidates);
@@ -488,7 +502,7 @@ export async function synchronizeTransactionUpdates(
   externalAccountId: string,
   transactionIds: string[]
 ): Promise<void> {
-  const connectionResult = await database.from('pluggy_connections').select('id,owner_id,item_id,last_success_at')
+  const connectionResult = await database.from('pluggy_connections').select('id,owner_id,item_id,last_success_at,times_backfilled_at')
     .eq('id', connectionId).eq('owner_id', ownerId).single();
   if (connectionResult.error) throw new Error('connection_not_found');
   const connection = connectionResult.data as ConnectionRow;
@@ -526,7 +540,7 @@ export async function synchronizeConnection(
   ownerId: string,
   requestedTrigger: SyncTrigger
 ): Promise<SyncResult> {
-  const connectionResult = await database.from('pluggy_connections').select('id,owner_id,item_id,last_success_at')
+  const connectionResult = await database.from('pluggy_connections').select('id,owner_id,item_id,last_success_at,times_backfilled_at')
     .eq('id', connectionId).eq('owner_id', ownerId).single();
   if (connectionResult.error) throw new Error('connection_not_found');
   const connection = connectionResult.data as ConnectionRow;
@@ -574,7 +588,8 @@ export async function synchronizeConnection(
         let transactionPage = 1;
         let transactionCursor: string | null = null;
         do {
-          const createdAtFrom = mapped.type === 'credit_card' ? undefined : incrementalFrom(connection.last_success_at);
+          // D-074: a primeira sincronização depois da hora existir busca tudo de novo, uma vez, para preencher o histórico.
+          const createdAtFrom = mapped.type === 'credit_card' || !connection.times_backfilled_at ? undefined : incrementalFrom(connection.last_success_at);
           const page = await pluggy.getTransactions(account.id, createdAtFrom, transactionCursor);
           const persisted = await persistTransactions(database, connection, mapped, accountInstitutionName, page.results, rules);
           skippedTransactions += persisted.skipped;
@@ -602,7 +617,8 @@ export async function synchronizeConnection(
       skipped_transactions: skippedTransactions, finished_at: finishedAt
     }).eq('id', runId);
     await database.from('pluggy_connections').update({
-      status: 'ready', last_success_at: finishedAt, last_error: null, updated_at: finishedAt
+      status: 'ready', last_success_at: finishedAt, last_error: null, updated_at: finishedAt,
+      ...(connection.times_backfilled_at ? {} : { times_backfilled_at: finishedAt })
     }).eq('id', connectionId).eq('owner_id', ownerId);
     return { runId, importedAccounts, importedTransactions, skippedTransactions };
   } catch (error) {
