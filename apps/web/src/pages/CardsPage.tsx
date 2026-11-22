@@ -60,7 +60,7 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, onSettle, institutio
             {active.openCents > 0n && <div className="card-statement__actions">
               <Button variant="secondary" onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>
               {/* D-076: paga por fora (conta sem histórico no mês): sai das pendências sem inventar lançamento. */}
-              {onSettle && active.statement.dueDate < new Date().toISOString().slice(0, 10) && <Button variant="ghost" loading={settling} onClick={() => settle(active.statement!, true)}>Marcar como paga</Button>}
+              {onSettle && active.statement.dueDate < new Date().toISOString().slice(0, 10) && <Button variant="secondary" loading={settling} onClick={() => settle(active.statement!, true)}>Marcar como paga</Button>}
             </div>}
           </div>}
           {active.settledManually && active.statement && <p className="muted card-statement__settled">Marcada como paga por você: o pagamento não aparece nas contas conectadas.{' '}

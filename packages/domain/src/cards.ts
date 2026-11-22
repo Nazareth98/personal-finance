@@ -150,6 +150,6 @@ export function cardStatementSummary(
   const remaining = purchasesCents > settled ? purchasesCents - settled : 0n;
   const settledManually = Boolean(statement.settledAt) && remaining > 0n;
   const openCents = settledManually ? 0n : remaining;
-  const status = (openCents === 0n && purchasesCents > 0n) || settledManually ? 'paid' : paymentsCents > 0n || refundsCents > 0n ? 'partial' : 'open';
+  const status = (openCents === 0n && purchasesCents > 0n) || settledManually ? 'paid' : paymentsCents > 0n ? 'partial' : 'open';
   return { purchasesCents, refundsCents, paymentsCents, openCents, status, settledManually };
 }
