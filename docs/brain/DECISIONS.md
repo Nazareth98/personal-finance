@@ -239,3 +239,7 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - **Cartão sem configuração:** compras de cartão só entram com fechamento e vencimento (competência imutável). Quando o cartão ganha essa configuração, o app sincroniza na hora.
 - **Banco do cartão:** “Nu Pagamentos S.A.” é reconhecido como Nubank e vira “Nubank”; cartão sem banco no nome herda o banco da conta que paga a fatura (`internal_infer_card_institutions`, ao fim de cada sincronização) e ganha o prefixo (“Nubank Gold”).
 - Pagamentos ao cartão Nubank que tinham sido confirmados como despesa antes de o cartão existir voltaram a ser pagamento de fatura, para casar com a fatura quando ela for importada.
+
+## D-071 — Pix no crédito para a própria conta (22/11/2026)
+
+- Pix pago com o cartão e enviado para outra conta do próprio titular: a saída já ficava neutra (D-063/D-070), mas a chegada contava como receita. Agora a chegada (mesmo valor, até 3 dias, outra conta conectada) também fica neutra; quem conta é a compra na fatura. Uma chegada por saída.
