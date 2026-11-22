@@ -69,9 +69,9 @@ jobs:
       - name: Vincular projeto
         run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
       - name: Migrations pendentes
-        run: supabase db push --dry-run --password "$SUPABASE_DB_PASSWORD"
+        run: supabase db push --remote --dry-run --password "$SUPABASE_DB_PASSWORD"
       - name: Aplicar migrations
-        run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+        run: supabase db push --remote --password "$SUPABASE_DB_PASSWORD"
       - name: Publicar Edge Functions
         # Sem nome, publica todas as pastas de supabase/functions; verify_jwt de cada uma vem do config.toml.
         run: supabase functions deploy --project-ref "$PROJECT_REF"
