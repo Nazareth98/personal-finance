@@ -139,4 +139,6 @@ export interface LedgerRepository {
   confirmTransactionSemantics(draft: SemanticConfirmation): Promise<void>;
   configureCreditCard(draft: CreditCardConfiguration): Promise<void>;
   linkCardPayment(draft: CardPaymentLink): Promise<void>;
+  /** D-076: marca (ou desmarca) uma fatura como paga fora do app. */
+  setStatementSettled(statementId: string, settled: boolean): Promise<void>;
 }

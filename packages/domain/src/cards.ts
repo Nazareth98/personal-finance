@@ -7,7 +7,8 @@ export type CreditCard = {
   dueDay: number;
   creditLimitCents?: bigint;
 };
-export type CardStatement = { id: string; cardId: string; competence: string; closingDate: string; dueDate: string };
+/** `settledAt`: o dono marcou como paga sem o pagamento estar no app (D-076). */
+export type CardStatement = { id: string; cardId: string; competence: string; closingDate: string; dueDate: string; settledAt?: string };
 export type CardStatementEntry = {
   id: string;
   statementId: string;
@@ -31,8 +32,7 @@ export type CardStatementSummary = {
   refundsCents: bigint;
   paymentsCents: bigint;
   openCents: bigint;
-  status: 'open' | 'partial' | 'paid';
-};
+  status: 'open' | 'partial' | 'paid'; settledManually: boolean };
 
 type CardCalendar = { closingDay: number; dueDay: number };
 
@@ -147,7 +147,9 @@ export function cardStatementSummary(
     if (entry.type === 'payment') paymentsCents += magnitude;
   }
   const settled = refundsCents + paymentsCents;
-  const openCents = purchasesCents > settled ? purchasesCents - settled : 0n;
-  const status = openCents === 0n && purchasesCents > 0n ? 'paid' : paymentsCents > 0n || refundsCents > 0n ? 'partial' : 'open';
-  return { purchasesCents, refundsCents, paymentsCents, openCents, status };
+  const remaining = purchasesCents > settled ? purchasesCents - settled : 0n;
+  const settledManually = Boolean(statement.settledAt) && remaining > 0n;
+  const openCents = settledManually ? 0n : remaining;
+  const status = (openCents === 0n && purchasesCents > 0n) || settledManually ? 'paid' : paymentsCents > 0n || refundsCents > 0n ? 'partial' : 'open';
+  return { purchasesCents, refundsCents, paymentsCents, openCents, status, settledManually };
 }

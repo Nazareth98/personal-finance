@@ -30,7 +30,7 @@ test('pagamento não vira despesa e estorno reduz o aberto da fatura', () => {
     { id: '2', statementId: 'statement', transactionId: 'refund', type: 'refund' },
     { id: '3', statementId: 'statement', transactionId: 'payment', type: 'payment' }
   ], transactions);
-  assert.deepEqual(summary, { purchasesCents: 10000n, refundsCents: 2000n, paymentsCents: 3000n, openCents: 5000n, status: 'partial' });
+  assert.deepEqual(summary, { purchasesCents: 10000n, refundsCents: 2000n, paymentsCents: 3000n, openCents: 5000n, status: 'partial', settledManually: false });
 });
 
 test('compra fica na fatura informada pelo banco, não na da data original da parcela (D-054)', () => {
@@ -41,4 +41,16 @@ test('compra fica na fatura informada pelo banco, não na da data original da pa
     { competence: '2026-05' }
   ]);
   assert.deepEqual([...byBill], [['b1', '2026-09'], ['b2', '2026-10']]);
+});
+
+test('D-076: fatura marcada como paga fica paga sem pagamento no app', async () => {
+  const { cardStatementSummary } = await import('../src/cards.ts');
+  const statement = { id: 's', cardId: 'c', competence: '2026-03', closingDate: '2026-03-07', dueDate: '2026-03-15' };
+  const entries = [{ id: 'e', statementId: 's', transactionId: 't', type: 'purchase' as const }];
+  const transactions = [{ id: 't', accountId: 'a', description: 'Compra', amountCents: -1000n, nature: 'expense', reporting: 'expense', source: 'pluggy', eventDate: '2026-03-01', competence: '2026-03', classificationStatus: 'confirmed' }] as never;
+  assert.equal(cardStatementSummary(statement, entries, transactions).status, 'open');
+  const settled = cardStatementSummary({ ...statement, settledAt: '2026-11-22T12:00:00Z' }, entries, transactions);
+  assert.equal(settled.status, 'paid');
+  assert.equal(settled.openCents, 0n);
+  assert.equal(settled.settledManually, true);
 });

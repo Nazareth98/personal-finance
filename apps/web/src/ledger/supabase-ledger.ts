@@ -30,7 +30,7 @@ type ReviewHistoryRow = {
   previous: { nature?: ReviewHistoryEntry['nature']; categoryId?: string | null }; superseded_at: string;
 };
 type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
-type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string };
+type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string; settled_at?: string | null };
 type CardStatementEntryRow = { id: string; statement_id: string; transaction_id: string; entry_type: CardStatementEntry['type'] };
 type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; purchase_group_key: string; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
 const SUPABASE_PAGE_SIZE = 1000;
@@ -93,7 +93,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.paged(() => this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false })),
       this.paged(() => this.client.from('transaction_review_history').select('id,transaction_id,decision_type,previous,superseded_at').order('superseded_at', { ascending: false })),
       this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
-      this.paged(() => this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false })),
+      this.paged(() => this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date,settled_at').order('due_date', { ascending: false })),
       this.paged(() => this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type')),
       this.paged(() => this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence'))
     ]);
@@ -205,7 +205,8 @@ export class SupabaseLedgerRepository implements LedgerRepository {
         ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) })
       })),
       cardStatements: ((cardStatementsResult.data ?? []) as CardStatementRow[]).map((row): CardStatement => ({
-        id: row.id, cardId: row.card_id, competence: row.competence, closingDate: row.closing_date, dueDate: row.due_date
+        id: row.id, cardId: row.card_id, competence: row.competence, closingDate: row.closing_date, dueDate: row.due_date,
+        ...(row.settled_at ? { settledAt: row.settled_at } : {})
       })),
       cardStatementEntries: activeCardEntries.map((row): CardStatementEntry => ({
         id: row.id, statementId: row.statement_id, transactionId: row.transaction_id, type: row.entry_type
@@ -387,6 +388,11 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       p_account_id: draft.accountId, p_closing_day: draft.closingDay, p_due_day: draft.dueDay,
       p_credit_limit_cents: draft.creditLimitCents?.toString() ?? null
     });
+    if (error) throw error;
+  }
+
+  async setStatementSettled(statementId: string, settled: boolean): Promise<void> {
+    const { error } = await this.client.rpc('set_card_statement_settled', { p_statement_id: statementId, p_settled: settled });
     if (error) throw error;
   }
 

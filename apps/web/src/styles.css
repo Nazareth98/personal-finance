@@ -776,3 +776,5 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
   .card-metrics .ui-metric-card__value{font-size:var(--font-size-lg)}
   .card-metrics .ui-metric-card__label{font-size:var(--font-size-xs)}
 }
+.card-statement__actions{display:flex;gap:var(--spacing-2);flex-wrap:wrap;justify-content:flex-end}
+.card-statement__settled{margin:0;font-size:var(--font-size-sm)}

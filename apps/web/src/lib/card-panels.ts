@@ -11,6 +11,7 @@ export type StatementTab = {
   openCents: bigint;
   projectedCents: bigint;
   lines: StatementLine[];
+  settledManually?: boolean;
 };
 export type CardPanel = { account: FinancialAccount; card?: CreditCard; committedCents: bigint; tabs: StatementTab[] };
 
@@ -37,7 +38,7 @@ export function buildCardPanels(input: {
       const summary = cardStatementSummary(statement, input.entries, input.transactions);
       const tab = tabFor(statement.competence);
       Object.assign(tab, { statement, status: summary.status, purchasesCents: summary.purchasesCents, refundsCents: summary.refundsCents,
-        paymentsCents: summary.paymentsCents, openCents: summary.openCents });
+        paymentsCents: summary.paymentsCents, openCents: summary.openCents, settledManually: summary.settledManually });
       for (const entry of input.entries.filter(item => item.statementId === statement.id)) {
         const transaction = transactionsById.get(entry.transactionId)!;
         const installment = installmentByTransaction.get(transaction.id);

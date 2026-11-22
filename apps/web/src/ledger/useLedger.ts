@@ -28,6 +28,7 @@ export type LedgerState = {
   setHolderName: (name: string) => Promise<SelfTransferResult>;
   confirmTransactionSemantics: (draft: SemanticConfirmation) => Promise<void>;
   configureCreditCard: (draft: CreditCardConfiguration) => Promise<void>;
+  setStatementSettled: (statementId: string, settled: boolean) => Promise<void>;
   linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
 };
 
@@ -154,6 +155,12 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function setStatementSettled(statementId: string, settled: boolean) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.setStatementSettled(statementId, settled);
+    await reload();
+  }
+
   async function linkCardPayment(draft: CardPaymentLink) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.linkCardPayment(draft);
@@ -168,6 +175,6 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
     createTransaction, saveBudget, deleteBudget, createSavingsBox, updateSavingsBox, deleteSavingsBox, createSavingsMovement, linkSavingsMovement,
-    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, linkCardPayment
+    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, setStatementSettled, linkCardPayment
   };
 }

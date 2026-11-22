@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import type { CardStatement, FinancialAccount } from '@personal-finance/domain';
-import { Badge, Button, Card, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, StatusAlertIcon, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, useToast, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, StatusAlertIcon, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import { buildCardPanels, cardOverview, defaultTab, limitShare, type CardOverview, type CardPanel, type StatementTab } from '../lib/card-panels';
@@ -25,7 +25,9 @@ const PREVIEW_LINES = 6;
 const tabStatusLabels = { ...statusLabels, projected: 'Prevista' } as const;
 const tabValue = (tab: StatementTab) => !tab.statement ? tab.projectedCents : tab.status === 'paid' ? tab.purchasesCents - tab.refundsCents : tab.openCents;
 
-function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { panel: CardPanel; onConfigure: () => void; onLinkPayment: (statement: CardStatement) => void; institutions?: readonly AccountInstitution[] }) {
+function CardPanelView({ panel, onConfigure, onLinkPayment, onSettle, institutions }: { panel: CardPanel; onConfigure: () => void; onLinkPayment: (statement: CardStatement) => void; onSettle?: (statement: CardStatement, settled: boolean) => Promise<void>; institutions?: readonly AccountInstitution[] }) {
+  const [settling, setSettling] = useState(false);
+  const settle = (statement: CardStatement, settled: boolean) => { if (!onSettle) return; setSettling(true); void onSettle(statement, settled).finally(() => setSettling(false)); };
   const [selected, setSelected] = useState<string>();
   const [linesOpen, setLinesOpen] = useState(false);
   const linesId = useId();
@@ -55,8 +57,14 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { pa
         <div className="card-statement__summary">
           {active.statement && <div className="card-statement__pending">
             <div><span className="muted">Pendente · vence {formatLocalDate(active.statement.dueDate)}</span><strong>{formatCentsBRL(active.openCents)}</strong></div>
-            {active.openCents > 0n && <Button variant="secondary" onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>}
+            {active.openCents > 0n && <div className="card-statement__actions">
+              <Button variant="secondary" onClick={() => onLinkPayment(active.statement!)}>Vincular pagamento</Button>
+              {/* D-076: paga por fora (conta sem histórico no mês): sai das pendências sem inventar lançamento. */}
+              {onSettle && active.statement.dueDate < new Date().toISOString().slice(0, 10) && <Button variant="ghost" loading={settling} onClick={() => settle(active.statement!, true)}>Marcar como paga</Button>}
+            </div>}
           </div>}
+          {active.settledManually && active.statement && <p className="muted card-statement__settled">Marcada como paga por você: o pagamento não aparece nas contas conectadas.{' '}
+            {onSettle && <Button variant="ghost" size="sm" disabled={settling} onClick={() => settle(active.statement!, false)}>Desfazer</Button>}</p>}
           <dl>
             {active.statement && <>
               <div><dt>Compras</dt><dd>{formatCentsBRL(active.purchasesCents)}</dd></div>
@@ -117,6 +125,7 @@ function CardTile({ overview, institutions, onConfigure }: { overview: CardOverv
 
 export function CardsPage({ ledger, headerAction }: PageProps) {
   const [params] = useHashParams();
+  const { notify } = useToast();
   const [selectedCard, setSelectedCard] = useState<FinancialAccount | null>(null);
   const [selectedStatement, setSelectedStatement] = useState<CardStatement | null>(null);
   if (ledger) {
@@ -139,7 +148,11 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={3} columns={4} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
         {detail ? <>
           <a className="card-back" href="#cards"><Icon icon={ChevronDownIcon} size="sm" />Todos os cartões</a>
-          <CardPanelView panel={detail} institutions={institutions} onConfigure={() => setSelectedCard(detail.account)} onLinkPayment={setSelectedStatement}/>
+          <CardPanelView panel={detail} institutions={institutions} onConfigure={() => setSelectedCard(detail.account)} onLinkPayment={setSelectedStatement}
+            onSettle={async (statement, settled) => {
+              try { await ledger.setStatementSettled(statement.id, settled); notify({ message: settled ? 'Fatura marcada como paga.' : 'Marcação desfeita.', tone: 'success' }); }
+              catch { notify({ message: 'Não foi possível atualizar a fatura. Tente de novo.', tone: 'error' }); }
+            }}/>
         </> : panels.length ? <>
           <div className="template-metrics card-metrics">
             <MetricCard label="Faturas em aberto" value={formatCentsBRL(totalOpen)} supportingText={`${openCards} de ${configured} ${configured === 1 ? 'cartão' : 'cartões'}`}
