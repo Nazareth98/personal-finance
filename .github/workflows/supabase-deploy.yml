@@ -74,4 +74,4 @@ jobs:
         run: supabase db push --remote --password "$SUPABASE_DB_PASSWORD"
       - name: Publicar Edge Functions
         # Sem nome, publica todas as pastas de supabase/functions; verify_jwt de cada uma vem do config.toml.
-        run: supabase functions deploy --project-ref "$PROJECT_REF"
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --yes
