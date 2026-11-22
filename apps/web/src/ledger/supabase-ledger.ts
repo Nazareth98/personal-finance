@@ -29,7 +29,7 @@ type ReviewHistoryRow = {
   id: string; transaction_id: string; decision_type: ReviewHistoryEntry['type'];
   previous: { nature?: ReviewHistoryEntry['nature']; categoryId?: string | null }; superseded_at: string;
 };
-type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null };
+type CreditCardRow = { id: string; account_id: string; closing_day: number; due_day: number; credit_limit_cents: string | number | null; available_limit_cents?: string | number | null; limit_updated_at?: string | null };
 type CardStatementRow = { id: string; card_id: string; competence: string; closing_date: string; due_date: string; settled_at?: string | null };
 type CardStatementEntryRow = { id: string; statement_id: string; transaction_id: string; entry_type: CardStatementEntry['type'] };
 type CardInstallmentRow = { id: string; card_id: string; statement_id: string; transaction_id: string | null; purchase_group_key: string; description: string; installment_number: number; total_installments: number; amount_cents: string | number; due_competence: string; status: CardInstallment['status'] };
@@ -92,7 +92,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.paged(() => this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false })),
       this.paged(() => this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false })),
       this.paged(() => this.client.from('transaction_review_history').select('id,transaction_id,decision_type,previous,superseded_at').order('superseded_at', { ascending: false })),
-      this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
+      this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents,available_limit_cents,limit_updated_at').order('created_at'),
       this.paged(() => this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date,settled_at').order('due_date', { ascending: false })),
       this.paged(() => this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type')),
       this.paged(() => this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence'))
@@ -202,7 +202,9 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       })),
       creditCards: ((creditCardsResult.data ?? []) as CreditCardRow[]).map((row): CreditCard => ({
         id: row.id, accountId: row.account_id, closingDay: row.closing_day, dueDay: row.due_day,
-        ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) })
+        ...(row.credit_limit_cents === null ? {} : { creditLimitCents: BigInt(row.credit_limit_cents) }),
+        ...(row.available_limit_cents === null || row.available_limit_cents === undefined ? {} : { availableLimitCents: BigInt(row.available_limit_cents) }),
+        ...(row.limit_updated_at ? { limitUpdatedAt: row.limit_updated_at } : {})
       })),
       cardStatements: ((cardStatementsResult.data ?? []) as CardStatementRow[]).map((row): CardStatement => ({
         id: row.id, cardId: row.card_id, competence: row.competence, closingDate: row.closing_date, dueDate: row.due_date,

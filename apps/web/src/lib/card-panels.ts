@@ -1,4 +1,4 @@
-import { cardStatementSummary, type CardInstallment, type CardStatement, type CardStatementEntry, type CreditCard, type FinancialAccount, type TransactionContract } from '@personal-finance/domain';
+import { cardCompetence, cardStatementSummary, type CardInstallment, type CardStatement, type CardStatementEntry, type CreditCard, type FinancialAccount, type TransactionContract } from '@personal-finance/domain';
 
 export type StatementLine = { id: string; description: string; date?: string; detail: string; amountCents: bigint; credit: boolean };
 export type StatementTab = {
@@ -13,7 +13,8 @@ export type StatementTab = {
   lines: StatementLine[];
   settledManually?: boolean;
 };
-export type CardPanel = { account: FinancialAccount; card?: CreditCard; committedCents: bigint; tabs: StatementTab[] };
+/** `limitSource`: `bank` quando o usado é limite − disponível informado pelo banco; `estimate` quando é soma de faturas e parcelas. */
+export type CardPanel = { account: FinancialAccount; card?: CreditCard; committedCents: bigint; tabs: StatementTab[]; limitSource?: 'bank' | 'estimate' };
 
 const entryLabels = { purchase: 'Compra', refund: 'Estorno', payment: 'Pagamento' } as const;
 
@@ -25,6 +26,8 @@ export function buildCardPanels(input: {
   entries: readonly CardStatementEntry[];
   transactions: readonly TransactionContract[];
   installments: readonly CardInstallment[];
+  /** Hoje (AAAA-MM-DD); parcelas previstas de faturas que já passaram são ignoradas. */
+  today?: string;
 }): CardPanel[] {
   const transactionsById = new Map(input.transactions.map(transaction => [transaction.id, transaction]));
   const installmentByTransaction = new Map(input.installments.filter(item => item.transactionId).map(item => [item.transactionId!, item]));
@@ -47,14 +50,18 @@ export function buildCardPanels(input: {
           amountCents: transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents });
       }
     }
-    for (const installment of input.installments.filter(item => item.cardId === card.id && item.status === 'projected')) {
+    const currentCompetence = input.today ? cardCompetence(input.today, card) : undefined;
+    for (const installment of input.installments.filter(item => item.cardId === card.id && item.status === 'projected'
+      && (!currentCompetence || item.dueCompetence >= currentCompetence))) {
       const tab = tabFor(installment.dueCompetence);
       tab.projectedCents += installment.amountCents;
       tab.lines.push({ id: installment.id, description: `${installment.description} ${installment.number}/${installment.total}`, detail: 'Parcela prevista',
         amountCents: installment.amountCents, credit: false });
     }
     const sorted = [...tabs.values()].sort((a, b) => a.competence.localeCompare(b.competence));
-    return { account, card, tabs: sorted, committedCents: sorted.reduce((sum, tab) => sum + tab.openCents + tab.projectedCents, 0n) };
+    const estimate = sorted.reduce((sum, tab) => sum + tab.openCents + tab.projectedCents, 0n);
+    const fromBank = card.creditLimitCents !== undefined && card.availableLimitCents !== undefined;
+    return { account, card, tabs: sorted, committedCents: fromBank ? card.creditLimitCents! - card.availableLimitCents! : estimate, limitSource: fromBank ? 'bank' : 'estimate' };
   });
 }
 

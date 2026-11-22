@@ -9,6 +9,7 @@ export type PluggyAccount = {
     closingDate?: string | number | null;
     dueDate?: string | number | null;
     creditLimit?: number | string | null;
+    availableCreditLimit?: number | string | null;
   } | null;
 };
 

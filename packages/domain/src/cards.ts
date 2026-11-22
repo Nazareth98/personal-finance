@@ -6,6 +6,9 @@ export type CreditCard = {
   closingDay: number;
   dueDay: number;
   creditLimitCents?: bigint;
+  /** Disponível informado pelo banco na última sincronização (D-077). */
+  availableLimitCents?: bigint;
+  limitUpdatedAt?: string;
 };
 /** `settledAt`: o dono marcou como paga sem o pagamento estar no app (D-076). */
 export type CardStatement = { id: string; cardId: string; competence: string; closingDate: string; dueDate: string; settledAt?: string };

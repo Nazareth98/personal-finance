@@ -46,9 +46,11 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, onSettle, institutio
     </div>
     {!card && <p className="sync-status sync-status--failed card-panel__pending"><Icon icon={StatusAlertIcon} size="sm" /><span>As compras deste cartão só aparecem depois que você informar o dia de fechamento e o de vencimento da fatura. Assim que salvar, o app busca as compras no banco.</span></p>}
     {card && <div className="card-panel__limit">
-      <p className="card-panel__row"><span className="muted">Limite comprometido</span><strong>{share && limit !== undefined ? `${formatCentsBRL(panel.committedCents)} de ${formatCentsBRL(limit)} · ${share.label}` : 'Limite não informado'}</strong></p>
+      <p className="card-panel__row"><span className="muted">Limite usado</span><strong>{share && limit !== undefined ? `${formatCentsBRL(panel.committedCents)} de ${formatCentsBRL(limit)} · ${share.label}` : 'Limite não informado'}</strong></p>
       {share && <progress className={`budget-progress ${share.basisPoints > 10000 ? 'budget-progress--exceeded' : ''}`} max={10000} value={Math.min(share.basisPoints, 10000)} aria-label={`Limite comprometido: ${share.label}`} />}
-      <p className="muted card-panel__note">Faturas em aberto {formatCentsBRL(openCents)} + parcelas futuras {formatCentsBRL(panel.committedCents - openCents)}{share && limit !== undefined ? ` · disponível ${formatCentsBRL(limit - panel.committedCents)}` : ''}</p>
+      <p className="muted card-panel__note">{panel.limitSource === 'bank'
+        ? `Segundo o banco${card.limitUpdatedAt ? ` em ${formatLocalDate(card.limitUpdatedAt.slice(0, 10))}` : ''}: disponível ${formatCentsBRL(card.availableLimitCents!)}`
+        : `Estimativa: faturas em aberto ${formatCentsBRL(openCents)} + parcelas futuras ${formatCentsBRL(panel.committedCents - openCents)}${share && limit !== undefined ? ` · disponível ${formatCentsBRL(limit - panel.committedCents)}` : ''}`}</p>
     </div>}
     {card && !active && <EmptyState title="Nenhuma fatura ainda" description="As faturas aparecem quando as primeiras compras deste cartão chegarem do banco." />}
     {active && <Tabs label={`Faturas do ${account.name}`} className="card-tabs" panelClassName="card-statement" selectedId={active.competence} onSelect={id => { setSelected(id); setLinesOpen(false); }}
@@ -131,7 +133,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
   if (ledger) {
     const data = ledger.data;
     const panels = buildCardPanels({ accounts: data?.accounts ?? [], cards: data?.creditCards ?? [], statements: data?.cardStatements ?? [],
-      entries: data?.cardStatementEntries ?? [], transactions: data?.transactions ?? [], installments: data?.cardInstallments ?? [] });
+      entries: data?.cardStatementEntries ?? [], transactions: data?.transactions ?? [], installments: data?.cardInstallments ?? [], today: localToday() });
     const institutions = data?.institutions;
     const detail = panels.find(panel => panel.account.id === params.get('card'));
     const today = localToday();

@@ -272,3 +272,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Correções no histórico: dois pagamentos do Nubank estavam na fatura errada (pagamento atrasado de maio caiu em junho; adiantado de janeiro caiu em dezembro) e foram religados; uma compra do Itaú feita no dia do fechamento (07/11) passou para a fatura de dezembro, como no banco; cinco Pix do Nubank marcados pelo banco como pagamento de cartão eram do cartão do CNPJ (não integrado) e viraram despesa.
 - O extrato do Itaú não tem lançamentos de março/2026 (lacuna da Pluggy), então o pagamento dessa fatura não existe no app. Para casos assim, a fatura vencida pode ser **marcada como paga** (`card_statements.settled_at`, `set_card_statement_settled`): sai das pendências sem inventar lançamento, com “Desfazer”.
 - Achado: o Itaú Platinum recebe R$ 188,00 a mais em vários meses; indica uma parcela fixa que não chega pela Pluggy. Sem correção automática.
+
+## D-077 — Limite do cartão vem do banco; parcelas com chave estável (22/11/2026)
+
+- O limite usado passa a ser `limite − disponível`, como o banco informa (`creditData.availableCreditLimit`), gravado a cada sincronização em `credit_cards.available_limit_cents`/`limit_updated_at`. A soma de faturas em aberto + parcelas previstas fica só como estimativa, identificada na tela.
+- O Itaú envia um `installmentId` diferente a cada parcela da mesma compra, o que multiplicava as parcelas previstas. A compra parcelada agora é agrupada por cartão + descrição sem “n/N” + total de parcelas + valor da parcela.
+- Parcelas previstas de faturas já passadas são ignoradas no limite. As parcelas previstas existentes foram apagadas (dado derivado) para a sincronização recriá-las.

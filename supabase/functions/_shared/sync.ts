@@ -90,14 +90,23 @@ async function ensureCreditCard(database: SupabaseClient, ownerId: string, accou
   if (existing.error) throw existing.error;
   const closingDay = providerDay(account.creditData?.balanceCloseDate ?? account.creditData?.closingDate);
   const dueDay = providerDay(account.creditData?.balanceDueDate ?? account.creditData?.dueDate);
+  // D-077: limite e disponível vêm do banco a cada sincronização; o “usado” da tela é limite − disponível.
+  const bankLimit = account.creditData?.creditLimit;
+  const bankAvailable = account.creditData?.availableCreditLimit;
+  const limits = {
+    ...(bankLimit === null || bankLimit === undefined ? {} : { credit_limit_cents: centsFromPluggy(bankLimit).toString() }),
+    ...(bankAvailable === null || bankAvailable === undefined ? {} : { available_limit_cents: centsFromPluggy(bankAvailable).toString(), limit_updated_at: new Date().toISOString() })
+  };
   if (existing.data && Number(existing.data.closing_day) && Number(existing.data.due_day)) {
+    if (Object.keys(limits).length) {
+      const updated = await database.from('credit_cards').update(limits).eq('id', existing.data.id);
+      if (updated.error) throw updated.error;
+    }
     return { id: String(existing.data.id), closingDay: Number(existing.data.closing_day), dueDay: Number(existing.data.due_day) };
   }
   if (!closingDay || !dueDay) return undefined;
-  const rawLimit = account.creditData?.creditLimit;
-  const creditLimit = rawLimit === null || rawLimit === undefined ? null : centsFromPluggy(rawLimit).toString();
   const stored = await database.from('credit_cards').upsert({
-    owner_id: ownerId, account_id: accountId, closing_day: closingDay, due_day: dueDay, credit_limit_cents: creditLimit
+    owner_id: ownerId, account_id: accountId, closing_day: closingDay, due_day: dueDay, credit_limit_cents: null, ...limits
   }, { onConflict: 'account_id' }).select('id').single();
   if (stored.error) throw stored.error;
   return { id: String(stored.data.id), closingDay, dueDay };
@@ -321,7 +330,10 @@ async function persistCardArtifacts(database: SupabaseClient, ownerId: string, c
     const transactionId = transactionByKey.get(item.externalKey);
     const projections = projectionsByKey.get(item.externalKey);
     if (!transactionId || !projections || !item.totalInstallments) continue;
-    const groupKey = item.groupKey ?? `${card.id}:${installmentGroupDescription(item.description)}:${item.totalInstallments}`;
+    // D-077: o id de parcelamento do banco muda a cada parcela em alguns emissores (Itaú), o que multiplicava as
+    // parcelas previstas. A compra é identificada pela descrição sem “n/N”, o total de parcelas e o valor da parcela.
+    const magnitude = item.amountCents < 0n ? -item.amountCents : item.amountCents;
+    const groupKey = `${card.id}:${installmentGroupDescription(item.description)}:${item.totalInstallments}:${magnitude}`;
     for (const projection of projections) {
       const statementId = statementByCompetence.get(projection.dueCompetence);
       if (!statementId) continue;
