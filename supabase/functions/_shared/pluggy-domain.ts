@@ -69,7 +69,7 @@ function normalizedEvidence(value: string | null): string {
   return (value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
-export type PluggyConnector = { id: number; name: string; isOpenFinance?: boolean | null };
+export type PluggyConnector = { id: number; name: string; isOpenFinance?: boolean | null; aliases?: readonly string[] };
 /** Conector agregador: a conex\u00e3o \u00e9 do MeuPluggy, n\u00e3o do banco; o banco de cada conta vem do nome dela. */
 export const MEU_PLUGGY_CONNECTOR_ID = 200;
 const GENERIC_NAME_WORDS = new Set(['banco', 'bank', 'conta', 'cartao', 'de', 'do', 'da']);
@@ -81,7 +81,7 @@ const GENERIC_NAME_WORDS = new Set(['banco', 'bank', 'conta', 'cartao', 'de', 'd
  */
 export const KNOWN_BANKS: readonly PluggyConnector[] = [
   { id: 201, name: 'Ita\u00fa' }, { id: 219, name: 'Caixa Econ\u00f4mica Federal' }, { id: 203, name: 'Bradesco' },
-  { id: 208, name: 'Santander' }, { id: 211, name: 'Banco do Brasil' }, { id: 212, name: 'Nubank' },
+  { id: 208, name: 'Santander' }, { id: 211, name: 'Banco do Brasil' }, { id: 212, name: 'Nubank', aliases: ['nu pagamentos', 'nu financeira', 'nuconta'] },
   { id: 215, name: 'Banco Inter' }, { id: 226, name: 'C6 Bank' }, { id: 214, name: 'BTG Pactual' },
   { id: 206, name: 'Mercado Pago' }, { id: 202, name: 'XP Investimentos' }
 ];
@@ -91,11 +91,21 @@ export const KNOWN_BANKS: readonly PluggyConnector[] = [
  * conector precisa aparecer no nome da conta. Mais de um banco poss\u00edvel \u2192 nenhum (sem chute).
  */
 export function institutionFromAccountName(accountName: string, connectors: readonly PluggyConnector[] = KNOWN_BANKS): PluggyConnector | undefined {
-  const words = new Set(normalizedEvidence(accountName).split(' '));
+  const normalized = normalizedEvidence(accountName);
+  // D-070: o Nubank chega como “Nu Pagamentos S.A. - Instituição de Pagamento”, sem a palavra Nubank.
+  const byAlias = connectors.filter(connector => connector.aliases?.some(alias => ` ${normalized} `.includes(` ${alias} `)));
+  if (byAlias.length === 1) return byAlias[0];
+  const words = new Set(normalized.split(' '));
   const keyOf = (connector: PluggyConnector) => normalizedEvidence(connector.name).split(' ').find(word => word.length >= 2 && !GENERIC_NAME_WORDS.has(word));
   const matches = connectors.filter(connector => { const key = keyOf(connector); return key !== undefined && words.has(key); })
     .sort((a, b) => Number(Boolean(a.isOpenFinance)) - Number(Boolean(b.isOpenFinance)) || a.id - b.id);
   return new Set(matches.map(keyOf)).size === 1 ? matches[0] : undefined;
+}
+
+/** Nome de conta legível: a razão social do Nubank vira “Nubank” (D-070). */
+export function displayAccountName(accountName: string): string {
+  const bank = institutionFromAccountName(accountName);
+  return bank?.aliases?.some(alias => ` ${normalizedEvidence(accountName)} `.includes(` ${alias} `)) ? bank.name : accountName;
 }
 
 export function ledgerSemantics(transaction: PluggyTransaction): {

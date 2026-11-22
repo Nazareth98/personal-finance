@@ -114,6 +114,20 @@ export function DashboardApp({ onSignOut, ledgerRepository, connectionsRepositor
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [connections.status]);
+  // Compras de cartão só entram depois que o cartão tem fechamento e vencimento (a competência é imutável).
+  // Quando um cartão ganha essa configuração, sincroniza na hora para trazer as compras que estavam esperando.
+  const configuredCards = ledger.data?.creditCards.length;
+  const previousConfiguredCards = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const previous = previousConfiguredCards.current;
+    previousConfiguredCards.current = configuredCards;
+    if (configuredCards === undefined || previous === undefined || configuredCards <= previous || !connectionsRepository) return;
+    void connections.syncStale(true).then(result => {
+      if (result === 'none') return;
+      setSyncFailed(result === 'failed');
+      void ledger.refresh();
+    });
+  }, [configuredCards]);
   const { canInstall, install, online } = usePwa();
   const data = ledgerRepository ? ledger.data : undefined;
   const pendingReviews = data ? pendingReviewCount(data.transactions, data) : 0;

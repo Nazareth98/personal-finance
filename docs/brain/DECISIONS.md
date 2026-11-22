@@ -230,3 +230,12 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - O rótulo “Correção confirmada” aparecia corrompido (CorreÃ§Ã£o): uma função aplicada pelo MCP do Supabase teve os acentos convertidos errado. A migration `20261121160302_fix_review_label_encoding` corrige a função e 756 rótulos gravados; em instância nova não faz nada.
 - Regra: SQL enviado pelo MCP usa só ASCII nos textos que vão para o banco (`chr()`/`U&''`); comentários podem ter acento. O workflow de publicação (D-065) não tem esse problema.
+
+## D-070 — Nubank conectado: transferências, Pix no crédito, cartão e leitura completa (22/11/2026)
+
+- **Leitura completa:** o app lia no máximo 1000 linhas de classificações, correções e itens de fatura (limite do PostgREST). Lançamentos revisados voltavam para a fila e o contador não baixava. Agora toda tabela que cresce é lida em páginas.
+- **Transferência própria:** o Nubank descreve “Transferência recebida/enviada | NOME” sem “Pix”; “transferência”/“transf” também valem. Um lado neutralizado sem par (o outro banco ainda não estava conectado) ganha o par quando ele chega, e os dois viram transferência própria vinculada.
+- **Pix no crédito do Nubank:** “Valor adicionado na conta por cartão de crédito” + a saída do mesmo valor no mesmo dia ficam neutros, como no Itaú (D-063); quem conta é a compra na fatura.
+- **Cartão sem configuração:** compras de cartão só entram com fechamento e vencimento (competência imutável). Quando o cartão ganha essa configuração, o app sincroniza na hora.
+- **Banco do cartão:** “Nu Pagamentos S.A.” é reconhecido como Nubank e vira “Nubank”; cartão sem banco no nome herda o banco da conta que paga a fatura (`internal_infer_card_institutions`, ao fim de cada sincronização) e ganha o prefixo (“Nubank Gold”).
+- Pagamentos ao cartão Nubank que tinham sido confirmados como despesa antes de o cartão existir voltaram a ser pagamento de fatura, para casar com a fatura quando ela for importada.

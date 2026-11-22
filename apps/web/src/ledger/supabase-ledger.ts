@@ -50,6 +50,22 @@ function classificationEvidence(value: unknown): TransactionClassification['evid
 export class SupabaseLedgerRepository implements LedgerRepository {
   constructor(private readonly client: SupabaseClient) {}
 
+  /**
+   * PostgREST devolve no máximo 1000 linhas por consulta. Tabelas que crescem com o histórico (classificações,
+   * correções, itens de fatura…) passavam desse limite e chegavam cortadas: lançamentos já revisados voltavam
+   * para a fila e o contador de pendências não baixava. Lê em páginas, com `id` como desempate estável.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async paged(query: () => any): Promise<{ data: unknown[]; error: null }> {
+    const rows: unknown[] = [];
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const result = await query().order('id').range(from, from + SUPABASE_PAGE_SIZE - 1);
+      if (result.error) throw result.error;
+      rows.push(...(result.data ?? []));
+      if ((result.data?.length ?? 0) < SUPABASE_PAGE_SIZE) return { data: rows, error: null };
+    }
+  }
+
   private async loadTransactions(): Promise<TransactionRow[]> {
     const rows: TransactionRow[] = [];
     for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
@@ -69,17 +85,17 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       this.client.from('categories').select('id,name,category_type,applicability,icon_key,color_key,sort_order,archived_at').order('sort_order'),
       this.client.rpc('get_category_usage'),
       this.loadTransactions(),
-      this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type'),
+      this.paged(() => this.client.from('transaction_links').select('id,source_transaction_id,target_transaction_id,link_type')),
       this.client.from('category_budgets').select('id,category_id,monthly_limit_cents').order('created_at'),
       this.client.from('savings_boxes').select('id,name,opening_balance_cents,target_cents,target_date').is('archived_at', null).order('created_at'),
-      this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false }),
-      this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false }),
-      this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false }),
-      this.client.from('transaction_review_history').select('id,transaction_id,decision_type,previous,superseded_at').order('superseded_at', { ascending: false }),
+      this.paged(() => this.client.from('savings_movements').select('id,savings_box_id,transaction_id,movement_type,amount_cents,event_date').order('event_date', { ascending: false })),
+      this.paged(() => this.client.from('transaction_classifications').select('id,transaction_id,category_id,confidence_basis_points,status,classifier_version,explanation').order('updated_at', { ascending: false })),
+      this.paged(() => this.client.from('transaction_semantic_overrides').select('id,transaction_id,effective_nature,effective_reporting,counterpart_transaction_id,statement_id,savings_box_id,reason,semantic_version,updated_at').order('updated_at', { ascending: false })),
+      this.paged(() => this.client.from('transaction_review_history').select('id,transaction_id,decision_type,previous,superseded_at').order('superseded_at', { ascending: false })),
       this.client.from('credit_cards').select('id,account_id,closing_day,due_day,credit_limit_cents').order('created_at'),
-      this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false }),
-      this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type'),
-      this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence')
+      this.paged(() => this.client.from('card_statements').select('id,card_id,competence,closing_date,due_date').order('due_date', { ascending: false })),
+      this.paged(() => this.client.from('card_statement_entries').select('id,statement_id,transaction_id,entry_type')),
+      this.paged(() => this.client.from('card_installments').select('id,card_id,statement_id,transaction_id,purchase_group_key,description,installment_number,total_installments,amount_cents,due_competence,status').order('due_competence'))
     ]);
     const error = accountsResult.error ?? categoriesResult.error ?? categoryUsageResult.error ?? linksResult.error ?? budgetsResult.error
       ?? savingsBoxesResult.error ?? savingsMovementsResult.error ?? classificationsResult.error ?? semanticOverridesResult.error ?? reviewHistoryResult.error ?? creditCardsResult.error

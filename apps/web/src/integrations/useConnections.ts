@@ -10,7 +10,8 @@ export type ConnectionsState = {
   connect: () => Promise<void>;
   sync: (connectionId: string) => Promise<void>;
   /** D-061: sincroniza em segundo plano as conexões vencidas; diz se algo rodou e se alguma falhou. */
-  syncStale: () => Promise<'none' | 'synced' | 'failed'>;
+  /** `force`: ignora as 6 h e sincroniza todas as conexões ativas (ex.: cartão acabou de ganhar fechamento/vencimento). */
+  syncStale: (force?: boolean) => Promise<'none' | 'synced' | 'failed'>;
   autoSyncing: boolean;
   /** D-064: testa e guarda as chaves do Pluggy; atualiza o status sem recarregar a tela. */
   saveCredentials: (clientId: string, clientSecret: string) => Promise<void>;
@@ -101,8 +102,9 @@ export function useConnections(repository?: ConnectionsRepository): ConnectionsS
     catch { setError('A sincronização falhou. A próxima tentativa retomará os dados sem duplicar lançamentos.'); throw new Error('sync failed'); }
   }
 
-  async function syncStale(): Promise<'none' | 'synced' | 'failed'> {
-    const due = repository && dataRef.current ? connectionsDue(dataRef.current.connections, Date.now()) : [];
+  async function syncStale(force = false): Promise<'none' | 'synced' | 'failed'> {
+    const active = dataRef.current?.connections.filter(connection => connection.status === 'ready' || connection.status === 'error') ?? [];
+    const due = repository && dataRef.current ? (force ? active : connectionsDue(dataRef.current.connections, Date.now())) : [];
     if (!repository || !due.length || autoSyncRunning.current) return 'none';
     autoSyncRunning.current = true;
     setAutoSyncing(true);

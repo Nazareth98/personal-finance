@@ -2,7 +2,7 @@ import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 import { classifyTransaction, type ClassificationCandidate, type ClassificationRule } from '../../../packages/domain/src/classification.ts';
 import { billCompetences, cardCompetence, cardStatementDates, projectInstallments } from '../../../packages/domain/src/cards.ts';
 import { recognizeItauSalary } from '../../../packages/domain/src/forecast.ts';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, merchantName, MEU_PLUGGY_CONNECTOR_ID, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
+import { accountTypeFromPluggy, displayAccountName, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, merchantName, MEU_PLUGGY_CONNECTOR_ID, rawCategory, sanitizedDescription, type PluggyAccount, type PluggyTransaction } from './pluggy-domain.ts';
 import type { PluggyClient } from './pluggy-client.ts';
 import { safeError } from './http.ts';
 
@@ -129,7 +129,7 @@ async function ensureAccount(
     return { mappingId: existing.data.mapping_id, accountId: existing.data.account_id, type, ...(card ? { card } : {}), created: false };
   }
 
-  const accountName = (account.name?.trim() || institutionName).slice(0, 80);
+  const accountName = (displayAccountName(account.name?.trim() ?? '') || institutionName).slice(0, 80);
   const createdAccount = await database.from('financial_accounts').insert({
     owner_id: connection.owner_id,
     name: accountName.length >= 2 ? accountName : 'Conta importada',
@@ -593,6 +593,9 @@ export async function synchronizeConnection(
       accountPage += 1;
     }
 
+    // D-070: cartão sem banco no nome (“gold”) herda o banco da conta que paga a fatura dele.
+    const inferred = await database.rpc('internal_infer_card_institutions', { p_owner: ownerId });
+    if (inferred.error) throw inferred.error;
     const finishedAt = new Date().toISOString();
     await database.from('sync_runs').update({
       status: 'succeeded', imported_accounts: importedAccounts, imported_transactions: importedTransactions,

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, sanitizedDescription, isStatementCarryover } from './pluggy-domain.ts';
+import { displayAccountName, accountTypeFromPluggy, cardLedgerSemantics, centsFromPluggy, institutionFromAccountName, ledgerSemantics, sanitizedDescription, isStatementCarryover } from './pluggy-domain.ts';
 
 test('converte valores Pluggy em centavos exatos', () => {
   assert.equal(centsFromPluggy(-42.9), -4290n);
@@ -76,6 +76,10 @@ test('banco da conta do MeuPluggy sai do nome da conta, sem chute quando ambígu
   // Nomes reais das contas do MeuPluggy (produto, sem dado pessoal); a lista padrão é KNOWN_BANKS.
   assert.equal(institutionFromAccountName('LATAM PASS ITAU VISA GOLD')?.id, 201);
   assert.equal(institutionFromAccountName('ITAU VISA PLATINUM')?.id, 201);
+  assert.equal(institutionFromAccountName('Nu Pagamentos S.A. - Instituição de Pagamento')?.id, 212);
+  assert.equal(institutionFromAccountName('gold'), undefined);
+  assert.equal(displayAccountName('Nu Pagamentos S.A. - Instituição de Pagamento'), 'Nubank');
+  assert.equal(displayAccountName('ITAU VISA PLATINUM'), 'ITAU VISA PLATINUM');
   assert.equal(institutionFromAccountName('itau')?.id, 201);
   assert.equal(institutionFromAccountName('CAIXA')?.id, 219);
   assert.equal(institutionFromAccountName('CAIXA SIM VISA INTERN CREDITO')?.id, 219);
