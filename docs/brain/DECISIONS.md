@@ -249,3 +249,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - A tela Cartões abre com um bloco por cartão: fatura atual com situação em relação a hoje (aberta · fecha em N dias, fechada · vence em N dias, vencida, paga), limite usado/livre e próxima fatura prevista. Ordem: vencida, fechada, aberta, paga; sem configuração por último, com o botão Configurar.
 - Resumo no topo: faturas em aberto, próximo vencimento e limite livre somado (no celular, só o primeiro e o último).
 - Tocar abre o detalhe em `#cards?card=<id>` (abas de fatura, lançamentos, vincular pagamento). Protótipo aprovado no canvas “Cartões: visão geral e detalhe”. Lógica em `cardOverview` (`lib/card-panels.ts`).
+
+## D-073 — Pix no crédito para si mesmo: cobrança vira transferência, juros viram despesa (22/11/2026)
+
+- O cartão cobra o Pix mais o custo do crédito; o dinheiro chega numa conta do titular (neutro, D-071). Contar a cobrança inteira como despesa duplicava o valor (ele é gasto de novo quando usado na conta de destino); receita + despesa inflaria os dois lados.
+- A cobrança vira transferência própria (neutra) e o app cria sozinho, no cartão e na mesma competência, “Juros do Pix no crédito” (despesa em Tarifas e juros) com a diferença entre cobrança e valor recebido, mais um ajuste neutro de mesmo valor e sinal oposto para o saldo do cartão continuar igual ao do banco. A fatura não muda.
+- Casa a entrada “Valor adicionado na conta por cartão de crédito” cuja saída leva o nome do titular com a cobrança do cartão do mesmo dia (até 1 dia), de valor entre 100% e 150% do recebido. Roda a cada importação; aplicado aos 3 casos do histórico.
+- Pix no crédito para outra pessoa continua como está: a cobrança no cartão é o gasto, já com juros.
