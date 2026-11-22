@@ -52,7 +52,8 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      # Aceita como variável (recomendado) ou como secret, para não travar quem cadastrou no lugar errado.
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF || secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
@@ -64,7 +65,7 @@ jobs:
           [ -n "$PROJECT_REF" ] || missing="$missing SUPABASE_PROJECT_REF"
           [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing="$missing SUPABASE_ACCESS_TOKEN"
           [ -n "$SUPABASE_DB_PASSWORD" ] || missing="$missing SUPABASE_DB_PASSWORD"
-          if [ -n "$missing" ]; then echo "::error::Faltando no environment ${{ matrix.environment }}:$missing"; exit 1; fi
+          if [ -n "$missing" ]; then echo "::error::Faltando no environment ${{ matrix.environment }}:$missing (confira se o nome está idêntico e se foi criado dentro do environment, não no repositório)"; exit 1; fi
       - name: Vincular projeto
         run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
       - name: Migrations pendentes
