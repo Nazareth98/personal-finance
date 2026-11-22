@@ -89,3 +89,13 @@ test('banco da conta do MeuPluggy sai do nome da conta, sem chute quando ambígu
   // O catálogo explícito ainda prefere o conector clássico ao Open Finance do mesmo banco.
   assert.equal(institutionFromAccountName('itau', [{ id: 601, name: 'Itaú', isOpenFinance: true }, { id: 201, name: 'Itaú' }])?.id, 201);
 });
+
+test('D-075: aplicação e resgate de investimento são aporte e resgate', () => {
+  const tx = (description: string, amount: number) => ({ id: 'x', accountId: 'a', description, amount, date: '2026-01-02' });
+  assert.equal(ledgerSemantics(tx('Aplicação RDB', -100)).nature, 'savings_contribution');
+  assert.equal(ledgerSemantics(tx('Resgate RDB', 100)).nature, 'savings_withdrawal');
+  assert.equal(ledgerSemantics(tx('Aplicação em Tesouro Direto', -100)).nature, 'savings_contribution');
+  assert.equal(ledgerSemantics(tx('Resgate CDB DI', 100)).nature, 'savings_withdrawal');
+  assert.equal(ledgerSemantics(tx('Valor recebido de Investimentos', 100)).nature, 'savings_withdrawal');
+  assert.equal(ledgerSemantics(tx('Supermercado', -100)).nature, 'expense');
+});

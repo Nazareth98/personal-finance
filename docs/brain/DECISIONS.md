@@ -261,3 +261,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - A Pluggy manda data e hora (UTC). `transactions.occurred_at` guarda o instante; Transações e Revisão mostram “22/11/2026 · 14:32” em horário de Brasília e ordenam pela hora dentro do dia. Sem hora (meia-noite UTC ou de Brasília), só a data.
 - Lançamento importado segue imutável: só o backend preenche `occurred_at`, e só quando ainda está vazio. Cada conexão faz uma sincronização completa uma vez (`times_backfilled_at`) para preencher o histórico.
+
+## D-075 — Investimentos como caixinhas (22/11/2026)
+
+- Aplicação e resgate de RDB, CDB, LCI/LCA, Tesouro e “Valor recebido de Investimentos” chegam como aporte/resgate (neutros), não como despesa/receita; ficam na Revisão só para escolher a caixinha.
+- Histórico corrigido: o resgate do CDB do Itaú foi ligado à caixinha (renomeada “Investimentos Itaú”), e os 46 movimentos de investimento do Nubank à nova caixinha “Investimentos Nubank”, com saldo inicial do que já estava aplicado antes do histórico. O rendimento (R$ 16,85 no Itaú, R$ 0,69 no Nubank) entrou no saldo inicial: o app ainda não separa rendimento como receita.

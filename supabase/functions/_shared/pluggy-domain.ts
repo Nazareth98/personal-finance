@@ -120,7 +120,11 @@ export function ledgerSemantics(transaction: PluggyTransaction): {
   if (/\b(?:credit card payment|pagamento (?:de )?fatura|pagamento (?:de )?cartao)\b/.test(evidence)) {
     return { nature: 'card_payment', reporting: 'neutral', categoryId: null, classificationStatus: 'automatic' };
   }
-  const savingsEvidence = /\b(?:cofrinhos?|caixinhas?|reservas?|savings?)\b/.test(evidence);
+  // D-075: investimentos também são aporte/resgate (dinheiro mudando de lugar), não despesa nem receita.
+  const savingsEvidence = /\b(?:cofrinhos?|caixinhas?|reservas?|savings?|rdb|cdb|lci|lca|tesouro|investimentos?)\b/.test(evidence);
+  if (amount > 0n && /\bvalor recebido de investimentos?\b/.test(evidence)) {
+    return { nature: 'savings_withdrawal', reporting: 'neutral', categoryId: 'savings', classificationStatus: 'automatic' };
+  }
   if (amount > 0n && savingsEvidence && /\b(?:resgate|withdrawal)\b/.test(evidence)) {
     return { nature: 'savings_withdrawal', reporting: 'neutral', categoryId: 'savings', classificationStatus: 'automatic' };
   }
