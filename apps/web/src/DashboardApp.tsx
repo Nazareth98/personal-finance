@@ -36,7 +36,7 @@ const navigation: { id: PageId; title: string; shortTitle?: string; icon: Lucide
   { id: 'overview', title: 'Visão geral', icon: DashboardIcon },
   { id: 'transactions', title: 'Transações', icon: TransactionsIcon },
   { id: 'accounts', title: 'Contas', icon: AccountsIcon },
-  { id: 'cards', title: 'Cartões e faturas', shortTitle: 'Cartões', icon: CardsIcon },
+  { id: 'cards', title: 'Cartões', shortTitle: 'Cartões', icon: CardsIcon },
   { id: 'budgets', title: 'Orçamentos', icon: BudgetsIcon },
   { id: 'savings', title: 'Caixinhas', icon: SavingsIcon },
   { id: 'categories', title: 'Categorias', icon: CategoriesIcon },

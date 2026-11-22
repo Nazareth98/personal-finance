@@ -21,7 +21,7 @@ test('navegação entre dez templates funciona com histórico hash',async ({page
   for(const {slug,title,navigationTitle=title} of [
     {slug:'transactions',title:'Transações'},
     {slug:'accounts',title:'Contas'},
-    {slug:'cards',title:'Cartões e faturas',navigationTitle:'Cartões'},
+    {slug:'cards',title:'Cartões',navigationTitle:'Cartões'},
     {slug:'budgets',title:'Orçamentos'},
     {slug:'savings',title:'Caixinhas'},
     {slug:'categories',title:'Categorias'},

@@ -5,7 +5,7 @@ const templates:{slug:PageName;title:string;navigationTitle?:string}[]=[
   {slug:'overview',title:'Visão geral'},
   {slug:'transactions',title:'Transações'},
   {slug:'accounts',title:'Contas'},
-  {slug:'cards',title:'Cartões e faturas',navigationTitle:'Cartões'},
+  {slug:'cards',title:'Cartões',navigationTitle:'Cartões'},
   {slug:'budgets',title:'Orçamentos'},
   {slug:'savings',title:'Caixinhas'},
   {slug:'categories',title:'Categorias'},

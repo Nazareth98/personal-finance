@@ -3,7 +3,8 @@ import type { CardStatement, FinancialAccount } from '@personal-finance/domain';
 import { Badge, Button, Card, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, StatusAlertIcon, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
-import { buildCardPanels, defaultTab, limitShare, type CardPanel, type StatementTab } from '../lib/card-panels';
+import { buildCardPanels, cardOverview, defaultTab, limitShare, type CardOverview, type CardPanel, type StatementTab } from '../lib/card-panels';
+import { useHashParams } from '../hooks/useHashParams';
 import { CreditCardForm } from '../components/CreditCardForm';
 import { CardPaymentForm } from '../components/CardPaymentForm';
 import type { PageProps } from './PageProps';
@@ -85,30 +86,70 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { pa
   </Card>;
 }
 
+const localToday = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; };
+
+/** D-072: um bloco por cartão na visão geral; tocar abre o detalhe (`#cards?card=<id>`). */
+function CardTile({ overview, institutions, onConfigure }: { overview: CardOverview; institutions?: readonly AccountInstitution[]; onConfigure: () => void }) {
+  const { panel, current } = overview;
+  const { account, card } = panel;
+  if (!card) return <section className="card-tile card-tile--pending" aria-labelledby={`tile-${account.id}`}>
+    <div className="card-tile__head"><InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="md" />
+      <div><strong id={`tile-${account.id}`}>{account.name}</strong><span className="card-status card-status--closed">Configuração pendente</span></div></div>
+    <p className="muted">As compras deste cartão só aparecem depois que você informar o dia de fechamento e o de vencimento da fatura.</p>
+    <div><Button onClick={onConfigure}>Configurar</Button></div>
+  </section>;
+  const share = overview.limitCents === undefined ? undefined : limitShare(panel.committedCents, overview.limitCents);
+  const billName = current ? `Fatura de ${formatCompetence(current.competence).toLowerCase()}` : 'Fatura';
+  return <a className="card-tile" href={`#cards?card=${account.id}`} aria-label={`${account.name}: ${billName}, ${formatCentsBRL(overview.currentCents)}, ${overview.statusLabel}. Ver detalhes`}>
+    <div className="card-tile__head"><InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="md" />
+      <div><strong>{account.name}</strong><span className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</span></div></div>
+    <div className="card-tile__bill"><span className="muted">{billName}</span>
+      <div><strong className="card-tile__amount">{formatCentsBRL(overview.currentCents)}</strong><span className={`card-status card-status--${overview.tone}`}>{overview.statusLabel}</span></div></div>
+    {share && overview.limitCents !== undefined && overview.freeCents !== undefined ? <div className="card-tile__limit">
+      <div className="card-tile__limit-row"><span className="muted">Limite usado <strong>{share.label}</strong></span><span className="muted">Livre <strong>{formatCentsBRL(overview.freeCents)}</strong></span></div>
+      <progress className={`budget-progress ${share.basisPoints >= 9000 ? 'budget-progress--exceeded' : share.basisPoints >= 7500 ? 'budget-progress--warning' : ''}`} max={10000} value={Math.min(share.basisPoints, 10000)} aria-hidden="true" />
+      <span className="muted card-tile__limit-total">{formatCentsBRL(panel.committedCents)} de {formatCentsBRL(overview.limitCents)}</span>
+    </div> : <p className="muted card-tile__limit-total">Limite não informado</p>}
+    <div className="card-tile__foot"><span className="muted">{overview.nextProjectedCents !== undefined ? <>Próxima fatura (prevista) <strong>{formatCentsBRL(overview.nextProjectedCents)}</strong></> : 'Sem próxima fatura prevista'}</span>
+      <span className="card-tile__more">Detalhes<Icon icon={ChevronDownIcon} size="sm" /></span></div>
+  </a>;
+}
+
 export function CardsPage({ ledger, headerAction }: PageProps) {
+  const [params] = useHashParams();
   const [selectedCard, setSelectedCard] = useState<FinancialAccount | null>(null);
   const [selectedStatement, setSelectedStatement] = useState<CardStatement | null>(null);
   if (ledger) {
     const data = ledger.data;
     const panels = buildCardPanels({ accounts: data?.accounts ?? [], cards: data?.creditCards ?? [], statements: data?.cardStatements ?? [],
       entries: data?.cardStatementEntries ?? [], transactions: data?.transactions ?? [], installments: data?.cardInstallments ?? [] });
-    const tabs = panels.flatMap(panel => panel.tabs);
-    const totalOpen = tabs.reduce((sum, tab) => sum + tab.openCents, 0n);
-    const next = tabs.filter(tab => tab.statement && tab.openCents > 0n).sort((a, b) => a.statement!.dueDate.localeCompare(b.statement!.dueDate))[0];
-    const projected = (data?.cardInstallments ?? []).filter(installment => installment.status === 'projected');
-    const lastProjected = projected.map(item => item.dueCompetence).sort().at(-1);
-    const totalProjected = projected.reduce((sum, installment) => sum + installment.amountCents, 0n);
+    const institutions = data?.institutions;
+    const detail = panels.find(panel => panel.account.id === params.get('card'));
+    const today = localToday();
+    const overviews = panels.map(panel => cardOverview(panel, today)).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+    const totalOpen = panels.flatMap(panel => panel.tabs).reduce((sum, tab) => sum + tab.openCents, 0n);
+    const openCards = panels.filter(panel => panel.tabs.some(tab => tab.openCents > 0n)).length;
+    const next = overviews.find(item => item.current?.statement && item.current.openCents > 0n);
+    const withLimit = overviews.filter(item => item.limitCents !== undefined);
+    const limitTotal = withLimit.reduce((sum, item) => sum + item.limitCents!, 0n);
+    const freeTotal = withLimit.reduce((sum, item) => sum + item.freeCents!, 0n);
+    const configured = panels.filter(panel => panel.card).length;
     return <div className="template-page">
-      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Cada compra conta no mês em que a fatura vence. Pagar a fatura não conta como gasto de novo.</p></div><div className="template-heading__actions">{headerAction}</div></div>
-      <div className="template-metrics">
-        <MetricCard label="Pendente em faturas" value={formatCentsBRL(totalOpen)} supportingText="Compras menos estornos e pagamentos"
-          info="O que ainda falta pagar nas faturas abertas. A linha “Total da fatura anterior” do banco é só informativa e não entra na conta."/>
-        <MetricCard label="Próxima fatura" value={formatCentsBRL(next?.openCents ?? 0n)} supportingText={next ? `${formatCompetence(next.competence)} · vence em ${formatLocalDate(next.statement!.dueDate)}` : 'Nenhuma fatura pendente'}/>
-        <MetricCard label="Parcelas futuras" value={formatCentsBRL(totalProjected)} supportingText={lastProjected ? `${projected.length} ${projected.length === 1 ? 'parcela' : 'parcelas'} até ${formatCompetence(lastProjected)} · fora do realizado` : 'Nenhuma parcela prevista'}/>
-      </div>
+      <div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões</h1><p className="muted">{detail ? 'Faturas, limite e lançamentos de um cartão.' : 'Todos os cartões num relance. Toque em um para ver a fatura em detalhe.'}</p></div><div className="template-heading__actions">{headerAction}</div></div>
       <DataState status={ledger.status === 'idle' ? 'loading' : ledger.status} kind="table" rows={3} columns={4} errorDescription={ledger.error} onRetry={() => void ledger.reload()}>
-        {panels.length ? panels.map(panel => <CardPanelView key={panel.account.id} panel={panel} institutions={ledger.data?.institutions} onConfigure={() => setSelectedCard(panel.account)} onLinkPayment={setSelectedStatement}/>)
-          : <Card><EmptyState title="Seus cartões aparecem aqui" description="Conecte o banco do cartão: faturas, compras e parcelas chegam na sincronização." action={<a className="ui-button ui-button--primary ui-button--md" href="#connections">Conectar banco</a>}/></Card>}
+        {detail ? <>
+          <a className="card-back" href="#cards"><Icon icon={ChevronDownIcon} size="sm" />Todos os cartões</a>
+          <CardPanelView panel={detail} institutions={institutions} onConfigure={() => setSelectedCard(detail.account)} onLinkPayment={setSelectedStatement}/>
+        </> : panels.length ? <>
+          <div className="template-metrics card-metrics">
+            <MetricCard label="Faturas em aberto" value={formatCentsBRL(totalOpen)} supportingText={`${openCards} de ${configured} ${configured === 1 ? 'cartão' : 'cartões'}`}
+              info="O que ainda falta pagar nas faturas abertas e fechadas. A linha “Total da fatura anterior” do banco é só informativa e não entra na conta."/>
+            <MetricCard label="Próximo vencimento" value={next?.current?.statement ? `${formatLocalDate(next.current.statement.dueDate).slice(0, 5)} · ${formatCentsBRL(next.currentCents)}` : 'Nenhum'} supportingText={next ? next.panel.account.name : 'Nenhuma fatura pendente'}/>
+            <MetricCard label="Limite livre" value={formatCentsBRL(freeTotal)} supportingText={withLimit.length ? `de ${formatCentsBRL(limitTotal)} somados` : 'Limites não informados'}
+              info="Limite total menos faturas em aberto e parcelas que ainda vão cair."/>
+          </div>
+          <div className="card-grid">{overviews.map(item => <CardTile key={item.panel.account.id} overview={item} institutions={institutions} onConfigure={() => setSelectedCard(item.panel.account)} />)}</div>
+        </> : <Card><EmptyState title="Seus cartões aparecem aqui" description="Conecte o banco do cartão: faturas, compras e parcelas chegam na sincronização." action={<a className="ui-button ui-button--primary ui-button--md" href="#connections">Conectar banco</a>}/></Card>}
       </DataState>
       <CreditCardForm account={selectedCard} onClose={() => setSelectedCard(null)} ledger={ledger}/>
       <CardPaymentForm statement={selectedStatement} onClose={() => setSelectedStatement(null)} ledger={ledger}/>
@@ -116,5 +157,5 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
   }
   const billed = demoInvoices.reduce((sum, item) => sum + item.purchasesCents, 0n);
   const paid = demoInvoices.reduce((sum, item) => sum + item.paymentsCents, 0n);
-  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões e faturas</h1><p className="muted">Compras, pagamentos e faturas. Pagar a fatura não conta como gasto de novo.</p></div><div className="template-heading__actions"><Badge>Dados fictícios</Badge>{headerAction}</div></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
+  return <div className="template-page"><div className="template-heading"><div><p className="eyebrow">CRÉDITO</p><h1>Cartões</h1><p className="muted">Compras, pagamentos e faturas. Pagar a fatura não conta como gasto de novo.</p></div><div className="template-heading__actions"><Badge>Dados fictícios</Badge>{headerAction}</div></div><div className="template-metrics"><MetricCard label="Compras faturadas" value={formatCentsBRL(billed)} supportingText="Exemplo de composição de faturas"/><MetricCard label="Pagamentos realizados" value={formatCentsBRL(paid)} supportingText="Liquidação patrimonial, não despesa"/><MetricCard label="Total pendente" value={formatCentsBRL(billed - paid)} supportingText="Valores ilustrativos"/></div><Card className="template-table-card"><DataTable ariaLabel="Faturas fictícias" columns={demoColumns} rows={demoInvoices} getRowKey={item => item.id}/></Card></div>;
 }

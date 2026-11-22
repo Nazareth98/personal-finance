@@ -67,3 +67,32 @@ export function limitShare(committedCents: bigint, limitCents: bigint): { label:
   const permille = limitCents > 0n ? (committedCents * 1000n) / limitCents : 0n;
   return { label: `${permille / 10n},${permille % 10n}%`, basisPoints: Number(permille * 10n) };
 }
+
+export type BillTone = 'open' | 'closed' | 'overdue' | 'paid' | 'projected';
+export type CardOverview = { panel: CardPanel; current?: StatementTab; currentCents: bigint; statusLabel: string; tone: BillTone; nextProjectedCents?: bigint;
+  limitCents?: bigint; freeCents?: bigint; sortKey: string };
+
+const daysBetween = (from: string, to: string) => Math.round((Date.UTC(+to.slice(0, 4), +to.slice(5, 7) - 1, +to.slice(8, 10)) - Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, +from.slice(8, 10))) / 86_400_000);
+const inDays = (days: number, verb: string) => days === 0 ? `${verb} hoje` : `${verb} em ${days} ${days === 1 ? 'dia' : 'dias'}`;
+
+/**
+ * Resumo de um cartão para a visão geral (D-072): a fatura atual (a mesma aba que o detalhe abre), sua situação em
+ * relação a hoje, limite usado/livre e a próxima fatura. `sortKey` põe primeiro quem vence antes; sem configuração, por último.
+ */
+export function cardOverview(panel: CardPanel, today: string): CardOverview {
+  const current = defaultTab(panel.tabs);
+  const limitCents = panel.card?.creditLimitCents;
+  const limits = limitCents === undefined ? {} : { limitCents, freeCents: limitCents - panel.committedCents };
+  const nextTab = current ? panel.tabs.find(tab => tab.competence > current.competence) : undefined;
+  const next = nextTab ? { nextProjectedCents: nextTab.statement ? nextTab.openCents + nextTab.projectedCents : nextTab.projectedCents } : {};
+  if (!panel.card) return { panel, currentCents: 0n, statusLabel: 'Configuração pendente', tone: 'projected', sortKey: '9' };
+  if (!current) return { panel, currentCents: 0n, statusLabel: 'Sem fatura ainda', tone: 'projected', sortKey: '8', ...limits };
+  const statement = current.statement;
+  if (!statement) return { panel, current, currentCents: current.projectedCents, statusLabel: 'Prevista', tone: 'projected', sortKey: `5${current.competence}`, ...limits, ...next };
+  const base = { panel, current, currentCents: current.status === 'paid' ? current.purchasesCents - current.refundsCents : current.openCents, ...limits, ...next };
+  if (current.status === 'paid') return { ...base, statusLabel: 'Paga', tone: 'paid', sortKey: `4${statement.dueDate}` };
+  if (today < statement.closingDate) return { ...base, statusLabel: `Aberta · ${inDays(daysBetween(today, statement.closingDate), 'fecha')}`, tone: 'open', sortKey: `2${statement.dueDate}` };
+  if (today <= statement.dueDate) return { ...base, statusLabel: `Fechada · ${inDays(daysBetween(today, statement.dueDate), 'vence')}`, tone: 'closed', sortKey: `1${statement.dueDate}` };
+  const late = daysBetween(statement.dueDate, today);
+  return { ...base, statusLabel: `Vencida há ${late} ${late === 1 ? 'dia' : 'dias'}`, tone: 'overdue', sortKey: `0${statement.dueDate}` };
+}

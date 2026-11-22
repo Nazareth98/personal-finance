@@ -733,3 +733,46 @@ h2 { font-size: 18px; margin-bottom: 6px; }
 }
 .help-panel .ui-dialog__footer .ui-button{white-space:nowrap}
 @media (max-width: 420px){.help-panel .ui-dialog__footer .ui-button svg{display:none}}
+
+/* D-072: Cartões — visão geral com um bloco por cartão; tocar abre o detalhe */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:var(--spacing-4)}
+.card-tile{display:grid;gap:var(--spacing-4);align-content:start;padding:var(--spacing-6);border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface);color:inherit;text-decoration:none;transition:border-color var(--motion-base) ease,box-shadow var(--motion-base) ease}
+a.card-tile:hover{border-color:var(--color-action-primary);box-shadow:var(--shadow-sm)}
+a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px}
+.card-tile p{margin:0}
+.card-tile--pending{border-style:dashed;border-color:var(--color-status-warning)}
+.card-tile__head{display:flex;align-items:center;gap:var(--spacing-3);min-width:0}
+.card-tile__head>div{display:grid;gap:2px;min-width:0}
+.card-tile__head strong{font-size:var(--font-size-base);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-tile__head .muted{font-size:var(--font-size-xs)}
+.card-tile__bill{display:grid;gap:var(--spacing-1)}
+.card-tile__bill .muted{font-size:var(--font-size-sm)}
+.card-tile__bill>div{display:grid;justify-items:start;gap:var(--spacing-2)}
+.card-tile__amount{font-size:var(--font-size-2xl);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card-tile__limit{display:grid;gap:var(--spacing-2)}
+.card-tile__limit-row{display:flex;justify-content:space-between;gap:var(--spacing-2);flex-wrap:wrap;font-size:var(--font-size-sm)}
+.card-tile__limit-row strong{color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.card-tile__limit-total{font-size:var(--font-size-xs);font-variant-numeric:tabular-nums}
+.card-tile__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2);padding-top:var(--spacing-3);border-top:1px solid var(--color-border-default);font-size:var(--font-size-sm)}
+.card-tile__foot strong{color:var(--color-text-primary);font-variant-numeric:tabular-nums;white-space:nowrap}
+.card-tile__more{display:inline-flex;align-items:center;gap:2px;flex:none;color:var(--color-text-accent);font-weight:600}
+.card-tile__more svg{transform:rotate(-90deg)}
+.card-status{display:inline-flex;align-items:center;min-height:22px;padding:0 var(--spacing-2);border-radius:999px;background:var(--color-bg-subtle);color:var(--color-text-secondary);font-size:var(--font-size-xs);font-weight:600;white-space:nowrap}
+.card-status--open{color:var(--color-text-accent)}
+.card-status--closed{color:var(--color-status-warning)}
+.card-status--overdue{color:var(--color-status-danger)}
+.card-status--paid{color:var(--color-status-success)}
+.budget-progress--warning::-webkit-progress-value{background:var(--color-status-warning)}
+.budget-progress--warning::-moz-progress-bar{background:var(--color-status-warning)}
+.card-back{display:inline-flex;align-items:center;gap:var(--spacing-1);width:fit-content;min-height:44px;font-weight:600;text-decoration:none}
+.card-back svg{transform:rotate(90deg)}
+@media (max-width: 640px){
+  .card-tile{padding:var(--spacing-4);gap:var(--spacing-3)}
+  .card-tile__amount{font-size:var(--font-size-xl)}
+  .card-metrics{grid-template-columns:1fr 1fr;gap:var(--spacing-3)}
+  .card-metrics>:nth-child(2){display:none}
+  .card-metrics .ui-metric-card{padding:var(--spacing-4);gap:var(--spacing-1)}
+  .card-metrics .ui-metric-card__icon{display:none}
+  .card-metrics .ui-metric-card__value{font-size:var(--font-size-lg)}
+  .card-metrics .ui-metric-card__label{font-size:var(--font-size-xs)}
+}

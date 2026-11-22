@@ -243,3 +243,9 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 ## D-071 — Pix no crédito para a própria conta (22/11/2026)
 
 - Pix pago com o cartão e enviado para outra conta do próprio titular: a saída já ficava neutra (D-063/D-070), mas a chegada contava como receita. Agora a chegada (mesmo valor, até 3 dias, outra conta conectada) também fica neutra; quem conta é a compra na fatura. Uma chegada por saída.
+
+## D-072 — Cartões: visão geral primeiro, detalhe ao tocar (22/11/2026)
+
+- A tela Cartões abre com um bloco por cartão: fatura atual com situação em relação a hoje (aberta · fecha em N dias, fechada · vence em N dias, vencida, paga), limite usado/livre e próxima fatura prevista. Ordem: vencida, fechada, aberta, paga; sem configuração por último, com o botão Configurar.
+- Resumo no topo: faturas em aberto, próximo vencimento e limite livre somado (no celular, só o primeiro e o último).
+- Tocar abre o detalhe em `#cards?card=<id>` (abas de fatura, lançamentos, vincular pagamento). Protótipo aprovado no canvas “Cartões: visão geral e detalhe”. Lógica em `cardOverview` (`lib/card-panels.ts`).
