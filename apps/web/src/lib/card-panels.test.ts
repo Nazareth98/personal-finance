@@ -22,7 +22,7 @@ const base = {
 test('painel compõe fatura materializada, fatura prevista e limite comprometido', () => {
   const [panel, ...rest] = buildCardPanels(base);
   assert.equal(rest.length, 0);
-  assert.deepEqual(panel!.tabs.map(tab => [tab.competence, tab.status, tab.openCents, tab.projectedCents]), [['2026-11', 'partial', 10000n, 0n], ['2026-12', 'projected', 0n, 12000n]]);
+  assert.deepEqual(panel!.tabs.map(tab => [tab.competence, tab.status, tab.openCents, tab.projectedCents]), [['2026-11', 'open', 10000n, 0n], ['2026-12', 'projected', 0n, 12000n]]);
   assert.deepEqual(panel!.tabs[0]!.lines.map(line => [line.detail, line.amountCents, line.credit]), [['Compra parcelada', 12000n, false], ['Estorno', 2000n, true]]);
   assert.equal(panel!.tabs[1]!.lines[0]!.description, 'Notebook 2/2');
   assert.equal(panel!.committedCents, 22000n);
