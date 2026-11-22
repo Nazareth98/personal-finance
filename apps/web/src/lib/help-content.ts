@@ -31,7 +31,7 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   cards: {
     title: "Cartões", subtitle: "Faturas, limite e parcelas.",
     shows: "Uma aba por cartão com a fatura, o que falta pagar, o uso do limite e as parcelas que ainda vão cair.",
-    calc: ["A fatura leva o mês do **vencimento**: compras de 09/09 a 08/10 vencem em 15/10.", "**Pendente** = compras − estornos − pagamentos ligados.", "A linha “Total da fatura anterior” do banco é só informativa e não conta.", "Parcelas futuras aparecem como previstas até o banco trazer o lançamento."],
+    calc: ["As compras de um cartão só entram depois que ele tem **dia de fechamento e de vencimento**. Sem isso o app não sabe em que fatura cada compra cai; ao salvar, ele busca as compras no banco.", "A fatura leva o mês do **vencimento**: compras de 09/09 a 08/10 vencem em 15/10.", "**Pendente** = compras − estornos − pagamentos ligados.", "A linha “Total da fatura anterior” do banco é só informativa e não conta.", "Parcelas futuras aparecem como previstas até o banco trazer o lançamento."],
     actions: ["**Vincular pagamento** quando o débito na conta não foi ligado sozinho.", "Configurar dia de fechamento, vencimento e limite.", "Abrir “Lançamentos” para ver as compras da fatura."],
     terms: ["Fatura", "Pagamento de fatura", "Competência"]
   },

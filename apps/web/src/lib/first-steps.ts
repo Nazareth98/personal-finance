@@ -20,7 +20,7 @@ export function buildFirstSteps(ledger: LedgerData, connections: ConnectionsData
       href: '#review', cta: 'Abrir Revisão',
       // Basta já ter revisado algo: a fila sempre recebe itens novos e não deve prender o passo (D-067).
       done: ledger.reviewHistory.length > 0 || (ledger.transactions.length > 0 && pendingReviews === 0) },
-    { id: 'cards', title: 'Conferir os cartões', description: 'Dia de fechamento e de vencimento de cada cartão, para a fatura cair no mês certo.',
+    { id: 'cards', title: 'Conferir os cartões', description: 'Informe o dia de fechamento e o de vencimento de cada cartão. Sem isso as compras do cartão não aparecem; ao salvar, o app busca as compras no banco.',
       href: '#cards', cta: 'Abrir Cartões', done: cardAccounts.length > 0 && cardAccounts.every(account => configured.has(account.id)) },
     { id: 'savings', title: 'Criar caixinhas', description: 'Reservas com saldo, objetivo e prazo. Aportes e resgates não contam como gasto.',
       href: '#savings', cta: 'Abrir Caixinhas', done: ledger.savingsBoxes.length > 0 },

@@ -89,6 +89,8 @@ No Supabase:
 
 Contas correntes e cartões chegam sozinhos na primeira sincronização. A partir daí, siga “Primeiros passos” na Visão geral e use o botão **?** de cada tela.
 
+> **Importante sobre cartões:** as compras de um cartão só aparecem depois que ele tem **dia de fechamento e dia de vencimento** da fatura. Alguns bancos já mandam essas datas; se um cartão aparecer em **Cartões** com “Configuração pendente”, toque em **Configurar** e informe os dois dias (estão na fatura ou no app do banco). Ao salvar, o app busca as compras na hora.
+
 ## Atualizações
 
 Automáticas: todo dia, às 6h, sua cópia busca as novidades do projeto original e o app se atualiza. Para buscar na hora: **Actions** › **Sincronizar com o projeto original** › **Run workflow**. Não edite arquivos na sua cópia, senão ela deixa de se atualizar sozinha.

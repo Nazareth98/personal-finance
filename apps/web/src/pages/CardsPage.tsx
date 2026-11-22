@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import type { CardStatement, FinancialAccount } from '@personal-finance/domain';
-import { Badge, Button, Card, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, Card, CardsIcon, ChevronDownIcon, DataState, DataTable, EmptyState, Icon, MetricCard, Tabs, StatusAlertIcon, type DataTableColumn } from '@personal-finance/ui';
 import { demoInvoices, invoiceOpenCents, type DemoInvoice } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence, formatLocalDate } from '../lib/demo-transactions';
 import { buildCardPanels, defaultTab, limitShare, type CardPanel, type StatementTab } from '../lib/card-panels';
@@ -39,8 +39,9 @@ function CardPanelView({ panel, onConfigure, onLinkPayment, institutions }: { pa
     <div className="card-panel__top">
       <InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="lg" />
       <div className="card-panel__heading"><h2 id={titleId}>{account.name}</h2>{card ? <p className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</p> : <Badge>Configuração pendente</Badge>}</div>
-      <Button variant="secondary" onClick={onConfigure}>Configurar</Button>
+      <Button variant={card ? 'secondary' : 'primary'} onClick={onConfigure}>Configurar</Button>
     </div>
+    {!card && <p className="sync-status sync-status--failed card-panel__pending"><Icon icon={StatusAlertIcon} size="sm" /><span>As compras deste cartão só aparecem depois que você informar o dia de fechamento e o de vencimento da fatura. Assim que salvar, o app busca as compras no banco.</span></p>}
     {card && <div className="card-panel__limit">
       <p className="card-panel__row"><span className="muted">Limite comprometido</span><strong>{share && limit !== undefined ? `${formatCentsBRL(panel.committedCents)} de ${formatCentsBRL(limit)} · ${share.label}` : 'Limite não informado'}</strong></p>
       {share && <progress className={`budget-progress ${share.basisPoints > 10000 ? 'budget-progress--exceeded' : ''}`} max={10000} value={Math.min(share.basisPoints, 10000)} aria-label={`Limite comprometido: ${share.label}`} />}
