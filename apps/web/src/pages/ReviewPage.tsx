@@ -12,6 +12,7 @@ import { TransactionFilterFields, natureLabels } from '../components/Transaction
 import type { PageProps } from './PageProps';
 import { eventSortKey } from '../lib/transaction-time';
 import { DateTime } from '../components/DateTime';
+import { InstitutionLogo } from '../components/InstitutionLogo';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
@@ -28,11 +29,27 @@ function Amount({ row }: { row: TransactionContract }) {
   return <FinancialValue value={formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)} tone={row.amountCents < 0n ? 'negative' : 'positive'} showSign/>;
 }
 
+type PendingSort = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc' | 'description';
+const pendingSortOptions: { value: PendingSort; label: string }[] = [
+  { value: 'date-desc', label: 'Data (mais recente)' }, { value: 'date-asc', label: 'Data (mais antiga)' },
+  { value: 'amount-desc', label: 'Valor (maior)' }, { value: 'amount-asc', label: 'Valor (menor)' }, { value: 'description', label: 'Descrição (A–Z)' }
+];
+const magnitude = (row: TransactionContract) => row.amountCents < 0n ? -row.amountCents : row.amountCents;
+function comparePending(a: TransactionContract, b: TransactionContract, order: PendingSort): number {
+  if (order === 'date-asc') return eventSortKey(a).localeCompare(eventSortKey(b));
+  if (order === 'amount-desc') return magnitude(b) > magnitude(a) ? 1 : magnitude(b) < magnitude(a) ? -1 : 0;
+  if (order === 'amount-asc') return magnitude(a) > magnitude(b) ? 1 : magnitude(a) < magnitude(b) ? -1 : 0;
+  if (order === 'description') return a.description.localeCompare(b.description, 'pt-BR');
+  return eventSortKey(b).localeCompare(eventSortKey(a));
+}
+
 export function ReviewPage({ ledger, headerAction }: PageProps) {
   const [selected, setSelected] = useState<TransactionContract | null>(null);
   const [confirming, setConfirming] = useState<string>();
   const [params, setParams] = useHashParams();
   const [sort, setSort] = useState<SortState>({ key: 'date', direction: 'desc' });
+  // Pendências são uma lista agrupada (não tabela): a ordem vem deste seletor, com as mesmas opções da tabela de Transações.
+  const [pendingSort, setPendingSort] = useState<PendingSort>('date-desc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize, pageSizeOptions] = usePageSize('review', 20);
   const { notify } = useToast();
@@ -68,7 +85,9 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => eventSortKey(row), cell: row => <DateTime row={row} /> },
     { mobile: 'primary', key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', sortable: true, sortValue: row => row.description, cell: row => {
       const detail = evidence(classifications.get(row.id));
-      return <><strong>{row.description}</strong><br/><span className="muted">{accounts.get(row.accountId) ?? 'Conta'}{detail ? ` · ${detail}` : ''}</span></>;
+      return <span className="ledger-description"><strong>{row.description}</strong><span className="muted ledger-description__account">
+        <InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />
+        {accounts.get(row.accountId) ?? 'Conta'}{detail ? ` · ${detail}` : ''}</span></span>;
     } },
     { mobile: 'detail', key: 'nature', header: 'Natureza', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={row.reporting === 'income' ? 'income' : row.reporting === 'expense' ? 'expense' : 'transfer'}>{natureLabels[row.nature]}</Badge> },
     { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: row => categoryName(row) ?? <span className="muted">Não se aplica</span> },
@@ -81,7 +100,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const reasonCounts = { links: matching.filter(row => view === 'pending' && reasonOf(row) === 'links').length, categories: 0 };
   reasonCounts.categories = view === 'pending' ? matching.length - reasonCounts.links : 0;
   const filtered = view === 'pending'
-    ? matching.filter(row => !reason || reasonOf(row) === reason).sort((a, b) => eventSortKey(b).localeCompare(eventSortKey(a)) || a.id.localeCompare(b.id))
+    ? matching.filter(row => !reason || reasonOf(row) === reason).sort((a, b) => comparePending(a, b, pendingSort) || a.id.localeCompare(b.id))
     : sortRows(matching, sort, columns);
   const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / pageSize)));
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -119,6 +138,8 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
       <TransactionFilterFields collapsible toolbar={reasonChips} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
         extraActiveCount={view === 'history' && historyFilter !== 'all' ? 1 : 0}
         accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={reviewNatures}>
+        {view === 'pending' && <Select label="Ordenar por" value={pendingSort} options={pendingSortOptions}
+          onChange={event => { setPendingSort(event.target.value as PendingSort); setPage(1); }} />}
         {view === 'history' && <Select label="Filtrar histórico" value={historyFilter === 'all' ? '' : historyFilter} options={[
           { value: '', label: 'Todos' }, { value: 'automatic', label: 'Automáticos' }, { value: 'confirmed', label: 'Confirmados' }
         ]} onChange={event => change('status', event.target.value)} />}
@@ -142,7 +163,8 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
                   return <li key={row.id} className={`review-item review-item--${group.reason}`}>
                     <span className="muted review-item__date"><DateTime row={row} /></span>
                     <span className="review-item__main"><strong>{row.description}</strong>
-                      <span className="muted">{accounts.get(row.accountId) ?? 'Conta'} · <span className="review-item__nature">{natureLabels[row.nature]}</span></span></span>
+                      <span className="muted ledger-description__account"><InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />
+                        {accounts.get(row.accountId) ?? 'Conta'} · <span className="review-item__nature">{natureLabels[row.nature]}</span></span></span>
                     {group.reason === 'categories' && <span className="review-item__suggestion">{suggestion
                       ? <><span>Sugestão: <strong>{categories.get(suggestion) ?? 'Categoria'}</strong></span><span className="muted">{evidence(classification)}</span></>
                       : <span className="muted">Sem sugestão</span>}</span>}
