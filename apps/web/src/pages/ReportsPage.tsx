@@ -4,14 +4,12 @@ import { monthlyReport } from '../lib/demo-finance';
 import { demoTransactions,formatCentsBRL,formatCompetence } from '../lib/demo-transactions';
 import {demoCashFlow,demoNetTrend,demoExpenseSlices} from '../lib/demo-charts';
 import { addCompetenceMonths, buildSixMonthForecast, ledgerTotals, type ForecastMonth } from '@personal-finance/domain';
-import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
 
-function nextCompetence(transactions: NonNullable<LedgerState['data']>['transactions']): string {
-  const latest = transactions.reduce((value, row) => row.competence > value ? row.competence : value, '');
-  if (latest) return addCompetenceMonths(latest, 1);
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+/** A previsão começa no mês seguinte ao atual; a média usa os seis meses até o atual. */
+export function forecastStartCompetence(now: Date = new Date()): string {
+  const current = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  return addCompetenceMonths(current, 1);
 }
 
 const forecastColumns: DataTableColumn<ForecastMonth>[] = [
@@ -38,7 +36,7 @@ function ForecastReport({ forecast, extraordinaryIncome, realizedIncome, periodC
   const tight = month && month.netCents >= 0n && month.recurringIncomeCents > 0n && month.netCents * 100n < month.recurringIncomeCents * 5n;
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">ANÁLISE</p><h1>Relatórios</h1>
-      <p className="muted">Uma estimativa dos próximos seis meses, com base no que se repete todo mês. Entradas fora do comum não entram.</p></div>
+      <p className="muted">Uma estimativa dos próximos seis meses, com base no que se repetiu nos últimos seis. Entradas fora do comum não entram.</p></div>
       <div className="template-heading__actions">{headerAction}</div></div>
     <section className="summary-strip" aria-label="Resumo da previsão">
       <div><span className="muted">Receita recorrente média</span><strong className="transaction-amount--income">{signed(first?.recurringIncomeCents ?? 0n)}</strong>
@@ -77,7 +75,7 @@ function ForecastReport({ forecast, extraordinaryIncome, realizedIncome, periodC
     <Card className="template-table-card"><div className="template-table-card__header"><h2>Tabela da previsão</h2><p className="muted">Os mesmos valores do gráfico, mês a mês.</p></div>
       <DataTable ariaLabel="Previsão financeira de seis meses" columns={forecastColumns} rows={forecast} getRowKey={row => row.competence}/></Card>
     <details className="ui-card report-criteria"><summary>Como a previsão é calculada</summary>
-      <p className="muted">Receitas extraordinárias alteram o realizado e os tetos do mês em que ocorreram, mas nunca a média futura. Despesas recorrentes exigem ocorrência em pelo menos duas das seis competências anteriores. Gastos planejados usam o maior valor entre essa média e os tetos definidos; parcelas e aportes são somados separadamente.</p>
+      <p className="muted">A previsão começa no próximo mês e usa como base os seis meses até o atual, mesmo que haja compras já lançadas em faturas futuras. Receitas extraordinárias alteram o realizado e os tetos do mês em que ocorreram, mas nunca a média futura. Despesas recorrentes exigem ocorrência em pelo menos duas das seis competências anteriores. Gastos planejados usam o maior valor entre essa média e os tetos definidos; parcelas e aportes são somados separadamente.</p>
     </details>
   </div>;
 }
@@ -88,7 +86,7 @@ export function ReportsPage({ ledger, headerAction }: PageProps) {
     const rows = data?.transactions ?? [];
     const totals = ledgerTotals(rows);
     const periods = new Set(rows.map(row => row.competence));
-    const startCompetence = nextCompetence(rows);
+    const startCompetence = forecastStartCompetence();
     const forecast = buildSixMonthForecast({ transactions: rows, budgets: data?.budgets ?? [], installments: data?.cardInstallments ?? [],
       savingsBoxes: data?.savingsBoxes ?? [], savingsMovements: data?.savingsMovements ?? [], startCompetence });
     const extraordinaryIncome = rows.filter(row => row.reporting === 'income' && row.categoryId === 'extraordinary_income')

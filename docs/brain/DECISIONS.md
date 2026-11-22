@@ -278,3 +278,7 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - O limite usado passa a ser `limite − disponível`, como o banco informa (`creditData.availableCreditLimit`), gravado a cada sincronização em `credit_cards.available_limit_cents`/`limit_updated_at`. A soma de faturas em aberto + parcelas previstas fica só como estimativa, identificada na tela.
 - O Itaú envia um `installmentId` diferente a cada parcela da mesma compra, o que multiplicava as parcelas previstas. A compra parcelada agora é agrupada por cartão + descrição sem “n/N” + total de parcelas + valor da parcela.
 - Parcelas previstas de faturas já passadas são ignoradas no limite. As parcelas previstas existentes foram apagadas (dado derivado) para a sincronização recriá-las.
+
+## D-078 — Previsão começa pelo calendário, não pelo último lançamento (22/11/2026)
+
+- A previsão de seis meses começava no mês seguinte ao lançamento mais recente. Compras no cartão já lançadas em faturas futuras empurravam o início (ex.: fev/2027) e a média de seis meses passava a incluir meses vazios, reduzindo receita e gastos. Agora a previsão começa no mês seguinte ao atual, e a média usa os seis meses até o atual.
