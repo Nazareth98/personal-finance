@@ -596,8 +596,9 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
   await login(page);
   await page.goto('/#cards');
   // D-072: a tela abre na visão geral; o bloco do cartão leva ao detalhe com as faturas.
-  await expect(page.getByRole('link', { name: /^Cartão principal: Fatura de nov\/2026/ })).toBeVisible();
-  await page.getByRole('link', { name: /^Cartão principal:/ }).click();
+  const cardLink = page.getByRole('link', { name: /Cartão principal.*Fatura de nov\/2026/ });
+  await expect(cardLink).toBeVisible();
+  await cardLink.click();
   await expect(page).toHaveURL(/#cards\?card=/);
   const statements = page.getByRole('tablist', { name: 'Faturas do Cartão principal' });
   await expect(statements.getByRole('tab', { name: /nov\/2026/ })).toHaveAttribute('aria-selected', 'true');
