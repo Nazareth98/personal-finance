@@ -1,6 +1,8 @@
 # Comece aqui: o seu Balanço em 6 etapas
 
-Para quem nunca mexeu com nada disso. Você vai criar quatro contas gratuitas e ligar uma na outra: é só seguir os passos, copiar e colar. Leva cerca de uma hora; faça no computador.
+Você vai criar contas em quatro serviços e ligar uma na outra. Reserve tempo para configurar e testar no computador; quem não tem familiaridade pode fazer os passos com ajuda. Os planos e limites dos serviços devem ser conferidos no cadastro.
+
+Cada pessoa precisa de seu próprio fork, projeto Supabase, projeto Vercel e conta MeuPluggy. Não crie um segundo usuário na instância de outra pessoa nem copie as credenciais dela. Se alguém ajudar na instalação, use as contas da pessoa que será dona do app. O roteiro para administradores está em [Nova instância](architecture/NEW_INSTANCE.md).
 
 | Peça | O que é | Para que serve |
 | --- | --- | --- |
@@ -46,10 +48,10 @@ Tudo na **sua cópia** do projeto no GitHub. Os nomes precisam ser exatamente es
    - `SUPABASE_PROJECT_REF` = o Project ID
 4. **Settings** › **Secrets and variables** › **Actions** › aba **Variables** › **New repository variable**:
    - `SUPABASE_ENVIRONMENTS` = `["producao"]` (com colchetes e aspas)
-5. Crie a chave de atualização automática: sua foto › **Settings** › **Developer settings** › **Personal access tokens** › **Tokens (classic)** › **Generate new token (classic)**. Note: “sincronizar financas”; Expiration: **No expiration**; marque só **repo** e **workflow**. Copie (começa com `ghp_`).
+5. Crie a chave de atualização automática: sua foto › **Settings** › **Developer settings** › **Personal access tokens** › **Tokens (classic)** › **Generate new token (classic)**. Note: “sincronizar financas”; escolha uma validade e anote quando renovar; marque **repo** e **workflow**, exigidos pelo workflow atual. Esse token dá acesso amplo aos repositórios da sua conta: guarde-o somente no secret indicado abaixo. Copie (começa com `ghp_`).
 6. **Settings** › **Secrets and variables** › **Actions** › aba **Secrets** › **New repository secret**:
    - `SYNC_TOKEN` = a chave `ghp_`
-7. **Actions** › **Supabase — publicar backend** › **Run workflow**. Em 3 a 5 minutos deve aparecer um ✓ verde.
+7. **Actions** › **Supabase — publicar backend** › **Run workflow**, na branch `main`. Abra a execução e confira que o job **deploy (producao)** aplicou as migrations e publicou as funções. Só o job **plan** verde não basta: sem `SUPABASE_ENVIRONMENTS`, o deploy é pulado.
 
 Deu ✗ vermelho? Quase sempre é um nome digitado diferente ou um valor colado com espaço. Confira os passos 2 a 4.
 
@@ -57,7 +59,7 @@ Deu ✗ vermelho? Quase sempre é um nome digitado diferente ou um valor colado 
 
 No Supabase:
 
-1. **Authentication** › **Sign In / Providers**: desligue **Allow new users to sign up** e salve. Se houver “Minimum password length”, coloque 12.
+1. **Authentication** › **Sign In / Providers**: mantenha e-mail/senha ligado, desligue **Allow new users to sign up** e o login anônimo e salve. Se houver “Minimum password length”, coloque 12.
 2. **Authentication** › **Users** › **Add user** › **Create new user**: seu e-mail, uma senha com 12 caracteres ou mais, marque **Auto Confirm User**.
 3. Abra o usuário criado e copie o **User UID**.
 4. **SQL Editor** › **+ New query**, cole o comando abaixo trocando os dois valores, e clique em **Run**:
@@ -72,34 +74,39 @@ No Supabase:
 ## 5. Vercel: o app no ar (~10 min)
 
 1. Em [vercel.com/signup](https://vercel.com/signup), plano **Hobby**, **Continue with GitHub**.
-2. **Add New…** › **Project** › escolha `personal-finance` › **Import**. Se não aparecer, **Configure GitHub App** e dê acesso a ele. Não mude “Root Directory” nem o build.
+2. **Add New…** › **Project** › escolha o fork `personal-finance` **da sua conta** › **Import**. Se não aparecer, **Configure GitHub App** e dê acesso a ele. Mantenha a raiz do repositório como “Root Directory”; o `vercel.json` define o build e a saída `apps/web/dist`. Confira Node.js **22.x** nas configurações.
 3. Em **Environment Variables**, adicione:
    - `VITE_SUPABASE_URL` = `https://SEU_PROJECT_ID.supabase.co`
    - `VITE_SUPABASE_PUBLISHABLE_KEY` = a Publishable key
 4. **Deploy** e espere uns 3 minutos. Copie o endereço que termina em `.vercel.app`.
-5. No Supabase, **Authentication** › **URL Configuration**: cole o endereço (com `https://`) em **Site URL**, salve e adicione o mesmo em **Redirect URLs**. Isso faz o “esqueci minha senha” funcionar.
+5. No Supabase, **Authentication** › **URL Configuration**: cole o endereço (com `https://`) em **Site URL**, salve e adicione o mesmo em **Redirect URLs**.
+6. Teste **Esqueci minha senha**, abra o e-mail, defina uma nova senha e entre novamente. O envio padrão do Supabase só atende endereços autorizados da equipe do projeto e tem limites; para outros destinatários e uso confiável, configure SMTP próprio conforme a [documentação do Supabase](https://supabase.com/docs/guides/auth/auth-smtp). Isso é especialmente importante se outra pessoa criou o projeto para você.
 
 ## 6. Entrar e conectar os bancos (~15 min)
 
 1. Abra o seu endereço `.vercel.app` e entre com o e-mail e a senha da etapa 4.
-2. Crie sua conta no [MeuPluggy](https://meu.pluggy.ai) e conecte seus bancos (até 5, uso pessoal).
+2. Crie sua conta no [MeuPluggy](https://meu.pluggy.ai) e conecte seus bancos, respeitando os limites disponíveis na sua conta.
 3. No [painel do Pluggy](https://dashboard.pluggy.ai), entre com o **mesmo e-mail e senha do MeuPluggy**, crie uma aplicação e copie **Client ID** e **Client Secret**.
 4. No app: **Conexões** › **Conectar ao Pluggy** › cole as chaves › **Testar e salvar**. Depois, **Conectar instituição** para cada banco.
 5. No celular: iPhone (Safari) › **Compartilhar** › **Adicionar à Tela de Início**; Android (Chrome) › **⋮** › **Instalar app**.
 
 Contas correntes e cartões chegam sozinhos na primeira sincronização. A partir daí, siga “Primeiros passos” na Visão geral e use o botão **?** de cada tela.
 
+Hoje a primeira importação busca **todo o histórico disponibilizado pelo provedor**, que pode variar por banco e conta. Em **Revisão → Alterar período**, escolha “Revisar a partir de” para começar por uma data, sem cortar a importação. Os lançamentos e as confirmações são salvos no banco da sua instância; sincronizar novamente não deve duplicá-los. As regras do período salvo no perfil estão em [MeuPluggy — período inicial](architecture/MEUPLUGGY.md#período-inicial-de-revisão).
+
 > **Importante sobre cartões:** as compras de um cartão só aparecem depois que ele tem **dia de fechamento e dia de vencimento** da fatura. Alguns bancos já mandam essas datas; se um cartão aparecer em **Cartões** com “Configuração pendente”, toque em **Configurar** e informe os dois dias (estão na fatura ou no app do banco). Ao salvar, o app busca as compras na hora.
 
 ## Atualizações
 
-Automáticas: todo dia, às 6h, sua cópia busca as novidades do projeto original e o app se atualiza. Para buscar na hora: **Actions** › **Sincronizar com o projeto original** › **Run workflow**. Não edite arquivos na sua cópia, senão ela deixa de se atualizar sozinha.
+O workflow está agendado para **06:17 de Brasília**, sujeito a atraso do GitHub. No fork, confira em **Actions** se **Sincronizar com o projeto original** está habilitado e execute **Run workflow** uma vez. O GitHub desativa agendamentos de repositórios públicos após 60 dias sem atividade; se parar, reative-o em Actions ([regras do GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)).
+
+Quando chegam alterações, confira separadamente o deploy da Vercel e, se houver mudanças no backend, **Supabase — publicar backend**. São publicações independentes. Evite editar arquivos no fork: alterações próprias podem gerar conflitos. Renove o `SYNC_TOKEN` antes do vencimento.
 
 ## Dúvidas comuns
 
-- **Vou pagar alguma coisa?** Não. Os quatro serviços têm planos gratuitos que dão conta de uso pessoal.
-- **Alguém além de mim vê meus dados?** Não. O cofre é seu, o cadastro fica fechado e só o seu usuário entra.
+- **Vou pagar alguma coisa?** A proposta é usar os planos gratuitos, dentro dos limites de cada serviço. Confira os limites vigentes e eventuais custos de SMTP antes de contratar.
+- **Alguém além de mim vê meus dados?** O app só permite o proprietário, mas administradores com acesso ao projeto Supabase e os serviços envolvidos têm acesso conforme suas permissões e políticas. Código público não torna o banco público.
 - **A sincronização falhou (recebi e-mail do GitHub).** Quase sempre é o `SYNC_TOKEN`. Gere outro (etapa 3, passo 5) e substitua o secret.
 - **Perdi a senha do banco ou o Access Token.** Gere outros (senha: **Project Settings** › **Database** › **Reset database password**) e atualize os dois secrets da etapa 3.
 - **O app ficou fora do ar depois de dias sem usar.** O plano gratuito do Supabase pausa projetos parados por uma semana. Entre no painel e clique em **Restore project**.
-- **Travei.** Abra uma dúvida em [Issues](https://github.com/Nazareth98/personal-finance/issues) com um print da tela (sem senhas nem chaves).
+- **Travei.** Abra uma dúvida em [Issues](https://github.com/Nazareth98/personal-finance/issues) descrevendo a etapa e a mensagem de erro, sem dados bancários, CPF, e-mail, senhas, chaves ou capturas de dados reais.

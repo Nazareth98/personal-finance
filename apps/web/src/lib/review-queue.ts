@@ -1,6 +1,7 @@
 import type { TransactionContract } from '@personal-finance/domain';
 import type { CardStatementEntry, SavingsMovement } from '@personal-finance/domain';
 import type { TransactionLink, TransactionSemanticOverride } from '../ledger/contracts';
+import { inReviewPeriod, type ReviewPeriod } from './review-period.ts';
 
 export type ReviewResolution = {
   categoryResolved: boolean;
@@ -36,8 +37,8 @@ export function reviewableTransactions(transactions: readonly TransactionContrac
   return transactions.filter(row => row.source === 'pluggy' && row.nature !== 'refund' && row.nature !== 'adjustment');
 }
 
-export function pendingReviewCount(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1]): number {
-  return reviewableTransactions(transactions).filter(row => reviewResolution(row, relations).pending).length;
+export function pendingReviewCount(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1] & ReviewPeriod): number {
+  return reviewableTransactions(transactions).filter(row => inReviewPeriod(row, relations) && reviewResolution(row, relations).pending).length;
 }
 
 export type ReviewReason = 'links' | 'categories';

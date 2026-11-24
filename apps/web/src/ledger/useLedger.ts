@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, SelfTransferResult, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
+  setReviewStartDate: (date: string | null) => Promise<void>;
   data: LedgerData | null;
   status: 'idle' | 'loading' | 'success' | 'error';
   error: string;
@@ -137,6 +138,12 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     return result;
   }
 
+  async function setReviewStartDate(date: string | null) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.setReviewStartDate(date);
+    setData(current => current ? { ...current, reviewStartDate: date } : current);
+  }
+
   async function confirmClassification(draft: ClassificationConfirmation) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.confirmClassification(draft);
@@ -168,7 +175,7 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
   }
 
   return {
-    data, status, error, reload, refresh, createAccount, updateAccount, archiveAccount,
+    data, status, error, reload, refresh, setReviewStartDate, createAccount, updateAccount, archiveAccount,
     createCategory: draft => mutateCategory(() => repository!.createCategory(draft)),
     updateCategory: (categoryId, update) => mutateCategory(() => repository!.updateCategory(categoryId, update)),
     moveCategory: (categoryId, direction) => mutateCategory(() => repository!.moveCategory(categoryId, direction)),

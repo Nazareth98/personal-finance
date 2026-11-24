@@ -1,6 +1,7 @@
 import { accountBalance, addCompetenceMonths, ledgerTotals, type CategoryBudgetProgress, type FinancialAccount, type TransactionContract } from '@personal-finance/domain';
 import type { ColumnPoint } from '@personal-finance/ui';
 import { reviewResolution, reviewableTransactions } from './review-queue.ts';
+import { inReviewPeriod, type ReviewPeriod } from './review-period.ts';
 
 export type MonthComparison = { previous: string; balanceDeltaCents: bigint; incomeDeltaCents: bigint; expenseDeltaCents: bigint };
 
@@ -23,8 +24,8 @@ export function monthComparison(transactions: readonly TransactionContract[], ac
 
 export type ReviewAttention = { total: number; links: number; categories: number };
 
-export function reviewAttention(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1]): ReviewAttention {
-  const resolutions = reviewableTransactions(transactions).map(row => reviewResolution(row, relations)).filter(item => item.pending);
+export function reviewAttention(transactions: readonly TransactionContract[], relations: Parameters<typeof reviewResolution>[1] & ReviewPeriod): ReviewAttention {
+  const resolutions = reviewableTransactions(transactions).filter(row => inReviewPeriod(row, relations)).map(row => reviewResolution(row, relations)).filter(item => item.pending);
   const links = resolutions.filter(item => !item.semanticResolved).length;
   return { total: resolutions.length, links, categories: resolutions.length - links };
 }

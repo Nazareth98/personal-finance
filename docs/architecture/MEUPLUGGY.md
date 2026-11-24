@@ -36,18 +36,28 @@ No ambiente real observado, `GET /v2/transactions` entregou também as compras q
 
 ## Operação
 
-Secrets obrigatórios:
-
-```text
-PLUGGY_CLIENT_ID
-PLUGGY_CLIENT_SECRET
-PLUGGY_WEBHOOK_SECRET
-```
-
-Após aplicar a migration `202611140001_meupluggy.sql`, publicar as três Edge Functions. O endpoint do webhook é `/functions/v1/pluggy-webhook`; `verify_jwt = false` vale somente para ele, pois sua autenticação é o segredo/HMAC específico.
+Na instalação atual, Client ID e Client Secret podem ser testados e salvos pelo app no Vault; as variáveis `PLUGGY_CLIENT_ID` e `PLUGGY_CLIENT_SECRET` são fallback. `PLUGGY_WEBHOOK_SECRET` só é necessário para ativar o webhook, ainda adiado. Aplique todas as migrations e publique todas as funções pelo [roteiro de nova instância](NEW_INSTANCE.md), incluindo `pluggy-credentials`. O endpoint do webhook é `/functions/v1/pluggy-webhook`; `verify_jwt = false` vale somente para ele, pois sua autenticação é o segredo/HMAC específico.
 
 “Sincronizar agora” busca o dado mais recente disponível no MeuPluggy. Não promete iniciar nova coleta na instituição. Erros persistem sem descrição, valor, token ou identificador bancário em logs apresentados ao usuário. A tela distingue a última atualização da fonte no MeuPluggy, a tentativa local de importação e o último sucesso local.
 
+## Período inicial de revisão
+
+Implementado no código em 23/11/2026 (D-079); migration publicada na instância principal em 24/11/2026. A importação continua completa: `pluggy-sync` recebe somente `itemId` ou `connectionId`. Incrementos bancários usam `createdAtFrom`, cartões releem o histórico; a preferência não entra nessas consultas.
+
+Em **Revisão → Alterar período**, o proprietário escolhe todo o histórico, mês atual, últimos 3/6 meses (incluindo o atual) ou data personalizada. Os atalhos começam no primeiro dia do mês e viram uma data fixa ao salvar, sem limite final. Não existe filtro temporário de intervalo fechado nesta entrega.
+
+- `profiles.review_start_date`: data inclusiva, nula = todo o histórico. Leitura pela policy existente; escrita somente nessa coluna por grant e RLS do proprietário. Identidade e autorização permanecem administrativas. A migration rejeita datas fora de 0001–9999 e infinitas; o cliente valida o calendário sem normalizar dias inválidos.
+- Contas usam a data do lançamento; cartões usam o mês inteiro da competência/vencimento da fatura, inclusive compras antigas que a compõem.
+- Fila, histórico de revisão e contadores da navegação/Visão geral usam a mesma regra. **Ver histórico anterior** abre o complemento via `scope=earlier` na URL e informa a contagem de pendências anteriores. Isso não altera a preferência nem confirma itens.
+- Alterar a data apenas muda o foco. Confirmações, vínculos, importação, relatórios, saldos, faturas e previsão não são alterados. Novidades retroativas anteriores ao início aparecem no histórico anterior. Conexões novas usam a preferência do mesmo perfil.
+- A preferência é lida ao carregar o livro e vale nos próximos acessos em qualquer aparelho. Não há transmissão em tempo real entre abas já abertas. Erro de leitura do perfil bloqueia o carregamento com retry; falha na gravação mantém o diálogo e a preferência anterior, sem toast de sucesso.
+
+**Publicação:** aplicar `20261123225503_review_start_date.sql` antes de publicar o frontend. Não é necessário reimportar dados nem republicar Edge Functions para este recurso.
+
+**Corte real de importação, fora desta entrega:** a API v2 oferece `dateFrom`/`dateTo`, mas `createdAtFrom` representa a chegada ao Pluggy e não pode ser combinado com `dateFrom`. Novidades podem ter datas antigas. Limitar armazenamento exigiria contrato próprio por conexão, backfill idempotente e tratamento de faturas/vínculos incompletos. Fontes: [parâmetros](https://docs.pluggy.ai/en/reference/basic-concepts) e [ciclo das transações](https://docs.pluggy.ai/en/docs/products/transactions).
+
 ## Implementação futura
+
+### Webhook
 
 A sincronização manual permanece, e o app dispara a mesma sincronização ao abrir quando a última tentativa passou de 6 h (D-061; registrada como `manual`). Em incremento futuro, configurar o mesmo `PLUGGY_WEBHOOK_SECRET` no Supabase e em `X-Pluggy-Webhook-Secret` no webhook criado pela API MeuPluggy, registrar `transactions/created`, `transactions/updated` e `transactions/deleted` e validar entrega, autenticação e retentativas. O código e a inbox durável já estão preparados; sem o secret, a função responde `503 webhook_not_configured`.

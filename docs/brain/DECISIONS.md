@@ -282,3 +282,11 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 ## D-078 — Previsão começa pelo calendário, não pelo último lançamento (22/11/2026)
 
 - A previsão de seis meses começava no mês seguinte ao lançamento mais recente. Compras no cartão já lançadas em faturas futuras empurravam o início (ex.: fev/2027) e a média de seis meses passava a incluir meses vazios, reduzindo receita e gastos. Agora a previsão começa no mês seguinte ao atual, e a média usa os seis meses até o atual.
+
+## D-079 — Início de revisão persistido, sem corte na importação (23/11/2026)
+
+- Revisão oferece “Revisar a partir de” com todo o histórico, mês atual, últimos 3/6 meses (incluindo o atual) e data personalizada. Atalhos viram data fixa ao salvar, sem fim que bloqueie novidades.
+- `profiles.review_start_date` é `date` anulável; nulo preserva todo o histórico nas instâncias existentes. UPDATE só nessa coluna, por grant e RLS do proprietário; identidade e autorização não ganham escrita.
+- Contas usam `eventDate` inclusiva; cartões usam o mês da competência/vencimento inteiro, preservando compras anteriores que compõem a fatura. Fila, histórico de revisão e contadores de navegação/Visão geral compartilham a regra.
+- “Ver histórico anterior” abre o complemento na URL, sem alterar a preferência ou confirmar pendências. Importação, relatórios, saldos, faturas e decisões anteriores permanecem completos. Ver [contrato](../architecture/MEUPLUGGY.md#período-inicial-de-revisão).
+- Publicar a migration `20261123225503_review_start_date` antes do frontend. Falha ao ler o perfil gera erro de carregamento, nunca retorno silencioso a todo o histórico.

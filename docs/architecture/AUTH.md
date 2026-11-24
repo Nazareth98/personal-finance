@@ -23,7 +23,7 @@ values ('UUID_DO_USUARIO', 'EMAIL_DO_PROPRIETARIO', true);
 5. Configure a URL pública da aplicação e adicione a mesma origem às Redirect URLs do Auth.
 6. Defina no frontend `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
 
-O índice `profiles_single_owner` impede um segundo proprietário. A tabela não concede escrita ao navegador; o provisionamento é administrativo.
+O índice `profiles_single_owner` impede um segundo proprietário. O provisionamento é administrativo; o navegador só pode atualizar a coluna `review_start_date` do próprio perfil proprietário, com grant por coluna e policy RLS de UPDATE (D-079). Identidade, e-mail e `is_owner` continuam sem escrita pelo navegador.
 
 ## Validação sem Docker
 
