@@ -1,6 +1,10 @@
 # Status atual
 
-Atualizado em: 21/11/2026.
+Atualizado em: 24/11/2026.
+
+Entrega D-079: “Revisar a partir de” implementado com componentes existentes, data salva no perfil, fila/contadores coerentes e acesso ao histórico anterior. Importação permanece completa. [Contrato e ordem de publicação](../architecture/MEUPLUGGY.md#período-inicial-de-revisão). Migration `20261123225503_review_start_date` aplicada em produção em 24/11, antes do frontend; histórico de migrations e RLS conferidos. Ensaio transacional com rollback aprovou gravação pelo proprietário, recusa de data infinita e privilégios restritos à coluna, sem alterar preferências reais.
+
+Validação D-079: `pnpm check` aprovado com Node 22.12 (4 testes novos de período/calendário/contadores e grants/RLS estáticos). Playwright CLI com dados sintéticos validou salvar, erro/retry, recarregar, histórico anterior, retorno a todo o histórico, teclado/foco e layouts Light/Dark até 320 px; axe sem violações na tela de Revisão mobile e no diálogo. Suíte autenticada: 33 passaram e 1 skip; a auditoria restante passou na reexecução em 24/11 após remover o `aria-label` incompleto de `.card-tile`, que agora deriva o nome acessível do texto visível. Capturas locais em `output/playwright/` (não versionadas).
 
 ## Situação
 

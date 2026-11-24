@@ -16,7 +16,7 @@ export function buildFirstSteps(ledger: LedgerData, connections: ConnectionsData
       href: '#overview', cta: 'Informar nome', done: Boolean(ledger.holderName) },
     { id: 'banks', title: 'Conectar seus bancos', description: 'Em Conexões, toque em “Conectar instituição” e autorize cada banco do MeuPluggy.',
       href: '#connections', cta: 'Conectar banco', done: hasBanks },
-    { id: 'review', title: 'Revisar os lançamentos', description: 'Confirme pelo menos um lançamento que o app não conseguiu decidir sozinho, para ver como funciona.',
+    { id: 'review', title: 'Revisar os lançamentos', description: 'Em “Revisar a partir de”, escolha o período por onde começar. Depois confirme um lançamento que ficou pendente.',
       href: '#review', cta: 'Abrir Revisão',
       // Basta já ter revisado algo: a fila sempre recebe itens novos e não deve prender o passo (D-067).
       done: ledger.reviewHistory.length > 0 || (ledger.transactions.length > 0 && pendingReviews === 0) },

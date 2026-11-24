@@ -2,7 +2,7 @@
 
 Cada pessoa usa a própria instância: um projeto Supabase, um projeto Vercel e a própria conta MeuPluggy. O código é o mesmo; nada pessoal fica no repositório (D-064, D-065).
 
-Quem executa este roteiro é quem administra o código. A pessoa que vai usar o app só participa no último passo.
+Quem executa este roteiro é quem administra a instalação, com a pessoa dona das contas. Para autonomia e isolamento, prefira o fork na conta dela, com Supabase, Vercel e MeuPluggy próprios. Não reutilize o projeto Supabase nem as credenciais da instância existente. Para o passo a passo sem terminal, use [Comece aqui](../COMECE_AQUI.md).
 
 ## 1. Supabase
 
@@ -18,14 +18,15 @@ O workflow [`supabase-deploy.yml`](../../.github/workflows/supabase-deploy.yml) 
    - variável `SUPABASE_PROJECT_REF`;
    - secrets `SUPABASE_ACCESS_TOKEN` e `SUPABASE_DB_PASSWORD`.
 2. Em Settings → Secrets and variables → Actions → Variables, defina `SUPABASE_ENVIRONMENTS` com todos os environments, em JSON: `["principal","esposa"]`.
-3. Em Actions → **Supabase — publicar backend** → Run workflow. Daí em diante, todo push na `main` que mude `supabase/` ou `packages/domain` publica nas instâncias.
+3. Em Actions → **Supabase — publicar backend** → Run workflow. Confira o job `deploy` de cada environment: `plan` verde com deploy pulado não publica nada. Os próximos pushes na `main` publicam quando alteram os caminhos definidos no workflow (migrations, funções, configuração Supabase, código do domínio ou o próprio workflow).
 
 ### Instância em fork (caso da segunda usuária)
 
 A pessoa faz um fork e configura nele um único environment (`producao`, com `SUPABASE_ENVIRONMENTS = ["producao"]`). O workflow [`fork-sync.yml`](../../.github/workflows/fork-sync.yml) roda só em forks, todo dia às 06:17 de Brasília: chama `merge-upstream` na `main`, e o push resultante dispara a publicação do backend e o deploy da Vercel da cópia (D-066).
 
 - Precisa do secret de repositório `SYNC_TOKEN` no fork: token clássico da dona com escopos `repo` e `workflow`. O `GITHUB_TOKEN` não pode atualizar arquivos de workflow nem disparar outros workflows.
-- O fork não pode ter commits próprios; havendo, a sincronização falha com conflito e avisa por e-mail.
+- Evite commits próprios no fork: eles podem gerar conflitos no merge. O workflow não resolve conflitos automaticamente.
+- Habilite o agendamento no fork e faça uma execução manual inicial. O horário pode atrasar; em repositórios públicos, 60 dias sem atividade desativam o agendamento. Veja as [regras do GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Tokens com validade precisam ser renovados.
 - Os workflows de validação (design system e regressão visual) não rodam em forks.
 
 O guia para quem não é técnico está em [`docs/COMECE_AQUI.md`](../COMECE_AQUI.md); há também uma versão visual interativa (artifact “Guia: seu app de finanças”).
@@ -37,6 +38,7 @@ O histórico de migrations do projeto principal foi alinhado aos nomes dos arqui
 - Authentication → Sign In / Providers: e-mail com senha ligado; **Allow new users to sign up** desligado; login anônimo desligado; senha mínima de 12 caracteres.
 - Authentication → URL Configuration: Site URL e Redirect URLs com o domínio da Vercel do passo 5.
 - Não use `supabase config push`: o `config.toml` tem URLs locais.
+- Teste o ciclo completo de recuperação de senha. O envio padrão restringe destinatários aos endereços autorizados da equipe; configure SMTP próprio quando necessário ([documentação](https://supabase.com/docs/guides/auth/auth-smtp)). A URL correta sozinha não garante entrega.
 
 ## 4. Proprietário
 
@@ -60,7 +62,9 @@ Mande o endereço do app, o e-mail e a senha provisória. No primeiro acesso ela
 1. Conexões → **Conectar ao Pluggy**: o card explica como criar a conta no MeuPluggy, a aplicação no painel do Pluggy e onde copiar Client ID e Client Secret. O app testa as chaves e as guarda no Vault (D-064); não há secret para cadastrar no Supabase.
 2. Conectar os bancos, revisar lançamentos, cartões, caixinhas e metas.
 
-O plano gratuito do MeuPluggy é de uso pessoal (até 5 conexões); cada pessoa usa a própria conta.
+Cada pessoa usa a própria conta MeuPluggy; confira os limites vigentes na conta. Antes de considerar a entrega concluída, valide login, recuperação de senha, credenciais Pluggy, uma sincronização e o calendário dos cartões. Não registre dados reais em capturas ou issues.
+
+A primeira sincronização importa todo o histórico disponível. O período de revisão pode ser escolhido e salvo no perfil; o [contrato de persistência](MEUPLUGGY.md#período-inicial-de-revisão) distingue esse recurso do corte de importação.
 
 ## O que não é automático
 

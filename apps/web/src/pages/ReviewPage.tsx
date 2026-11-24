@@ -13,6 +13,8 @@ import type { PageProps } from './PageProps';
 import { eventSortKey } from '../lib/transaction-time';
 import { DateTime } from '../components/DateTime';
 import { InstitutionLogo } from '../components/InstitutionLogo';
+import { ReviewPeriodForm } from '../components/ReviewPeriodForm';
+import { inReviewPeriod } from '../lib/review-period';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
@@ -44,6 +46,7 @@ function comparePending(a: TransactionContract, b: TransactionContract, order: P
 }
 
 export function ReviewPage({ ledger, headerAction }: PageProps) {
+  const [periodOpen, setPeriodOpen] = useState(false);
   const [selected, setSelected] = useState<TransactionContract | null>(null);
   const [confirming, setConfirming] = useState<string>();
   const [params, setParams] = useHashParams();
@@ -64,6 +67,8 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const reason = (['links', 'categories'].includes(params.get('reason') ?? '') ? params.get('reason') : undefined) as ReviewReason | undefined;
   const filters = readTransactionFilters(params);
   const data = ledger.data;
+  const period = { reviewStartDate: data?.reviewStartDate, creditCards: data?.creditCards };
+  const earlier = Boolean(data?.reviewStartDate) && params.get('scope') === 'earlier';
   const classifications = new Map((data?.classifications ?? []).map(item => [item.transactionId, item]));
   const categories = new Map((data?.categories ?? []).map(item => [item.id, item.name]));
   const accounts = new Map((data?.accounts ?? []).map(item => [item.id, item.name]));
@@ -74,8 +79,10 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const imported = reviewableTransactions(data?.transactions ?? []);
   const resolutions = new Map(imported.map(row => [row.id, reviewResolution(row, relations)]));
   const reasonOf = (row: TransactionContract) => reviewReason(resolutions.get(row.id)!);
-  const pending = imported.filter(row => resolutions.get(row.id)?.pending);
-  const history = imported.filter(row => !resolutions.get(row.id)?.pending);
+  const earlierCount = imported.filter(row => !inReviewPeriod(row, period) && resolutions.get(row.id)?.pending).length;
+  const scoped = imported.filter(row => earlier ? !inReviewPeriod(row, period) : inReviewPeriod(row, period));
+  const pending = scoped.filter(row => resolutions.get(row.id)?.pending);
+  const history = scoped.filter(row => !resolutions.get(row.id)?.pending);
   const statusLabel = (row: TransactionContract) => row.classificationStatus === 'automatic' ? 'Automática' : 'Confirmada';
   const categoryName = (row: TransactionContract) => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : undefined;
   const evidence = (classification?: TransactionClassification) => classification?.evidence.length
@@ -125,13 +132,29 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     {([[undefined, 'Todas', matching.length], ['links', 'Vínculos', reasonCounts.links], ['categories', 'Categorias', reasonCounts.categories]] as const).map(([value, label, count]) =>
       <button key={label} type="button" className="review-reason" aria-pressed={reason === value} onClick={() => change('reason', value ?? '')}>{label} {count}</button>)}
   </div>;
-  const emptyTitle = active || reason ? 'Nenhum lançamento corresponde aos filtros' : view === 'pending' ? 'Tudo revisado' : 'Nenhum item no histórico';
+  const emptyTitle = active || reason ? 'Nenhum lançamento corresponde aos filtros' : view === 'pending' ? (data?.reviewStartDate ? 'Tudo revisado neste período' : 'Tudo revisado') : 'Nenhum item no histórico';
   const emptyDescription = active || reason ? 'Altere ou limpe os filtros para ver outros lançamentos.' : view === 'pending' ? 'Quando chegarem lançamentos que o app não souber classificar, eles aparecem aqui.' : 'Altere o filtro para consultar outras decisões.';
 
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">REVISÃO</p><h1>Revisão de categorias</h1>
       <p className="muted">Só o que o app não conseguiu decidir sozinho. Mudou de ideia? Corrija pelo histórico.</p></div>
       <div className="template-heading__actions">{headerAction}</div></div>
+    {ledger.status === 'success' && <Card>
+      <div className="section-heading">
+        <div><h2>Revisar a partir de</h2><p className="muted">{data?.reviewStartDate
+          ? `${data.reviewStartDate.split('-').reverse().join('/')} · salvo para seus próximos acessos`
+          : 'Todo o histórico · escolha um período para começar'}</p></div>
+        <Button variant="secondary" onClick={() => setPeriodOpen(true)}>Alterar período</Button>
+      </div>
+      {data?.reviewStartDate && <div className="review-reasons">
+        <span className="muted">{earlierCount} pendência{earlierCount === 1 ? '' : 's'} anterior{earlierCount === 1 ? '' : 'es'} ao período.</span>
+        <Button variant="ghost" onClick={() => {
+          setParams({ scope: earlier ? null : 'earlier', q: null, account: null, category: null, nature: null, reason: null, view: null, status: null });
+          setPage(1);
+        }}>{earlier ? 'Voltar ao período escolhido' : 'Ver histórico anterior'}</Button>
+      </div>}
+      {earlier && <p role="status">Exibindo o histórico anterior à data escolhida. Sua preferência continua salva.</p>}
+    </Card>}
     <Tabs label="Visualização da revisão" className="review-view-tabs" panelClassName="review-panel" selectedId={view}
       onSelect={id => change('view', id === 'history' ? 'history' : '')}
       items={[{ id: 'pending', label: <strong>Pendências · {pending.length}</strong> }, { id: 'history', label: <strong>Histórico · {history.length}</strong> }]}>
@@ -184,5 +207,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
       </DataState>
     </Tabs>
     <ClassificationReviewForm transaction={selected} onClose={() => setSelected(null)} ledger={ledger}/>
+    <ReviewPeriodForm open={periodOpen} onClose={() => setPeriodOpen(false)} ledger={ledger}
+      onSaved={() => { setParams({ scope: null }); setPage(1); }}/>
   </div>;
 }

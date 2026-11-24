@@ -39,6 +39,7 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
   await page.clock.setFixedTime(new Date('2026-11-18T12:00:00-03:00'));
   const confirmedCategories = new Map<string, string>();
   const semanticOverrides = new Map<string, Record<string, unknown>>();
+  let reviewStartDate: string | null = null;
   await page.route('http://127.0.0.1:54321/**', async (route: Route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/token') {
@@ -54,7 +55,10 @@ async function mockSupabase(page: Page, owner = true, rpcCalls: { path: string; 
       return;
     }
     if (url.pathname === '/rest/v1/profiles') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(owner ? [{ id: userId }] : []) });
+      if (route.request().method() === 'PATCH') reviewStartDate = route.request().postDataJSON().review_start_date;
+      const profile = { id: userId, holder_name: null, review_start_date: reviewStartDate };
+      const single = route.request().headers().accept?.includes('application/vnd.pgrst.object+json');
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(owner ? (single ? profile : [profile]) : []) });
       return;
     }
     if (url.pathname === '/rest/v1/financial_accounts') {

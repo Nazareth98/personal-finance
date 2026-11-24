@@ -48,6 +48,8 @@ export type ReviewHistoryEntry = {
 export type AccountInstitution = { accountId: string; connectorId?: number; name: string };
 
 export type LedgerData = {
+  /** Null means all history; persisted on the owner's profile. */
+  reviewStartDate?: string | null;
   accounts: FinancialAccount[];
   categories: Category[];
   budgets: CategoryBudget[];
@@ -115,6 +117,7 @@ export type ManualTransactionDraft = {
 };
 
 export interface LedgerRepository {
+  setReviewStartDate(date: string | null): Promise<void>;
   load(): Promise<LedgerData>;
   setHolderName(name: string): Promise<SelfTransferResult>;
   createAccount(draft: AccountDraft): Promise<void>;

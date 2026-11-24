@@ -110,7 +110,7 @@ function CardTile({ overview, institutions, onConfigure }: { overview: CardOverv
   </section>;
   const share = overview.limitCents === undefined ? undefined : limitShare(panel.committedCents, overview.limitCents);
   const billName = current ? `Fatura de ${formatCompetence(current.competence).toLowerCase()}` : 'Fatura';
-  return <a className="card-tile" href={`#cards?card=${account.id}`} aria-label={`${account.name}: ${billName}, ${formatCentsBRL(overview.currentCents)}, ${overview.statusLabel}. Ver detalhes`}>
+  return <a className="card-tile" href={`#cards?card=${account.id}`}>
     <div className="card-tile__head"><InstitutionLogo accountId={account.id} accountName={account.name} institutions={institutions} size="md" />
       <div><strong>{account.name}</strong><span className="muted">Fecha dia {card.closingDay} · vence dia {card.dueDay}</span></div></div>
     <div className="card-tile__bill"><span className="muted">{billName}</span>

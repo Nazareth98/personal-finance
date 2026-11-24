@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { validReviewStartDate } from '../lib/review-period';
 import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
 import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, SelfTransferResult, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
@@ -49,6 +50,13 @@ function classificationEvidence(value: unknown): TransactionClassification['evid
 
 export class SupabaseLedgerRepository implements LedgerRepository {
   constructor(private readonly client: SupabaseClient) {}
+
+  async setReviewStartDate(date: string | null): Promise<void> {
+    if (!validReviewStartDate(date)) throw new Error('invalid_review_start_date');
+    const result = await this.client.from('profiles').update({ review_start_date: date })
+      .eq('is_owner', true).select('review_start_date').single();
+    if (result.error) throw result.error;
+  }
 
   /**
    * PostgREST devolve no máximo 1000 linhas por consulta. Tabelas que crescem com o histórico (classificações,
@@ -142,13 +150,15 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       .map(row => [row.category_id, Number(row.dependency_count)]));
     // D-052: logo/nome do banco por conta; falha aqui não impede o livro de carregar.
     const institutionsResult = await this.client.rpc('get_account_institutions');
-    // D-062: falha aqui também não impede o livro de carregar.
-    const profileResult = await this.client.from('profiles').select('holder_name').maybeSingle();
-    const holderName = profileResult.error ? undefined : (profileResult.data as { holder_name: string | null } | null)?.holder_name ?? undefined;
+    // A preferência não pode voltar silenciosamente a todo o histórico quando a leitura falha.
+    const profileResult = await this.client.from('profiles').select('holder_name,review_start_date').single();
+    if (profileResult.error) throw profileResult.error;
+    const holderName = profileResult.data.holder_name as string | null;
     const institutions = institutionsResult.error ? [] : ((institutionsResult.data ?? []) as { account_id: string; connector_id: number | null; institution_name: string }[])
       .map(row => ({ accountId: row.account_id, name: row.institution_name, ...(row.connector_id ? { connectorId: row.connector_id } : {}) }));
     return {
       institutions,
+      reviewStartDate: profileResult.data.review_start_date ?? null,
       ...(holderName ? { holderName } : {}),
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
       categories: ((categoriesResult.data ?? []) as CategoryRow[]).map(row => ({

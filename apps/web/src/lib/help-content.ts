@@ -67,7 +67,7 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
     title: "Revisão", subtitle: "O que o app não conseguiu decidir sozinho.",
     shows: "A fila de lançamentos que precisam de você: categoria a confirmar ou efeito financeiro a definir, como pagamento de fatura ou aporte em caixinha.",
     calc: ["Sugestão com confiança alta já entra sozinha; média vem para cá; baixa fica sem categoria.", "Pagamento de fatura e transferência entre suas contas precisam do outro lado ligado.", "Cada confirmação ensina o app para os próximos lançamentos parecidos."],
-    actions: ["**Confirmar** a sugestão com um toque.", "**Alterar** para escolher outra categoria ou natureza.", "Confirmar a mesma categoria em **todos os lançamentos iguais** de uma vez.", "Ver o histórico do que já foi decidido."],
+    actions: ["**Revisar a partir de** salva seu período para os próximos acessos. Nas contas vale o dia escolhido; nos cartões, o mês de vencimento da fatura inteiro.", "**Ver histórico anterior** mostra pendências antigas sem mudar sua preferência. Nada é apagado e a importação continua completa.", "**Confirmar** a sugestão com um toque.", "**Alterar** para escolher outra categoria ou natureza.", "Confirmar a mesma categoria em **todos os lançamentos iguais** de uma vez.", "Ver o histórico do que já foi decidido."],
     terms: ["Revisão", "Natureza", "Reconciliado"]
   },
   reports: {
