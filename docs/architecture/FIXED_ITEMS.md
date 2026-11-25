@@ -14,9 +14,16 @@ Saber quanto se pode definir de meta por categoria, a partir do que entra e do q
   - “Não é fixo”;
   - os fixos da categoria, com o sugerido no topo;
   - “Criar fixo”, com o nome tirado da descrição.
-- **Lançamentos iguais** (mesma descrição normalizada) chegam com o fixo sugerido. Entram vinculados pela mesma regra de “todos os iguais” da categoria.
+- **Não há cadastro prévio:** o fixo nasce do primeiro lançamento vinculado (“Criar fixo”).
+- **Ao criar um fixo**, o app procura os lançamentos anteriores iguais (mesma descrição normalizada), já revisados ou não. Oferece “Vincular também os N anteriores” (marcado por padrão), para histórico, último valor e situação ficarem certos desde o primeiro dia.
+- **Lançamentos já revisados:** o campo também aparece ao corrigir pelo histórico da Revisão e na ação “Marcar como fixo” em Transações.
+- **Lançamentos iguais futuros** chegam com o fixo sugerido. Entram vinculados pela mesma regra de “todos os iguais” da categoria.
+- **Editar:**
+  - mudar o fixo de um lançamento afeta só ele, a não ser que se escolha “todos os iguais”;
+  - renomear, trocar categoria ou encerrar o fixo vale para o fixo e mantém todos os vínculos;
+  - a previsão sempre usa o vínculo mais recente.
 - **Previsão:** cada fixo projeta, para os meses seguintes, o valor do **último lançamento vinculado**.
-- **Fixo pago no cartão:** conta na competência da fatura, que já é a competência do lançamento de cartão.
+- **Fixo pago no cartão:** conta no mês em que o dinheiro sai, a competência da fatura. Essa já é a competência do lançamento de cartão.
 - **Situação no mês:**
   - Pago/Recebido: há vínculo na competência.
   - Pendente: ainda não há vínculo.
@@ -56,7 +63,7 @@ Valores em `bigint` (centavos):
 
 ## Gráficos (novos no Design System)
 
-- **Despesas por categoria x receita, visão do mês:** barra única em que 100% é a receita. Cada categoria é uma faixa com a cor da categoria, seguida da faixa de caixinhas e da sobra. Se passar de 100%, o excedente fica em `status-danger`.
+- **Despesas por categoria x receita, visão do mês:** barra única em que 100% é a receita. Cada categoria é uma faixa com a **cor da própria categoria** (a mesma da identidade da categoria no app, não a paleta `chart-category-*`), seguida da faixa de caixinhas e da sobra. Se passar de 100%, o excedente fica em `status-danger`.
 - **Despesas por categoria x receita, 12 meses:** colunas empilhadas por categoria, com 6 meses realizados e 6 previstos (listrados), mais a marca da receita de cada mês.
 - **Acessibilidade:** os dois têm tabela equivalente (categoria, previsto, fixos, % da receita, meta). A informação nunca depende só de cor.
 
