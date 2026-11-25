@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import { Button, Dialog, FormMessage, Input, RadioGroup, useToast } from '@personal-finance/ui';
+import { Button, CalendarIcon, Dialog, FormMessage, GlossaryIcon, Icon, Input, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatReviewDate, reviewMonthStart, todayIso, validReviewStartDate } from '../lib/review-period';
 
@@ -47,10 +47,12 @@ export function ReviewPeriodForm({ open, onClose, onSaved, ledger }: {
     finally { setLoading(false); }
   }
 
-  const options = [
-    { value: 'all', label: 'Todo o histórico' },
-    ...presets.map(item => ({ value: item.value, label: `${item.label} (desde ${formatReviewDate(reviewMonthStart(Number(item.value)))})` })),
-    { value: 'custom', label: 'Escolher uma data' }
+  const tile = (icon: typeof CalendarIcon) => <span className="review-period-option" aria-hidden="true"><Icon icon={icon} size="sm" /></span>;
+  const options: VisualSelectOption[] = [
+    { value: 'all', label: 'Todo o histórico', description: 'Tudo o que o banco enviou', visual: tile(GlossaryIcon) },
+    ...presets.map(item => ({ value: item.value, label: item.label,
+      description: `Desde ${formatReviewDate(reviewMonthStart(Number(item.value)))}`, visual: tile(CalendarIcon) })),
+    { value: 'custom', label: 'Escolher uma data', description: choice === 'custom' && date ? `Desde ${formatReviewDate(date)}` : 'Qualquer dia até hoje', visual: tile(CalendarIcon) }
   ];
   const fieldError = choice === 'custom' && error && error !== 'Não foi possível salvar. Tente novamente.' ? error : undefined;
 
@@ -59,7 +61,7 @@ export function ReviewPeriodForm({ open, onClose, onSaved, ledger }: {
     footer={<><Button variant="secondary" disabled={loading} onClick={onClose}>Cancelar</Button>
       <Button type="submit" form={formId} loading={loading}>Salvar</Button></>}>
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
-      <RadioGroup legend="Começar por" name={`${formId}-period`} value={choice} options={options} disabled={loading}
+      <VisualSelect label="Começar por" value={choice} options={options} disabled={loading}
         onChange={next => { setChoice(next); setError(''); if (next === 'custom' && !date) setDate(todayIso()); }}
         hint="Nos cartões, conta a fatura inteira do mês escolhido." />
       {choice === 'custom' && <Input label="Data" type="date" required max={todayIso()} value={date} disabled={loading}

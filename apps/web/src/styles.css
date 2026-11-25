@@ -788,3 +788,4 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
 .review-period>p{flex:1 1 220px;margin:0;min-width:0;line-height:1.45}
 .review-period strong{color:var(--color-text-primary);font-weight:600}
 .review-period__actions{display:flex;gap:var(--spacing-1);margin-left:auto}
+.review-period-option{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:var(--radius-md);background:var(--color-bg-subtle);color:var(--color-text-secondary)}
