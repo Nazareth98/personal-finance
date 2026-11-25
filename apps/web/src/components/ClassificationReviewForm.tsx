@@ -1,13 +1,13 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import type { TransactionContract } from '@personal-finance/domain';
-import { Button, Checkbox, Dialog, FormMessage, RadioGroup, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { fixedItemLastValue, normalizeClassificationText, similarWithoutFixed, suggestFixedItemName, type TransactionContract } from '@personal-finance/domain';
+import { Button, CategoryRepeatIcon, Checkbox, CloseIcon, Dialog, FormMessage, Input, PlusIcon, RadioGroup, Select, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import type { SemanticConfirmation } from '../ledger/contracts';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } from '../lib/demo-transactions';
 import { statementChoices } from '../lib/statement-choices';
 import { MAX_BULK_CONFIRMATIONS, similarTransactions } from '../lib/similar-transactions';
 import { InstitutionLogo } from './InstitutionLogo';
-import { accountOption, categoryOption, savingsBoxOption, transactionOption } from './visual-options';
+import { OptionTile, accountOption, categoryOption, savingsBoxOption, transactionOption } from './visual-options';
 import { natureHints } from '../lib/help-content';
 
 type ReviewNature = SemanticConfirmation['nature'];
@@ -36,6 +36,10 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
   const [scope, setScope] = useState<'one' | 'similar'>('one');
   const [includeConfirmed, setIncludeConfirmed] = useState(false);
   const [error, setError] = useState('');
+  /** D-084: '' = não é fixo; 'new' = criar; senão o id do fixo. */
+  const [fixedChoice, setFixedChoice] = useState('');
+  const [fixedName, setFixedName] = useState('');
+  const [linkSimilarFixed, setLinkSimilarFixed] = useState(true);
   const [loading, setLoading] = useState(false);
   const formId = useId();
   const { notify } = useToast();
@@ -57,6 +61,12 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       ? (counterpart.source === 'manual' ? `account:${counterpart.accountId}` : `transaction:${counterpart.id}`)
       : semanticOverride?.statementId ?? semanticOverride?.savingsBoxId ?? payment?.statementId ?? movement?.savingsBoxId ?? '');
     setError('');
+    const key = normalizeClassificationText(transaction.description);
+    const linkedFixed = data?.fixedItemLinks?.find(item => item.transactionId === transaction.id)?.fixedItemId;
+    const suggestedFixed = data?.fixedItems?.find(item => !item.endedAt && item.matchKey === key && item.nature === transaction.nature)?.id;
+    setFixedChoice(linkedFixed ?? suggestedFixed ?? '');
+    setFixedName(suggestFixedItemName(transaction.description));
+    setLinkSimilarFixed(true);
   }, [data, semanticOverride, transaction]);
   useEffect(() => { setScope('one'); setIncludeConfirmed(false); }, [transaction?.id]);
 
@@ -128,11 +138,36 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     if (nature === 'card_payment' && !relationId && suggestedStatement.length === 1) setRelationId(suggestedStatement[0]!.statementId);
   }, [nature, relationId, suggestedStatement.length, suggestedStatement[0]?.statementId]);
 
+  // D-084: lançamento fixo (receita ou despesa). Só aparece quando a instância já tem a estrutura de fixos.
+  const fixedAvailable = Boolean(data?.fixedItems) && (nature === 'income' || nature === 'expense');
+  const currentFixed = transaction ? data?.fixedItemLinks?.find(item => item.transactionId === transaction.id)?.fixedItemId ?? '' : '';
+  const fixedKey = transaction ? normalizeClassificationText(transaction.description) : '';
+  const similarFixed = transaction && fixedAvailable ? similarWithoutFixed(transaction, data?.transactions ?? [], data?.fixedItemLinks ?? [])
+    .filter(item => (nature === 'income') === (item.amountCents > 0n)) : [];
+  const fixedOptions: VisualSelectOption[] = fixedAvailable ? [
+    { value: '', label: 'Não é fixo', visual: <OptionTile icon={CloseIcon} /> },
+    ...(data?.fixedItems ?? []).filter(item => !item.endedAt && item.nature === nature)
+      .sort((a, b) => Number(b.matchKey === fixedKey) - Number(a.matchKey === fixedKey)
+        || Number(b.categoryId === categoryId) - Number(a.categoryId === categoryId) || a.name.localeCompare(b.name, 'pt-BR'))
+      .map(item => {
+        const last = fixedItemLastValue(item.id, data?.fixedItemLinks ?? [], data?.transactions ?? []);
+        return { value: item.id, label: item.name, visual: <OptionTile icon={CategoryRepeatIcon} />,
+          description: last.competence ? `Último: ${formatCentsBRL(last.cents)} em ${formatCompetence(last.competence)}` : 'Sem lançamentos ainda',
+          ...(item.matchKey === fixedKey ? { badge: { label: 'Sugerido', tone: 'accent' as const } } : {}),
+          group: item.categoryId === categoryId ? 'Fixos desta categoria' : 'Outros fixos' };
+      }),
+    { value: 'new', label: `Criar fixo “${fixedName.trim() || 'Novo fixo'}”`, visual: <OptionTile icon={PlusIcon} />,
+      description: 'O valor deste lançamento vira a previsão dos próximos meses', group: 'Novo' }
+  ] : [];
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!transaction) return;
     if ((nature === 'income' || nature === 'expense') && !categoryId) {
       setError('Selecione a categoria confirmada.'); return;
+    }
+    if (fixedAvailable && fixedChoice === 'new' && fixedName.trim().length < 2) {
+      setError('Dê um nome ao fixo com pelo menos 2 letras.'); return;
     }
     if (relation && !relationId) {
       setError(`Selecione ${nature === 'own_transfer' ? 'o outro lado da transferência' : nature === 'card_payment' ? 'a fatura' : 'a caixinha'}.`); return;
@@ -153,11 +188,24 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         await ledger.confirmClassification({ transactionId: transaction.id, categoryId,
           ...(bulk ? { similarTransactionIds: bulkTargets.map(item => item.id) } : {}) });
       }
-      notify({ message: bulk
+      let fixedMessage = '';
+      if (fixedAvailable) {
+        if (fixedChoice === 'new') {
+          const linked = await ledger.createFixedItem({ transactionId: transaction.id, name: fixedName.trim(), categoryId, linkSimilar: linkSimilarFixed && similarFixed.length > 0 });
+          fixedMessage = ` Fixo “${fixedName.trim()}” criado${linked ? ` com mais ${linked} ${linked === 1 ? 'lançamento' : 'lançamentos'}` : ''}.`;
+        } else if (fixedChoice && (fixedChoice !== currentFixed || (linkSimilarFixed && similarFixed.length > 0))) {
+          await ledger.setTransactionFixedItem(transaction.id, fixedChoice, linkSimilarFixed && similarFixed.length > 0);
+          fixedMessage = ' Vinculado ao fixo.';
+        } else if (!fixedChoice && currentFixed) {
+          await ledger.setTransactionFixedItem(transaction.id, null, false);
+          fixedMessage = ' Desvinculado do fixo.';
+        }
+      }
+      notify({ message: (bulk
         ? `Categoria confirmada em ${bulkTargets.length + 1} lançamentos.`
         : nature === 'income' || nature === 'expense'
         ? 'Revisão confirmada e alias aprendido.'
-        : 'Natureza e vínculo confirmados.', tone: 'success' });
+        : 'Natureza e vínculo confirmados.') + fixedMessage, tone: 'success' });
       onClose();
     } catch {
       setError('Não foi possível confirmar a revisão. Confira o vínculo e tente novamente.');
@@ -172,6 +220,13 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
       {(nature === 'income' || nature === 'expense') && <VisualSelect label="Categoria confirmada" value={categoryId}
         options={categoryOptions} searchable={categoryOptions.length > 8} required onChange={setCategoryId} />}
+      {fixedAvailable && <VisualSelect label="Lançamento fixo" value={fixedChoice} options={fixedOptions} searchable={fixedOptions.length > 8}
+        hint="Fixo é o lançamento que se repete todo mês, mesmo com valor diferente. A previsão usa o valor do último mês."
+        onChange={value => { setFixedChoice(value); setError(''); }} />}
+      {fixedAvailable && fixedChoice === 'new' && <Input label="Nome do fixo" value={fixedName} required maxLength={80}
+        onChange={event => setFixedName(event.target.value)} />}
+      {fixedAvailable && fixedChoice && similarFixed.length > 0 && <Checkbox checked={linkSimilarFixed} onChange={event => setLinkSimilarFixed(event.target.checked)}
+        label={`Vincular também ${similarFixed.length === 1 ? 'o lançamento igual' : `os ${similarFixed.length} lançamentos iguais`} sem fixo`} />}
       {relation && nature === 'card_payment'
         ? <VisualSelect label={relation.label} value={relationId} placeholder={relation.placeholder} options={statementOptions}
           required hint={statementHint} onChange={setRelationId} />

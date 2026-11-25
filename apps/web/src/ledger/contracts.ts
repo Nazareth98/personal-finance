@@ -1,4 +1,4 @@
-import type { CardInstallment, CardStatement, CardStatementEntry, Category, CategoryBudget, CreditCard, FinancialAccount, SavingsBox, SavingsMovement, TransactionContract } from '@personal-finance/domain';
+import type { CardInstallment, CardStatement, CardStatementEntry, Category, CategoryBudget, CreditCard, FinancialAccount, FixedItem, FixedItemLink, SavingsBox, SavingsMovement, TransactionContract } from '@personal-finance/domain';
 
 export type TransactionLink = {
   id: string;
@@ -68,7 +68,13 @@ export type LedgerData = {
   institutions?: AccountInstitution[];
   /** D-062: nome do titular, usado para reconhecer Pix para si mesmo. */
   holderName?: string;
+  /** D-084: fixos e seus vínculos; opcionais para demonstração e instâncias ainda sem a migration. */
+  fixedItems?: FixedItem[];
+  fixedItemLinks?: FixedItemLink[];
 };
+
+/** D-084: cria um fixo a partir de um lançamento revisado. */
+export type FixedItemDraft = { transactionId: string; name: string; categoryId?: string; linkSimilar: boolean };
 
 export type SelfTransferResult = { paired: number; neutralized: number };
 
@@ -144,4 +150,8 @@ export interface LedgerRepository {
   linkCardPayment(draft: CardPaymentLink): Promise<void>;
   /** D-076: marca (ou desmarca) uma fatura como paga fora do app. */
   setStatementSettled(statementId: string, settled: boolean): Promise<void>;
+  /** D-084: cria o fixo e vincula o lançamento (e, se pedido, os iguais sem fixo). Devolve quantos iguais vinculou. */
+  createFixedItem(draft: FixedItemDraft): Promise<number>;
+  /** D-084: vincula ou, com `null`, desvincula; `applySimilar` vale para os iguais. Devolve quantos mudaram. */
+  setTransactionFixedItem(transactionId: string, fixedItemId: string | null, applySimilar: boolean): Promise<number>;
 }

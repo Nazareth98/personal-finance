@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { validReviewStartDate } from '../lib/review-period';
-import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
-import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, SelfTransferResult, CreditCardConfiguration, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
+import { applyTransactionSemantics, type CardInstallment, type CardStatement, type CardStatementEntry, type Category, type CategoryBudget, type CreditCard, type FinancialAccount, type FixedItem, type FixedItemLink, type SavingsBox, type SavingsMovement, type TransactionContract } from '@personal-finance/domain';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, SelfTransferResult, CreditCardConfiguration, FixedItemDraft, LedgerData, LedgerRepository, ManualTransactionDraft, ReviewHistoryEntry, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation, TransactionClassification, TransactionLink, TransactionSemanticOverride } from './contracts';
 
 type AccountRow = { id: string; name: string; account_type: FinancialAccount['type']; opening_balance_cents: string | number };
 type TransactionRow = {
@@ -150,14 +150,26 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       .map(row => [row.category_id, Number(row.dependency_count)]));
     // D-052: logo/nome do banco por conta; falha aqui não impede o livro de carregar.
     const institutionsResult = await this.client.rpc('get_account_institutions');
+    // D-084: fixos; falha (instância ainda sem a migration) não impede o livro de carregar.
+    const [fixedItemsResult, fixedLinksResult] = await Promise.all([
+      this.client.from('fixed_items').select('id,name,nature,category_id,match_key,ended_at').order('created_at'),
+      this.paged(() => this.client.from('fixed_item_links').select('transaction_id,fixed_item_id,linked_by'))
+    ]);
     // A preferência não pode voltar silenciosamente a todo o histórico quando a leitura falha.
     const profileResult = await this.client.from('profiles').select('holder_name,review_start_date').single();
     if (profileResult.error) throw profileResult.error;
     const holderName = profileResult.data.holder_name as string | null;
     const institutions = institutionsResult.error ? [] : ((institutionsResult.data ?? []) as { account_id: string; connector_id: number | null; institution_name: string }[])
       .map(row => ({ accountId: row.account_id, name: row.institution_name, ...(row.connector_id ? { connectorId: row.connector_id } : {}) }));
+    const fixedItems = fixedItemsResult.error ? undefined : ((fixedItemsResult.data ?? []) as { id: string; name: string; nature: 'income' | 'expense'; category_id: string | null; match_key: string; ended_at: string | null }[])
+      .map((row): FixedItem => ({ id: row.id, name: row.name, nature: row.nature, matchKey: row.match_key,
+        ...(row.category_id ? { categoryId: row.category_id } : {}), ...(row.ended_at ? { endedAt: row.ended_at } : {}) }));
+    const fixedItemLinks = fixedLinksResult.error ? undefined : ((fixedLinksResult.data ?? []) as { transaction_id: string; fixed_item_id: string; linked_by: 'owner' | 'auto_similar' }[])
+      .map((row): FixedItemLink => ({ transactionId: row.transaction_id, fixedItemId: row.fixed_item_id, linkedBy: row.linked_by }));
     return {
       institutions,
+      ...(fixedItems ? { fixedItems } : {}),
+      ...(fixedItemLinks ? { fixedItemLinks } : {}),
       reviewStartDate: profileResult.data.review_start_date ?? null,
       ...(holderName ? { holderName } : {}),
       accounts: ((accountsResult.data ?? []) as AccountRow[]).map(row => ({ id: row.id, name: row.name, type: row.account_type, openingBalanceCents: BigInt(row.opening_balance_cents) })),
@@ -401,6 +413,22 @@ export class SupabaseLedgerRepository implements LedgerRepository {
       p_credit_limit_cents: draft.creditLimitCents?.toString() ?? null
     });
     if (error) throw error;
+  }
+
+  async createFixedItem(draft: FixedItemDraft): Promise<number> {
+    const { data, error } = await this.client.rpc('create_fixed_item', {
+      p_transaction_id: draft.transactionId, p_name: draft.name, p_category_id: draft.categoryId ?? null, p_link_similar: draft.linkSimilar
+    });
+    if (error) throw error;
+    return Number((data as { linkedSimilar?: number } | null)?.linkedSimilar ?? 0);
+  }
+
+  async setTransactionFixedItem(transactionId: string, fixedItemId: string | null, applySimilar: boolean): Promise<number> {
+    const { data, error } = await this.client.rpc('set_transaction_fixed_item', {
+      p_transaction_id: transactionId, p_fixed_item_id: fixedItemId, p_apply_similar: applySimilar
+    });
+    if (error) throw error;
+    return Number(data ?? 0);
   }
 
   async setStatementSettled(statementId: string, settled: boolean): Promise<void> {

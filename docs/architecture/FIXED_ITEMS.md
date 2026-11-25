@@ -1,6 +1,6 @@
 # Fixos, plano do mês e despesas x receita
 
-Status: **proposta (D-084)**. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
+Status: **em implementação (D-084)**. Etapa 12.1 publicada em 25/11/2026: migration `20261125165816_fixed_items.sql`, campo “Lançamento fixo” na Revisão e domínio `packages/domain/src/fixed.ts`. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
 
 ## Objetivo
 

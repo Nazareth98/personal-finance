@@ -66,9 +66,9 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   review: {
     title: "Revisão", subtitle: "O que o app não conseguiu decidir sozinho.",
     shows: "A fila de lançamentos que precisam de você: categoria a confirmar ou efeito financeiro a definir, como pagamento de fatura ou aporte em caixinha.",
-    calc: ["Sugestão com confiança alta já entra sozinha; média vem para cá; baixa fica sem categoria.", "Pagamento de fatura e transferência entre suas contas precisam do outro lado ligado.", "Cada confirmação ensina o app para os próximos lançamentos parecidos.", "Aplicações e resgates de investimentos (CDB, Tesouro…) vêm como aporte ou resgate: escolha a caixinha."],
+    calc: ["Sugestão com confiança alta já entra sozinha; média vem para cá; baixa fica sem categoria.", "Pagamento de fatura e transferência entre suas contas precisam do outro lado ligado.", "Cada confirmação ensina o app para os próximos lançamentos parecidos.", "Aplicações e resgates de investimentos (CDB, Tesouro…) vêm como aporte ou resgate: escolha a caixinha.", "**Lançamento fixo**: marque o que se repete todo mês (aluguel, luz, salário). Os próximos iguais chegam vinculados e a previsão usa o valor do último mês."],
     actions: ["**Alterar** o período para escolher por onde a fila começa. Fica salvo, inclusive em outro aparelho. Nas contas vale o dia escolhido; nos cartões, a fatura inteira do mês.", "**Ver anteriores** mostra as pendências antes dessa data sem mudar o período. Nada é apagado.", "**Confirmar** a sugestão com um toque.", "**Ordenar por** data, valor ou descrição para achar lançamentos parecidos.", "**Alterar** para escolher outra categoria ou natureza.", "Confirmar a mesma categoria em **todos os lançamentos iguais** de uma vez.", "Ver o histórico do que já foi decidido."],
-    terms: ["Revisão", "Natureza", "Reconciliado"]
+    terms: ["Revisão", "Natureza", "Fixo", "Reconciliado"]
   },
   reports: {
     title: "Relatórios", subtitle: "Tendência e previsão.",
@@ -89,6 +89,7 @@ export const glossary: GlossaryTerm[] = [
   { term: "Fatura", definition: "Conjunto das compras do cartão entre dois fechamentos. Leva o mês do vencimento: compras de 09/09 a 08/10 vencem em 15/10." },
   { term: "Folga", definition: "Quanto ainda cabe no teto do mês. Negativa vira excedente." },
   { term: "Gastos sem meta", definition: "Despesas do mês em categorias que ainda não têm teto. Dá para criar a meta direto dali." },
+  { term: "Fixo", definition: "Lançamento que se repete todo mês, como aluguel, conta de luz ou salário, mesmo que o valor mude. Você marca na Revisão; os próximos iguais chegam vinculados e a previsão usa o valor do último mês." },
   { term: "Limite usado", definition: "Quanto do limite do cartão está comprometido: limite menos o disponível que o banco informa. Inclui compras parceladas que ainda vão cair." },
   { term: "Marcar como paga", definition: "Tira uma fatura vencida das pendências quando você pagou, mas o pagamento não chegou do banco. Não cria lançamento e pode ser desfeito." },
   { term: "Natureza", definition: "O efeito do lançamento: receita, despesa, transferência entre suas contas, pagamento de fatura, aporte, resgate ou ajuste." },

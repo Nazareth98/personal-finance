@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, SelfTransferResult, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
+import type { AccountDraft, AccountUpdate, CardPaymentLink, CategoryArchiveDraft, CategoryBudgetDraft, CategoryDraft, CategoryUpdate, ClassificationConfirmation, CreditCardConfiguration, FixedItemDraft, SelfTransferResult, LedgerData, LedgerRepository, ManualTransactionDraft, SavingsBoxDraft, SavingsMovementDraft, SavingsMovementLinkDraft, SemanticConfirmation } from './contracts';
 
 export type LedgerState = {
   setReviewStartDate: (date: string | null) => Promise<void>;
@@ -30,6 +30,8 @@ export type LedgerState = {
   confirmTransactionSemantics: (draft: SemanticConfirmation) => Promise<void>;
   configureCreditCard: (draft: CreditCardConfiguration) => Promise<void>;
   setStatementSettled: (statementId: string, settled: boolean) => Promise<void>;
+  createFixedItem: (draft: FixedItemDraft) => Promise<number>;
+  setTransactionFixedItem: (transactionId: string, fixedItemId: string | null, applySimilar: boolean) => Promise<number>;
   linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
 };
 
@@ -162,6 +164,20 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     await reload();
   }
 
+  async function createFixedItem(draft: FixedItemDraft) {
+    if (!repository) throw new Error('ledger repository missing');
+    const linked = await repository.createFixedItem(draft);
+    await reload();
+    return linked;
+  }
+
+  async function setTransactionFixedItem(transactionId: string, fixedItemId: string | null, applySimilar: boolean) {
+    if (!repository) throw new Error('ledger repository missing');
+    const changed = await repository.setTransactionFixedItem(transactionId, fixedItemId, applySimilar);
+    await reload();
+    return changed;
+  }
+
   async function setStatementSettled(statementId: string, settled: boolean) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.setStatementSettled(statementId, settled);
@@ -182,6 +198,6 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
     createTransaction, saveBudget, deleteBudget, createSavingsBox, updateSavingsBox, deleteSavingsBox, createSavingsMovement, linkSavingsMovement,
-    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, setStatementSettled, linkCardPayment
+    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, setStatementSettled, linkCardPayment, createFixedItem, setTransactionFixedItem
   };
 }
