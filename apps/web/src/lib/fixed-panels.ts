@@ -1,4 +1,4 @@
-import { addCompetenceMonths, fixedItemLastValue, fixedItemMonthStatus, type Category, type FixedItem, type FixedItemLink, type FixedItemMonthStatus, type TransactionContract } from '@personal-finance/domain';
+import { addCompetenceMonths, fixedItemLastValue, fixedItemMonthStatus, fixedItemMonthValue, type Category, type FixedItem, type FixedItemLink, type FixedItemMonthStatus, type TransactionContract } from '@personal-finance/domain';
 
 export type FixedItemRow = {
   item: FixedItem;
@@ -8,6 +8,8 @@ export type FixedItemRow = {
   /** Previsão do mês seguinte: o último valor, se o fixo está ativo. */
   nextCents: bigint;
   status: FixedItemMonthStatus;
+  /** O que ainda falta cair no mês: o valor de referência inteiro, se nada caiu; a diferença, se caiu só parte. */
+  remainingCents: bigint;
   linkedCount: number;
 };
 
@@ -29,12 +31,16 @@ export function buildFixedItemsPanel(input: {
   const month = input.today.slice(0, 7);
   const categories = new Map(input.categories.map(category => [category.id, category]));
   const rows = input.items.map((item): FixedItemRow => {
-    const last = fixedItemLastValue(item.id, input.links, input.transactions);
+    // Referência: o último mês completo antes do atual (o mês em curso pode ter só parte).
+    const last = fixedItemLastValue(item.id, input.links, input.transactions, month);
+    const status = fixedItemMonthStatus(item.id, input.links, input.transactions, month, input.today);
+    const received = fixedItemMonthValue(item.id, input.links, input.transactions, month).cents;
+    const remainingCents = status === 'done' ? 0n : status === 'partial' ? (last.cents > received ? last.cents - received : 0n) : last.cents;
     return {
       item, ...(item.categoryId && categories.get(item.categoryId) ? { category: categories.get(item.categoryId)! } : {}),
       lastCents: last.cents, ...(last.competence ? { lastCompetence: last.competence } : {}),
       nextCents: item.endedAt ? 0n : last.cents,
-      status: fixedItemMonthStatus(item.id, input.links, input.transactions, month, input.today),
+      status, remainingCents,
       linkedCount: input.links.filter(link => link.fixedItemId === item.id).length
     };
   }).sort((a, b) => Number(a.item.nature === 'expense') - Number(b.item.nature === 'expense') || a.item.name.localeCompare(b.item.name, 'pt-BR'));
@@ -48,5 +54,6 @@ export function buildFixedItemsPanel(input: {
 
 export function fixedStatusLabel(row: Pick<FixedItemRow, 'status' | 'item'>): string {
   if (row.status === 'done') return row.item.nature === 'income' ? 'Recebido' : 'Pago';
+  if (row.status === 'partial') return row.item.nature === 'income' ? 'Recebido em parte' : 'Pago em parte';
   return row.status === 'late' ? 'Atrasado' : 'Pendente';
 }

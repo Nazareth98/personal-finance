@@ -8,7 +8,7 @@ import { CategoryIdentityIcon } from './CategoryIdentity';
 import { FixedItemForm } from './FixedItemForm';
 import { OptionTile } from './visual-options';
 
-const statusTone = { done: 'income', pending: 'neutral', late: 'expense' } as const;
+const statusTone = { done: 'income', partial: 'transfer', pending: 'neutral', late: 'expense' } as const;
 
 /** D-084: aba “Fixos” de Orçamentos — o que se repete todo mês, último valor, previsão e situação no mês. */
 export function FixedItemsPanel({ ledger, today }: { ledger: LedgerState; today: string }) {
@@ -24,7 +24,7 @@ export function FixedItemsPanel({ ledger, today }: { ledger: LedgerState; today:
         ? <CategoryIdentityIcon iconKey={row.category.iconKey} colorKey={row.category.colorKey} />
         : <OptionTile icon={CategoryRepeatIcon} />}
         <span><strong>{row.item.name}</strong><span className="muted">{row.item.nature === 'income' ? 'Receita' : 'Despesa'} · {row.category?.name ?? 'Sem categoria'} · {row.linkedCount} {row.linkedCount === 1 ? 'lançamento' : 'lançamentos'}</span></span></span> },
-    { key: 'last', header: 'Último valor', align: 'end', mobile: 'value', sortable: true, sortValue: row => row.lastCents,
+    { key: 'last', header: 'Valor de referência', align: 'end', mobile: 'value', sortable: true, sortValue: row => row.lastCents,
       cell: row => row.lastCompetence
         ? <span className="fixed-item-amount"><strong className={row.item.nature === 'income' ? 'transaction-amount--income' : undefined}>{money(row, row.lastCents)}</strong><span className="muted">{formatCompetence(row.lastCompetence)}</span></span>
         : <span className="muted">—</span> },
@@ -43,7 +43,7 @@ export function FixedItemsPanel({ ledger, today }: { ledger: LedgerState; today:
       <div><span className="muted">Despesas fixas</span><strong>− {formatCentsBRL(panel.expenseCents)}</strong><span className="muted">Por mês, pelo último valor</span></div>
       <div><span className="muted">Em {formatCompetence(panel.month)}</span><strong>{panel.doneCount} de {panel.active.length}</strong><span className="muted">já chegaram</span></div>
     </section>
-    <p className="muted">Fixos são criados na Revisão, no campo “Lançamento fixo”. A previsão de cada um usa o valor do último mês.</p>
+    <p className="muted">Fixos são criados na Revisão, no campo “Lançamento fixo”. A previsão de cada um usa o valor do último mês completo.</p>
     {panel.active.length === 0
       ? <EmptyState title="Nenhum fixo ainda" description="Na Revisão, marque o aluguel, a conta de luz ou o salário como lançamento fixo." action={<a href="#review">Abrir Revisão</a>} />
       : <DataTable ariaLabel="Fixos ativos" columns={columns} rows={panel.active} getRowKey={row => row.item.id} />}

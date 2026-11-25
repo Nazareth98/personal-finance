@@ -21,7 +21,7 @@ export type {
 } from './classification.ts';
 export { addCompetenceMonths, billCompetences, cardCompetence, cardStatementDates, cardStatementSummary, projectInstallments } from './cards.ts';
 export type { CardInstallment, CardStatement, CardStatementEntry, CardStatementSummary, CreditCard } from './cards.ts';
-export { fixedItemLastValue, fixedItemMonthStatus, fixedItemTransactions, similarWithoutFixed, suggestFixedItemName } from './fixed.ts';
+export { fixedItemExpectedValue, fixedItemLastValue, fixedItemMonthStatus, fixedItemMonthValue, fixedItemTransactions, similarWithoutFixed, suggestFixedItemName } from './fixed.ts';
 export type { FixedItem, FixedItemLink, FixedItemMonthStatus } from './fixed.ts';
 export { buildSavingsPlans, buildSixMonthForecast, recognizeItauSalary, recurringIncomeEstimate } from './forecast.ts';
 export { buildMonthPlan, buildPlanForecast } from './plan.ts';

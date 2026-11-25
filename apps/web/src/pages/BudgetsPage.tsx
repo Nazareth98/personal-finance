@@ -58,7 +58,7 @@ function MonthPlanStrip({ plan }: { plan: MonthPlan }) {
   const negative = plan.leftoverCents < 0n;
   return <section className="month-plan" aria-label={`Plano de ${formatCompetence(plan.competence)}`}>
     <div><span className="muted">Receita prevista<InfoTip label="Receita prevista" text={plan.incomeSource === 'fixed'
-      ? 'Soma das receitas fixas, pelo valor do último mês de cada uma.'
+      ? 'Soma das receitas fixas, pelo valor do último mês completo completo de cada uma.'
       : 'Estimativa: média de 6 meses das categorias de receita recorrente. Marque o salário como fixo na Revisão para usar o valor real.'} /></span>
       <strong className="transaction-amount--income">+ {formatCentsBRL(plan.incomeCents)}</strong>
       <span className="muted">{plan.incomeSource === 'fixed' ? 'Receitas fixas' : 'Estimativa'}</span></div>

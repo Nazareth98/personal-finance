@@ -1,7 +1,7 @@
 import { addCompetenceMonths, type CardInstallment } from './cards.ts';
 import { normalizeClassificationText } from './classification.ts';
 import type { CategoryBudget, SavingsBox, SavingsMovement, TransactionContract } from './finance.ts';
-import { fixedItemLastValue, type FixedItem, type FixedItemLink } from './fixed.ts';
+import { fixedItemExpectedValue, fixedItemLastValue, type FixedItem, type FixedItemLink } from './fixed.ts';
 import { buildSavingsPlans, recurringIncomeEstimate } from './forecast.ts';
 
 /** D-084: o que já está comprometido numa categoria no mês — fixos (último valor) e parcelas de cartão. */
@@ -58,8 +58,12 @@ const installmentKey = (item: Pick<CardInstallment, 'cardId' | 'description' | '
 export function buildMonthPlan(input: MonthPlanInput): MonthPlan {
   const active = input.fixedItems.filter(item => !item.endedAt);
   // Fixo de receita ainda sem lançamento vinculado não tem valor: sem nenhum com valor, vale a estimativa.
+  // Com `today`, o mês em curso não serve de base (pode ter caído só parte); sem `today`, o último mês com vínculo.
+  const fixedValue = (itemId: string) => input.today
+    ? fixedItemExpectedValue(itemId, input.fixedItemLinks, input.transactions, input.competence, input.today.slice(0, 7))
+    : fixedItemLastValue(itemId, input.fixedItemLinks, input.transactions).cents;
   const fixedIncomeCents = active.filter(item => item.nature === 'income')
-    .reduce((sum, item) => sum + fixedItemLastValue(item.id, input.fixedItemLinks, input.transactions).cents, 0n);
+    .reduce((sum, item) => sum + fixedValue(item.id), 0n);
   const incomeSource = fixedIncomeCents > 0n ? 'fixed' as const : 'estimate' as const;
   const nextMonth = input.today ? addCompetenceMonths(input.today.slice(0, 7), 1) : input.competence;
   const base = input.competence < nextMonth ? input.competence : nextMonth;
@@ -76,7 +80,7 @@ export function buildMonthPlan(input: MonthPlanInput): MonthPlan {
     return created;
   };
   for (const item of active.filter(entry => entry.nature === 'expense')) {
-    const { cents } = fixedItemLastValue(item.id, input.fixedItemLinks, input.transactions);
+    const cents = fixedValue(item.id);
     if (cents <= 0n) continue;
     const target = bucket(item.categoryId ?? null);
     target.fixedCents += cents; target.totalCents += cents;

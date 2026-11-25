@@ -22,10 +22,21 @@ test('aba Fixos: totais só dos ativos, receitas antes das despesas e situação
   const panel = buildFixedItemsPanel({ items, links, transactions, categories: [], today: '2026-12-15' });
   assert.deepEqual(panel.active.map(row => row.item.id), ['salary', 'rent', 'light']);
   assert.deepEqual(panel.ended.map(row => row.item.id), ['old']);
-  assert.equal(panel.incomeCents, 830000n);
+  // Referência é o último mês completo (novembro), não dezembro, que está em curso.
+  assert.equal(panel.incomeCents, 820000n);
   assert.equal(panel.expenseCents, 203190n);
   assert.equal(panel.doneCount, 1);
   assert.equal(panel.nextMonth, '2027-01');
   assert.deepEqual(panel.active.map(row => fixedStatusLabel(row)), ['Recebido', 'Atrasado', 'Pendente']);
   assert.equal(panel.ended[0]!.nextCents, 0n);
+});
+
+test('aba Fixos: salário em duas partes fica “Recebido em parte” e mostra quanto falta (D-084)', () => {
+  const transactions = [tx('a', '2026-10', 309000n, '15', 'SALARIO'), tx('b', '2026-10', 256700n, '29', 'SALARIO'), tx('c', '2026-11', 252600n, '12', 'SALARIO')];
+  const links = ['a', 'b', 'c'].map(transactionId => ({ transactionId, fixedItemId: 'salary', linkedBy: 'owner' as const }));
+  const panel = buildFixedItemsPanel({ items: [{ id: 'salary', name: 'Salário', nature: 'income', matchKey: 'salario' }], links, transactions, categories: [], today: '2026-11-25' });
+  const row = panel.active[0]!;
+  assert.equal(fixedStatusLabel(row), 'Recebido em parte');
+  assert.equal(row.lastCents, 565700n);
+  assert.equal(row.remainingCents, 313100n);
 });

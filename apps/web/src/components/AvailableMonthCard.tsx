@@ -26,7 +26,7 @@ export function AvailableMonthCard({ data, today }: { data: LedgerData; today: s
   const waiting = fixed.active.filter(row => row.status !== 'done');
   const toPay = waiting.filter(row => row.item.nature === 'expense');
   const toReceive = waiting.filter(row => row.item.nature === 'income');
-  const sum = (rows: typeof waiting) => rows.reduce((total, row) => total + row.lastCents, 0n);
+  const sum = (rows: typeof waiting) => rows.reduce((total, row) => total + row.remainingCents, 0n);
   const late = waiting.filter(row => row.status === 'late').length;
   const negative = plan.leftoverCents < 0n;
   return <Card className="available-month">

@@ -14,7 +14,8 @@ export type FixedItem = {
 
 export type FixedItemLink = { transactionId: string; fixedItemId: string; linkedBy: 'owner' | 'auto_similar' };
 
-export type FixedItemMonthStatus = 'done' | 'pending' | 'late';
+/** `partial`: já caiu no mês, mas menos vezes do que no mês de referência (salário pago em duas partes, por exemplo). */
+export type FixedItemMonthStatus = 'done' | 'partial' | 'pending' | 'late';
 
 type Tx = Pick<TransactionContract, 'id' | 'description' | 'amountCents' | 'eventDate' | 'competence'>;
 
@@ -28,14 +29,37 @@ export function fixedItemTransactions<T extends Tx>(itemId: string, links: reado
 }
 
 /**
- * Valor que o fixo projeta para os próximos meses: o do último mês com vínculo (somando os lançamentos daquele mês,
- * caso o fixo tenha caído mais de uma vez nele). Sempre positivo; sem vínculo, 0.
+ * Valor do último mês com vínculo (somando os lançamentos daquele mês, caso o fixo tenha caído mais de uma vez nele).
+ * Com `before`, considera só meses anteriores a ele, voltando a todos os meses se não houver nenhum. Sempre positivo;
+ * sem vínculo, 0.
  */
-export function fixedItemLastValue(itemId: string, links: readonly FixedItemLink[], transactions: readonly Tx[]): { cents: bigint; competence?: string } {
-  const linked = fixedItemTransactions(itemId, links, transactions);
+export function fixedItemLastValue(itemId: string, links: readonly FixedItemLink[], transactions: readonly Tx[], before?: string): { cents: bigint; competence?: string; count?: number } {
+  const all = fixedItemTransactions(itemId, links, transactions);
+  const earlier = before ? all.filter(item => item.competence < before) : all;
+  const linked = earlier.length ? earlier : all;
   const latest = linked[0]?.competence;
   if (!latest) return { cents: 0n };
-  return { cents: linked.filter(item => item.competence === latest).reduce((sum, item) => sum + abs(item.amountCents), 0n), competence: latest };
+  const month = linked.filter(item => item.competence === latest);
+  return { cents: month.reduce((sum, item) => sum + abs(item.amountCents), 0n), competence: latest, count: month.length };
+}
+
+/** Quanto do fixo caiu numa competência e em quantos lançamentos. */
+export function fixedItemMonthValue(itemId: string, links: readonly FixedItemLink[], transactions: readonly Tx[], competence: string): { cents: bigint; count: number } {
+  const month = fixedItemTransactions(itemId, links, transactions).filter(item => item.competence === competence);
+  return { cents: month.reduce((sum, item) => sum + abs(item.amountCents), 0n), count: month.length };
+}
+
+/**
+ * Valor previsto do fixo numa competência. Mês passado com vínculo: o que de fato caiu. Mês atual ou futuro: o último
+ * mês completo antes do atual, porque o mês em curso pode ter só parte (salário em duas vezes, por exemplo).
+ */
+export function fixedItemExpectedValue(itemId: string, links: readonly FixedItemLink[], transactions: readonly Tx[], competence: string, currentCompetence: string): bigint {
+  if (competence < currentCompetence) {
+    const actual = fixedItemMonthValue(itemId, links, transactions, competence);
+    if (actual.count) return actual.cents;
+    return fixedItemLastValue(itemId, links, transactions, competence).cents;
+  }
+  return fixedItemLastValue(itemId, links, transactions, currentCompetence).cents;
 }
 
 /**
@@ -44,7 +68,11 @@ export function fixedItemLastValue(itemId: string, links: readonly FixedItemLink
  */
 export function fixedItemMonthStatus(itemId: string, links: readonly FixedItemLink[], transactions: readonly Tx[], competence: string, today: string): FixedItemMonthStatus {
   const linked = fixedItemTransactions(itemId, links, transactions);
-  if (linked.some(item => item.competence === competence)) return 'done';
+  const inMonth = linked.filter(item => item.competence === competence).length;
+  if (inMonth) {
+    const reference = fixedItemLastValue(itemId, links, transactions, competence);
+    return reference.competence && reference.competence < competence && inMonth < (reference.count ?? 0) ? 'partial' : 'done';
+  }
   if (!linked[0]) return 'pending';
   const current = today.slice(0, 7);
   if (competence < current) return 'late';

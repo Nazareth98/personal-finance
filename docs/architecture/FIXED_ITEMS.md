@@ -27,6 +27,7 @@ Saber quanto se pode definir de meta por categoria, a partir do que entra e do q
 - **Situação no mês:**
   - Pago/Recebido: há vínculo na competência.
   - Pendente: ainda não há vínculo.
+  - Recebido/Pago em parte: caiu no mês, mas em menos lançamentos que no último mês completo (salário em duas partes). “A receber/pagar” mostra a diferença.
   - Atrasado: passou do dia habitual mais 3 dias. O dia habitual é o dia do último vínculo.
 - **Encerrar um fixo** tira ele das próximas previsões e mantém o histórico.
 - **Metas incluem os fixos.** A meta de Moradia cobre o aluguel e o resto. O app mostra quanto da meta já está comprometido e avisa quando a meta fica abaixo dos fixos. Não há bloqueio.
@@ -84,3 +85,8 @@ Valores em `bigint` (centavos):
 
 - Sem fixos, nada muda para quem usa. A previsão continua pela estimativa atual, com a marca “Estimativa” e um atalho para a Revisão.
 - As migrations só criam estruturas, sem dados.
+
+
+## Mês de referência (25/11/2026)
+
+A previsão de um fixo usa o **último mês completo antes do atual** (`fixedItemExpectedValue`). O mês em curso não vira base, porque pode ter caído só parte (salário pago em duas vezes). Meses passados usam o que de fato caiu. Sem nenhum mês anterior, vale o mês atual.

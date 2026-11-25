@@ -221,7 +221,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       {(nature === 'income' || nature === 'expense') && <VisualSelect label="Categoria confirmada" value={categoryId}
         options={categoryOptions} searchable={categoryOptions.length > 8} required onChange={setCategoryId} />}
       {fixedAvailable && <VisualSelect label="Lançamento fixo" value={fixedChoice} options={fixedOptions} searchable={fixedOptions.length > 8}
-        hint="Fixo é o lançamento que se repete todo mês, mesmo com valor diferente. A previsão usa o valor do último mês."
+        hint="Fixo é o lançamento que se repete todo mês, mesmo com valor diferente. A previsão usa o valor do último mês completo."
         onChange={value => { setFixedChoice(value); setError(''); }} />}
       {fixedAvailable && fixedChoice === 'new' && <Input label="Nome do fixo" value={fixedName} required maxLength={80}
         onChange={event => setFixedName(event.target.value)} />}
