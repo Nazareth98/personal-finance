@@ -158,7 +158,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     <Tabs label="Visualização da revisão" className="review-view-tabs" panelClassName="review-panel" selectedId={view}
       onSelect={id => change('view', id === 'history' ? 'history' : '')}
       items={[{ id: 'pending', label: <strong>Pendências · {pending.length}</strong> }, { id: 'history', label: <strong>Histórico · {history.length}</strong> }]}>
-      <TransactionFilterFields collapsible toolbar={reasonChips} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
+      <TransactionFilterFields collapsible institutions={data?.institutions} toolbar={reasonChips} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
         extraActiveCount={view === 'history' && historyFilter !== 'all' ? 1 : 0}
         accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={reviewNatures}>
         {view === 'pending' && <Select label="Ordenar por" value={pendingSort} options={pendingSortOptions}

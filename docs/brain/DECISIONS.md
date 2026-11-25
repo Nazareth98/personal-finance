@@ -295,3 +295,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - UI no padrão do design system: o card grande virou uma linha discreta (`.review-period`) com a data, o número de pendências anteriores e ações pequenas “Ver anteriores”/“Alterar”. No diálogo, o período é um `VisualSelect` (padrão do design system para opções com descrição): cada opção tem ícone, rótulo e a data em linha secundária (“Últimos 3 meses · Desde 01/09/2026”); o campo de data só aparece em “Escolher uma data”. `RadioGroup` em linha foi descartado: com rótulos longos quebrava em grade irregular.
 - Regras: data futura recusada (esconderia a fila inteira); ao reabrir, um atalho salvo volta selecionado se ainda corresponde à mesma data; a mensagem de sucesso diz o período salvo.
+
+## D-081 — Seleções com ícone usam VisualSelect (25/11/2026)
+
+- Toda escolha de conta, categoria, caixinha ou lançamento passou de `Select` nativo para `VisualSelect` com o ícone da coisa (logo do banco, identidade da categoria, ícone neutro), como pede o Design System. Construtores em `components/visual-options.tsx`.
+- `Select` continua para listas sem identidade visual (tipo, natureza, período, ordenação). Em filtros, a opção de conta é compacta (sem tipo) para manter 44 px.

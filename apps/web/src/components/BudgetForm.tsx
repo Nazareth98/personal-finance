@@ -1,6 +1,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import type { CategoryBudget } from '@personal-finance/domain';
-import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, Select, useToast } from '@personal-finance/ui';
+import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, VisualSelect, useToast } from '@personal-finance/ui';
+import { categoryOption } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsPlain } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
@@ -32,10 +33,11 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
   const budgeted = new Set((ledger.data?.budgets ?? []).map(item => item.categoryId));
   const categoryName = categories.find(category => category.id === budget?.categoryId)?.name ?? 'Categoria indisponível';
   const options = budget
-    ? [{ value: budget.categoryId, label: categoryName }]
+    ? [categories.find(category => category.id === budget.categoryId)].map(category => category ? categoryOption(category)
+      : { value: budget.categoryId, label: categoryName, visual: null })
     : categories
       .filter(category => !category.archivedAt && category.applicability === 'expense' && !budgeted.has(category.id))
-      .map(category => ({ value: category.id, label: category.name }));
+      .map(categoryOption);
   const title = budget ? `Editar meta de ${categoryName}` : 'Definir meta';
 
   async function submit(event: FormEvent) {
@@ -91,8 +93,8 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
     <Button type="submit" form={formId} loading={loading}>Salvar</Button>
   </>}>
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
-      <Select label="Categoria" value={categoryId} placeholder="Selecione" options={options} required disabled={Boolean(budget)}
-        onChange={event => setCategoryId(event.target.value)} />
+      <VisualSelect label="Categoria" value={categoryId} options={options} searchable={options.length > 8} required disabled={Boolean(budget)}
+        onChange={setCategoryId} />
       <Input label="Teto mensal" startText="R$" value={limit} inputMode="decimal" placeholder="Ex.: 800,00" required
         hint="Quanto você aceita gastar por mês nesta categoria. Na visão anual, vale 12 vezes." onChange={event => setLimit(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}

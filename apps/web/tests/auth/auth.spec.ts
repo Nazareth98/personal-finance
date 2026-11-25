@@ -3,6 +3,12 @@ import AxeBuilder from '@axe-core/playwright';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
+/** Escolhe uma opção num `VisualSelect` (D-081): abre o campo pelo rótulo e clica na opção pelo início do nome. */
+async function pick(scope: Pick<Page, 'getByRole'>, label: string, option: string | RegExp) {
+  await scope.getByRole('combobox', { name: new RegExp(`^${label}`) }).click();
+  await scope.getByRole('option', { name: typeof option === 'string' ? new RegExp(`^${option}`) : option }).first().click();
+}
+
 function token() {
   const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
   return `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ sub: userId, role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })}.signature`;
@@ -324,8 +330,8 @@ test('registra transferência manual nas duas pontas pelo procedimento atômico'
   await page.getByLabel('Descrição').fill('Transferência para reserva');
   await page.getByLabel('Valor', { exact: true }).fill('250,00');
   await page.getByLabel('Tipo').selectOption('transfer');
-  await page.getByLabel('Conta de origem').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-  await page.getByLabel('Conta de destino').selectOption('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+  await pick(page, 'Conta de origem', 'Conta principal');
+  await pick(page, 'Conta de destino', 'Reserva');
   await page.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Transferência conciliada nas duas contas.')).toBeVisible();
   expect(rpcCalls).toHaveLength(1);
@@ -380,9 +386,9 @@ test('cadastra conta e envia ajuste vinculado ao lançamento original', async ({
   await transactionDialog.getByLabel('Descrição').fill('Correção de tarifa');
   await transactionDialog.getByLabel('Valor', { exact: true }).fill('12,50');
   await transactionDialog.getByLabel('Tipo').selectOption('adjustment_expense');
-  await transactionDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-  await transactionDialog.getByLabel('Categoria').selectOption('groceries');
-  await transactionDialog.getByLabel('Lançamento original').selectOption('22222222-2222-4222-8222-222222222222');
+  await pick(transactionDialog, 'Conta', 'Conta principal');
+  await pick(transactionDialog, 'Categoria', 'Supermercado');
+  await pick(transactionDialog, 'Lançamento original', /^Mercado\b/);
   await transactionDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Ajuste vinculado ao lançamento original.')).toBeVisible();
   expect(writes.map(write => write.path)).toEqual(['/rest/v1/financial_accounts', '/rest/v1/rpc/create_manual_transaction']);
@@ -409,8 +415,9 @@ test('agrupa metas por situação, cria, edita e exclui meta por categoria', asy
 
   await page.getByRole('button', { name: 'Definir meta', exact: true }).click();
   const create = page.getByRole('dialog', { name: 'Definir meta' });
-  await expect(create.getByLabel('Categoria').locator('option[value="groceries"]')).toHaveCount(0);
-  await create.getByLabel('Categoria').selectOption('restaurants');
+  await create.getByRole('combobox', { name: /^Categoria/ }).click();
+  await expect(create.getByRole('option', { name: /^Supermercado/ })).toHaveCount(0);
+  await create.getByRole('option', { name: /^Restaurantes/ }).click();
   await create.getByLabel('Teto mensal').fill('1.250,50');
   await create.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Meta por categoria salva.')).toBeVisible();
@@ -466,7 +473,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await behind.getByRole('button', { name: 'Aportar' }).click();
   const movementDialog = page.getByRole('dialog', { name: 'Registrar aporte' });
   await expect(movementDialog.getByLabel('Tipo de movimento')).toHaveValue('contribution');
-  await movementDialog.getByLabel('Conta').selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  await pick(movementDialog, 'Conta', 'Conta principal');
   await movementDialog.getByLabel('Descrição').fill('Aporte mensal');
   await movementDialog.getByLabel('Valor', { exact: true }).fill('250,00');
   await movementDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
@@ -477,7 +484,7 @@ test('caixinhas: situação, aporte, gaveta de movimentos, edição e exclusão'
   await expect(drawer.getByText('Nenhum aporte ou resgate ainda.', { exact: false })).toBeVisible();
   await drawer.getByRole('button', { name: 'Associar lançamento importado' }).click();
   const linkDialog = page.getByRole('dialog', { name: 'Associar lançamento importado' });
-  await linkDialog.getByLabel('Lançamento importado').selectOption('88888888-2222-4888-8888-888888888888');
+  await pick(linkDialog, 'Lançamento importado', 'Aplicação importada');
   await linkDialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(page.getByText('Lançamento associado à caixinha.')).toBeVisible();
 
@@ -631,7 +638,7 @@ test('configura ciclo, projeta parcelas e vincula pagamento de fatura como neutr
 
   await page.getByRole('button', { name: 'Vincular pagamento' }).click();
   const paymentDialog = page.getByRole('dialog', { name: 'Vincular pagamento' });
-  await paymentDialog.getByLabel('Pagamento de fatura').selectOption('66666666-3333-4666-8666-666666666666');
+  await pick(paymentDialog, 'Pagamento de fatura', 'Pagamento da fatura');
   await paymentDialog.getByRole('button', { name: 'Vincular pagamento' }).click();
   await expect(page.getByText('Pagamento vinculado sem duplicar a despesa.')).toBeVisible();
 
@@ -777,7 +784,7 @@ test('explica sugestão e aprende somente após confirmação', async ({ page })
   await expect(page.getByText('Token da descrição')).toBeVisible();
   await page.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
   const dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
-  await dialog.getByLabel('Categoria confirmada').selectOption('restaurants');
+  await pick(dialog, 'Categoria confirmada', 'Restaurantes');
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Revisão confirmada e alias aprendido.')).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Pendências · 3' })).toBeVisible();
@@ -806,7 +813,7 @@ test('confirma a sugestão direto da fila e filtra pendências por motivo', asyn
   const confirmation = writes.find(write => write.path === '/rest/v1/rpc/confirm_transaction_classification');
   expect(confirmation?.body).toContain('groceries');
   await expect(page.getByRole('button', { name: 'Filtros' })).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('main').getByLabel('Conta', { exact: true })).toBeHidden();
+  await expect(page.getByRole('main').getByRole('combobox', { name: /^Conta/ })).toBeHidden();
 });
 
 test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', async ({ page }) => {
@@ -833,7 +840,7 @@ test('exige e persiste vínculo de fatura ou caixinha na revisão semântica', a
   await page.getByRole('region', { name: /Vincular/ }).getByRole('listitem').filter({ hasText: 'Aplicação importada' }).getByRole('button', { name: 'Vincular' }).click();
   dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Natureza financeira').selectOption('savings_contribution');
-  await dialog.getByLabel('Caixinha').selectOption('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+  await pick(dialog, 'Caixinha', 'Reserva de emergência');
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
 
   const semanticWrites = writes.filter(write => write.path === '/rest/v1/rpc/confirm_transaction_semantics');
@@ -858,10 +865,10 @@ test('revisa novamente preservando versões e registra o outro lado da transfer�
   await page.getByRole('listitem').filter({ hasText: 'Café sintético' }).getByRole('button', { name: 'Alterar' }).click();
   dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
   await dialog.getByLabel('Natureza financeira').selectOption('own_transfer');
-  const counterpart = dialog.getByLabel('Outro lado da transferência');
-  await expect(counterpart.getByRole('option', { name: 'Registrar entrada em Cartão principal' })).toHaveCount(0);
-  await expect(counterpart.getByRole('option', { name: /em Conta principal/ })).toHaveCount(0);
-  await counterpart.selectOption({ label: 'Registrar entrada em Reserva' });
+  await dialog.getByRole('combobox', { name: /^Outro lado da transferência/ }).click();
+  await expect(dialog.getByRole('option', { name: /^Registrar entrada em Cartão principal/ })).toHaveCount(0);
+  await expect(dialog.getByRole('option', { name: /em Conta principal/ })).toHaveCount(0);
+  await dialog.getByRole('option', { name: /^Registrar entrada em Reserva/ }).click();
   await dialog.getByRole('button', { name: 'Confirmar revisão' }).click();
   await expect(page.getByText('Natureza e vínculo confirmados.')).toBeVisible();
 
@@ -902,7 +909,7 @@ test('busca e filtra transações com estado na URL', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Totais do período' })).toContainText('+ R$ 25.000,00');
   await expect(page.getByRole('main').getByLabel('Conta', { exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Filtros', exact: true }).click();
-  await page.getByRole('main').getByLabel('Conta', { exact: true }).selectOption('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+  await pick(page.getByRole('main'), 'Conta', 'Conta principal');
   // Botão de ícone com contador e etiqueta removível do filtro ativo (D-041).
   await expect(page.getByRole('button', { name: 'Filtros, 1 ativo' })).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByRole('list', { name: 'Filtros ativos' }).getByRole('button', { name: 'Remover filtro Conta: Conta principal' })).toBeVisible();
@@ -953,7 +960,7 @@ test('revisão pelo histórico confirma a categoria em todos os lançamentos igu
   const table = page.getByRole('table', { name: 'Histórico de revisões' });
   await table.getByRole('row', { name: '20/10/2026' }).getByRole('button', { name: 'Revisar novamente' }).click();
   const dialog = page.getByRole('dialog', { name: 'Revisar lançamento' });
-  await dialog.getByLabel('Categoria confirmada').selectOption('groceries');
+  await pick(dialog, 'Categoria confirmada', 'Supermercado');
   const scope = dialog.getByRole('group', { name: 'Aplicar a' });
   await expect(scope.getByLabel('Só este lançamento')).toBeChecked();
   await expect(dialog.getByRole('button', { name: 'Confirmar revisão' })).toBeVisible();

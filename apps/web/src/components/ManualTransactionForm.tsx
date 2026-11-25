@@ -1,8 +1,8 @@
 import { useId, useState, type FormEvent } from 'react';
-import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-finance/ui';
+import { Button, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
+import { accountOption, categoryOption, transactionOption } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { parseBrlCents } from '../lib/transaction-validation';
-import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 import { natureHints } from '../lib/help-content';
 
 type Kind = 'income' | 'expense' | 'transfer' | 'adjustment_income' | 'adjustment_expense';
@@ -56,14 +56,12 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
     }
   }
 
-  const accountOptions = (data?.accounts ?? []).map(account => ({ value: account.id, label: account.name }));
+  const accountOptions = (data?.accounts ?? []).map(account => accountOption(account, data?.institutions));
   const categoryApplicability = draft.kind.includes('income') ? 'income' : 'expense';
   const categoryOptions = (data?.categories ?? [])
     .filter(category => !category.archivedAt && category.applicability === categoryApplicability)
-    .map(category => ({ value: category.id, label: category.name }));
-  const transactionOptions = (data?.transactions ?? []).map(transaction => ({
-    value: transaction.id, label: `${formatLocalDate(transaction.eventDate)} · ${transaction.description} · ${formatCentsBRL(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents)}`
-  }));
+    .map(categoryOption);
+  const transactionOptions = (data?.transactions ?? []).map(transaction => transactionOption(transaction, data?.accounts ?? [], data?.institutions));
 
   return <Dialog open={open} onClose={onClose} title="Nova movimentação" description="Registre lançamentos manuais sem alterar dados importados."
     footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button>{accountOptions.length > 0 && <Button type="submit" form={formId} loading={loading}>Salvar</Button>}</>}>
@@ -74,10 +72,10 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
         { value: 'expense', label: 'Despesa' }, { value: 'income', label: 'Receita' }, { value: 'transfer', label: 'Transferência entre minhas contas' },
         { value: 'adjustment_expense', label: 'Ajuste de despesa' }, { value: 'adjustment_income', label: 'Ajuste de receita' }
       ]} hint={natureHints[draft.kind]} onChange={event => { patch('kind', event.target.value as Kind); patch('categoryId', ''); }} />
-      <Select label={transfer ? 'Conta de origem' : 'Conta'} value={draft.accountId} placeholder="Selecione" options={accountOptions} required onChange={event => patch('accountId', event.target.value)} />
-      {transfer && <Select label="Conta de destino" value={draft.targetAccountId} placeholder="Selecione" options={accountOptions.filter(option => option.value !== draft.accountId)} required onChange={event => patch('targetAccountId', event.target.value)} />}
-      {!transfer && <Select label="Categoria" value={draft.categoryId} placeholder="Selecione" options={categoryOptions} required onChange={event => patch('categoryId', event.target.value)} />}
-      {adjustment && <Select label="Lançamento original" value={draft.adjustedTransactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => patch('adjustedTransactionId', event.target.value)} />}
+      <VisualSelect label={transfer ? 'Conta de origem' : 'Conta'} value={draft.accountId} options={accountOptions} required onChange={value => patch('accountId', value)} />
+      {transfer && <VisualSelect label="Conta de destino" value={draft.targetAccountId} options={accountOptions.filter(option => option.value !== draft.accountId)} required onChange={value => patch('targetAccountId', value)} />}
+      {!transfer && <VisualSelect label="Categoria" value={draft.categoryId} options={categoryOptions} searchable={categoryOptions.length > 8} required onChange={value => patch('categoryId', value)} />}
+      {adjustment && <VisualSelect label="Lançamento original" value={draft.adjustedTransactionId} options={transactionOptions} searchable required onChange={value => patch('adjustedTransactionId', value)} />}
       <Input label="Data" type="date" value={draft.eventDate} required onChange={event => patch('eventDate', event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}    </form>}
   </Dialog>;

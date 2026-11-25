@@ -1,7 +1,8 @@
 import { useId, useMemo, useState, type FormEvent } from 'react';
 import type { Category, CategoryColorKey, CategoryIconKey } from '@personal-finance/domain';
-import { ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon, EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, RadioGroup, Select, StatusOkIcon, useToast, VisualSelect, type DataTableColumn } from '@personal-finance/ui';
+import { ArchiveIcon, Badge, Button, Card, CategoriesIcon, DataState, DataTable, DeleteIcon, Dialog, EditIcon, EmptyState, FormMessage, Icon, Input, MoveDownIcon, MoveUpIcon, RadioGroup, StatusOkIcon, useToast, VisualSelect, type DataTableColumn } from '@personal-finance/ui';
 import { CategoryIdentity, CategoryIdentityIcon, categoryColors, categoryIcons } from '../components/CategoryIdentity';
+import { OptionTile, categoryOption } from '../components/visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
 import { PageAction } from '../components/PageAction';
@@ -64,7 +65,7 @@ function CategoryRemoval({ category, onClose, ledger }: { category: Category | n
   const [loading, setLoading] = useState(false);
   const { notify } = useToast();
   const replacements = (ledger.data?.categories ?? []).filter(item => item.id !== category?.id && !item.archivedAt
-    && item.applicability === category?.applicability).map(item => ({ value: item.id, label: item.name }));
+    && item.applicability === category?.applicability).map(categoryOption);
 
   async function archive() {
     if (!category) return;
@@ -91,7 +92,9 @@ function CategoryRemoval({ category, onClose, ledger }: { category: Category | n
       <Button loading={loading} onClick={() => void archive()}><Icon icon={ArchiveIcon} size="sm"/>Arquivar</Button></>}>
     <div className="transaction-form">
       {category?.dependencyCount ? <><FormMessage tone="hint">Há {category.dependencyCount.toLocaleString('pt-BR')} referência(s). Você pode preservá-las ou reatribuir os usos atuais antes de arquivar.</FormMessage>
-        <Select label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histórico" options={replacements} onChange={event => setReplacement(event.target.value)} /></>
+        <VisualSelect label="Reatribuir para (opcional)" value={replacement} placeholder="Preservar categoria no histórico"
+          options={[{ value: '', label: 'Preservar categoria no histórico', visual: <OptionTile icon={ArchiveIcon} /> }, ...replacements]}
+          searchable={replacements.length > 8} onChange={setReplacement} /></>
         : <FormMessage tone="hint">Esta categoria nunca foi utilizada e também pode ser excluída definitivamente.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}    </div>
   </Dialog>;

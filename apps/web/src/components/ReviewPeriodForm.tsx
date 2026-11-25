@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import { Button, CalendarIcon, Dialog, FormMessage, GlossaryIcon, Icon, Input, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { Button, CalendarIcon, Dialog, FormMessage, GlossaryIcon, Input, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { OptionTile } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatReviewDate, reviewMonthStart, todayIso, validReviewStartDate } from '../lib/review-period';
 
@@ -47,7 +48,7 @@ export function ReviewPeriodForm({ open, onClose, onSaved, ledger }: {
     finally { setLoading(false); }
   }
 
-  const tile = (icon: typeof CalendarIcon) => <span className="review-period-option" aria-hidden="true"><Icon icon={icon} size="sm" /></span>;
+  const tile = (icon: typeof CalendarIcon) => <OptionTile icon={icon} />;
   const options: VisualSelectOption[] = [
     { value: 'all', label: 'Todo o histórico', description: 'Tudo o que o banco enviou', visual: tile(GlossaryIcon) },
     ...presets.map(item => ({ value: item.value, label: item.label,

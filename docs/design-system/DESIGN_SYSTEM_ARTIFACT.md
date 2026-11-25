@@ -44,7 +44,10 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 ### Seleção visual (`VisualSelect`)
 - Opções com elemento visual (ícone, logo, cor), rótulo, `description` opcional (período, data, conta), `aside` (valor) e `badge`.
 - `searchable` para listas longas.
-- Usado em: ícone e cor da categoria, fatura do pagamento, período de revisão.
+- **Regra (D-081): toda escolha de algo que tem ícone usa `VisualSelect` com o ícone.** Conta → logo do banco (`InstitutionLogo`); categoria → `CategoryIdentityIcon`; caixinha, “Todas”, “Sem categoria” → `OptionTile`; lançamento → logo da conta, descrição, data · conta e valor à direita. Construtores prontos em `apps/web/src/components/visual-options.tsx`.
+- Em filtros, a conta vai sem a linha de tipo (`compact`), para o campo ter 44 px como os vizinhos.
+- `Select` fica para listas sem identidade visual (tipo, natureza, período, ordenação).
+- Usado em: filtros de conta e categoria, nova movimentação, revisão (categoria, outro lado da transferência, fatura, caixinha), metas, caixinhas, vincular pagamento, reatribuir categoria, ícone e cor da categoria, período de revisão.
 
 ### Diálogo (`Dialog`)
 - Cabeçalho (título, descrição, fechar) e barra de ações fixos. Só o corpo rola.

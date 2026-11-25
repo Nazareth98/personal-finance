@@ -1,8 +1,8 @@
 import { useId, useState, type FormEvent } from 'react';
-import { Button, Dialog, FormMessage, Input, Select, useToast } from '@personal-finance/ui';
+import { Button, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
+import { accountOption, transactionOption } from './visual-options';
 import type { SavingsBox, SavingsMovement } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
-import { formatCentsBRL, formatLocalDate } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
 
 type MovementType = SavingsMovement['type'];
@@ -68,11 +68,8 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
     }
   }
 
-  const accountOptions = (ledger.data?.accounts ?? []).filter(account => account.type !== 'credit_card').map(account => ({ value: account.id, label: account.name }));
-  const transactionOptions = eligibleTransactions.map(transaction => ({
-    value: transaction.id,
-    label: `${formatLocalDate(transaction.eventDate)} · ${transaction.description} · ${formatCentsBRL(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents)}`
-  }));
+  const accountOptions = (ledger.data?.accounts ?? []).filter(account => account.type !== 'credit_card').map(account => accountOption(account, ledger.data?.institutions));
+  const transactionOptions = eligibleTransactions.map(transaction => transactionOption(transaction, ledger.data?.accounts ?? [], ledger.data?.institutions));
   const title = mode === 'link' ? 'Associar lançamento importado' : type === 'withdrawal' ? 'Registrar resgate' : 'Registrar aporte';
 
   return <Dialog open={Boolean(box)} onClose={onClose} title={title} description={box ? `Caixinha: ${box.name}` : undefined}
@@ -81,12 +78,12 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
       <Select label="Tipo de movimento" value={type} options={[{ value: 'contribution', label: 'Aporte' }, { value: 'withdrawal', label: 'Resgate' }]}
         onChange={event => { setType(event.target.value as MovementType); setTransactionId(''); setError(''); }} />
       {mode === 'manual' ? <>
-        <Select label="Conta" value={accountId} placeholder="Selecione" options={accountOptions} required onChange={event => setAccountId(event.target.value)} />
+        <VisualSelect label="Conta" value={accountId} options={accountOptions} required onChange={setAccountId} />
         <Input label="Descrição" value={description} maxLength={120} required onChange={event => setDescription(event.target.value)} />
         <Input label="Valor" startText="R$" inputMode="decimal" value={amount} required onChange={event => setAmount(event.target.value)} />
         <Input label="Data" type="date" value={eventDate} required onChange={event => setEventDate(event.target.value)} />
       </> : transactionOptions.length
-        ? <Select label="Lançamento importado" value={transactionId} placeholder="Selecione" options={transactionOptions} required onChange={event => setTransactionId(event.target.value)} />
+        ? <VisualSelect label="Lançamento importado" value={transactionId} options={transactionOptions} searchable={transactionOptions.length > 8} required onChange={setTransactionId} />
         : <FormMessage tone="hint">Nenhum lançamento importado e neutro é compatível com este tipo.</FormMessage>}
       {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;

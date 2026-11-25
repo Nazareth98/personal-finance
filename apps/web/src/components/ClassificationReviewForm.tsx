@@ -7,6 +7,7 @@ import { formatCentsBRL, formatCompetence, formatDateTime, formatLocalDate } fro
 import { statementChoices } from '../lib/statement-choices';
 import { MAX_BULK_CONFIRMATIONS, similarTransactions } from '../lib/similar-transactions';
 import { InstitutionLogo } from './InstitutionLogo';
+import { accountOption, categoryOption, savingsBoxOption, transactionOption } from './visual-options';
 import { natureHints } from '../lib/help-content';
 
 type ReviewNature = SemanticConfirmation['nature'];
@@ -67,22 +68,17 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     : [];
   const categoryOptions = (data?.categories ?? [])
     .filter(category => !category.archivedAt && category.applicability === nature)
-    .map(category => ({ value: category.id, label: category.name }));
+    .map(categoryOption);
   const counterpartOptions = transaction ? (data?.transactions ?? []).filter(candidate =>
     candidate.id !== transaction.id && candidate.source === 'pluggy' && candidate.accountId !== transaction.accountId
     && candidate.amountCents + transaction.amountCents === 0n && daysApart(candidate.eventDate, transaction.eventDate) <= 3
-  ).map(candidate => ({
-    value: `transaction:${candidate.id}`,
-    label: `${candidate.description} · ${data?.accounts.find(account => account.id === candidate.accountId)?.name ?? 'Conta'} · ${formatLocalDate(candidate.eventDate)}`
-  })) : [];
+  ).map(candidate => ({ ...transactionOption(candidate, data?.accounts ?? [], data?.institutions, `transaction:${candidate.id}`), group: 'Lançamento importado' })) : [];
   // Conta conectada receberá o próprio lado pela importação; registrar outro duplicaria o saldo.
   const connectedAccountIds = new Set((data?.transactions ?? []).filter(item => item.source === 'pluggy').map(item => item.accountId));
   const counterpartAccountOptions = transaction ? (data?.accounts ?? []).filter(account =>
     account.id !== transaction.accountId && account.type !== 'credit_card' && !connectedAccountIds.has(account.id)
-  ).map(account => ({
-    value: `account:${account.id}`,
-    label: `Registrar ${transaction.amountCents < 0n ? 'entrada' : 'saída'} em ${account.name}`
-  })) : [];
+  ).map(account => ({ ...accountOption(account, data?.institutions, `Registrar ${transaction.amountCents < 0n ? 'entrada' : 'saída'} em ${account.name}`),
+    value: `account:${account.id}`, group: 'Conta sem importação' })) : [];
   const categoryNames = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
   const accountNames = new Map((data?.accounts ?? []).map(account => [account.id, account.name]));
   // D-060: só categoria em lote; vínculos (transferência, fatura, caixinha) dependem do par e seguem um a um.
@@ -116,7 +112,7 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
       ? `Pendente após o vínculo: ${formatCentsBRL(chosen.openAfterCents)}.`
       : `O pagamento (${formatCentsBRL(paymentAmount)}) difere do em aberto (${formatCentsBRL(chosen.openCents)}). Pendente após o vínculo: ${formatCentsBRL(chosen.openAfterCents)}.`
     : 'A fatura leva o mês do vencimento. A sugerida tem o mesmo valor do pagamento.';
-  const savingsOptions = (data?.savingsBoxes ?? []).map(box => ({ value: box.id, label: box.name }));
+  const savingsOptions = (data?.savingsBoxes ?? []).map(savingsBoxOption);
   const relation = nature === 'own_transfer'
     ? { label: 'Outro lado da transferência', placeholder: 'Selecione o lançamento ou a conta de destino',
       options: [...counterpartOptions, ...counterpartAccountOptions] }
@@ -174,13 +170,13 @@ export function ClassificationReviewForm({ transaction, onClose, ledger }: {
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Select label="Natureza financeira" value={nature} options={natureOptions} required hint={natureHints[nature] ?? 'O que aconteceu com esse dinheiro?'}
         onChange={event => { setNature(event.target.value as ReviewNature); setCategoryId(''); setRelationId(''); setError(''); }} />
-      {(nature === 'income' || nature === 'expense') && <Select label="Categoria confirmada" value={categoryId}
-        placeholder="Selecione" options={categoryOptions} required onChange={event => setCategoryId(event.target.value)} />}
+      {(nature === 'income' || nature === 'expense') && <VisualSelect label="Categoria confirmada" value={categoryId}
+        options={categoryOptions} searchable={categoryOptions.length > 8} required onChange={setCategoryId} />}
       {relation && nature === 'card_payment'
         ? <VisualSelect label={relation.label} value={relationId} placeholder={relation.placeholder} options={statementOptions}
           required hint={statementHint} onChange={setRelationId} />
-        : relation && <Select label={relation.label} value={relationId} placeholder={relation.placeholder}
-          options={relation.options as { value: string; label: string }[]} required onChange={event => setRelationId(event.target.value)} />}
+        : relation && <VisualSelect label={relation.label} value={relationId} placeholder={relation.placeholder}
+          options={relation.options} searchable={relation.options.length > 8} required onChange={setRelationId} />}
       {hasSimilar && <div className="review-scope">
         <RadioGroup legend="Aplicar a" name={`${formId}-scope`} value={scope} onChange={value => setScope(value as 'one' | 'similar')}
           options={[{ value: 'one', label: 'Só este lançamento' },

@@ -48,7 +48,7 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
 
   const net = totals.netCents < 0n ? `− ${formatCentsBRL(-totals.netCents)}` : formatCentsBRL(totals.netCents);
   return <section className="transactions-demo ledger-transactions" aria-labelledby="transactions-title">
-    <TransactionFilterFields collapsible filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
+    <TransactionFilterFields collapsible institutions={data?.institutions} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
       accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={natures}
       toolbar={<div className="ledger-period"><Select label="Período" value={period} options={periodOptions} onChange={event => change('period', event.target.value)} /></div>} />
     <section className="ledger-totals" aria-label="Totais do período">

@@ -1,6 +1,8 @@
 import { useId, useState, type ReactNode } from 'react';
 import type { Category, FinancialAccount, TransactionContract } from '@personal-finance/domain';
-import { Button, CloseIcon, FilterIcon, Icon, Input, Select } from '@personal-finance/ui';
+import { Button, CategoryWalletIcon as WalletIcon, CloseIcon, FilterIcon, Icon, Input, Select, StatusPendingIcon, VisualSelect } from '@personal-finance/ui';
+import type { AccountInstitution } from '../ledger/contracts';
+import { OptionTile, accountOption, allOption, categoryOption } from './visual-options';
 import { UNCATEGORIZED, hasTransactionFilters, type TransactionFilters } from '../lib/transaction-filters';
 
 export const natureLabels: Record<TransactionContract['nature'], string> = {
@@ -9,7 +11,9 @@ export const natureLabels: Record<TransactionContract['nature'], string> = {
 };
 
 /** Busca e filtros comuns a Transações e Revisão; `children` recebe filtros próprios da tela. */
-export function TransactionFilterFields({ filters, active, onChange, onClear, accounts, categories, natures, resultCount, children, collapsible = false, toolbar, extraActiveCount = 0 }: {
+export function TransactionFilterFields({ filters, active, onChange, onClear, accounts, categories, natures, resultCount, children, collapsible = false, toolbar, extraActiveCount = 0, institutions }: {
+  /** Logos dos bancos nas opções de conta. */
+  institutions?: readonly AccountInstitution[];
   /** Mantém só a busca visível; conta, categoria, natureza e `children` ficam atrás do botão “Filtros”. */
   collapsible?: boolean;
   /** Controles extras na linha da busca (só com `collapsible`). */
@@ -50,11 +54,11 @@ export function TransactionFilterFields({ filters, active, onChange, onClear, ac
         {chip.label}<Icon icon={CloseIcon} size="sm" /></button></li>)}</ul>}
     <div className={`transactions-filters${collapsible ? ' filter-panel' : ''}`} id={panelId} hidden={collapsible && !open}>
       {!collapsible && search}
-      <Select label="Conta" value={filters.account} onChange={event => onChange('account', event.target.value)}
-        options={[{ value: '', label: 'Todas' }, ...accounts.map(account => ({ value: account.id, label: account.name }))]} />
-      <Select label="Categoria" value={filters.category} onChange={event => onChange('category', event.target.value)}
-        options={[{ value: '', label: 'Todas' }, { value: UNCATEGORIZED, label: 'Sem categoria' },
-          ...categories.map(category => ({ value: category.id, label: category.archivedAt ? `${category.name} (arquivada)` : category.name }))]} />
+      <VisualSelect label="Conta" value={filters.account} onChange={value => onChange('account', value)}
+        options={[allOption('Todas', <OptionTile icon={WalletIcon} />), ...accounts.map(account => accountOption(account, institutions, account.name, true))]} />
+      <VisualSelect label="Categoria" value={filters.category} searchable={categories.length > 8} onChange={value => onChange('category', value)}
+        options={[allOption(), { value: UNCATEGORIZED, label: 'Sem categoria', visual: <OptionTile icon={StatusPendingIcon} /> },
+          ...categories.map(categoryOption)]} />
       <Select label="Natureza" value={filters.nature} onChange={event => onChange('nature', event.target.value)}
         options={[{ value: '', label: 'Todas' }, ...natures.map(nature => ({ value: nature, label: natureLabels[nature] }))]} />
       {children}
