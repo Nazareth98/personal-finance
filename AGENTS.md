@@ -39,6 +39,17 @@ Ao terminar uma mudança relevante:
 - O Figma é a referência visual; tokens e código versionados são a fonte técnica.
 - Todo componente interativo exige teclado, foco, estados, labels, contraste e teste proporcional ao risco.
 
+## Forks: cada pessoa, sua instância
+
+Outras pessoas usam o Balanço em forks próprios (GitHub, Supabase, Vercel e MeuPluggy separados) que recebem `main` automaticamente todo dia ([`COMECE_AQUI.md`](docs/COMECE_AQUI.md), [`NEW_INSTANCE.md`](docs/architecture/NEW_INSTANCE.md)). Tudo o que entra em `main` roda nessas instâncias sem revisão de quem as usa.
+
+- **Migrations rodam em todos os bancos.** Nunca coloque IDs, nomes, valores ou datas de uma pessoa. Ajuste nos dados de uma instância (religar um pagamento, marcar um lançamento) é feito direto nela, fora de migration. Correções retroativas em migration precisam de regra genérica e ser seguras em banco vazio ou com dados diferentes.
+- **Regras por banco são aceitáveis; por pessoa, não.** Reconhecer como um banco descreve lançamentos é genérico. Nome do titular, contas e categorias vêm da configuração do usuário, nunca do código.
+- **Mudanças precisam funcionar para quem ainda não tem o dado novo.** Colunas novas são opcionais ou têm padrão; a interface lida com instâncias vazias, recém-criadas ou sem o banco/cartão em questão.
+- **A publicação é automática e sem volta fácil.** Evite migrations destrutivas; quando inevitáveis, apague só dado derivado que a sincronização recria e registre a decisão.
+- **Textos, ajuda e documentação servem a quem não desenvolve.** Linguagem simples, sem dados reais nem referências à instância original. Mudou um comportamento visível? Atualize a ajuda da tela (`help-content.ts`), o glossário e, se afetar a instalação ou os primeiros dias, o `COMECE_AQUI.md`.
+- **Configuração só pelo app ou pelos guias.** Quem usa um fork não edita arquivos; qualquer novo segredo ou variável exige passo documentado no `COMECE_AQUI.md` e no `NEW_INSTANCE.md`.
+
 ## Roteamento rápido
 
 | Se a tarefa envolve... | Leia também |
