@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addCompetenceMonths, type CategoryBudget } from '@personal-finance/domain';
+import { addCompetenceMonths, buildMonthPlan, type CategoryBudget, type CategoryCommitment, type MonthPlan } from '@personal-finance/domain';
 import { Badge, Button, Card, EditIcon, EmptyState, Icon, InfoTip, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, Tabs, type LucideIcon } from '@personal-finance/ui';
 import { BudgetForm, formatBasisPoints } from '../components/BudgetForm';
 import { CategoryIdentityIcon } from '../components/CategoryIdentity';
@@ -52,7 +52,37 @@ function BudgetPeriodControls({ kind, month, onKindChange, onMonthChange }: {
   </div>;
 }
 
-function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void }) {
+/** D-084: plano do mês — receita prevista, aportes, quanto se pode distribuir, metas (com fixos) e a sobra. */
+function MonthPlanStrip({ plan }: { plan: MonthPlan }) {
+  const negative = plan.leftoverCents < 0n;
+  return <section className="month-plan" aria-label={`Plano de ${formatCompetence(plan.competence)}`}>
+    <div><span className="muted">Receita prevista<InfoTip label="Receita prevista" text={plan.incomeSource === 'fixed'
+      ? 'Soma das receitas fixas, pelo valor do último mês de cada uma.'
+      : 'Estimativa: média de 6 meses das categorias de receita recorrente. Marque o salário como fixo na Revisão para usar o valor real.'} /></span>
+      <strong className="transaction-amount--income">+ {formatCentsBRL(plan.incomeCents)}</strong>
+      <span className="muted">{plan.incomeSource === 'fixed' ? 'Receitas fixas' : 'Estimativa'}</span></div>
+    <div><span className="muted">Aportes planejados</span><strong>− {formatCentsBRL(plan.savingsCents)}</strong><span className="muted">Caixinhas com data-alvo</span></div>
+    <div><span className="muted">Pode distribuir</span><strong>{plan.distributableCents < 0n ? '− ' : ''}{formatCentsBRL(plan.distributableCents < 0n ? -plan.distributableCents : plan.distributableCents)}</strong><span className="muted">Para metas e compromissos</span></div>
+    <div><span className="muted">Metas e compromissos<InfoTip label="Metas e compromissos" text="Por categoria, o maior entre a meta e o que já está comprometido em fixos e parcelas; mais os compromissos de categorias sem meta." /></span>
+      <strong>− {formatCentsBRL(plan.plannedCents)}</strong>
+      <span className="muted">{plan.unbudgetedCommittedCents > 0n ? `${formatCentsBRL(plan.unbudgetedCommittedCents)} sem meta` : 'Metas incluem os fixos'}</span></div>
+    <div className={negative ? 'month-plan__leftover month-plan__leftover--negative' : 'month-plan__leftover'}><span className="muted">Sobra do mês</span>
+      <strong className={negative ? 'transaction-amount--expense' : 'transaction-amount--income'}>{negative ? '− ' : ''}{formatCentsBRL(negative ? -plan.leftoverCents : plan.leftoverCents)}</strong>
+      <span className="muted">{negative ? 'O mês não fecha: reduza metas ou aportes' : 'Sem destino definido'}</span></div>
+  </section>;
+}
+
+function CommitmentLine({ commitment, limitCents }: { commitment?: CategoryCommitment; limitCents: bigint }) {
+  if (!commitment || commitment.totalCents <= 0n) return null;
+  const below = limitCents < commitment.totalCents;
+  return <p className={`budget-card__commitment${below ? ' budget-card__commitment--below' : ''}`}>
+    {below && <Icon icon={StatusAlertIcon} size="sm" />}
+    {below ? `A meta está ${formatCentsBRL(commitment.totalCents - limitCents)} abaixo do já comprometido (${formatCentsBRL(commitment.totalCents)}).`
+      : `Já comprometido: ${formatCentsBRL(commitment.totalCents)} em ${[commitment.fixedCents > 0n ? 'fixos' : '', commitment.installmentsCents > 0n ? 'parcelas' : ''].filter(Boolean).join(' e ')}.`}
+  </p>;
+}
+
+function BudgetCard({ item, onEdit, commitment }: { item: BudgetCardView; onEdit: () => void; commitment?: CategoryCommitment }) {
   const { progress, budget, category, name, pace } = item;
   const exceeded = progress.status === 'exceeded';
   const visualPercent = Number(progress.usageBasisPoints > 10000n ? 10000n : progress.usageBasisPoints) / 100;
@@ -70,6 +100,7 @@ function BudgetCard({ item, onEdit }: { item: BudgetCardView; onEdit: () => void
     <div className="budget-card__usage"><span className="muted">{formatCentsBRL(progress.usedCents)} de {formatCentsBRL(progress.limitCents)}</span>
       <strong className={`status-tone--${progress.status}`}>{formatBasisPoints(progress.usageBasisPoints)}</strong></div>
     {pace ? <p className="budget-card__pace muted">{paceText(pace)}</p> : null}
+    <CommitmentLine commitment={commitment} limitCents={budget.monthlyLimitCents} />
   </Card>;
 }
 
@@ -87,6 +118,10 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   const panels = buildBudgetPanels({
     budgets: data?.budgets ?? [], categories: data?.categories ?? [], transactions: data?.transactions ?? [], period, today: localToday()
   });
+  const plan = kind === 'month' && data ? buildMonthPlan({ competence: selectedMonth, transactions: data.transactions,
+    fixedItems: data.fixedItems ?? [], fixedItemLinks: data.fixedItemLinks ?? [], budgets: data.budgets,
+    installments: data.cardInstallments, savingsBoxes: data.savingsBoxes, savingsMovements: data.savingsMovements }) : null;
+  const commitments = new Map((plan?.commitments ?? []).map(item => [item.categoryId, item]));
   const transactionsLink = kind === 'month' ? `#transactions?period=${selectedMonth}` : '#transactions';
   const freeCents = panels.incomeCents - panels.totalLimitCents;
 
@@ -99,6 +134,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
       items={[{ id: 'goals', label: <strong>Metas</strong> }, { id: 'fixed', label: <strong>Fixos · {fixedCount}</strong> }]}>
     {tab === 'fixed' ? <FixedItemsPanel ledger={ledger} today={localToday()} /> : <>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
+    {plan && <MonthPlanStrip plan={plan} />}
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Entrou no período</span></div>
       <div><span className="muted summary-strip__label">Total em tetos<InfoTip label="Total em tetos" text="Soma dos tetos mensais das categorias com meta. Ao lado, quanto isso representa da receita do mês." /></span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>
@@ -116,7 +152,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
           <h2 id={`status-group-${group.status}`} className={`status-group__title status-tone--${group.status}`}>
             <Icon icon={copy.icon} size="sm" />{copy.title}<span className="muted"> · {group.items.length}</span></h2>
           <div className="goal-grid">{group.items.map(item =>
-            <BudgetCard key={item.budget.id} item={item} onEdit={() => setForm({ budget: item.budget })} />)}</div>
+            <BudgetCard key={item.budget.id} item={item} commitment={commitments.get(item.budget.categoryId)} onEdit={() => setForm({ budget: item.budget })} />)}</div>
         </section>;
       })}
     <Card className="budget-unbudgeted">
@@ -135,7 +171,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
     </>}
     </Tabs>
     {form && <BudgetForm key={form.budget?.id ?? form.categoryId ?? 'new'} open onClose={() => setForm(null)} ledger={ledger}
-      budget={form.budget} initialCategoryId={form.categoryId} />}
+      budget={form.budget} initialCategoryId={form.categoryId} competence={selectedMonth} />}
   </div>;
 }
 

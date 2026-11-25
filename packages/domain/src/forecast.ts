@@ -58,6 +58,28 @@ function monthsThroughTarget(startCompetence: string, targetDate: string): numbe
   return (targetYear - startYear) * 12 + targetMonth - startMonth + 1;
 }
 
+/** Quanto guardar por mês em cada caixinha com data-alvo para chegar lá, a partir de `startCompetence`. */
+export function buildSavingsPlans(boxes: readonly SavingsBox[], movements: readonly SavingsMovement[], startCompetence: string) {
+  return boxes.flatMap(box => {
+    if (!box.targetDate) return [];
+    const months = monthsThroughTarget(startCompetence, box.targetDate);
+    if (!months) return [];
+    const progress = savingsBoxProgress(box, movements.filter(movement => movement.savingsBoxId === box.id));
+    if (progress.remainingCents === 0n) return [];
+    const monthlyCents = (progress.remainingCents + BigInt(months) - 1n) / BigInt(months);
+    return [{ savingsBoxId: box.id, targetCompetence: box.targetDate.slice(0, 7), monthlyCents }];
+  });
+}
+
+/** Média mensal das receitas recorrentes por categoria nos seis meses anteriores a `startCompetence` (estimativa sem fixos). */
+export function recurringIncomeEstimate(transactions: readonly TransactionContract[], startCompetence: string): bigint {
+  const history = new Set(Array.from({ length: 6 }, (_, index) => addCompetenceMonths(startCompetence, index - 6)));
+  return transactions.reduce((sum, transaction) => history.has(transaction.competence) && transaction.reporting === 'income'
+    && recurringIncomeCategories.has(transaction.categoryId ?? '')
+    && (transaction.classificationStatus === 'confirmed' || transaction.classificationStatus === 'automatic')
+    ? sum + transaction.amountCents : sum, 0n) / 6n;
+}
+
 export function recognizeItauSalary(description: string, institutionName: string): boolean {
   const institution = normalizeClassificationText(institutionName);
   const normalized = normalizeClassificationText(description);
@@ -80,16 +102,7 @@ export function buildSixMonthForecast(input: SixMonthForecastInput): ForecastMon
   const recurringExpenseCents = recurringExpenseAverage(input.transactions, historyPeriods, postedInstallmentTransactions);
   const budgetEnvelopeCents = input.budgets.reduce((sum, budget) => sum + budget.monthlyLimitCents, 0n);
   const plannedSpendingCents = recurringExpenseCents > budgetEnvelopeCents ? recurringExpenseCents : budgetEnvelopeCents;
-  const savingsPlans = input.savingsBoxes.flatMap(box => {
-    if (!box.targetDate) return [];
-    const months = monthsThroughTarget(input.startCompetence, box.targetDate);
-    if (!months) return [];
-    const progress = savingsBoxProgress(box, input.savingsMovements.filter(movement => movement.savingsBoxId === box.id));
-    if (progress.remainingCents === 0n) return [];
-    const monthlyCents = (progress.remainingCents + BigInt(months) - 1n) / BigInt(months);
-    return [{ targetCompetence: box.targetDate.slice(0, 7), monthlyCents }];
-  });
-
+  const savingsPlans = buildSavingsPlans(input.savingsBoxes, input.savingsMovements, input.startCompetence);
   return Array.from({ length: 6 }, (_, index) => {
     const competence = addCompetenceMonths(input.startCompetence, index);
     const installmentCents = input.installments.filter(item => item.status === 'projected' && item.dueCompetence === competence)

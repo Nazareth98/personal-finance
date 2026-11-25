@@ -1,6 +1,6 @@
 # Fixos, plano do mês e despesas x receita
 
-Status: **em implementação (D-084)**. Etapas 12.1 e 12.2 publicadas em 25/11/2026: migrations `20261125165816_fixed_items.sql` e `20261125172454_fixed_item_management.sql`, campo “Lançamento fixo” na Revisão, aba “Fixos” (`components/FixedItemsPanel.tsx`, `lib/fixed-panels.ts`), selo em Transações e domínio `packages/domain/src/fixed.ts`. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
+Status: **em implementação (D-084)**. Etapas 12.1, 12.2 e 12.3 publicadas em 25/11/2026 (plano em `packages/domain/src/plan.ts`): migrations `20261125165816_fixed_items.sql` e `20261125172454_fixed_item_management.sql`, campo “Lançamento fixo” na Revisão, aba “Fixos” (`components/FixedItemsPanel.tsx`, `lib/fixed-panels.ts`), selo em Transações e domínio `packages/domain/src/fixed.ts`. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
 
 ## Objetivo
 
@@ -38,7 +38,9 @@ Valores em `bigint` (centavos):
 - **Receita prevista** = soma dos fixos de receita, pelo último valor de cada um. Sem nenhum fixo de receita, usa a média atual das categorias recorrentes e aparece marcada como “Estimativa”.
 - **Pode distribuir** = receita prevista − aportes planejados nas caixinhas.
 - **Comprometido por categoria** = fixos da categoria (último valor) + parcelas de cartão previstas para a competência.
-- **Sobra** = pode distribuir − soma das metas.
+- **Metas e compromissos** = por categoria, o maior entre a meta e o comprometido; mais o comprometido de categorias sem meta.
+- **Sobra** = pode distribuir − metas e compromissos.
+- **Receita prevista:** um fixo de receita ainda sem lançamento vinculado não tem valor. Se nenhum tiver, vale a estimativa.
 - **Gasto previsto por categoria em mês futuro** = o maior entre a meta e o comprometido. Sem meta, vale só o comprometido.
 - **Previsão de Relatórios:** usa o mesmo plano. O gasto previsto é a soma dos gastos previstos por categoria, mais os aportes. Isso substitui a regra “maior entre a média recorrente e a soma dos tetos”.
 

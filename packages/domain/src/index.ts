@@ -23,7 +23,9 @@ export { addCompetenceMonths, billCompetences, cardCompetence, cardStatementDate
 export type { CardInstallment, CardStatement, CardStatementEntry, CardStatementSummary, CreditCard } from './cards.ts';
 export { fixedItemLastValue, fixedItemMonthStatus, fixedItemTransactions, similarWithoutFixed, suggestFixedItemName } from './fixed.ts';
 export type { FixedItem, FixedItemLink, FixedItemMonthStatus } from './fixed.ts';
-export { buildSixMonthForecast, recognizeItauSalary } from './forecast.ts';
+export { buildSavingsPlans, buildSixMonthForecast, recognizeItauSalary, recurringIncomeEstimate } from './forecast.ts';
+export { buildMonthPlan } from './plan.ts';
+export type { CategoryCommitment, MonthPlan, MonthPlanInput } from './plan.ts';
 export type { ForecastMonth, SixMonthForecastInput } from './forecast.ts';
 export type {
   Category,

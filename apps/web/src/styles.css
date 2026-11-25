@@ -800,3 +800,32 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
 .fixed-items__ended{display:flex;flex-direction:column;gap:var(--spacing-3);align-items:flex-start}
 .fixed-items__ended>.ui-table-scroll,.fixed-items__ended>.ui-table-list{align-self:stretch}
 .budget-tab-panel{display:grid;gap:var(--spacing-4);min-width:0}
+/* D-084: plano do mês em Orçamentos. */
+.month-plan{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface)}
+.month-plan>div{display:grid;gap:var(--spacing-1);align-content:start;min-width:0;padding:var(--spacing-4);container-type:inline-size}
+.month-plan>div+div{border-left:1px solid var(--color-border-default)}
+.month-plan span{font-size:var(--font-size-xs)}
+.month-plan>div>span:first-child{display:inline-flex;align-items:center;gap:var(--spacing-1);font-size:var(--font-size-sm)}
+.month-plan>div>strong{font-size:clamp(14px,9cqi,22px);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.month-plan__leftover{background:var(--color-bg-subtle);border-radius:0 var(--radius-lg) var(--radius-lg) 0}
+.budget-card__commitment{display:flex;gap:var(--spacing-1);align-items:flex-start;margin:0;font-size:var(--font-size-xs);color:var(--color-text-secondary)}
+.budget-card__commitment--below{color:var(--color-status-warning)}
+.budget-card__commitment .ui-icon,.budget-card__commitment svg{flex:none;margin-top:1px}
+@media(max-width:1100px){.month-plan{grid-template-columns:repeat(2,minmax(0,1fr))}.month-plan>div+div{border-left:0}.month-plan>div{border-top:1px solid var(--color-border-default)}.month-plan>div:first-child{border-top:0}.month-plan>div:nth-child(even){border-left:1px solid var(--color-border-default)}.month-plan>div:nth-child(2){border-top:0}.month-plan>div.month-plan__leftover{grid-column:1/-1;border-left:0;border-radius:0 0 var(--radius-lg) var(--radius-lg)}}
+.budget-form__average{margin:calc(var(--spacing-2) * -1) 0 0;font-size:var(--font-size-xs)}
+.budget-form__use{padding:0;border:0;background:none;color:var(--color-text-accent);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
+.budget-form__use:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px;border-radius:var(--radius-sm)}
+.budget-form__commitment{display:grid;gap:var(--spacing-2);padding:var(--spacing-4);border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-canvas);font-size:var(--font-size-sm)}
+.budget-form__commitment-title{margin:0;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-secondary)}
+.budget-form__commitment ul{display:grid;gap:var(--spacing-1);margin:0;padding:0;list-style:none}
+.budget-form__commitment li,.budget-form__commitment-total{display:flex;justify-content:space-between;gap:var(--spacing-3);margin:0;font-variant-numeric:tabular-nums}
+.budget-form__commitment-total{padding-top:var(--spacing-2);border-top:1px solid var(--color-border-default);font-weight:600}
+.budget-form__plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--spacing-2);margin:0}
+.budget-form__plan>div{padding:var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-md)}
+.budget-form__plan dt{font-size:var(--font-size-xs);color:var(--color-text-secondary)}
+.budget-form__plan dd{margin:var(--spacing-1) 0 0;font-weight:700;font-variant-numeric:tabular-nums}
+.budget-form__plan>.is-positive{border-color:var(--color-status-success)}
+.budget-form__plan>.is-positive dd{color:var(--color-status-success)}
+.budget-form__plan>.is-negative{border-color:var(--color-status-danger)}
+.budget-form__plan>.is-negative dd{color:var(--color-status-danger)}
+@media(max-width:680px){.budget-form__plan{grid-template-columns:minmax(0,1fr)}}

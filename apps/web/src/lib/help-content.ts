@@ -38,9 +38,9 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   budgets: {
     title: "Orçamentos", subtitle: "Tetos mensais por categoria.",
     shows: "Quanto você gastou em cada categoria no mês, comparado ao teto que você definiu.",
-    calc: ["**Teto** é um valor fixo por mês. Na visão do ano, vale 12 vezes.", "**Folga** = teto − gasto. Negativa vira excedente.", "**Perto do teto** a partir de 80% usado.", "Compras no cartão contam no mês do vencimento da fatura.", "Na aba **Fixos**, cada fixo mostra o último valor (a previsão dos próximos meses) e se já chegou neste mês: pago, pendente ou atrasado (passou 3 dias do dia em que costuma cair)."],
+    calc: ["**Plano do mês**: receita prevista (receitas fixas pelo último valor; sem elas, uma estimativa) − aportes planejados = **pode distribuir**. Desse valor saem as metas e os compromissos; o que resta é a **sobra do mês**.", "Cada meta inclui os fixos e as parcelas da categoria. Se a meta ficar abaixo do que já está comprometido, o card avisa.", "**Teto** é um valor fixo por mês. Na visão do ano, vale 12 vezes.", "**Folga** = teto − gasto. Negativa vira excedente.", "**Perto do teto** a partir de 80% usado.", "Compras no cartão contam no mês do vencimento da fatura.", "Na aba **Fixos**, cada fixo mostra o último valor (a previsão dos próximos meses) e se já chegou neste mês: pago, pendente ou atrasado (passou 3 dias do dia em que costuma cair)."],
     actions: ["**+ Definir meta** para uma categoria.", "Tocar num card para **editar ou excluir** a meta.", "Em **Gastos sem meta**, criar uma meta a partir do que já foi gasto.", "Na aba **Fixos**, **editar** o nome ou a categoria e **encerrar** um fixo que acabou (ele sai das previsões, nada é apagado)."],
-    terms: ["Teto", "Folga", "Fixo", "Competência", "Gastos sem meta"]
+    terms: ["Sobra do mês", "Teto", "Folga", "Fixo", "Competência", "Gastos sem meta"]
   },
   savings: {
     title: "Caixinhas", subtitle: "Reservas com saldo próprio.",
@@ -99,6 +99,7 @@ export const glossary: GlossaryTerm[] = [
   { term: "Reconciliado", definition: "Quando o lado da conta e o lado do cartão (ou das duas contas) foram ligados e batem." },
   { term: "Resultado", definition: "Receitas menos despesas do mês. Transferências, pagamentos de fatura, aportes e resgates ficam de fora." },
   { term: "Revisão", definition: "Fila do que o app não conseguiu decidir sozinho: categoria ou natureza para confirmar." },
+  { term: "Sobra do mês", definition: "O que resta da receita prevista depois dos aportes planejados nas caixinhas e das metas (que já incluem fixos e parcelas). Negativa quer dizer que o plano do mês não fecha." },
   { term: "Teto", definition: "Valor máximo que você aceita gastar por mês numa categoria." }
 ];
 
