@@ -17,6 +17,7 @@ import { ReviewPeriodForm } from '../components/ReviewPeriodForm';
 import { formatReviewDate, inReviewPeriod } from '../lib/review-period';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
+type FixedFilter = 'all' | 'fixed' | 'not-fixed';
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
 const groups: { reason: ReviewReason; title: string; description: string }[] = [
   { reason: 'links', title: 'Vincular', description: 'Sem o outro lado, o valor contaria duas vezes.' },
@@ -65,6 +66,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
   const view = params.get('view') === 'history' ? 'history' : 'pending';
   const historyFilter = (['automatic', 'confirmed'].includes(params.get('status') ?? '') ? params.get('status') : 'all') as HistoryFilter;
   const reason = (['links', 'categories'].includes(params.get('reason') ?? '') ? params.get('reason') : undefined) as ReviewReason | undefined;
+  const fixedFilter = (['fixed', 'not-fixed'].includes(params.get('fixed') ?? '') ? params.get('fixed') : 'all') as FixedFilter;
   const filters = readTransactionFilters(params);
   const data = ledger.data;
   const period = { reviewStartDate: data?.reviewStartDate, creditCards: data?.creditCards };
@@ -76,6 +78,10 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     semanticOverrides: data?.semanticOverrides ?? [], links: data?.links ?? [],
     savingsMovements: data?.savingsMovements ?? [], cardStatementEntries: data?.cardStatementEntries ?? []
   };
+  // D-084: filtro por lançamento fixo.
+  const fixedItemNames = new Map((data?.fixedItems ?? []).map(item => [item.id, item.name]));
+  const fixedNames = new Map((data?.fixedItemLinks ?? []).map(link => [link.transactionId, fixedItemNames.get(link.fixedItemId) ?? '']));
+  const matchesFixed = (row: TransactionContract) => fixedFilter === 'all' || (fixedFilter === 'fixed') === fixedNames.has(row.id);
   const imported = reviewableTransactions(data?.transactions ?? []);
   const resolutions = new Map(imported.map(row => [row.id, reviewResolution(row, relations)]));
   const reasonOf = (row: TransactionContract) => reviewReason(resolutions.get(row.id)!);
@@ -92,7 +98,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => eventSortKey(row), cell: row => <DateTime row={row} /> },
     { mobile: 'primary', key: 'description', header: 'Lançamento', headerIcon: ReviewIcon, iconTone: 'warning', sortable: true, sortValue: row => row.description, cell: row => {
       const detail = evidence(classifications.get(row.id));
-      return <span className="ledger-description"><strong>{row.description}</strong><span className="muted ledger-description__account">
+      return <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{fixedNames.get(row.id) ? <Badge tone="transfer" title={`Fixo: ${fixedNames.get(row.id)}`}>Fixo</Badge> : null}</span><span className="muted ledger-description__account">
         <InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />
         {accounts.get(row.accountId) ?? 'Conta'}{detail ? ` · ${detail}` : ''}</span></span>;
     } },
@@ -103,7 +109,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     { mobile: 'footer', key: 'action', header: 'Ação', align: 'end', cell: row => <Button size="sm" variant="ghost" onClick={() => setSelected(row)}>Revisar novamente</Button> }
   ];
   const matching = (view === 'pending' ? pending : history.filter(row => historyFilter === 'all' || row.classificationStatus === historyFilter))
-    .filter(row => matchesTransactionFilters(row, filters));
+    .filter(row => matchesTransactionFilters(row, filters) && matchesFixed(row));
   const reasonCounts = { links: matching.filter(row => view === 'pending' && reasonOf(row) === 'links').length, categories: 0 };
   reasonCounts.categories = view === 'pending' ? matching.length - reasonCounts.links : 0;
   const filtered = view === 'pending'
@@ -111,13 +117,13 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     : sortRows(matching, sort, columns);
   const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / pageSize)));
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const active = Boolean(params.get('status')) || Object.values(filters).some(Boolean);
+  const active = Boolean(params.get('status')) || fixedFilter !== 'all' || Object.values(filters).some(Boolean);
 
-  function change(key: keyof TransactionFilters | 'view' | 'status' | 'reason', value: string) {
+  function change(key: keyof TransactionFilters | 'view' | 'status' | 'reason' | 'fixed', value: string) {
     setParams({ [key]: value || null, ...(key === 'view' ? { status: null, reason: null } : {}) });
     setPage(1);
   }
-  const clear = () => { setParams({ q: null, account: null, category: null, nature: null, status: null }); setPage(1); };
+  const clear = () => { setParams({ q: null, account: null, category: null, nature: null, status: null, fixed: null }); setPage(1); };
   async function confirm(row: TransactionContract, categoryId: string) {
     setConfirming(row.id);
     try {
@@ -149,7 +155,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
           : <>Revisando <strong>todo o histórico</strong></>}</p>
       <div className="review-period__actions">
         {data?.reviewStartDate && (earlier || earlierCount > 0) && <Button variant="ghost" size="sm" onClick={() => {
-          setParams({ scope: earlier ? null : 'earlier', q: null, account: null, category: null, nature: null, reason: null, view: null, status: null });
+          setParams({ scope: earlier ? null : 'earlier', q: null, account: null, category: null, nature: null, reason: null, view: null, status: null, fixed: null });
           setPage(1);
         }}>{earlier ? 'Voltar ao período' : 'Ver anteriores'}</Button>}
         <Button variant="secondary" size="sm" onClick={() => setPeriodOpen(true)}>Alterar</Button>
@@ -159,10 +165,13 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
       onSelect={id => change('view', id === 'history' ? 'history' : '')}
       items={[{ id: 'pending', label: <strong>Pendências · {pending.length}</strong> }, { id: 'history', label: <strong>Histórico · {history.length}</strong> }]}>
       <TransactionFilterFields collapsible institutions={data?.institutions} toolbar={reasonChips} filters={filters} active={active} onChange={change} onClear={clear} resultCount={filtered.length}
-        extraActiveCount={view === 'history' && historyFilter !== 'all' ? 1 : 0}
+        extraActiveCount={(view === 'history' && historyFilter !== 'all' ? 1 : 0) + (fixedFilter !== 'all' ? 1 : 0)}
         accounts={data?.accounts ?? []} categories={data?.categories ?? []} natures={reviewNatures}>
         {view === 'pending' && <Select label="Ordenar por" value={pendingSort} options={pendingSortOptions}
           onChange={event => { setPendingSort(event.target.value as PendingSort); setPage(1); }} />}
+        <Select label="Fixos" value={fixedFilter === 'all' ? '' : fixedFilter} options={[
+          { value: '', label: 'Todos' }, { value: 'fixed', label: 'Só fixos' }, { value: 'not-fixed', label: 'Sem fixo' }
+        ]} onChange={event => change('fixed', event.target.value)} />
         {view === 'history' && <Select label="Filtrar histórico" value={historyFilter === 'all' ? '' : historyFilter} options={[
           { value: '', label: 'Todos' }, { value: 'automatic', label: 'Automáticos' }, { value: 'confirmed', label: 'Confirmados' }
         ]} onChange={event => change('status', event.target.value)} />}
@@ -185,7 +194,7 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
                   const suggestion = group.reason === 'categories' ? suggestedCategoryId(row, classification?.categoryId) : undefined;
                   return <li key={row.id} className={`review-item review-item--${group.reason}`}>
                     <span className="muted review-item__date"><DateTime row={row} /></span>
-                    <span className="review-item__main"><strong>{row.description}</strong>
+                    <span className="review-item__main"><span className="ledger-description__title"><strong>{row.description}</strong>{fixedNames.get(row.id) ? <Badge tone="transfer" title={`Fixo: ${fixedNames.get(row.id)}`}>Fixo</Badge> : null}</span>
                       <span className="muted ledger-description__account"><InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />
                         {accounts.get(row.accountId) ?? 'Conta'} · <span className="review-item__nature">{natureLabels[row.nature]}</span></span></span>
                     {group.reason === 'categories' && <span className="review-item__suggestion">{suggestion
