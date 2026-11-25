@@ -23,7 +23,7 @@
 
 - JSON versionado: `packages/tokens/src/themes.json`.
 - Mudanças no JSON exigem documentação e adaptação dos componentes consumidores.
-- Figma é a representação visual, não fonte técnica automatizada. Novos tokens devem ser replicados nas páginas Light e Dark do Figma.
+- A referência visual é o Design System “Personal Finance” (https://claude.ai/artifact/9AweKnLszsM8TkibsYZ29E; resumo em `DESIGN_SYSTEM_ARTIFACT.md`). Novos tokens e padrões são registrados lá e no resumo. O Figma é histórico.
 - Não usar cores genéricas "verde para positivo" sem verificar o papel semântico e contraste. Transferência própria é neutra no domínio.
 
 ## Privacidade

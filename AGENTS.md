@@ -36,8 +36,17 @@ Ao terminar uma mudança relevante:
 - API Key do MeuPluggy existe somente no backend.
 - Componentes genéricos ficam em `packages/ui`; funcionalidades financeiras ficam em `apps/web`.
 - Tokens pertencem a `packages/tokens/src/themes.json`; não use cores hex inline em componentes.
-- O Figma é a referência visual; tokens e código versionados são a fonte técnica.
+- **O Design System “Personal Finance” é a referência visual de toda interface**: https://claude.ai/artifact/9AweKnLszsM8TkibsYZ29E (resumo em `docs/design-system/DESIGN_SYSTEM_ARTIFACT.md`). Tokens e código versionados são a fonte técnica; o Figma é histórico.
 - Todo componente interativo exige teclado, foco, estados, labels, contraste e teste proporcional ao risco.
+
+## Design System: sempre
+
+Toda mudança de interface parte do Design System “Personal Finance” (artifact acima). Antes de criar ou mexer em tela, componente, diálogo ou formulário:
+
+1. Leia `project/README.md` e `project/Componentes-e-padroes.md` do artifact (ou o resumo em `docs/design-system/DESIGN_SYSTEM_ARTIFACT.md`) e o README do componente envolvido em `project/components/<Comp>/`.
+2. Use os componentes de `packages/ui` como o Design System descreve. Não monte controles soltos: escolha entre opções com descrição usa `VisualSelect`; lista simples usa `Select`; `RadioGroup` só para 2–3 opções curtas; ações seguem as variantes de `Button`; diálogos seguem `Dialog`.
+3. Sem cores, tamanhos ou espaçamentos fora dos tokens. Valide desktop e celular (≤ 680 px) antes de publicar.
+4. Padrão novo ou alterado? Registre no artifact (Componentes e padrões) e no resumo do repositório no mesmo trabalho. Redesign grande passa por protótipo no Claude Design antes de implementar.
 
 ## Forks: cada pessoa, sua instância
 
@@ -59,6 +68,7 @@ Outras pessoas usam o Balanço em forks próprios (GitHub, Supabase, Vercel e Me
 | backend, banco, integração ou segurança | `docs/brain/ARCHITECTURE.md` |
 | decisão histórica | `docs/brain/DECISIONS.md` |
 | tokens ou fundamentos visuais | `docs/design-system/FOUNDATIONS.md`, `docs/design-system/THEMING.md` |
+| qualquer interface | Design System “Personal Finance” (artifact) e `docs/design-system/DESIGN_SYSTEM_ARTIFACT.md` |
 | componente de UI | `docs/design-system/COMPONENTS.md`, `docs/design-system/GOVERNANCE.md` |
 | redesign com Claude Design | `docs/design-system/REDESIGN.md`, `DESIGN.md` |
 | formulário | `docs/design-system/FORMS.md` |
