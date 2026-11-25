@@ -310,3 +310,10 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - A Visão geral usava grade em linhas: abrir os valores de um gráfico esticava a linha e deixava buraco no card vizinho. Novo `DashboardColumns` (`packages/ui`): duas colunas que empilham os próprios cards; até 1100 px, uma só (esquerda, depois direita).
 - “vs. anterior” mostrava percentual sobre base negativa (−4.456 → −3.458 = “+22,4%”, set = “−255,9%”). Agora o percentual só aparece entre dois valores positivos; nos outros casos, a diferença em reais.
+
+## D-084 — Fixos definidos na Revisão e plano do mês (proposta, 25/11/2026)
+
+- Fixo é o lançamento recorrente, não o valor: vinculado na Revisão (como fatura e caixinha), projetado pelo valor do último mês. Vale para receitas e despesas e substitui a recorrência adivinhada por categoria.
+- Metas incluem os fixos; o app mostra o comprometido e avisa quando a meta fica abaixo dele.
+- Plano do mês: receita prevista − aportes = pode distribuir; − metas = sobra. Novo gráfico “Despesas por categoria x receita” (mês e 12 meses).
+- Especificação em `docs/architecture/FIXED_ITEMS.md`; etapas 12.1–12.5 no `PLAN.md`. Aguarda aprovação do protótipo.

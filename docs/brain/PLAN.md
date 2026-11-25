@@ -217,6 +217,49 @@ Estado: concluída em 18/11/2026 (D-029).
 
 Aceite: os gráficos seguem o período selecionado, usam os mesmos totais do livro e não dependem somente de cor para comunicar valores.
 
+## Etapa 12 — fixos, plano do mês e despesas x receita
+
+Especificação: [`FIXED_ITEMS.md`](../architecture/FIXED_ITEMS.md) (D-084). Protótipo no canvas “Fixos, metas e despesas x receita — proposta”. Cada sub-etapa termina publicada, testada e registrada no Design System.
+
+### 12.1 — Fixos na Revisão
+
+- migration genérica `fixed_items` + `fixed_item_links`, RLS e RPCs de proprietário (criar a partir de lançamento, vincular, desvincular, renomear, encerrar);
+- campo “Lançamento fixo” (`VisualSelect`) na Revisão para receita e despesa, com “Criar fixo”;
+- sugestão para lançamentos iguais pela mesma regra de “todos os iguais” da categoria;
+- domínio: último valor, situação no mês (pago, pendente, atrasado) e testes.
+
+Aceite: um lançamento vinculado vira fixo; o próximo igual chega sugerido; nada muda para quem não tem fixos.
+
+### 12.2 — Aba “Fixos”
+
+- aba em Orçamentos com totais, último valor, previsto e situação do mês; renomear e encerrar;
+- selo “Fixo” em Transações; ajuda da tela e glossário.
+
+Aceite: a aba mostra todos os fixos com a situação certa no mês e encerrar tira o fixo da previsão sem apagar histórico.
+
+### 12.3 — Plano do mês e metas
+
+- domínio `monthPlan`: receita prevista, aportes, pode distribuir, comprometido por categoria, metas e sobra (centavos `bigint`);
+- cards do plano em Orçamentos; metas com marca do comprometido em fixos;
+- diálogo de meta com média de 3 meses, comprometido, aviso abaixo dos fixos e sobra com a meta.
+
+Aceite: a soma confere com o livro; metas incluem fixos; sobra negativa é destacada.
+
+### 12.4 — Despesas por categoria x receita
+
+- componentes de gráfico no `packages/ui` e no Design System: barra de 100% da receita (mês) e colunas empilhadas de 12 meses (6 realizados, 6 previstos) com marca da receita;
+- tabela equivalente e cores das categorias.
+
+Aceite: os gráficos seguem o mês escolhido, usam os mesmos totais do plano e não dependem só de cor.
+
+### 12.5 — Previsão e Visão geral
+
+- Relatórios passam a usar o plano (gasto previsto por categoria = maior entre meta e comprometido, mais aportes); fallback “Estimativa” sem fixos;
+- card “Disponível no mês” na Visão geral; aviso de mês no vermelho;
+- atualizar `FORECASTING.md`, ajuda, glossário e `COMECE_AQUI.md`.
+
+Aceite: previsão e plano mostram o mesmo número para o mesmo mês; instâncias sem fixos continuam funcionando.
+
 ## Implementações futuras
 
 ### Webhook operacional do MeuPluggy

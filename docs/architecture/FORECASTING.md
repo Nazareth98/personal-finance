@@ -12,7 +12,7 @@ Durante a sincronização, descrições fortes de salário em uma instituição 
 
 ## Horizonte de seis meses
 
-A previsão começa na competência seguinte à mais recente e usa exatamente as seis competências anteriores. Valores continuam em `bigint`:
+A previsão começa no mês seguinte ao atual (D-078) e usa as seis competências anteriores. A etapa 12 (D-084, [`FIXED_ITEMS.md`](FIXED_ITEMS.md)) substitui a recorrência por categoria pelos fixos definidos na Revisão. Valores continuam em `bigint`:
 
 - receita recorrente: soma confirmada dividida por seis;
 - despesa recorrente: grupos de categoria ou descrição presentes em pelo menos duas competências, divididos por seis;

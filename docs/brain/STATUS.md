@@ -8,6 +8,8 @@ Validação D-079: `pnpm check` aprovado com Node 22.12 (4 testes novos de perí
 
 ## Situação
 
+- 25/11/2026: proposta de fixos, plano do mês e despesas x receita (D-084) prototipada; próximo marco é a etapa 12.1 (fixos na Revisão) após aprovação. Spec em `docs/architecture/FIXED_ITEMS.md`.
+
 - 22/11/2026: integração Nubank revisada (D-070–D-073: transferências próprias, Pix no crédito neutro com juros separados), horário dos lançamentos (D-074), investimentos como caixinhas (D-075), “Marcar como paga” (D-076), limite do cartão pelo banco e parcelas sem duplicar (D-077), previsão ancorada no mês atual (D-078). 25/11: ajuda, glossário e guias revisados para essas mudanças.
 
 - D-079 integrada na `main` pelo PR #6 em 24/11; deploy Vercel, backend Supabase e qualidade aprovados. CI visual aprovou baselines, responsividade, acessibilidade e estados assíncronos; o fluxo de Cartões precisou atualizar o seletor que dependia do antigo `aria-label`. Correção do teste publicada separadamente; conferir a nova execução completa antes de considerar o CI encerrado.
