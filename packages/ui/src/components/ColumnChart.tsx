@@ -21,7 +21,7 @@ export function ColumnChart({ data, formatValue, title, valueLabel = 'Valor', pr
   if (!data.length) return <EmptyState title="Sem valores para o gráfico" description="Adicione períodos para consultar a série." />;
   const scale = data.reduce((max, point) => point.valueCents > max ? point.valueCents : max, 0n);
   const status = (point: ColumnPoint) => point.projected ? projectedLabel : valueLabel;
-  const change = (index: number) => changeLabel(data[index]!.valueCents, data[index - 1]?.valueCents);
+  const change = (index: number) => changeLabel(data[index]!.valueCents, data[index - 1]?.valueCents, formatValue);
   const active = focus.active === null ? undefined : data[focus.active];
   return <figure className="ui-chart" aria-label={title}>
     <div className="ui-chart__legend" aria-hidden="true">

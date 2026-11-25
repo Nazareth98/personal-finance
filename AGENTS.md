@@ -44,7 +44,7 @@ Ao terminar uma mudança relevante:
 Toda mudança de interface parte do Design System “Personal Finance” (artifact acima). Antes de criar ou mexer em tela, componente, diálogo ou formulário:
 
 1. Leia `project/README.md` e `project/Componentes-e-padroes.md` do artifact (ou o resumo em `docs/design-system/DESIGN_SYSTEM_ARTIFACT.md`) e o README do componente envolvido em `project/components/<Comp>/`.
-2. Use os componentes de `packages/ui` como o Design System descreve. Não monte controles soltos: escolha entre opções com descrição usa `VisualSelect`; lista simples usa `Select`; `RadioGroup` só para 2–3 opções curtas; data usa `DateField`, nunca `<input type="date">`; ações seguem as variantes de `Button`; diálogos seguem `Dialog`.
+2. Use os componentes de `packages/ui` como o Design System descreve. Não monte controles soltos: escolha entre opções com descrição usa `VisualSelect`; lista simples usa `Select`; `RadioGroup` só para 2–3 opções curtas; data usa `DateField`, nunca `<input type="date">`; painel de cards de alturas diferentes usa `DashboardColumns`; ações seguem as variantes de `Button`; diálogos seguem `Dialog`.
 3. Sem cores, tamanhos ou espaçamentos fora dos tokens. Valide desktop e celular (≤ 680 px) antes de publicar.
 4. Padrão novo ou alterado? Registre no artifact (Componentes e padrões) e no resumo do repositório no mesmo trabalho. Redesign grande passa por protótipo no Claude Design antes de implementar.
 

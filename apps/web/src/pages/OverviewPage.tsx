@@ -1,4 +1,4 @@
-import { Badge, Button, Card, MetricCard, CashFlowChart, ColumnChart, DataState, EmptyState, Icon, NextIcon, PreviousIcon, TrendLineChart, type CashFlowPoint, type DataStatus } from '@personal-finance/ui';
+import { Badge, Button, Card, DashboardColumns, MetricCard, CashFlowChart, ColumnChart, DataState, EmptyState, Icon, NextIcon, PreviousIcon, TrendLineChart, type CashFlowPoint, type DataStatus } from '@personal-finance/ui';
 import type { ReactNode } from 'react';
 import { cardCommitmentSeries, cashFlowSeries, competenceWindow, cumulativeResultSeries } from '../lib/overview-charts';
 import { budgetAttention, monthComparison, nextCardCommitment, reviewAttention } from '../lib/overview-attention';
@@ -75,13 +75,12 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
   const status = ledger.status === 'idle' ? 'loading' : ledger.status;
   const chartState = (children: ReactNode, chartKind: 'bars' | 'line') => <DataState status={status} kind="chart" chartKind={chartKind}
     errorDescription={ledger.error} onRetry={() => void ledger.reload()}>{children}</DataState>;
-  return <div className="template-chart-grid">
-    <Card><div className="chart-card__heading"><h2>Receitas e despesas</h2><a href={`#transactions?period=${period}`}>Ver lançamentos de {formatCompetence(period)}</a></div>
+  const cashFlowCard = <Card><div className="chart-card__heading"><h2>Receitas e despesas</h2><a href={`#transactions?period=${period}`}>Ver lançamentos de {formatCompetence(period)}</a></div>
       <p className="muted">Seis meses até {formatCompetence(period)}, sem transferências próprias.</p>
-      {chartState(<CashFlowChart data={flow} formatValue={formatCentsBRL} title="Receitas e despesas por mês" layout="vertical" collapsibleDetails />, 'bars')}</Card>
-    <Card><h2>Resultado acumulado</h2><p className="muted">Soma de receitas menos despesas desde o início da janela.</p>
-      {chartState(<TrendLineChart data={cumulativeResultSeries(flow)} formatValue={formatCentsBRL} title="Resultado acumulado por mês" collapsibleDetails />, 'line')}</Card>
-    <Card><h2>Metas do período</h2><p className="muted">Orçado versus realizado em {formatCompetence(period)}.</p>
+      {chartState(<CashFlowChart data={flow} formatValue={formatCentsBRL} title="Receitas e despesas por mês" layout="vertical" collapsibleDetails />, 'bars')}</Card>;
+  const resultCard = <Card><h2>Resultado acumulado</h2><p className="muted">Soma de receitas menos despesas desde o início da janela.</p>
+      {chartState(<TrendLineChart data={cumulativeResultSeries(flow)} formatValue={formatCentsBRL} title="Resultado acumulado por mês" collapsibleDetails />, 'line')}</Card>;
+  const budgetsCard = <Card><h2>Metas do período</h2><p className="muted">Orçado versus realizado em {formatCompetence(period)}.</p>
       {budgets.length === 0 ? <EmptyState title="Nenhuma meta ainda" description="Defina quanto quer gastar por mês em cada categoria e acompanhe aqui." action={<a href="#budgets">Definir metas</a>} />
         : <ul className="overview-budgets" aria-label="Orçado versus realizado por categoria">{budgets.map(({ budget, category, progress }) => {
           const label = progress.status === 'exceeded' ? 'Acima do teto' : progress.status === 'approaching' ? 'Próximo do teto' : 'Dentro do teto';
@@ -91,11 +90,11 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
               value={Number(progress.usageBasisPoints > 10000n ? 10000n : progress.usageBasisPoints)} aria-label={`Uso da meta de ${category}`} />
             <p className="muted">{formatCentsBRL(progress.usedCents)} realizados de {formatCentsBRL(progress.limitCents)} orçados</p>
           </li>;
-        })}</ul>}</Card>
-    <Card><h2>Compromissos de cartão</h2><p className="muted">Faturas por vencimento e parcelas futuras já assumidas.</p>
+        })}</ul>}</Card>;
+  const commitmentsCard = <Card><h2>Compromissos de cartão</h2><p className="muted">Faturas por vencimento e parcelas futuras já assumidas.</p>
       {(data?.creditCards.length ?? 0) === 0 ? <EmptyState title="Nenhum cartão ainda" description="Quando o banco do cartão estiver conectado, as faturas e parcelas futuras aparecem aqui." action={<a href="#connections">Conectar banco</a>} />
-        : chartState(<ColumnChart data={commitments} formatValue={formatCentsBRL} title="Compromissos de cartão por mês" valueLabel="Fatura" collapsibleDetails />, 'bars')}</Card>
-  </div>;
+        : chartState(<ColumnChart data={commitments} formatValue={formatCentsBRL} title="Compromissos de cartão por mês" valueLabel="Fatura" collapsibleDetails />, 'bars')}</Card>;
+  return <DashboardColumns left={<>{cashFlowCard}{budgetsCard}</>} right={<>{resultCard}{commitmentsCard}</>} />;
 }
 
 export function OverviewPage({ ledger, headerAction, intro }: PageProps) {

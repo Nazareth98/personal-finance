@@ -30,7 +30,7 @@ export function TrendLineChart({data,formatValue,title='Evolução do saldo',val
    <div className="ui-trend-plot__hits" aria-hidden="true">{data.map((_,i)=><span key={i} {...focus.point(i)}/>)}</div>
    {active&&activeIndex!==null?<ChartTooltip title={active.label} className={`${tooltipEdge(activeIndex,data.length)}${xy[activeIndex]!.y<110?' ui-chart-tooltip--below':''}`}
      style={{left:`${xy[activeIndex]!.x/6}%`,top:`${xy[activeIndex]!.y/2.2}%`}}>
-     <strong>{text(active.valueCents)}</strong>{activeIndex>0?<span>{changeLabel(active.valueCents,data[activeIndex-1]!.valueCents)} vs. {data[activeIndex-1]!.label}</span>:null}
+     <strong>{text(active.valueCents)}</strong>{activeIndex>0?<span>{changeLabel(active.valueCents,data[activeIndex-1]!.valueCents,formatValue)} vs. {data[activeIndex-1]!.label}</span>:null}
    </ChartTooltip>:null}
   </div>
   <ChartAnnouncement text={active?`${active.label}, ${text(active.valueCents)}`:''}/>
@@ -38,7 +38,7 @@ export function TrendLineChart({data,formatValue,title='Evolução do saldo',val
    <table className="ui-chart-table" aria-label={`Valores: ${title}`}>
     <thead><tr><th scope="col">Período</th><th scope="col">Valor</th><th scope="col">vs. anterior</th></tr></thead>
     <tbody>{data.map((p,i)=><tr key={i} {...focus.row(i)}><th scope="row">{p.label}</th>
-     <td className={tone(p.valueCents)}>{text(p.valueCents)}</td><td>{changeLabel(p.valueCents,data[i-1]?.valueCents)}</td></tr>)}</tbody>
+     <td className={tone(p.valueCents)}>{text(p.valueCents)}</td><td>{changeLabel(p.valueCents,data[i-1]?.valueCents,formatValue)}</td></tr>)}</tbody>
    </table>
   </ChartDetails>
  </figure>;

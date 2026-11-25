@@ -23,6 +23,7 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 | Ação de apoio | `Button` `secondary` |
 | Ação discreta, link de navegação interna | `Button` `ghost` |
 | Configuração da tela que muda pouco (período, escopo) | linha de contexto (abaixo), nunca um card grande |
+| Painel com cards de alturas diferentes (Visão geral) | `DashboardColumns` (duas colunas independentes) |
 | Qualquer data | `DateField` (nunca `<input type="date">`) |
 | Formulário curto | `Dialog` com ações fixas no rodapé |
 
@@ -65,8 +66,14 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 - Até 680 px vira folha inferior, com as ações em colunas iguais.
 - Confirmação destrutiva tem diálogo próprio, com a pergunta no título e o foco em Cancelar.
 
+### Painel de cards (`DashboardColumns`) — D-083
+- Duas colunas independentes; cada uma empilha seus cards com `spacing-4`. Um card que cresce só empurra a própria coluna, sem buracos.
+- Até 1100 px: uma coluna, esquerda e depois direita (ordem visual = ordem de foco).
+- Nunca `columns` do CSS nem grade com células esticadas. Listas de cards do mesmo tipo (metas, caixinhas) seguem em grade.
+
 ### Tabela e lista (`DataTable`, `Pagination`)
 - No desktop, colunas, com valores à direita em `tabular-nums`. No celular, cards.
+- “vs. anterior” nos gráficos: percentual só entre dois valores positivos; senão diferença em reais (“+R$ 997,30”); sem variação, “—”.
 - Paginação “1–20 de 134”. “Por página” fica salvo por tabela.
 
 ### Filtros

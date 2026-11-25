@@ -305,3 +305,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - O `<input type="date">` nativo mudava de formato (mm/dd/aaaa em navegador em inglês) e de visual por sistema, destoando do app. Novo `DateField` em `packages/ui`: texto dd/mm/aaaa digitável, dia da semana abaixo, calendário próprio na top layer e folha inferior no celular. Protótipo aprovado no canvas “Seletor de data — proposta”.
 - Usado em Nova movimentação, aporte/resgate, data-alvo da caixinha (com limpar) e “Revisar a partir de” (até hoje). Registrado no Design System (componente DateField).
+
+## D-083 — Painel em colunas independentes e “vs. anterior” sem percentual enganoso (25/11/2026)
+
+- A Visão geral usava grade em linhas: abrir os valores de um gráfico esticava a linha e deixava buraco no card vizinho. Novo `DashboardColumns` (`packages/ui`): duas colunas que empilham os próprios cards; até 1100 px, uma só (esquerda, depois direita).
+- “vs. anterior” mostrava percentual sobre base negativa (−4.456 → −3.458 = “+22,4%”, set = “−255,9%”). Agora o percentual só aparece entre dois valores positivos; nos outros casos, a diferença em reais.

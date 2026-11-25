@@ -33,7 +33,7 @@ export function DivergingColumnChart({ data, formatValue, title, positiveLabel =
   const downHeight = maxNegative > 0n ? CHART_HEIGHT - upHeight : 0;
   const tone = (value: bigint) => value < 0n ? 'negative' : value > 0n ? 'positive' : 'neutral';
   const status = (value: bigint) => value < 0n ? negativeLabel : positiveLabel;
-  const change = (index: number) => changeLabel(data[index]!.valueCents, data[index - 1]?.valueCents);
+  const change = (index: number) => changeLabel(data[index]!.valueCents, data[index - 1]?.valueCents, formatValue);
   const active = focus.active === null ? undefined : data[focus.active];
   return <figure className="ui-chart" aria-label={title}>
     <div className="ui-chart__legend" aria-hidden="true">

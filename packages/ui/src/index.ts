@@ -101,6 +101,7 @@ export type { InputProps } from './components/Input';
 export { Select } from './components/Select';
 export type { SelectProps,SelectOption } from './components/Select';
 export { VisualSelect } from './components/VisualSelect';
+export { DashboardColumns } from './components/DashboardColumns';
 export { DateField, formatDateBR, parseDateBR, maskDateBR } from './components/DateField';
 export type { DateFieldProps } from './components/DateField';
 export type { VisualSelectProps,VisualSelectOption } from './components/VisualSelect';

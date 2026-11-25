@@ -40,3 +40,14 @@ test('fatia de valor negativo ou zero não aumenta o total',()=>{
   // O cálculo de fatias elege apenas magnitudes positivas na apresentação.
   assert.equal(output.filter(x=>x.valueCents>0n).reduce((s,x)=>s+x.valueCents,0n),205868n);
 });
+
+test('vs. anterior: percentual só entre positivos; senão diferença em reais (D-083)', async () => {
+  const { changeLabel } = await import('../../../../packages/ui/src/lib/chart-data.ts');
+  const brl = (v: bigint) => `R$ ${(Number(v) / 100).toFixed(2).replace('.', ',')}`;
+  assert.equal(changeLabel(11000n, 10000n, brl), '+10%');
+  assert.equal(changeLabel(-345895n, -445625n, brl), '+R$ 997,30');
+  assert.equal(changeLabel(-684110n, -192218n, brl), '−R$ 4918,92');
+  assert.equal(changeLabel(5000n, -1000n, brl), '+R$ 60,00');
+  assert.equal(changeLabel(-5000n, -1000n), '—');
+  assert.equal(changeLabel(100n, undefined, brl), '—');
+});
