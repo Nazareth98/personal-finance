@@ -45,7 +45,7 @@ export function CreditCardForm({ account, onClose, ledger }: { account: Financia
     <form id={formId} className="transaction-form" noValidate onSubmit={submit}>
       <Input label="Dia de fechamento" inputMode="numeric" value={closingDay} required onChange={event => setClosingDay(event.target.value)} />
       <Input label="Dia de vencimento" inputMode="numeric" value={dueDay} required onChange={event => setDueDay(event.target.value)} />
-      <Input label="Limite" startText="R$" inputMode="decimal" value={limit} hint="Opcional; não altera o saldo do livro." onChange={event => setLimit(event.target.value)} />
+      <Input label="Limite" startText="R$" inputMode="decimal" value={limit} hint="Opcional. Quando o banco informa o limite, o valor dele prevalece." onChange={event => setLimit(event.target.value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}    </form>
   </Dialog>;
 }

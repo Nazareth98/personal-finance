@@ -31,9 +31,9 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   cards: {
     title: "Cartões", subtitle: "Faturas, limite e parcelas.",
     shows: "Todos os cartões num relance: fatura atual e a situação dela, limite usado e livre e a próxima fatura prevista. Toque num cartão para ver as faturas, os lançamentos e as parcelas que ainda vão cair.",
-    calc: ["As compras de um cartão só entram depois que ele tem **dia de fechamento e de vencimento**. Sem isso o app não sabe em que fatura cada compra cai; ao salvar, ele busca as compras no banco.", "A fatura leva o mês do **vencimento**: compras de 09/09 a 08/10 vencem em 15/10.", "**Pendente** = compras − estornos − pagamentos ligados.", "A linha “Total da fatura anterior” do banco é só informativa e não conta.", "Parcelas futuras aparecem como previstas até o banco trazer o lançamento."],
-    actions: ["**Vincular pagamento** quando o débito na conta não foi ligado sozinho.", "Configurar dia de fechamento, vencimento e limite.", "Abrir “Lançamentos” para ver as compras da fatura."],
-    terms: ["Fatura", "Pagamento de fatura", "Competência"]
+    calc: ["As compras de um cartão só entram depois que ele tem **dia de fechamento e de vencimento**. Sem isso o app não sabe em que fatura cada compra cai; ao salvar, ele busca as compras no banco.", "A fatura leva o mês do **vencimento**: compras de 09/09 a 08/10 vencem em 15/10.", "**Pendente** = compras − estornos − pagamentos ligados.", "A linha “Total da fatura anterior” do banco é só informativa e não conta.", "Parcelas futuras aparecem como previstas até o banco trazer o lançamento.", "**Limite usado** = limite − disponível, como o banco informa na última sincronização. Se o banco não mandar esse dado, o app estima somando faturas em aberto e parcelas futuras, e avisa que é estimativa.", "**Pix no crédito** para você mesmo não é gasto: só os juros cobrados entram como despesa, separados automaticamente."],
+    actions: ["**Configurar** o dia de fechamento e o de vencimento. O limite é preenchido pelo banco; informe à mão só se ele não vier.", "**Vincular pagamento** quando o débito na conta não foi ligado sozinho.", "**Marcar como paga** uma fatura vencida que você pagou, mas cujo pagamento não chegou do banco. Dá para desfazer.", "Abrir “Lançamentos” para ver as compras da fatura."],
+    terms: ["Fatura", "Pagamento de fatura", "Limite usado", "Pix no crédito"]
   },
   budgets: {
     title: "Orçamentos", subtitle: "Tetos mensais por categoria.",
@@ -45,8 +45,8 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   savings: {
     title: "Caixinhas", subtitle: "Reservas com saldo próprio.",
     shows: "Cada reserva com saldo, objetivo, prazo e quanto guardar por mês para chegar lá.",
-    calc: ["**Saldo** = saldo inicial + aportes − resgates.", "Aporte e resgate **não são** receita nem gasto: o dinheiro só muda de lugar.", "O plano mensal divide o que falta pelo número de meses até a data-alvo."],
-    actions: ["Criar, editar ou arquivar uma caixinha.", "Registrar um aporte ou resgate.", "Ligar um lançamento do banco a uma caixinha quando o app não reconheceu."],
+    calc: ["**Saldo** = saldo inicial + aportes − resgates.", "Aporte e resgate **não são** receita nem gasto: o dinheiro só muda de lugar.", "O plano mensal divide o que falta pelo número de meses até a data-alvo.", "Investimentos como CDB, Tesouro, LCI e LCA funcionam como caixinhas: aplicar é aporte, resgatar é resgate."],
+    actions: ["Criar, editar ou arquivar uma caixinha.", "Registrar um aporte ou resgate.", "Ligar um lançamento do banco a uma caixinha quando o app não reconheceu.", "Criar uma caixinha para cada lugar onde você investe, para acompanhar quanto tem aplicado."],
     terms: ["Caixinha", "Aporte e resgate"]
   },
   categories: {
@@ -59,23 +59,23 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   connections: {
     title: "Conexões", subtitle: "Bancos ligados pelo MeuPluggy.",
     shows: "Cada banco conectado, quando o banco atualizou os dados, a última importação e qualquer erro.",
-    calc: ["O app importa ao abrir, se a última tentativa tiver mais de 6 horas.", "“Sincronizar agora” busca o dado mais recente que o banco já entregou ao Pluggy; não força o banco a atualizar.", "Importar de novo não duplica lançamentos."],
+    calc: ["O app importa ao abrir, se a última tentativa tiver mais de 6 horas.", "“Sincronizar agora” busca o dado mais recente que o banco já entregou ao Pluggy; não força o banco a atualizar.", "Importar de novo não duplica lançamentos.", "Ao configurar um cartão, o app sincroniza na hora para trazer as compras dele."],
     actions: ["**Conectar ao Pluggy** com suas chaves (primeira vez).", "**Conectar instituição** para cada banco do MeuPluggy.", "Sincronizar agora ou ver o erro de uma conexão."],
     terms: ["Reconciliado"]
   },
   review: {
     title: "Revisão", subtitle: "O que o app não conseguiu decidir sozinho.",
     shows: "A fila de lançamentos que precisam de você: categoria a confirmar ou efeito financeiro a definir, como pagamento de fatura ou aporte em caixinha.",
-    calc: ["Sugestão com confiança alta já entra sozinha; média vem para cá; baixa fica sem categoria.", "Pagamento de fatura e transferência entre suas contas precisam do outro lado ligado.", "Cada confirmação ensina o app para os próximos lançamentos parecidos."],
-    actions: ["**Revisar a partir de** salva seu período para os próximos acessos. Nas contas vale o dia escolhido; nos cartões, o mês de vencimento da fatura inteiro.", "**Ver histórico anterior** mostra pendências antigas sem mudar sua preferência. Nada é apagado e a importação continua completa.", "**Confirmar** a sugestão com um toque.", "**Alterar** para escolher outra categoria ou natureza.", "Confirmar a mesma categoria em **todos os lançamentos iguais** de uma vez.", "Ver o histórico do que já foi decidido."],
+    calc: ["Sugestão com confiança alta já entra sozinha; média vem para cá; baixa fica sem categoria.", "Pagamento de fatura e transferência entre suas contas precisam do outro lado ligado.", "Cada confirmação ensina o app para os próximos lançamentos parecidos.", "Aplicações e resgates de investimentos (CDB, Tesouro…) vêm como aporte ou resgate: escolha a caixinha."],
+    actions: ["**Revisar a partir de** salva seu período para os próximos acessos. Nas contas vale o dia escolhido; nos cartões, o mês de vencimento da fatura inteiro.", "**Ver histórico anterior** mostra pendências antigas sem mudar sua preferência. Nada é apagado e a importação continua completa.", "**Confirmar** a sugestão com um toque.", "**Ordenar por** data, valor ou descrição para achar lançamentos parecidos.", "**Alterar** para escolher outra categoria ou natureza.", "Confirmar a mesma categoria em **todos os lançamentos iguais** de uma vez.", "Ver o histórico do que já foi decidido."],
     terms: ["Revisão", "Natureza", "Reconciliado"]
   },
   reports: {
     title: "Relatórios", subtitle: "Tendência e previsão.",
-    shows: "Receitas e despesas mês a mês, de onde vem o resultado e uma previsão para os próximos seis meses.",
-    calc: ["A previsão usa a média dos **últimos seis meses** de receitas recorrentes.", "Receitas extraordinárias entram no realizado, mas não na média.", "O gasto previsto usa o maior entre a média recorrente e a soma dos tetos, mais parcelas futuras."],
-    actions: ["Alternar entre visão mensal e anual.", "Tocar num mês do gráfico para ver os valores.", "Conferir a previsão antes de criar metas."],
-    terms: ["Teto", "Competência"]
+    shows: "Uma previsão dos próximos seis meses: quanto deve entrar, quanto deve sair e se algum mês fica no vermelho.",
+    calc: ["A previsão começa no **próximo mês** e usa como base os **seis meses até o atual**.", "**Receita recorrente** = média das categorias Salário e Outras receitas recorrentes. Receitas extraordinárias ficam de fora.", "**Gastos planejados** = o maior entre a média das despesas que se repetem (em pelo menos 2 dos 6 meses) e a soma dos seus tetos.", "Somam-se as **parcelas de cartão** previstas para cada mês e os **aportes** que faltam para as caixinhas com data-alvo.", "**Resultado previsto** = receita − gastos − parcelas − aportes."],
+    actions: ["Tocar num mês do gráfico para ver os valores.", "Usar as setas de **Composição** para ver de onde vem o resultado de cada mês.", "Ajustar tetos em Orçamentos se algum mês ficar no vermelho."],
+    terms: ["Teto", "Receita recorrente", "Competência"]
   }
 };
 
@@ -89,8 +89,12 @@ export const glossary: GlossaryTerm[] = [
   { term: "Fatura", definition: "Conjunto das compras do cartão entre dois fechamentos. Leva o mês do vencimento: compras de 09/09 a 08/10 vencem em 15/10." },
   { term: "Folga", definition: "Quanto ainda cabe no teto do mês. Negativa vira excedente." },
   { term: "Gastos sem meta", definition: "Despesas do mês em categorias que ainda não têm teto. Dá para criar a meta direto dali." },
+  { term: "Limite usado", definition: "Quanto do limite do cartão está comprometido: limite menos o disponível que o banco informa. Inclui compras parceladas que ainda vão cair." },
+  { term: "Marcar como paga", definition: "Tira uma fatura vencida das pendências quando você pagou, mas o pagamento não chegou do banco. Não cria lançamento e pode ser desfeito." },
   { term: "Natureza", definition: "O efeito do lançamento: receita, despesa, transferência entre suas contas, pagamento de fatura, aporte, resgate ou ajuste." },
   { term: "Pagamento de fatura", definition: "Quita o cartão. Não é gasto novo: as compras já contaram na fatura." },
+  { term: "Pix no crédito", definition: "Pix pago com o limite do cartão. Se for para uma conta sua, não é gasto: só os juros cobrados pelo banco entram como despesa." },
+  { term: "Receita recorrente", definition: "Entradas que se repetem todo mês, como salário. É a base da previsão em Relatórios." },
   { term: "Reconciliado", definition: "Quando o lado da conta e o lado do cartão (ou das duas contas) foram ligados e batem." },
   { term: "Resultado", definition: "Receitas menos despesas do mês. Transferências, pagamentos de fatura, aportes e resgates ficam de fora." },
   { term: "Revisão", definition: "Fila do que o app não conseguiu decidir sozinho: categoria ou natureza para confirmar." },

@@ -8,6 +8,8 @@ Validação D-079: `pnpm check` aprovado com Node 22.12 (4 testes novos de perí
 
 ## Situação
 
+- 22/11/2026: integração Nubank revisada (D-070–D-073: transferências próprias, Pix no crédito neutro com juros separados), horário dos lançamentos (D-074), investimentos como caixinhas (D-075), “Marcar como paga” (D-076), limite do cartão pelo banco e parcelas sem duplicar (D-077), previsão ancorada no mês atual (D-078). 25/11: ajuda, glossário e guias revisados para essas mudanças.
+
 - D-079 integrada na `main` pelo PR #6 em 24/11; deploy Vercel, backend Supabase e qualidade aprovados. CI visual aprovou baselines, responsividade, acessibilidade e estados assíncronos; o fluxo de Cartões precisou atualizar o seletor que dependia do antigo `aria-label`. Correção do teste publicada separadamente; conferir a nova execução completa antes de considerar o CI encerrado.
 
 - Design system Corporate UI v0.6.2 implementado com Inter Variable auto-hospedada, tokens Light/Dark, ícones Lucide, biblioteca React, Storybook, templates e estados assíncronos. O shell agora mantém aparência e saída no rodapé da sidebar e alinha ações ao cabeçalho de cada template. Os 78 baselines foram regenerados no CI Linux em 18/11/2026, inclusive após a nova navegação mobile.

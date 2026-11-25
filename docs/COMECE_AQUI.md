@@ -92,20 +92,32 @@ No Supabase:
 
 Contas correntes e cartões chegam sozinhos na primeira sincronização. A partir daí, siga “Primeiros passos” na Visão geral e use o botão **?** de cada tela.
 
-Hoje a primeira importação busca **todo o histórico disponibilizado pelo provedor**, que pode variar por banco e conta. Em **Revisão → Alterar período**, escolha “Revisar a partir de” para começar por uma data, sem cortar a importação. Os lançamentos e as confirmações são salvos no banco da sua instância; sincronizar novamente não deve duplicá-los. As regras do período salvo no perfil estão em [MeuPluggy — período inicial](architecture/MEUPLUGGY.md#período-inicial-de-revisão).
+A primeira sincronização traz **todo o histórico** que cada banco disponibiliza (o tamanho varia de banco para banco). Se não quiser revisar tudo isso, em **Revisão** escolha **Revisar a partir de** uma data: a fila começa ali, e nada é apagado. Sincronizar de novo não duplica lançamentos.
 
 > **Importante sobre cartões:** as compras de um cartão só aparecem depois que ele tem **dia de fechamento e dia de vencimento** da fatura. Alguns bancos já mandam essas datas; se um cartão aparecer em **Cartões** com “Configuração pendente”, toque em **Configurar** e informe os dois dias (estão na fatura ou no app do banco). Ao salvar, o app busca as compras na hora.
 
+## Os primeiros dias
+
+O app aprende com você. Na primeira semana:
+
+- **Revisão** vai ter uma fila maior (use **Revisar a partir de** para começar por uma data). Confirme ou altere cada sugestão; cada resposta ensina o app, e lançamentos parecidos passam a entrar sozinhos. Dá para ordenar a fila por data ou valor.
+- **Transferências entre suas contas** e **pagamentos de fatura** não contam como receita nem gasto. Para o app reconhecer Pix entre as suas contas, informe seu nome como aparece no banco (está em “Primeiros passos”).
+- **Investimentos** (CDB, Tesouro, LCI…) funcionam como caixinhas: crie uma caixinha para cada lugar onde você investe e ligue as aplicações e os resgates a ela.
+- **Faturas antigas** que aparecem em aberto, mas que você já pagou, podem vir de um pagamento que o banco não enviou. Abra o cartão e toque em **Marcar como paga**.
+- **Relatórios** só fazem sentido depois de alguns meses de dados: a previsão usa a média dos últimos seis meses.
+
 ## Atualizações
 
-O workflow está agendado para **06:17 de Brasília**, sujeito a atraso do GitHub. No fork, confira em **Actions** se **Sincronizar com o projeto original** está habilitado e execute **Run workflow** uma vez. O GitHub desativa agendamentos de repositórios públicos após 60 dias sem atividade; se parar, reative-o em Actions ([regras do GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)).
+Sua cópia busca as novidades do projeto original todo dia, por volta das 6h (o GitHub às vezes atrasa um pouco), e o app se atualiza sozinho.
 
-Quando chegam alterações, confira separadamente o deploy da Vercel e, se houver mudanças no backend, **Supabase — publicar backend**. São publicações independentes. Evite editar arquivos no fork: alterações próprias podem gerar conflitos. Renove o `SYNC_TOKEN` antes do vencimento.
+- Logo depois de montar tudo, abra **Actions** › **Sincronizar com o projeto original** › **Run workflow** uma vez, para ligar a rotina.
+- Se a sua cópia ficar 60 dias sem nenhuma atividade, o GitHub pausa a rotina. Para religar, repita o passo acima.
+- Não edite arquivos na sua cópia: ela precisa continuar igual à original para se atualizar sozinha.
 
 ## Dúvidas comuns
 
-- **Vou pagar alguma coisa?** A proposta é usar os planos gratuitos, dentro dos limites de cada serviço. Confira os limites vigentes e eventuais custos de SMTP antes de contratar.
-- **Alguém além de mim vê meus dados?** O app só permite o proprietário, mas administradores com acesso ao projeto Supabase e os serviços envolvidos têm acesso conforme suas permissões e políticas. Código público não torna o banco público.
+- **Vou pagar alguma coisa?** Não precisa. Os quatro serviços têm planos gratuitos que dão conta de uso pessoal; só não aumente o plano de nenhum deles.
+- **Alguém além de mim vê meus dados?** No app, só você entra: o cadastro fica fechado. Fora dele, quem tiver acesso à sua conta do Supabase também consegue ver os dados, então guarde bem essa senha. O código do app é público; os seus dados, não.
 - **A sincronização falhou (recebi e-mail do GitHub).** Quase sempre é o `SYNC_TOKEN`. Gere outro (etapa 3, passo 5) e substitua o secret.
 - **Perdi a senha do banco ou o Access Token.** Gere outros (senha: **Project Settings** › **Database** › **Reset database password**) e atualize os dois secrets da etapa 3.
 - **O app ficou fora do ar depois de dias sem usar.** O plano gratuito do Supabase pausa projetos parados por uma semana. Entre no painel e clique em **Restore project**.

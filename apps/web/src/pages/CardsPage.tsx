@@ -161,7 +161,7 @@ export function CardsPage({ ledger, headerAction }: PageProps) {
               info="O que ainda falta pagar nas faturas abertas e fechadas. A linha “Total da fatura anterior” do banco é só informativa e não entra na conta."/>
             <MetricCard label="Próximo vencimento" value={next?.current?.statement ? `${formatLocalDate(next.current.statement.dueDate).slice(0, 5)} · ${formatCentsBRL(next.currentCents)}` : 'Nenhum'} supportingText={next ? next.panel.account.name : 'Nenhuma fatura pendente'}/>
             <MetricCard label="Limite livre" value={formatCentsBRL(freeTotal)} supportingText={withLimit.length ? `de ${formatCentsBRL(limitTotal)} somados` : 'Limites não informados'}
-              info="Limite total menos faturas em aberto e parcelas que ainda vão cair."/>
+              info="Limite total menos o que está comprometido. Usa o disponível informado pelo banco; sem esse dado, estima com faturas em aberto e parcelas futuras."/>
           </div>
           <div className="card-grid">{overviews.map(item => <CardTile key={item.panel.account.id} overview={item} institutions={institutions} onConfigure={() => setSelectedCard(item.panel.account)} />)}</div>
         </> : <Card><EmptyState title="Seus cartões aparecem aqui" description="Conecte o banco do cartão: faturas, compras e parcelas chegam na sincronização." action={<a className="ui-button ui-button--primary ui-button--md" href="#connections">Conectar banco</a>}/></Card>}

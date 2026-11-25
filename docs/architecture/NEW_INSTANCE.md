@@ -14,22 +14,22 @@ Quem executa este roteiro é quem administra a instalação, com a pessoa dona d
 
 O workflow [`supabase-deploy.yml`](../../.github/workflows/supabase-deploy.yml) aplica as migrations e publica as Edge Functions em cada instância listada.
 
-1. Em Settings → Environments, crie um environment (ex.: `esposa`) com:
+1. Em Settings → Environments, crie um environment (ex.: `segunda-instancia`) com:
    - variável `SUPABASE_PROJECT_REF`;
    - secrets `SUPABASE_ACCESS_TOKEN` e `SUPABASE_DB_PASSWORD`.
-2. Em Settings → Secrets and variables → Actions → Variables, defina `SUPABASE_ENVIRONMENTS` com todos os environments, em JSON: `["principal","esposa"]`.
+2. Em Settings → Secrets and variables → Actions → Variables, defina `SUPABASE_ENVIRONMENTS` com todos os environments, em JSON: `["principal","segunda-instancia"]`.
 3. Em Actions → **Supabase — publicar backend** → Run workflow. Confira o job `deploy` de cada environment: `plan` verde com deploy pulado não publica nada. Os próximos pushes na `main` publicam quando alteram os caminhos definidos no workflow (migrations, funções, configuração Supabase, código do domínio ou o próprio workflow).
 
-### Instância em fork (caso da segunda usuária)
+### Instância em fork (recomendado para outra pessoa)
 
 A pessoa faz um fork e configura nele um único environment (`producao`, com `SUPABASE_ENVIRONMENTS = ["producao"]`). O workflow [`fork-sync.yml`](../../.github/workflows/fork-sync.yml) roda só em forks, todo dia às 06:17 de Brasília: chama `merge-upstream` na `main`, e o push resultante dispara a publicação do backend e o deploy da Vercel da cópia (D-066).
 
-- Precisa do secret de repositório `SYNC_TOKEN` no fork: token clássico da dona com escopos `repo` e `workflow`. O `GITHUB_TOKEN` não pode atualizar arquivos de workflow nem disparar outros workflows.
+- Precisa do secret de repositório `SYNC_TOKEN` no fork: token clássico de quem é dona do fork, com escopos `repo` e `workflow`. O `GITHUB_TOKEN` não pode atualizar arquivos de workflow nem disparar outros workflows.
 - Evite commits próprios no fork: eles podem gerar conflitos no merge. O workflow não resolve conflitos automaticamente.
 - Habilite o agendamento no fork e faça uma execução manual inicial. O horário pode atrasar; em repositórios públicos, 60 dias sem atividade desativam o agendamento. Veja as [regras do GitHub](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Tokens com validade precisam ser renovados.
 - Os workflows de validação (design system e regressão visual) não rodam em forks.
 
-O guia para quem não é técnico está em [`docs/COMECE_AQUI.md`](../COMECE_AQUI.md); há também uma versão visual interativa (artifact “Guia: seu app de finanças”).
+O guia para quem não é técnico está em [`docs/COMECE_AQUI.md`](../COMECE_AQUI.md); há também uma versão visual interativa (artifact “Guia: seu Balanço”).
 
 O histórico de migrations do projeto principal foi alinhado aos nomes dos arquivos em 21/11/2026; um projeto novo recebe todas em ordem.
 
@@ -60,7 +60,7 @@ Novo projeto importando o mesmo repositório, com as configurações de [`DEPLOY
 Mande o endereço do app, o e-mail e a senha provisória. No primeiro acesso ela segue “Primeiros passos” dentro do app:
 
 1. Conexões → **Conectar ao Pluggy**: o card explica como criar a conta no MeuPluggy, a aplicação no painel do Pluggy e onde copiar Client ID e Client Secret. O app testa as chaves e as guarda no Vault (D-064); não há secret para cadastrar no Supabase.
-2. Conectar os bancos, revisar lançamentos, cartões, caixinhas e metas.
+2. Informar o nome do titular (reconhece Pix entre as próprias contas), conectar os bancos, revisar lançamentos, configurar fechamento e vencimento dos cartões, criar caixinhas (inclusive para investimentos) e metas.
 
 Cada pessoa usa a própria conta MeuPluggy; confira os limites vigentes na conta. Antes de considerar a entrega concluída, valide login, recuperação de senha, credenciais Pluggy, uma sincronização e o calendário dos cartões. Não registre dados reais em capturas ou issues.
 
