@@ -101,6 +101,8 @@ export type { InputProps } from './components/Input';
 export { Select } from './components/Select';
 export type { SelectProps,SelectOption } from './components/Select';
 export { VisualSelect } from './components/VisualSelect';
+export { DateField, formatDateBR, parseDateBR, maskDateBR } from './components/DateField';
+export type { DateFieldProps } from './components/DateField';
 export type { VisualSelectProps,VisualSelectOption } from './components/VisualSelect';
 export { Checkbox } from './components/Checkbox';
 export type { CheckboxProps } from './components/Checkbox';

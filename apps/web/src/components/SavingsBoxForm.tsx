@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react';
 import type { SavingsBox } from '@personal-finance/domain';
-import { Button, DeleteIcon, Dialog, FormMessage, Icon, Input, useToast } from '@personal-finance/ui';
+import { Button, DateField, DeleteIcon, Dialog, FormMessage, Icon, Input, useToast } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsPlain } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
@@ -89,7 +89,7 @@ export function SavingsBoxForm({ open, onClose, ledger, box, hasHistory = false 
       <Input label="Nome da caixinha" value={name} maxLength={80} required onChange={event => setName(event.target.value)} />
       <Input label="Saldo inicial" startText="R$" inputMode="decimal" value={openingBalance} required onChange={event => setOpeningBalance(event.target.value)} />
       <Input label="Meta" startText="R$" inputMode="decimal" value={target} required onChange={event => setTarget(event.target.value)} />
-      <Input label="Data-alvo (opcional)" type="date" value={targetDate} hint="Com data, a tela calcula quanto guardar por mês." onChange={event => setTargetDate(event.target.value)} />
+      <DateField label="Data-alvo (opcional)" value={targetDate} clearable hint="Com data, a tela calcula quanto guardar por mês." onChange={setTargetDate} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </form>
   </Dialog>;

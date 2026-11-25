@@ -397,3 +397,41 @@ html.ui-scroll-locked{overflow:hidden;overscroll-behavior:none;scrollbar-gutter:
 .ui-infotip__bubble{position:absolute;z-index:30;left:50%;top:calc(100% + 8px);transform:translateX(calc(-50% + var(--ui-infotip-shift,0px)));width:max-content;max-width:min(280px,calc(100vw - 32px));padding:var(--spacing-3);border-radius:var(--radius-md);background:var(--color-text-primary);color:var(--color-bg-surface);font-size:var(--font-size-sm);font-weight:400;line-height:1.45;text-align:left;white-space:normal;box-shadow:var(--shadow-md)}
 .ui-infotip__bubble[hidden]{display:none}
 .ui-metric-card__label{display:inline-flex;align-items:center;gap:var(--spacing-1)}
+/* D-082: DateField — campo dd/mm/aaaa + calendário próprio; folha inferior até 680 px. */
+.ui-date-field__wrap>.ui-input{padding-right:calc(var(--control-height-lg) + var(--spacing-1))}
+.ui-date-field__wrap--clear>.ui-input{padding-right:calc(var(--control-height-lg) * 2)}
+.ui-date-field__actions{gap:0}
+.ui-date-field__icon-button{display:inline-grid;place-items:center;width:var(--control-height-sm);height:var(--control-height-sm);margin:0 4px 0 0;padding:0;border:0;border-radius:var(--radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.ui-date-field__icon-button:hover:not(:disabled){background:var(--color-bg-subtle);color:var(--color-text-primary)}
+.ui-date-field__icon-button:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:2px}
+.ui-date-field__icon-button:disabled{opacity:.5;cursor:not-allowed}
+.ui-date-field__icon-button--lg{width:var(--control-height-lg);height:var(--control-height-lg);color:var(--color-text-primary)}
+.ui-date-field__weekday{text-transform:none}
+.ui-date-calendar{width:312px;box-sizing:border-box;padding:var(--spacing-3);border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface);box-shadow:var(--shadow-md);font:400 var(--font-size-sm)/1.4 var(--font-family-sans);color:var(--color-text-primary)}
+.ui-date-calendar__nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-2)}
+.ui-date-calendar__nav strong{font-weight:600}
+.ui-date-calendar__nav .ui-date-field__icon-button{margin:0;color:var(--color-text-primary)}
+.ui-date-calendar__grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.ui-date-calendar__weekday{font-size:var(--font-size-xs);font-weight:600;line-height:28px;color:var(--color-text-secondary);text-decoration:none}
+.ui-date-calendar__day{height:36px;padding:0;border:1px solid transparent;border-radius:var(--radius-md);background:transparent;color:var(--color-text-primary);font:inherit;font-variant-numeric:tabular-nums;cursor:pointer;transition:background-color var(--motion-fast) var(--ease-standard)}
+.ui-date-calendar__day:hover{background:var(--color-bg-subtle)}
+.ui-date-calendar__day:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:1px}
+.ui-date-calendar__day.is-outside,.ui-date-calendar__day[aria-disabled="true"]{color:var(--color-text-secondary);opacity:.6}
+.ui-date-calendar__day[aria-disabled="true"]{cursor:not-allowed;background:transparent}
+.ui-date-calendar__day.is-today{border-color:var(--color-action-primary);color:var(--color-text-accent);font-weight:600;opacity:1}
+.ui-date-calendar__day.is-selected{border-color:transparent;background:var(--color-action-primary);color:var(--color-text-on-action);font-weight:600;opacity:1}
+.ui-date-calendar__day.is-selected:hover{background:var(--color-action-hover)}
+.ui-date-calendar__footer{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2);margin-top:var(--spacing-2);padding-top:var(--spacing-2);border-top:1px solid var(--color-border-default)}
+.ui-date-calendar__footer .ui-button--ghost{color:var(--color-text-accent)}
+.ui-date-calendar__note{font-size:var(--font-size-xs);color:var(--color-text-secondary)}
+.ui-date-calendar__sheet-head{display:flex;align-items:center;justify-content:space-between;padding:var(--spacing-4) var(--spacing-4) var(--spacing-3);border-bottom:1px solid var(--color-border-default)}
+.ui-date-calendar__sheet-head strong{font-size:var(--font-size-lg)}
+.ui-date-calendar__sheet-head p{margin:2px 0 0;color:var(--color-text-secondary)}
+.ui-date-calendar--sheet{inset:auto 0 0 0 !important;top:auto !important;left:0 !important;width:100% !important;max-width:none;max-height:none !important;padding:0;border:0;border-radius:var(--radius-xl) var(--radius-xl) 0 0;box-shadow:0 0 0 100vmax var(--overlay-backdrop),var(--shadow-lg);animation:ui-sheet-in var(--motion-slow) var(--ease-enter)}
+.ui-date-calendar--sheet .ui-date-calendar__body{padding:var(--spacing-3) var(--spacing-4)}
+.ui-date-calendar--sheet .ui-date-calendar__nav .ui-date-field__icon-button{width:var(--control-height-lg);height:var(--control-height-lg)}
+.ui-date-calendar--sheet .ui-date-calendar__nav strong{font-size:var(--font-size-base)}
+.ui-date-calendar--sheet .ui-date-calendar__grid{gap:4px}
+.ui-date-calendar--sheet .ui-date-calendar__day{height:var(--control-height-lg);font-size:var(--font-size-base)}
+.ui-date-calendar--sheet .ui-date-calendar__footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-3);margin:0;padding:var(--spacing-3) var(--spacing-4) calc(var(--spacing-6) + env(safe-area-inset-bottom,0px))}
+@media(prefers-reduced-motion:reduce){.ui-date-calendar--sheet{animation:none}}

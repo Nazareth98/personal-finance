@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import { Button, CalendarIcon, Dialog, FormMessage, GlossaryIcon, Input, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
+import { Button, CalendarIcon, DateField, Dialog, FormMessage, GlossaryIcon, VisualSelect, useToast, type VisualSelectOption } from '@personal-finance/ui';
 import { OptionTile } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatReviewDate, reviewMonthStart, todayIso, validReviewStartDate } from '../lib/review-period';
@@ -65,8 +65,8 @@ export function ReviewPeriodForm({ open, onClose, onSaved, ledger }: {
       <VisualSelect label="Começar por" value={choice} options={options} disabled={loading}
         onChange={next => { setChoice(next); setError(''); if (next === 'custom' && !date) setDate(todayIso()); }}
         hint="Nos cartões, conta a fatura inteira do mês escolhido." />
-      {choice === 'custom' && <Input label="Data" type="date" required max={todayIso()} value={date} disabled={loading}
-        onChange={event => { setDate(event.target.value); setError(''); }} error={fieldError} />}
+      {choice === 'custom' && <DateField label="Data" required max={todayIso()} value={date} disabled={loading}
+        onChange={value => { setDate(value); setError(''); }} error={fieldError} />}
       {error && !fieldError && <FormMessage tone="error">{error}</FormMessage>}
     </form>
   </Dialog>;

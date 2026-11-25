@@ -300,3 +300,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 
 - Toda escolha de conta, categoria, caixinha ou lançamento passou de `Select` nativo para `VisualSelect` com o ícone da coisa (logo do banco, identidade da categoria, ícone neutro), como pede o Design System. Construtores em `components/visual-options.tsx`.
 - `Select` continua para listas sem identidade visual (tipo, natureza, período, ordenação). Em filtros, a opção de conta é compacta (sem tipo) para manter 44 px.
+
+## D-082 — DateField: seletor de data próprio (25/11/2026)
+
+- O `<input type="date">` nativo mudava de formato (mm/dd/aaaa em navegador em inglês) e de visual por sistema, destoando do app. Novo `DateField` em `packages/ui`: texto dd/mm/aaaa digitável, dia da semana abaixo, calendário próprio na top layer e folha inferior no celular. Protótipo aprovado no canvas “Seletor de data — proposta”.
+- Usado em Nova movimentação, aporte/resgate, data-alvo da caixinha (com limpar) e “Revisar a partir de” (até hoje). Registrado no Design System (componente DateField).

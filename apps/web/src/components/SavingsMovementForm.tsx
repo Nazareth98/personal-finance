@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from 'react';
-import { Button, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
+import { Button, DateField, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
 import { accountOption, transactionOption } from './visual-options';
 import type { SavingsBox, SavingsMovement } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
@@ -81,7 +81,7 @@ export function SavingsMovementForm({ box, mode, onClose, ledger, initialType = 
         <VisualSelect label="Conta" value={accountId} options={accountOptions} required onChange={setAccountId} />
         <Input label="Descrição" value={description} maxLength={120} required onChange={event => setDescription(event.target.value)} />
         <Input label="Valor" startText="R$" inputMode="decimal" value={amount} required onChange={event => setAmount(event.target.value)} />
-        <Input label="Data" type="date" value={eventDate} required onChange={event => setEventDate(event.target.value)} />
+        <DateField label="Data" value={eventDate} required onChange={setEventDate} />
       </> : transactionOptions.length
         ? <VisualSelect label="Lançamento importado" value={transactionId} options={transactionOptions} searchable={transactionOptions.length > 8} required onChange={setTransactionId} />
         : <FormMessage tone="hint">Nenhum lançamento importado e neutro é compatível com este tipo.</FormMessage>}

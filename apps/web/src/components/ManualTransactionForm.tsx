@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from 'react';
-import { Button, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
+import { Button, DateField, Dialog, FormMessage, Input, Select, VisualSelect, useToast } from '@personal-finance/ui';
 import { accountOption, categoryOption, transactionOption } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { parseBrlCents } from '../lib/transaction-validation';
@@ -76,7 +76,7 @@ export function ManualTransactionForm({ open, onClose, ledger }: { open: boolean
       {transfer && <VisualSelect label="Conta de destino" value={draft.targetAccountId} options={accountOptions.filter(option => option.value !== draft.accountId)} required onChange={value => patch('targetAccountId', value)} />}
       {!transfer && <VisualSelect label="Categoria" value={draft.categoryId} options={categoryOptions} searchable={categoryOptions.length > 8} required onChange={value => patch('categoryId', value)} />}
       {adjustment && <VisualSelect label="Lançamento original" value={draft.adjustedTransactionId} options={transactionOptions} searchable required onChange={value => patch('adjustedTransactionId', value)} />}
-      <Input label="Data" type="date" value={draft.eventDate} required onChange={event => patch('eventDate', event.target.value)} />
+      <DateField label="Data" value={draft.eventDate} required onChange={value => patch('eventDate', value)} />
       {error && <FormMessage tone="error">{error}</FormMessage>}    </form>}
   </Dialog>;
 }

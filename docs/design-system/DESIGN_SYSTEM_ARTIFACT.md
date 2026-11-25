@@ -23,6 +23,7 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 | Ação de apoio | `Button` `secondary` |
 | Ação discreta, link de navegação interna | `Button` `ghost` |
 | Configuração da tela que muda pouco (período, escopo) | linha de contexto (abaixo), nunca um card grande |
+| Qualquer data | `DateField` (nunca `<input type="date">`) |
 | Formulário curto | `Dialog` com ações fixas no rodapé |
 
 ## Componentes e padrões (espelho do artifact)
@@ -48,6 +49,15 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 - Em filtros, a conta vai sem a linha de tipo (`compact`), para o campo ter 44 px como os vizinhos.
 - `Select` fica para listas sem identidade visual (tipo, natureza, período, ordenação).
 - Usado em: filtros de conta e categoria, nova movimentação, revisão (categoria, outro lado da transferência, fatura, caixinha), metas, caixinhas, vincular pagamento, reatribuir categoria, ícone e cor da categoria, período de revisão.
+
+### Seletor de data (`DateField`) — D-082
+- Mesma caixa do Input (44 px), texto dd/mm/aaaa digitável (barras automáticas); valor ISO `AAAA-MM-DD` sem fuso.
+- Abaixo do campo: dia da semana por extenso, depois a dica; erro com ícone (“Data inválida.”, “Escolha até …”).
+- Botão de calendário dentro do campo; X de limpar só com `clearable` (opcionais). `min`/`max` bloqueiam dias.
+- Calendário próprio na top layer (312 px, `radius-lg`, `shadow-md`): setas + mês, D S T Q Q S S, dias de 36 px; escolhido `action-primary`, hoje com contorno, outro mês/indisponível apagados; rodapé “Hoje” + nota do limite. Escolher fecha.
+- Até 680 px: folha inferior, dias de 44 px, “Hoje” / “Confirmar”.
+- Teclado: Alt+↓ abre; setas, PageUp/PageDown, Home/End; Enter escolhe; Esc fecha.
+- Implementação: `packages/ui/src/components/DateField.tsx` e `date-format.ts`.
 
 ### Diálogo (`Dialog`)
 - Cabeçalho (título, descrição, fechar) e barra de ações fixos. Só o corpo rola.
