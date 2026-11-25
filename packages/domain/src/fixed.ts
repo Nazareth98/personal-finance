@@ -74,6 +74,8 @@ export function fixedItemMonthStatus(itemId: string, links: readonly FixedItemLi
     return reference.competence && reference.competence < competence && inMonth < (reference.count ?? 0) ? 'partial' : 'done';
   }
   if (!linked[0]) return 'pending';
+  // Já lançado para um mês seguinte (compra no cartão cai na fatura do mês que vem): não está atrasado.
+  if (linked[0].competence > competence) return 'done';
   const current = today.slice(0, 7);
   if (competence < current) return 'late';
   if (competence > current) return 'pending';

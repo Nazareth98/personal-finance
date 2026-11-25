@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FixedItem } from '@personal-finance/domain';
-import { Badge, Button, CategoryRepeatIcon, DataTable, EditIcon, EmptyState, Icon, type DataTableColumn } from '@personal-finance/ui';
+import { Badge, Button, CategoryRepeatIcon, DataTable, EditIcon, EmptyState, Icon, NextIcon, type DataTableColumn } from '@personal-finance/ui';
 import type { LedgerState } from '../ledger/useLedger';
 import { buildFixedItemsPanel, fixedStatusLabel, type FixedItemRow } from '../lib/fixed-panels';
 import { formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
@@ -36,6 +36,26 @@ export function FixedItemsPanel({ ledger, today }: { ledger: LedgerState; today:
       cell: row => <Button variant="ghost" size="sm" aria-label={`Editar fixo ${row.item.name}`} onClick={() => setEditing(row.item)}><Icon icon={EditIcon} size="sm" /></Button> }
   ];
 
+  const identity = (row: FixedItemRow) => row.category
+    ? <CategoryIdentityIcon iconKey={row.category.iconKey} colorKey={row.category.colorKey} />
+    : <OptionTile icon={CategoryRepeatIcon} />;
+  // Até 680 px: lista compacta (D-084). Linha inteira abre a edição; valor e situação à direita.
+  const list = (rows: readonly FixedItemRow[], label: string) => <ul className="fixed-list" aria-label={label}>{rows.map(row =>
+    <li key={row.item.id}><button type="button" className="fixed-list__item" onClick={() => setEditing(row.item)} aria-label={`Editar fixo ${row.item.name}`}>
+      {identity(row)}
+      <span className="fixed-list__main"><strong>{row.item.name}</strong>
+        <span className="muted">{row.category?.name ?? 'Sem categoria'}{row.lastCompetence ? ` · ${formatCompetence(row.lastCompetence)}` : ''}</span></span>
+      <span className="fixed-list__side">
+        {row.lastCompetence ? <strong className={row.item.nature === 'income' ? 'transaction-amount--income' : undefined}>{money(row, row.lastCents)}</strong> : <span className="muted">Sem valor</span>}
+        {row.item.endedAt ? <Badge>Encerrado</Badge> : <Badge tone={statusTone[row.status]}>{fixedStatusLabel(row)}</Badge>}
+      </span>
+      <Icon icon={NextIcon} size="sm" className="fixed-list__chevron" />
+    </button></li>)}</ul>;
+  const table = (rows: readonly FixedItemRow[], label: string) => <>
+    <div className="fixed-items__table"><DataTable ariaLabel={label} columns={columns} rows={rows} getRowKey={row => row.item.id} /></div>
+    {list(rows, label)}
+  </>;
+
   if (!data?.fixedItems) return <EmptyState title="Fixos ainda não disponíveis" description="Esta instância ainda não recebeu a atualização de fixos. Ela chega sozinha na próxima publicação." />;
   return <div className="fixed-items">
     <section className="summary-strip" aria-label="Resumo dos fixos">
@@ -46,11 +66,11 @@ export function FixedItemsPanel({ ledger, today }: { ledger: LedgerState; today:
     <p className="muted">Fixos são criados na Revisão, no campo “Lançamento fixo”. A previsão de cada um usa o valor do último mês completo.</p>
     {panel.active.length === 0
       ? <EmptyState title="Nenhum fixo ainda" description="Na Revisão, marque o aluguel, a conta de luz ou o salário como lançamento fixo." action={<a href="#review">Abrir Revisão</a>} />
-      : <DataTable ariaLabel="Fixos ativos" columns={columns} rows={panel.active} getRowKey={row => row.item.id} />}
+      : table(panel.active, 'Fixos ativos')}
     {panel.ended.length > 0 && <section className="fixed-items__ended">
       <Button variant="ghost" size="sm" aria-expanded={showEnded} onClick={() => setShowEnded(value => !value)}>
         {showEnded ? 'Ocultar' : 'Ver'} encerrados · {panel.ended.length}</Button>
-      {showEnded && <DataTable ariaLabel="Fixos encerrados" columns={columns} rows={panel.ended} getRowKey={row => row.item.id} />}
+      {showEnded && table(panel.ended, 'Fixos encerrados')}
     </section>}
     <FixedItemForm item={editing} onClose={() => setEditing(null)} ledger={ledger} />
   </div>;

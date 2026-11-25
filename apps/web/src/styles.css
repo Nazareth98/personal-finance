@@ -798,7 +798,19 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
 .fixed-item-amount{display:inline-flex;flex-direction:column;align-items:flex-end}
 .fixed-item-amount .muted{font-size:var(--font-size-xs)}
 .fixed-items__ended{display:flex;flex-direction:column;gap:var(--spacing-3);align-items:flex-start}
-.fixed-items__ended>.ui-table-scroll,.fixed-items__ended>.ui-table-list{align-self:stretch}
+.fixed-items__ended>.ui-table-scroll,.fixed-items__ended>.ui-table-list,.fixed-items__ended>.fixed-items__table,.fixed-items__ended>.fixed-list{align-self:stretch}
+.fixed-list{display:none;margin:0;padding:0;list-style:none;border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface);overflow:hidden}
+.fixed-list>li+li{border-top:1px solid var(--color-border-default)}
+.fixed-list__item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:var(--spacing-3);width:100%;min-height:64px;padding:var(--spacing-3);border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.fixed-list__item:hover{background:var(--color-bg-subtle)}
+.fixed-list__item:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:-3px}
+.fixed-list__main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fixed-list__main strong,.fixed-list__main .muted{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fixed-list__main .muted{font-size:var(--font-size-xs)}
+.fixed-list__side{display:flex;flex-direction:column;align-items:flex-end;gap:var(--spacing-1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fixed-list__side .ui-badge{font-size:var(--font-size-xs)}
+.fixed-list__chevron{color:var(--color-text-secondary)}
+@media(max-width:680px){.fixed-items__table{display:none}.fixed-list{display:block}}
 .budget-tab-panel{display:grid;gap:var(--spacing-4);min-width:0}
 /* D-084: plano do mês em Orçamentos. */
 .month-plan{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface)}
