@@ -104,7 +104,7 @@ O app aprende com você. Na primeira semana:
 - **Transferências entre suas contas** e **pagamentos de fatura** não contam como receita nem gasto. Para o app reconhecer Pix entre as suas contas, informe seu nome como aparece no banco (está em “Primeiros passos”).
 - **Investimentos** (CDB, Tesouro, LCI…) funcionam como caixinhas: crie uma caixinha para cada lugar onde você investe e ligue as aplicações e os resgates a ela.
 - **Faturas antigas** que aparecem em aberto, mas que você já pagou, podem vir de um pagamento que o banco não enviou. Abra o cartão e toque em **Marcar como paga**.
-- **Relatórios** só fazem sentido depois de alguns meses de dados: a previsão usa a média dos últimos seis meses.
+- **Fixos:** na Revisão, marque como **lançamento fixo** o que se repete todo mês (salário, aluguel, contas). A partir daí, Orçamentos mostra quanto entra, o que já está comprometido e quanto sobra para as metas, e Relatórios prevê os próximos meses com esses valores. Sem fixos, a previsão usa a média dos últimos seis meses.
 
 ## Atualizações
 

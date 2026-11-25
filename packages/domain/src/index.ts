@@ -24,8 +24,8 @@ export type { CardInstallment, CardStatement, CardStatementEntry, CardStatementS
 export { fixedItemLastValue, fixedItemMonthStatus, fixedItemTransactions, similarWithoutFixed, suggestFixedItemName } from './fixed.ts';
 export type { FixedItem, FixedItemLink, FixedItemMonthStatus } from './fixed.ts';
 export { buildSavingsPlans, buildSixMonthForecast, recognizeItauSalary, recurringIncomeEstimate } from './forecast.ts';
-export { buildMonthPlan } from './plan.ts';
-export type { CategoryCommitment, MonthPlan, MonthPlanInput } from './plan.ts';
+export { buildMonthPlan, buildPlanForecast } from './plan.ts';
+export type { CategoryCommitment, MonthPlan, MonthPlanInput, PlanForecastMonth } from './plan.ts';
 export type { ForecastMonth, SixMonthForecastInput } from './forecast.ts';
 export type {
   Category,

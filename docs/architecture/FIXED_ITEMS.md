@@ -1,6 +1,6 @@
 # Fixos, plano do mês e despesas x receita
 
-Status: **em implementação (D-084)**. Etapas 12.1, 12.2 e 12.3 publicadas em 25/11/2026 (plano em `packages/domain/src/plan.ts`): migrations `20261125165816_fixed_items.sql` e `20261125172454_fixed_item_management.sql`, campo “Lançamento fixo” na Revisão, aba “Fixos” (`components/FixedItemsPanel.tsx`, `lib/fixed-panels.ts`), selo em Transações e domínio `packages/domain/src/fixed.ts`. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
+Status: **implementado (D-084, D-085)**. Etapas 12.1 a 12.5 publicadas em 25/11/2026 (plano em `packages/domain/src/plan.ts`): migrations `20261125165816_fixed_items.sql` e `20261125172454_fixed_item_management.sql`, campo “Lançamento fixo” na Revisão, aba “Fixos” (`components/FixedItemsPanel.tsx`, `lib/fixed-panels.ts`), selo em Transações e domínio `packages/domain/src/fixed.ts`. Protótipo: canvas “Fixos, metas e despesas x receita — proposta”. A implementação segue as etapas 12.1–12.5 do [`PLAN.md`](../brain/PLAN.md#etapa-12--fixos-plano-do-mês-e-despesas-x-receita).
 
 ## Objetivo
 

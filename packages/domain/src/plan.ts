@@ -117,3 +117,31 @@ export function buildMonthPlan(input: MonthPlanInput): MonthPlan {
     commitments: [...byCategory.values()].sort((a, b) => (b.totalCents > a.totalCents ? 1 : b.totalCents < a.totalCents ? -1 : 0))
   };
 }
+
+/** Um mês da previsão de Relatórios pelo plano (D-084): a mesma conta de Orçamentos para o mesmo mês. */
+export type PlanForecastMonth = {
+  competence: string;
+  incomeCents: bigint;
+  incomeSource: MonthPlan['incomeSource'];
+  /** Por categoria, o maior entre meta e comprometido; mais compromissos sem meta. */
+  plannedCents: bigint;
+  /** Informativos: quanto dos compromissos são fixos e parcelas. */
+  fixedCents: bigint;
+  installmentsCents: bigint;
+  savingsCents: bigint;
+  netCents: bigint;
+};
+
+/** Seis meses (ou `months`) a partir de `startCompetence`, cada um pelo plano do mês. */
+export function buildPlanForecast(input: Omit<MonthPlanInput, 'competence'> & { startCompetence: string; months?: number }): PlanForecastMonth[] {
+  return Array.from({ length: input.months ?? 6 }, (_, index) => {
+    const competence = addCompetenceMonths(input.startCompetence, index);
+    const plan = buildMonthPlan({ ...input, competence });
+    return {
+      competence, incomeCents: plan.incomeCents, incomeSource: plan.incomeSource, plannedCents: plan.plannedCents,
+      fixedCents: plan.commitments.reduce((sum, item) => sum + item.fixedCents, 0n),
+      installmentsCents: plan.commitments.reduce((sum, item) => sum + item.installmentsCents, 0n),
+      savingsCents: plan.savingsCents, netCents: plan.leftoverCents
+    };
+  });
+}

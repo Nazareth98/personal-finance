@@ -1,5 +1,7 @@
 # Receitas e previsão
 
+> **D-084 (etapa 12.5):** Relatórios passaram a usar `buildPlanForecast` (`packages/domain/src/plan.ts`): cada mês é o plano de Orçamentos — receita prevista (fixos de receita ou estimativa), metas e compromissos, aportes e resultado. O texto abaixo descreve a estimativa de receita usada quando não há fixos de receita e o `buildSixMonthForecast` legado, mantido no domínio. Detalhes em [`FIXED_ITEMS.md`](FIXED_ITEMS.md).
+
 ## Classificação de receita
 
 As categorias do overlay imutável definem a recorrência:

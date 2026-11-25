@@ -10,9 +10,9 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   overview: {
     title: "Visão geral", subtitle: "O mês num relance.",
     shows: "O resultado do mês: quanto entrou, quanto saiu, faturas a pagar, metas em alerta e a evolução nos últimos meses.",
-    calc: ["**Resultado** = receitas − despesas do mês.", "Transferências entre suas contas, pagamentos de fatura, aportes e resgates **não contam** como receita ou gasto.", "Compras no cartão entram no mês do **vencimento** da fatura.", "Nos gráficos, toque num mês para ver os valores daquele período."],
+    calc: ["**Resultado** = receitas − despesas do mês.", "Transferências entre suas contas, pagamentos de fatura, aportes e resgates **não contam** como receita ou gasto.", "Compras no cartão entram no mês do **vencimento** da fatura.", "Nos gráficos, toque num mês para ver os valores daquele período.", "**Disponível no mês** mostra quanto ainda cabe nas metas do mês atual, a sobra do plano e os fixos que ainda não chegaram."],
     actions: ["Trocar o mês no seletor de período.", "Tocar num alerta para ir direto à tela que resolve.", "Usar o botão **+** para registrar uma movimentação manual."],
-    terms: ["Competência", "Resultado", "Natureza"]
+    terms: ["Competência", "Resultado", "Natureza", "Sobra do mês"]
   },
   transactions: {
     title: "Transações", subtitle: "Todos os lançamentos, importados e manuais.",
@@ -72,10 +72,10 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   },
   reports: {
     title: "Relatórios", subtitle: "Tendência e previsão.",
-    shows: "Uma previsão dos próximos seis meses: quanto deve entrar, quanto deve sair e se algum mês fica no vermelho.",
-    calc: ["A previsão começa no **próximo mês** e usa como base os **seis meses até o atual**.", "**Receita recorrente** = média das categorias Salário e Outras receitas recorrentes. Receitas extraordinárias ficam de fora.", "**Gastos planejados** = o maior entre a média das despesas que se repetem (em pelo menos 2 dos 6 meses) e a soma dos seus tetos.", "Somam-se as **parcelas de cartão** previstas para cada mês e os **aportes** que faltam para as caixinhas com data-alvo.", "**Resultado previsto** = receita − gastos − parcelas − aportes."],
-    actions: ["Tocar num mês do gráfico para ver os valores.", "Usar as setas de **Composição** para ver de onde vem o resultado de cada mês.", "Ajustar tetos em Orçamentos se algum mês ficar no vermelho."],
-    terms: ["Teto", "Receita recorrente", "Competência"]
+    shows: "A previsão dos próximos seis meses pelo plano de Orçamentos: quanto deve entrar, quanto já está comprometido e se algum mês fica no vermelho.",
+    calc: ["Cada mês segue o **plano de Orçamentos**, então os números batem com os de lá.", "**Receita prevista** = receitas fixas pelo valor do último mês. Sem receitas fixas, a média de 6 meses das categorias Salário e Outras receitas recorrentes (extraordinárias ficam de fora).", "**Metas e compromissos** = em cada categoria, o maior entre a meta e o que já está comprometido em fixos e parcelas de cartão; compromissos sem meta também entram.", "**Aportes** = quanto falta guardar por mês nas caixinhas com data-alvo.", "**Resultado previsto** = receita − metas e compromissos − aportes."],
+    actions: ["Tocar num mês do gráfico para ver os valores.", "Usar as setas de **Composição** para ver de onde vem o resultado de cada mês, inclusive quanto é fixo e quanto é parcela.", "Ajustar metas em Orçamentos se algum mês ficar no vermelho."],
+    terms: ["Fixo", "Sobra do mês", "Teto", "Receita recorrente", "Competência"]
   }
 };
 

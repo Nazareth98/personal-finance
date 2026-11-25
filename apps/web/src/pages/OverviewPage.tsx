@@ -11,6 +11,7 @@ import { demoTransactions, formatCentsBRL, formatCompetence } from '../lib/demo-
 import { accountBalance, addCompetenceMonths, categoryBudgetProgress, ledgerTotals, type CategoryBudgetProgress } from '@personal-finance/domain';
 import type { LedgerState } from '../ledger/useLedger';
 import type { PageProps } from './PageProps';
+import { AvailableMonthCard } from '../components/AvailableMonthCard';
 
 const currentCompetence = () => {
   const now = new Date();
@@ -94,7 +95,10 @@ function OverviewCharts({ ledger, period, flow, budgets, commitments }: {
   const commitmentsCard = <Card><h2>Compromissos de cartão</h2><p className="muted">Faturas por vencimento e parcelas futuras já assumidas.</p>
       {(data?.creditCards.length ?? 0) === 0 ? <EmptyState title="Nenhum cartão ainda" description="Quando o banco do cartão estiver conectado, as faturas e parcelas futuras aparecem aqui." action={<a href="#connections">Conectar banco</a>} />
         : chartState(<ColumnChart data={commitments} formatValue={formatCentsBRL} title="Compromissos de cartão por mês" valueLabel="Fatura" collapsibleDetails />, 'bars')}</Card>;
-  return <DashboardColumns left={<>{cashFlowCard}{budgetsCard}</>} right={<>{resultCard}{commitmentsCard}</>} />;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const availableCard = data ? <AvailableMonthCard data={data} today={today} /> : null;
+  return <DashboardColumns left={<>{cashFlowCard}{budgetsCard}</>} right={<>{availableCard}{resultCard}{commitmentsCard}</>} />;
 }
 
 export function OverviewPage({ ledger, headerAction, intro }: PageProps) {

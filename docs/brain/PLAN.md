@@ -219,6 +219,8 @@ Aceite: os gráficos seguem o período selecionado, usam os mesmos totais do liv
 
 ## Etapa 12 — fixos, plano do mês e despesas x receita
 
+Status: concluída em 25/11/2026 (12.1–12.5).
+
 Especificação: [`FIXED_ITEMS.md`](../architecture/FIXED_ITEMS.md) (D-084). Protótipo no canvas “Fixos, metas e despesas x receita — proposta”. Cada sub-etapa termina publicada, testada e registrada no Design System.
 
 ### 12.1 — Fixos na Revisão

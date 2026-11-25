@@ -67,3 +67,17 @@ test('meses futuros mantêm a estimativa de receita e os aportes do mês seguint
   assert.equal(mar.savingsCents, dec.savingsCents);
   assert.equal(dec.savingsCents, 20000n);
 });
+
+test('previsão de Relatórios = plano de cada mês (mesmo número em Orçamentos)', async () => {
+  const { buildPlanForecast } = await import('../src/index.ts');
+  const common = { transactions, fixedItems: items, fixedItemLinks: links, installments, savingsMovements: [], today: '2026-11-25',
+    budgets: [{ id: 'b1', categoryId: 'housing', monthlyLimitCents: 200000n }],
+    savingsBoxes: [{ id: 'trip', name: 'Viagem', openingBalanceCents: 0n, targetCents: 120000n, targetDate: '2027-05-31' }] };
+  const forecast = buildPlanForecast({ ...common, startCompetence: '2026-12' });
+  assert.equal(forecast.length, 6);
+  const december = buildMonthPlan({ ...common, competence: '2026-12' });
+  assert.equal(forecast[0]!.netCents, december.leftoverCents);
+  assert.equal(forecast[0]!.installmentsCents, 30000n);
+  assert.equal(forecast[1]!.installmentsCents, 0n);
+  assert.equal(forecast[0]!.fixedCents, 210427n);
+});
