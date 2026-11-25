@@ -74,6 +74,18 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     }
   }
 
+  /** D-084: vínculos dos fixos (chave `transaction_id`, sem `id`); erro vira `{ error }` para o livro carregar sem fixos. */
+  private async loadFixedItemLinks(): Promise<{ data: unknown[] | null; error: unknown }> {
+    const rows: unknown[] = [];
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const result = await this.client.from('fixed_item_links').select('transaction_id,fixed_item_id,linked_by')
+        .order('transaction_id').range(from, from + SUPABASE_PAGE_SIZE - 1);
+      if (result.error) return { data: null, error: result.error };
+      rows.push(...(result.data ?? []));
+      if ((result.data?.length ?? 0) < SUPABASE_PAGE_SIZE) return { data: rows, error: null };
+    }
+  }
+
   private async loadTransactions(): Promise<TransactionRow[]> {
     const rows: TransactionRow[] = [];
     for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
@@ -153,7 +165,7 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     // D-084: fixos; falha (instância ainda sem a migration) não impede o livro de carregar.
     const [fixedItemsResult, fixedLinksResult] = await Promise.all([
       this.client.from('fixed_items').select('id,name,nature,category_id,match_key,ended_at').order('created_at'),
-      this.paged(() => this.client.from('fixed_item_links').select('transaction_id,fixed_item_id,linked_by'))
+      this.loadFixedItemLinks()
     ]);
     // A preferência não pode voltar silenciosamente a todo o histórico quando a leitura falha.
     const profileResult = await this.client.from('profiles').select('holder_name,review_start_date').single();
