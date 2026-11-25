@@ -290,3 +290,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Contas usam `eventDate` inclusiva; cartões usam o mês da competência/vencimento inteiro, preservando compras anteriores que compõem a fatura. Fila, histórico de revisão e contadores de navegação/Visão geral compartilham a regra.
 - “Ver histórico anterior” abre o complemento na URL, sem alterar a preferência ou confirmar pendências. Importação, relatórios, saldos, faturas e decisões anteriores permanecem completos. Ver [contrato](../architecture/MEUPLUGGY.md#período-inicial-de-revisão).
 - Publicar a migration `20261123225503_review_start_date` antes do frontend. Falha ao ler o perfil gera erro de carregamento, nunca retorno silencioso a todo o histórico.
+
+## D-080 — Revisão do “Revisar a partir de” (25/11/2026)
+
+- UI no padrão do design system: o card grande virou uma linha discreta (`.review-period`) com a data, o número de pendências anteriores e ações pequenas “Ver anteriores”/“Alterar”. No diálogo, o `Select` + texto solto deu lugar a `RadioGroup` com a data de cada atalho visível (“Últimos 3 meses (desde 01/09/2026)”); a data só aparece em “Escolher uma data”.
+- Regras: data futura recusada (esconderia a fila inteira); ao reabrir, um atalho salvo volta selecionado se ainda corresponde à mesma data; a mensagem de sucesso diz o período salvo.

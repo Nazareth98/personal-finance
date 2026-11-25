@@ -45,3 +45,9 @@ test('fila, navegação e visão geral concordam; ampliar período preserva conf
   assert.equal(pendingReviewCount(rows, { ...relations, reviewStartDate: null }), 3);
   assert.deepEqual(rows, before);
 });
+
+test('data de hoje local e formato brasileiro', async () => {
+  const { todayIso, formatReviewDate } = await import('./review-period.ts');
+  assert.equal(todayIso(new Date(2026, 10, 5)), '2026-11-05');
+  assert.equal(formatReviewDate('2026-09-01'), '01/09/2026');
+});

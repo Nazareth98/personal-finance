@@ -1,7 +1,7 @@
 import { usePageSize } from '../hooks/usePageSize';
 import { useState } from 'react';
 import type { TransactionContract } from '@personal-finance/domain';
-import { Badge, Button, Card, DataState, DataTable, EmptyState, FinancialValue, Pagination, ReviewIcon, Select, Tabs, sortRows, useToast, type DataTableColumn, type SortState } from '@personal-finance/ui';
+import { Badge, Button, CalendarIcon, Card, Icon, DataState, DataTable, EmptyState, FinancialValue, Pagination, ReviewIcon, Select, Tabs, sortRows, useToast, type DataTableColumn, type SortState } from '@personal-finance/ui';
 import type { TransactionClassification } from '../ledger/contracts';
 import { formatCentsBRL } from '../lib/demo-transactions';
 import { reviewReason, reviewResolution, reviewableTransactions, suggestedCategoryId, type ReviewReason } from '../lib/review-queue';
@@ -14,7 +14,7 @@ import { eventSortKey } from '../lib/transaction-time';
 import { DateTime } from '../components/DateTime';
 import { InstitutionLogo } from '../components/InstitutionLogo';
 import { ReviewPeriodForm } from '../components/ReviewPeriodForm';
-import { inReviewPeriod } from '../lib/review-period';
+import { formatReviewDate, inReviewPeriod } from '../lib/review-period';
 
 type HistoryFilter = 'all' | 'automatic' | 'confirmed';
 const reviewNatures: TransactionContract['nature'][] = ['income', 'expense', 'own_transfer', 'card_payment', 'savings_contribution', 'savings_withdrawal'];
@@ -139,22 +139,22 @@ export function ReviewPage({ ledger, headerAction }: PageProps) {
     <div className="template-heading"><div><p className="eyebrow">REVISÃO</p><h1>Revisão de categorias</h1>
       <p className="muted">Só o que o app não conseguiu decidir sozinho. Mudou de ideia? Corrija pelo histórico.</p></div>
       <div className="template-heading__actions">{headerAction}</div></div>
-    {ledger.status === 'success' && <Card>
-      <div className="section-heading">
-        <div><h2>Revisar a partir de</h2><p className="muted">{data?.reviewStartDate
-          ? `${data.reviewStartDate.split('-').reverse().join('/')} · salvo para seus próximos acessos`
-          : 'Todo o histórico · escolha um período para começar'}</p></div>
-        <Button variant="secondary" onClick={() => setPeriodOpen(true)}>Alterar período</Button>
-      </div>
-      {data?.reviewStartDate && <div className="review-reasons">
-        <span className="muted">{earlierCount} pendência{earlierCount === 1 ? '' : 's'} anterior{earlierCount === 1 ? '' : 'es'} ao período.</span>
-        <Button variant="ghost" onClick={() => {
+    {ledger.status === 'success' && <div className="review-period" role="group" aria-label="Período de revisão">
+      <Icon icon={CalendarIcon} size="sm" />
+      <p>{earlier
+        ? <>Mostrando o que é <strong>anterior a {formatReviewDate(data!.reviewStartDate!)}</strong></>
+        : data?.reviewStartDate
+          ? <>Revisando a partir de <strong>{formatReviewDate(data.reviewStartDate)}</strong>
+            {earlierCount > 0 && <span className="muted"> · {earlierCount} {earlierCount === 1 ? 'pendência anterior' : 'pendências anteriores'}</span>}</>
+          : <>Revisando <strong>todo o histórico</strong></>}</p>
+      <div className="review-period__actions">
+        {data?.reviewStartDate && (earlier || earlierCount > 0) && <Button variant="ghost" size="sm" onClick={() => {
           setParams({ scope: earlier ? null : 'earlier', q: null, account: null, category: null, nature: null, reason: null, view: null, status: null });
           setPage(1);
-        }}>{earlier ? 'Voltar ao período escolhido' : 'Ver histórico anterior'}</Button>
-      </div>}
-      {earlier && <p role="status">Exibindo o histórico anterior à data escolhida. Sua preferência continua salva.</p>}
-    </Card>}
+        }}>{earlier ? 'Voltar ao período' : 'Ver anteriores'}</Button>}
+        <Button variant="secondary" size="sm" onClick={() => setPeriodOpen(true)}>Alterar</Button>
+      </div>
+    </div>}
     <Tabs label="Visualização da revisão" className="review-view-tabs" panelClassName="review-panel" selectedId={view}
       onSelect={id => change('view', id === 'history' ? 'history' : '')}
       items={[{ id: 'pending', label: <strong>Pendências · {pending.length}</strong> }, { id: 'history', label: <strong>Histórico · {history.length}</strong> }]}>

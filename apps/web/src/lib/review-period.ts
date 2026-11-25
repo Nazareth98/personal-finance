@@ -23,3 +23,13 @@ export function reviewMonthStart(months: number, today = new Date()): string {
   const date = new Date(today.getFullYear(), today.getMonth() - months + 1, 1);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
 }
+
+/** Data local de hoje (AAAA-MM-DD). */
+export function todayIso(today = new Date()): string {
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+/** AAAA-MM-DD → DD/MM/AAAA, sem fuso. */
+export function formatReviewDate(value: string): string {
+  return value.split('-').reverse().join('/');
+}
