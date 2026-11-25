@@ -154,4 +154,8 @@ export interface LedgerRepository {
   createFixedItem(draft: FixedItemDraft): Promise<number>;
   /** D-084: vincula ou, com `null`, desvincula; `applySimilar` vale para os iguais. Devolve quantos mudaram. */
   setTransactionFixedItem(transactionId: string, fixedItemId: string | null, applySimilar: boolean): Promise<number>;
+  /** D-084: renomeia e troca a categoria de um fixo. */
+  updateFixedItem(fixedItemId: string, name: string, categoryId?: string): Promise<void>;
+  /** D-084: encerra (tira das previsões) ou reativa um fixo, sem apagar vínculos. */
+  setFixedItemEnded(fixedItemId: string, ended: boolean): Promise<void>;
 }

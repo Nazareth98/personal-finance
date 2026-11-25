@@ -443,6 +443,16 @@ export class SupabaseLedgerRepository implements LedgerRepository {
     return Number(data ?? 0);
   }
 
+  async updateFixedItem(fixedItemId: string, name: string, categoryId?: string): Promise<void> {
+    const { error } = await this.client.rpc('update_fixed_item', { p_fixed_item_id: fixedItemId, p_name: name, p_category_id: categoryId ?? null });
+    if (error) throw error;
+  }
+
+  async setFixedItemEnded(fixedItemId: string, ended: boolean): Promise<void> {
+    const { error } = await this.client.rpc('set_fixed_item_ended', { p_fixed_item_id: fixedItemId, p_ended: ended });
+    if (error) throw error;
+  }
+
   async setStatementSettled(statementId: string, settled: boolean): Promise<void> {
     const { error } = await this.client.rpc('set_card_statement_settled', { p_statement_id: statementId, p_settled: settled });
     if (error) throw error;

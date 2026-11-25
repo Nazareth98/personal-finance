@@ -32,6 +32,8 @@ export type LedgerState = {
   setStatementSettled: (statementId: string, settled: boolean) => Promise<void>;
   createFixedItem: (draft: FixedItemDraft) => Promise<number>;
   setTransactionFixedItem: (transactionId: string, fixedItemId: string | null, applySimilar: boolean) => Promise<number>;
+  updateFixedItem: (fixedItemId: string, name: string, categoryId?: string) => Promise<void>;
+  setFixedItemEnded: (fixedItemId: string, ended: boolean) => Promise<void>;
   linkCardPayment: (draft: CardPaymentLink) => Promise<void>;
 };
 
@@ -178,6 +180,18 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     return changed;
   }
 
+  async function updateFixedItem(fixedItemId: string, name: string, categoryId?: string) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.updateFixedItem(fixedItemId, name, categoryId);
+    await reload();
+  }
+
+  async function setFixedItemEnded(fixedItemId: string, ended: boolean) {
+    if (!repository) throw new Error('ledger repository missing');
+    await repository.setFixedItemEnded(fixedItemId, ended);
+    await reload();
+  }
+
   async function setStatementSettled(statementId: string, settled: boolean) {
     if (!repository) throw new Error('ledger repository missing');
     await repository.setStatementSettled(statementId, settled);
@@ -198,6 +212,6 @@ export function useLedger(repository?: LedgerRepository): LedgerState {
     archiveCategory: draft => mutateCategory(() => repository!.archiveCategory(draft)),
     deleteCategory: categoryId => mutateCategory(() => repository!.deleteCategory(categoryId)),
     createTransaction, saveBudget, deleteBudget, createSavingsBox, updateSavingsBox, deleteSavingsBox, createSavingsMovement, linkSavingsMovement,
-    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, setStatementSettled, linkCardPayment, createFixedItem, setTransactionFixedItem
+    confirmClassification, setHolderName, confirmTransactionSemantics, configureCreditCard, setStatementSettled, linkCardPayment, createFixedItem, setTransactionFixedItem, updateFixedItem, setFixedItemEnded
   };
 }

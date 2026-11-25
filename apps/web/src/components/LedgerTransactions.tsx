@@ -22,11 +22,14 @@ export function LedgerTransactions({ ledger }: { ledger: LedgerState }) {
   const [pageSize, setPageSize, pageSizeOptions] = usePageSize('transactions', 10);
   const data = ledger.data;
   const accounts = new Map((data?.accounts ?? []).map(account => [account.id, account.name]));
+  // D-084: selo “Fixo” nos lançamentos vinculados a um fixo.
+  const fixedItemNames = new Map((data?.fixedItems ?? []).map(item => [item.id, item.name]));
+  const fixedNames = new Map((data?.fixedItemLinks ?? []).map(link => [link.transactionId, fixedItemNames.get(link.fixedItemId) ?? '']));
   const categories = new Map((data?.categories ?? []).map(category => [category.id, category.name]));
   const categoryName = (row: TransactionContract) => row.categoryId ? categories.get(row.categoryId) ?? 'Sem categoria' : 'Sem categoria';
   const columns: DataTableColumn<TransactionContract>[] = [
     { mobile: 'detail', key: 'date', header: 'Data', sortable: true, sortValue: row => eventSortKey(row), cell: row => <DateTime row={row} /> },
-    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{row.source !== 'pluggy' && <Badge>Manual</Badge>}</span><span className="muted ledger-description__account"><InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />{accounts.get(row.accountId) ?? 'Conta arquivada'}</span></span> },
+    { mobile: 'primary', key: 'description', header: 'Descrição', headerIcon: TransactionsIcon, iconTone: 'transfer', sortable: true, sortValue: row => row.description, cell: row => <span className="ledger-description"><span className="ledger-description__title"><strong>{row.description}</strong>{row.source !== 'pluggy' && <Badge>Manual</Badge>}{fixedNames.get(row.id) ? <Badge tone="transfer" title={`Fixo: ${fixedNames.get(row.id)}`}>Fixo</Badge> : null}</span><span className="muted ledger-description__account"><InstitutionLogo accountId={row.accountId} accountName={accounts.get(row.accountId) ?? 'Conta'} institutions={data?.institutions} size="sm" />{accounts.get(row.accountId) ?? 'Conta arquivada'}</span></span> },
     { mobile: 'detail', key: 'category', header: 'Categoria', sortable: true, sortValue: categoryName, cell: categoryName },
     { mobile: 'detail', key: 'nature', header: 'Tipo', sortable: true, sortValue: row => natureLabels[row.nature], cell: row => <Badge tone={tone(row)}>{natureLabels[row.nature]}</Badge> },
     { mobile: 'value', key: 'amount', header: 'Valor', align: 'end', sortable: true, sortValue: row => row.amountCents, cell: row => <span className={`transaction-amount transaction-amount--${tone(row)}`}>{row.amountCents > 0n ? '+ ' : '− '}{formatCentsBRL(row.amountCents < 0n ? -row.amountCents : row.amountCents)}</span> }

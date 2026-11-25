@@ -38,9 +38,9 @@ export const screenHelp: Record<HelpPageId, ScreenHelp> = {
   budgets: {
     title: "Orçamentos", subtitle: "Tetos mensais por categoria.",
     shows: "Quanto você gastou em cada categoria no mês, comparado ao teto que você definiu.",
-    calc: ["**Teto** é um valor fixo por mês. Na visão do ano, vale 12 vezes.", "**Folga** = teto − gasto. Negativa vira excedente.", "**Perto do teto** a partir de 80% usado.", "Compras no cartão contam no mês do vencimento da fatura."],
-    actions: ["**+ Definir meta** para uma categoria.", "Tocar num card para **editar ou excluir** a meta.", "Em **Gastos sem meta**, criar uma meta a partir do que já foi gasto."],
-    terms: ["Teto", "Folga", "Competência", "Gastos sem meta"]
+    calc: ["**Teto** é um valor fixo por mês. Na visão do ano, vale 12 vezes.", "**Folga** = teto − gasto. Negativa vira excedente.", "**Perto do teto** a partir de 80% usado.", "Compras no cartão contam no mês do vencimento da fatura.", "Na aba **Fixos**, cada fixo mostra o último valor (a previsão dos próximos meses) e se já chegou neste mês: pago, pendente ou atrasado (passou 3 dias do dia em que costuma cair)."],
+    actions: ["**+ Definir meta** para uma categoria.", "Tocar num card para **editar ou excluir** a meta.", "Em **Gastos sem meta**, criar uma meta a partir do que já foi gasto.", "Na aba **Fixos**, **editar** o nome ou a categoria e **encerrar** um fixo que acabou (ele sai das previsões, nada é apagado)."],
+    terms: ["Teto", "Folga", "Fixo", "Competência", "Gastos sem meta"]
   },
   savings: {
     title: "Caixinhas", subtitle: "Reservas com saldo próprio.",

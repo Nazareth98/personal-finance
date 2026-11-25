@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { addCompetenceMonths, type CategoryBudget } from '@personal-finance/domain';
-import { Badge, Button, Card, EditIcon, EmptyState, Icon, InfoTip, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, type LucideIcon } from '@personal-finance/ui';
+import { Badge, Button, Card, EditIcon, EmptyState, Icon, InfoTip, MetricCard, NextIcon, PreviousIcon, StatusAlertIcon, StatusOkIcon, StatusPendingIcon, Tabs, type LucideIcon } from '@personal-finance/ui';
 import { BudgetForm, formatBasisPoints } from '../components/BudgetForm';
 import { CategoryIdentityIcon } from '../components/CategoryIdentity';
 import type { LedgerState } from '../ledger/useLedger';
@@ -9,6 +9,8 @@ import { budgetPercent,budgetRemaining,demoBudgets } from '../lib/demo-finance';
 import { formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
 import { PageAction } from '../components/PageAction';
+import { FixedItemsPanel } from '../components/FixedItemsPanel';
+import { useHashParams } from '../hooks/useHashParams';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const localToday = () => {
@@ -76,6 +78,9 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   const [kind, setKind] = useState<PeriodKind>('month');
   const [month, setMonth] = useState('');
   const [form, setForm] = useState<{ budget?: CategoryBudget; categoryId?: string } | null>(null);
+  const [params, setParams] = useHashParams();
+  const tab = params.get('tab') === 'fixed' ? 'fixed' : 'goals';
+  const fixedCount = (data?.fixedItems ?? []).filter(item => !item.endedAt).length;
   // Abre no mês corrente, não no último mês com lançamento (parcelas futuras empurravam para frente).
   const selectedMonth = month || localToday().slice(0, 7);
   const period = kind === 'year' ? selectedMonth.slice(0, 4) : selectedMonth;
@@ -88,7 +93,11 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   return <div className="template-page">
     <div className="template-heading"><div><p className="eyebrow">PLANEJAMENTO</p><h1>Orçamentos</h1>
       <p className="muted">Quanto você quer gastar por mês em cada categoria. Na visão do ano, cada teto vale 12 vezes.</p></div>
-      <div className="template-heading__actions"><PageAction label="Definir meta" shortLabel="Meta" onClick={() => setForm({})} />{headerAction}</div></div>
+      <div className="template-heading__actions">{tab === 'goals' && <PageAction label="Definir meta" shortLabel="Meta" onClick={() => setForm({})} />}{headerAction}</div></div>
+    <Tabs label="Seções de orçamentos" className="budget-tabs" panelClassName="budget-tab-panel" selectedId={tab}
+      onSelect={id => setParams({ tab: id === 'fixed' ? 'fixed' : null })}
+      items={[{ id: 'goals', label: <strong>Metas</strong> }, { id: 'fixed', label: <strong>Fixos · {fixedCount}</strong> }]}>
+    {tab === 'fixed' ? <FixedItemsPanel ledger={ledger} today={localToday()} /> : <>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Entrou no período</span></div>
@@ -123,6 +132,8 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
             : null}
         </li>)}</ul>}
     </Card>
+    </>}
+    </Tabs>
     {form && <BudgetForm key={form.budget?.id ?? form.categoryId ?? 'new'} open onClose={() => setForm(null)} ledger={ledger}
       budget={form.budget} initialCategoryId={form.categoryId} />}
   </div>;

@@ -790,3 +790,13 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
 .review-period__actions{display:flex;gap:var(--spacing-1);margin-left:auto}
 /* D-081: ícone neutro de opção em VisualSelect (Todas, Sem categoria, caixinha, período). */
 .option-tile{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:var(--radius-md);background:var(--color-bg-subtle);color:var(--color-text-secondary)}
+/* D-084: aba Fixos. */
+.fixed-items{display:flex;flex-direction:column;gap:var(--spacing-4)}
+.fixed-item-name{display:inline-flex;align-items:center;gap:var(--spacing-3);min-width:0}
+.fixed-item-name>span:last-child{display:flex;flex-direction:column;min-width:0}
+.fixed-item-name .muted{font-size:var(--font-size-xs)}
+.fixed-item-amount{display:inline-flex;flex-direction:column;align-items:flex-end}
+.fixed-item-amount .muted{font-size:var(--font-size-xs)}
+.fixed-items__ended{display:flex;flex-direction:column;gap:var(--spacing-3);align-items:flex-start}
+.fixed-items__ended>.ui-table-scroll,.fixed-items__ended>.ui-table-list{align-self:stretch}
+.budget-tab-panel{display:grid;gap:var(--spacing-4);min-width:0}
