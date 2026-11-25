@@ -99,7 +99,7 @@ export const glossary: GlossaryTerm[] = [
   { term: "Reconciliado", definition: "Quando o lado da conta e o lado do cartão (ou das duas contas) foram ligados e batem." },
   { term: "Resultado", definition: "Receitas menos despesas do mês. Transferências, pagamentos de fatura, aportes e resgates ficam de fora." },
   { term: "Revisão", definition: "Fila do que o app não conseguiu decidir sozinho: categoria ou natureza para confirmar." },
-  { term: "Sobra do mês", definition: "O que resta da receita prevista depois dos aportes planejados nas caixinhas e das metas (que já incluem fixos e parcelas). Negativa quer dizer que o plano do mês não fecha." },
+  { term: "Sobra do mês", definition: "O que resta da receita prevista depois dos aportes planejados e das metas (que já incluem fixos e parcelas). Negativa quer dizer que o plano do mês não fecha." },
   { term: "Teto", definition: "Valor máximo que você aceita gastar por mês numa categoria." }
 ];
 
