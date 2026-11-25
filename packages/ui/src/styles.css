@@ -447,6 +447,12 @@ html.ui-scroll-locked{overflow:hidden;overscroll-behavior:none;scrollbar-gutter:
 .ui-income-share__segment{display:block;height:100%;min-width:2px;box-shadow:inset -1px 0 0 var(--color-bg-surface)}
 .ui-income-share__segment.is-muted,.ui-chart__swatch.is-muted{background-image:repeating-linear-gradient(135deg,var(--color-bg-surface) 0 2px,transparent 2px 6px)}
 .ui-income-share__limit{position:absolute;top:-1px;bottom:-1px;width:3px;margin-left:-1px;background:var(--color-status-danger)}
+.ui-income-share__plot{position:relative;border-radius:var(--radius-md)}
+.ui-income-share__plot:focus-visible{outline:3px solid var(--color-border-focus);outline-offset:3px}
+.ui-income-share__segment{cursor:default;transition:opacity .12s}
+.ui-income-share__track.has-active>.ui-income-share__segment:not(.is-active){opacity:.35}
+.ui-chart-tooltip__total{margin-top:2px;font-weight:600}
+.has-active>:not(.is-active) .ui-stacked__stack{opacity:.35}
 .ui-income-share__row-label{display:inline-flex;align-items:center;gap:var(--spacing-2)}
 .ui-stacked__bars{position:relative;height:200px}
 .ui-stacked__stack{display:flex;flex-direction:column-reverse;width:min(26px,60%);min-height:0;overflow:hidden;border-radius:4px 4px 0 0}

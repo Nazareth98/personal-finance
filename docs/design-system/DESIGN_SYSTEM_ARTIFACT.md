@@ -74,8 +74,8 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 - Nunca `columns` do CSS nem grade com células esticadas. Listas de cards do mesmo tipo (metas, caixinhas) seguem em grade.
 
 ### Gráficos de composição — D-085
-- **`IncomeShareChart`:** barra única em que 100% é a receita. Cada segmento tem a **cor da categoria** (`var(--color-<colorKey>)`), depois caixinhas (`chart-income`) e sobra (listrada sobre `bg-subtle`). Acima da receita, a barra cresce e um traço `status-danger` marca os 100%. Legenda, resumo “N% da receita” e tabela com valor, colunas extras (fixos, meta) e % da receita.
-- **`StackedColumnChart`:** colunas empilhadas por série (até 6 + “Outras”), traço `chart-income` com a referência de cada mês e períodos previstos listrados. Setas percorrem os meses; a tabela traz total, referência e cada série. Abaixo de 680 px, as colunas ficam mais juntas e os rótulos menores.
+- **`IncomeShareChart`:** barra única em que 100% é a receita. Cada segmento tem a **cor da categoria** (`var(--color-<colorKey>)`), depois caixinhas (`chart-income`) e sobra (listrada sobre `bg-subtle`). Acima da receita, a barra cresce e um traço `status-danger` marca os 100%. Legenda, resumo “N% da receita” e tabela com valor, colunas extras (fixos, meta) e % da receita. **Interação igual aos gráficos da Visão geral (D-058):** mouse, toque e setas focam uma faixa, as outras ficam a 35%, o `ChartTooltip` (ancorado no centro da faixa) mostra categoria, valor, % da receita e as colunas extras preenchidas, e a linha da tabela realça.
+- **`StackedColumnChart`:** colunas empilhadas por série (até 6 + “Outras”), traço `chart-income` com a referência de cada mês e períodos previstos listrados. Setas percorrem os meses; o tooltip lista cada série com amostra de cor e valor, o total, a referência e a sobra (ou quanto passa), como o tooltip do fluxo de caixa. A tabela traz total, referência e cada série. Abaixo de 680 px, as colunas ficam mais juntas e os rótulos menores.
 - Os dois usam `ChartDetails` (“Ver valores”) e nunca dependem só de cor.
 
 ### Tabela e lista (`DataTable`, `Pagination`)

@@ -18,6 +18,8 @@ export type StackedColumnChartProps = {
   data: readonly StackedColumnPoint[];
   formatValue: (value: bigint) => string;
   referenceLabel?: string;
+  /** Rótulo da soma das séries no tooltip. */
+  totalLabel?: string;
   projectedLabel?: string;
   collapsibleDetails?: boolean;
 };
@@ -29,7 +31,7 @@ const height = (value: bigint, scale: bigint) => scale > 0n ? Number(value * 100
  * Colunas empilhadas por série (D-085) com marca de referência por período (a receita). Períodos previstos
  * ficam listrados. Setas percorrem os períodos; tabela equivalente com total, referência e cada série.
  */
-export function StackedColumnChart({ title, series, data, formatValue, referenceLabel = 'Receita', projectedLabel = 'Previsto', collapsibleDetails }: StackedColumnChartProps) {
+export function StackedColumnChart({ title, series, data, formatValue, referenceLabel = 'Receita', totalLabel = 'Despesas', projectedLabel = 'Previsto', collapsibleDetails }: StackedColumnChartProps) {
   const current = data.findIndex(point => point.current);
   const focus = useChartFocus(data.length, current < 0 ? data.length - 1 : current);
   if (!data.length) return <EmptyState title="Sem valores para o gráfico" description="Adicione períodos para consultar a série." />;
@@ -38,6 +40,10 @@ export function StackedColumnChart({ title, series, data, formatValue, reference
     return candidate > max ? candidate : max;
   }, 0n);
   const active = focus.active === null ? undefined : data[focus.active];
+  const balance = (point: StackedColumnPoint) => {
+    const left = (point.referenceCents ?? 0n) - total(point);
+    return left >= 0n ? `Sobra ${formatValue(left)}` : `Passa ${formatValue(-left)} da ${referenceLabel.toLowerCase()}`;
+  };
   const describe = (point: StackedColumnPoint) => `${point.label}${point.projected ? ` · ${projectedLabel}` : ''}`;
   return <figure className="ui-chart ui-stacked" aria-label={title}>
     <div className="ui-chart__legend" aria-hidden="true">
@@ -50,8 +56,11 @@ export function StackedColumnChart({ title, series, data, formatValue, reference
         className={`ui-chart__column-group${point.current ? ' is-current' : ''}${index === focus.active ? ' is-active' : ''}`}>
         <div className="ui-chart__column-bars ui-stacked__bars">
           {index === focus.active ? <ChartTooltip title={describe(point)} className={tooltipEdge(index, data.length)}>
-            <strong>{formatValue(total(point))}</strong>
-            {point.referenceCents !== undefined ? <span>{referenceLabel}: {formatValue(point.referenceCents)}</span> : null}
+            {series.filter(item => (point.values[item.key] ?? 0n) > 0n).map(item => <span key={item.key} className="ui-chart-tooltip__row">
+              <i className="ui-chart__swatch" style={{ background: item.color }} />{item.label} <strong>{formatValue(point.values[item.key]!)}</strong></span>)}
+            <span className="ui-chart-tooltip__row ui-chart-tooltip__total">{totalLabel} <strong>{formatValue(total(point))}</strong></span>
+            {point.referenceCents !== undefined ? <span className="ui-chart-tooltip__row"><i className="ui-stacked__reference-swatch" />{referenceLabel} <strong>{formatValue(point.referenceCents)}</strong></span> : null}
+            {point.referenceCents !== undefined ? <span>{balance(point)}</span> : null}
           </ChartTooltip> : null}
           <span className={`ui-stacked__stack${point.projected ? ' is-projected' : ''}`} style={{ height: `${height(total(point), scale)}%` }}>
             {series.map(item => point.values[item.key] && point.values[item.key]! > 0n
@@ -63,7 +72,7 @@ export function StackedColumnChart({ title, series, data, formatValue, reference
         <span className="ui-chart__column-label">{point.axisLabel ?? point.label}</span>
       </div>)}
     </div>
-    <ChartAnnouncement text={active ? `${describe(active)}, despesas ${formatValue(total(active))}${active.referenceCents !== undefined ? `, ${referenceLabel.toLowerCase()} ${formatValue(active.referenceCents)}` : ''}` : ''} />
+    <ChartAnnouncement text={active ? `${describe(active)}, ${totalLabel.toLowerCase()} ${formatValue(total(active))}${active.referenceCents !== undefined ? `, ${referenceLabel.toLowerCase()} ${formatValue(active.referenceCents)}, ${balance(active).toLowerCase()}` : ''}` : ''} />
     <ChartDetails collapsible={collapsibleDetails}>
       <table className="ui-chart-table" aria-label={`Valores: ${title}`}>
         <thead><tr><th scope="col">Período</th><th scope="col">Total</th><th scope="col">{referenceLabel}</th>{series.map(item => <th key={item.key} scope="col">{item.label}</th>)}</tr></thead>
