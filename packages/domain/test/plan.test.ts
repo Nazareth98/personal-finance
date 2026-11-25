@@ -57,3 +57,13 @@ test('fixo de receita ainda sem lançamento não zera a receita: cai na estimati
   assert.equal(plan.incomeSource, 'estimate');
   assert.equal(plan.incomeCents, 1050000n / 6n);
 });
+
+test('meses futuros mantêm a estimativa de receita e os aportes do mês seguinte ao atual', () => {
+  const input = { transactions, fixedItems: [], fixedItemLinks: [], installments: [], budgets: [], savingsMovements: [],
+    savingsBoxes: [{ id: 'trip', name: 'Viagem', openingBalanceCents: 0n, targetCents: 120000n, targetDate: '2027-05-31' }], today: '2026-11-25' };
+  const dec = buildMonthPlan({ ...input, competence: '2026-12' });
+  const mar = buildMonthPlan({ ...input, competence: '2027-03' });
+  assert.equal(mar.incomeCents, dec.incomeCents);
+  assert.equal(mar.savingsCents, dec.savingsCents);
+  assert.equal(dec.savingsCents, 20000n);
+});

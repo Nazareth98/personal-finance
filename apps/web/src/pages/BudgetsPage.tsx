@@ -118,7 +118,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
   const panels = buildBudgetPanels({
     budgets: data?.budgets ?? [], categories: data?.categories ?? [], transactions: data?.transactions ?? [], period, today: localToday()
   });
-  const plan = kind === 'month' && data ? buildMonthPlan({ competence: selectedMonth, transactions: data.transactions,
+  const plan = kind === 'month' && data ? buildMonthPlan({ competence: selectedMonth, today: localToday(), transactions: data.transactions,
     fixedItems: data.fixedItems ?? [], fixedItemLinks: data.fixedItemLinks ?? [], budgets: data.budgets,
     installments: data.cardInstallments, savingsBoxes: data.savingsBoxes, savingsMovements: data.savingsMovements }) : null;
   const commitments = new Map((plan?.commitments ?? []).map(item => [item.categoryId, item]));

@@ -5,6 +5,7 @@ import { categoryOption } from './visual-options';
 import type { LedgerState } from '../ledger/useLedger';
 import { formatCentsBRL, formatCentsPlain, formatCompetence } from '../lib/demo-transactions';
 import { parseBrlCents } from '../lib/transaction-validation';
+import { todayIso } from '../lib/review-period';
 
 const centsInput = (cents: bigint) => formatCentsPlain(cents).replace('R$ ', '');
 
@@ -45,7 +46,7 @@ export function BudgetForm({ open, onClose, ledger, budget, initialCategoryId = 
   // D-084: o que já está comprometido na categoria, a média recente e a sobra do mês com esta meta.
   const data = ledger.data;
   const typedCents = parseBrlCents(limit);
-  const planFor = (budgets: readonly CategoryBudget[]) => data && competence ? buildMonthPlan({ competence, transactions: data.transactions,
+  const planFor = (budgets: readonly CategoryBudget[]) => data && competence ? buildMonthPlan({ competence, today: todayIso(), transactions: data.transactions,
     fixedItems: data.fixedItems ?? [], fixedItemLinks: data.fixedItemLinks ?? [], budgets, installments: data.cardInstallments,
     savingsBoxes: data.savingsBoxes, savingsMovements: data.savingsMovements }) : null;
   const otherBudgets = (data?.budgets ?? []).filter(item => item.categoryId !== categoryId);

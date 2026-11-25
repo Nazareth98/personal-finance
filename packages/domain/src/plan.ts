@@ -1,4 +1,4 @@
-import type { CardInstallment } from './cards.ts';
+import { addCompetenceMonths, type CardInstallment } from './cards.ts';
 import { normalizeClassificationText } from './classification.ts';
 import type { CategoryBudget, SavingsBox, SavingsMovement, TransactionContract } from './finance.ts';
 import { fixedItemLastValue, type FixedItem, type FixedItemLink } from './fixed.ts';
@@ -33,6 +33,11 @@ export type MonthPlan = {
 
 export type MonthPlanInput = {
   competence: string;
+  /**
+   * Hoje (AAAA-MM-DD). Meses futuros usam a mesma base dos meses fechados: a estimativa de receita olha os seis meses
+   * até o mês atual e os aportes contam a partir do próximo mês, sem que meses ainda vazios puxem a média para baixo.
+   */
+  today?: string;
   transactions: readonly TransactionContract[];
   fixedItems: readonly FixedItem[];
   fixedItemLinks: readonly FixedItemLink[];
@@ -56,8 +61,10 @@ export function buildMonthPlan(input: MonthPlanInput): MonthPlan {
   const fixedIncomeCents = active.filter(item => item.nature === 'income')
     .reduce((sum, item) => sum + fixedItemLastValue(item.id, input.fixedItemLinks, input.transactions).cents, 0n);
   const incomeSource = fixedIncomeCents > 0n ? 'fixed' as const : 'estimate' as const;
-  const incomeCents = fixedIncomeCents > 0n ? fixedIncomeCents : recurringIncomeEstimate(input.transactions, input.competence);
-  const savingsCents = buildSavingsPlans(input.savingsBoxes, input.savingsMovements, input.competence)
+  const nextMonth = input.today ? addCompetenceMonths(input.today.slice(0, 7), 1) : input.competence;
+  const base = input.competence < nextMonth ? input.competence : nextMonth;
+  const incomeCents = fixedIncomeCents > 0n ? fixedIncomeCents : recurringIncomeEstimate(input.transactions, base);
+  const savingsCents = buildSavingsPlans(input.savingsBoxes, input.savingsMovements, base)
     .filter(plan => input.competence <= plan.targetCompetence).reduce((sum, plan) => sum + plan.monthlyCents, 0n);
 
   const byCategory = new Map<string | null, CategoryCommitment>();
