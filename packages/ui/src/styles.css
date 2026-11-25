@@ -440,3 +440,18 @@ html.ui-scroll-locked{overflow:hidden;overscroll-behavior:none;scrollbar-gutter:
 .ui-dashboard-columns__col{display:flex;flex-direction:column;gap:var(--spacing-4);min-width:0}
 .ui-dashboard-columns__col>*{min-width:0}
 @media(max-width:1100px){.ui-dashboard-columns{grid-template-columns:minmax(0,1fr)}}
+/* D-085: despesas por categoria x receita — barra de 100% da receita e colunas empilhadas com marca da receita. */
+.ui-income-share__scale{display:flex;justify-content:space-between;gap:var(--spacing-3);font-size:var(--font-size-xs);color:var(--color-text-secondary)}
+.ui-income-share__scale strong{color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.ui-income-share__track{position:relative;display:flex;height:40px;overflow:hidden;border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-bg-subtle)}
+.ui-income-share__segment{display:block;height:100%;min-width:2px;box-shadow:inset -1px 0 0 var(--color-bg-surface)}
+.ui-income-share__segment.is-muted,.ui-chart__swatch.is-muted{background-image:repeating-linear-gradient(135deg,var(--color-bg-surface) 0 2px,transparent 2px 6px)}
+.ui-income-share__limit{position:absolute;top:-1px;bottom:-1px;width:3px;margin-left:-1px;background:var(--color-status-danger)}
+.ui-income-share__row-label{display:inline-flex;align-items:center;gap:var(--spacing-2)}
+.ui-stacked__bars{position:relative;height:200px}
+.ui-stacked__stack{display:flex;flex-direction:column-reverse;width:min(26px,60%);min-height:0;overflow:hidden;border-radius:4px 4px 0 0}
+.ui-stacked__stack>span{display:block;min-height:1px;box-shadow:inset 0 1px 0 var(--color-bg-surface)}
+.ui-stacked__stack.is-projected>span{background-image:repeating-linear-gradient(135deg,var(--color-bg-surface) 0 2px,transparent 2px 6px)}
+.ui-stacked__reference{position:absolute;left:12%;right:12%;height:3px;margin-bottom:-1px;border-radius:2px;background:var(--color-chart-income)}
+.ui-stacked__reference-swatch{display:inline-block;width:14px;height:3px;border-radius:2px;background:var(--color-chart-income)}
+@media(max-width:680px){.ui-stacked__columns{gap:2px}.ui-stacked .ui-chart__column-label{font-size:10px;text-overflow:clip}.ui-stacked__stack{width:min(22px,80%)}}

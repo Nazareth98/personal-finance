@@ -10,6 +10,7 @@ import { formatCentsBRL, formatCompetence } from '../lib/demo-transactions';
 import type { PageProps } from './PageProps';
 import { PageAction } from '../components/PageAction';
 import { FixedItemsPanel } from '../components/FixedItemsPanel';
+import { CategoryIncomeCard } from '../components/CategoryIncomeCard';
 import { useHashParams } from '../hooks/useHashParams';
 
 const pad = (value: number) => String(value).padStart(2, '0');
@@ -135,6 +136,7 @@ function RealBudgets({ ledger, headerAction }: { ledger: LedgerState; headerActi
     {tab === 'fixed' ? <FixedItemsPanel ledger={ledger} today={localToday()} /> : <>
     <BudgetPeriodControls kind={kind} month={selectedMonth} onKindChange={setKind} onMonthChange={setMonth} />
     {plan && <MonthPlanStrip plan={plan} />}
+    {plan && data && <CategoryIncomeCard data={data} month={selectedMonth} today={localToday()} />}
     <section className="summary-strip" aria-label="Resumo das metas por categoria">
       <div><span className="muted">Receita confirmada</span><strong className="transaction-amount--income">+ {formatCentsBRL(panels.incomeCents)}</strong><span className="muted">Entrou no período</span></div>
       <div><span className="muted summary-strip__label">Total em tetos<InfoTip label="Total em tetos" text="Soma dos tetos mensais das categorias com meta. Ao lado, quanto isso representa da receita do mês." /></span><strong>{formatCentsBRL(panels.totalLimitCents)}</strong>

@@ -829,3 +829,8 @@ a.card-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-of
 .budget-form__plan>.is-negative{border-color:var(--color-status-danger)}
 .budget-form__plan>.is-negative dd{color:var(--color-status-danger)}
 @media(max-width:680px){.budget-form__plan{grid-template-columns:minmax(0,1fr)}}
+/* D-085: card despesas por categoria x receita. */
+.category-income{display:grid;gap:var(--spacing-4);min-width:0}
+.category-income__heading{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--spacing-3);flex-wrap:wrap}
+.category-income__heading h2{margin:0}
+.category-income__heading p{margin:var(--spacing-1) 0 0}

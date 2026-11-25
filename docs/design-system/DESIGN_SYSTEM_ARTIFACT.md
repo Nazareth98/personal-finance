@@ -24,6 +24,8 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 | Ação discreta, link de navegação interna | `Button` `ghost` |
 | Configuração da tela que muda pouco (período, escopo) | linha de contexto (abaixo), nunca um card grande |
 | Painel com cards de alturas diferentes (Visão geral) | `DashboardColumns` (duas colunas independentes) |
+| Quanto de um total (receita) cada categoria ocupa | `IncomeShareChart` (barra de 100%) |
+| Composição por série ao longo dos meses, contra uma referência | `StackedColumnChart` |
 | Qualquer data | `DateField` (nunca `<input type="date">`) |
 | Formulário curto | `Dialog` com ações fixas no rodapé |
 
@@ -70,6 +72,11 @@ Os tokens técnicos ficam em `packages/tokens/src/themes.json`, e os componentes
 - Duas colunas independentes; cada uma empilha seus cards com `spacing-4`. Um card que cresce só empurra a própria coluna, sem buracos.
 - Até 1100 px: uma coluna, esquerda e depois direita (ordem visual = ordem de foco).
 - Nunca `columns` do CSS nem grade com células esticadas. Listas de cards do mesmo tipo (metas, caixinhas) seguem em grade.
+
+### Gráficos de composição — D-085
+- **`IncomeShareChart`:** barra única em que 100% é a receita. Cada segmento tem a **cor da categoria** (`var(--color-<colorKey>)`), depois caixinhas (`chart-income`) e sobra (listrada sobre `bg-subtle`). Acima da receita, a barra cresce e um traço `status-danger` marca os 100%. Legenda, resumo “N% da receita” e tabela com valor, colunas extras (fixos, meta) e % da receita.
+- **`StackedColumnChart`:** colunas empilhadas por série (até 6 + “Outras”), traço `chart-income` com a referência de cada mês e períodos previstos listrados. Setas percorrem os meses; a tabela traz total, referência e cada série. Abaixo de 680 px, as colunas ficam mais juntas e os rótulos menores.
+- Os dois usam `ChartDetails` (“Ver valores”) e nunca dependem só de cor.
 
 ### Tabela e lista (`DataTable`, `Pagination`)
 - No desktop, colunas, com valores à direita em `tabular-nums`. No celular, cards.

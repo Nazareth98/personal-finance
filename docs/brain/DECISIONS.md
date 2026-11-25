@@ -317,3 +317,8 @@ Use identificadores estáveis. Para substituir uma decisão, acrescente outra e 
 - Metas incluem os fixos; o app mostra o comprometido e avisa quando a meta fica abaixo dele.
 - Plano do mês: receita prevista − aportes = pode distribuir; − metas = sobra. Novo gráfico “Despesas por categoria x receita” (mês e 12 meses).
 - Especificação em `docs/architecture/FIXED_ITEMS.md`; etapas 12.1–12.5 no `PLAN.md`. Protótipo aprovado; 12.1 publicada em 25/11/2026.
+
+## D-085 — Despesas por categoria x receita (25/11/2026)
+
+- Novos gráficos no `packages/ui`: `IncomeShareChart` (barra de 100% da receita, uma faixa por categoria com a cor dela, caixinhas e sobra; excedente marcado) e `StackedColumnChart` (colunas empilhadas por categoria com a marca da receita de cada mês; previstos listrados).
+- Em Orçamentos (aba Metas, visão mensal): card com “Mês” e “12 meses”. Meses até o atual usam o realizado; os futuros usam o plano (D-084). Lógica em `apps/web/src/lib/category-income.ts`.
