@@ -18,8 +18,10 @@ Tenha à mão um gerenciador de senhas (ou um lugar seguro) para guardar três c
 ## 1. GitHub: sua cópia do app (~10 min)
 
 1. Crie sua conta em [github.com/signup](https://github.com/signup). O plano gratuito basta.
-2. Abra [o projeto](https://github.com/Nazareth98/personal-finance) e clique em **Fork** (canto superior direito) › **Create fork**.
+2. Abra [o projeto](https://github.com/Nazareth98/personal-finance) e clique em **Fork** (canto superior direito) › **Create fork**. Mantenha o nome `personal-finance`. Confira: o endereço da cópia fica `github.com/SEU_USUARIO/personal-finance` e a aba **Code** mostra as pastas `apps`, `docs` e `supabase`.
 3. Na sua cópia, abra a aba **Actions** e clique em **I understand my workflows, go ahead and enable them**.
+   - Se a página mostrar a lista de automações (“Sincronizar com o projeto original” e outras), já está liberado.
+   - Se aparecer **Get started with GitHub Actions** com sugestões como “Simple workflow”, a cópia não é deste projeto. Apague-a (**Settings** › final da página › **Delete this repository**) e refaça o passo 2 a partir do link acima. Não clique em **Configure**.
 
 ## 2. Supabase: o cofre (~10 min)
 
